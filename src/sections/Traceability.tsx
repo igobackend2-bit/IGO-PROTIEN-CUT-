@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, MapPin, Factory, Truck, Home, CheckCircle2, X, ChevronRight } from 'lucide-react';
+import { Search, MapPin, Factory, Truck, Home, CheckCircle2, X, ChevronRight, ThermometerSnowflake } from 'lucide-react';
 
 const pillars = [
   {
@@ -47,21 +47,74 @@ const Traceability = () => {
   return (
     <section id="traceability" className="py-24 bg-white overflow-hidden scroll-mt-20">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-20">
-          <motion.span 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            className="text-igo-green font-bold text-sm uppercase tracking-widest"
+        <div className="grid lg:grid-cols-2 gap-16 items-center mb-24">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
           >
-            Trust Your Protein
-          </motion.span>
-          <h2 className="text-4xl md:text-5xl font-display font-bold mt-4 text-neutral-dark">
-            Know Your Source. <span className="text-igo-gold">Trust Your Cut.</span>
-          </h2>
-          <p className="mt-6 text-neutral-500 max-w-2xl mx-auto text-lg leading-relaxed">
-            Our technology-driven traceability system provides complete 
-            farm-to-table transparency. Verify origin, temperature, and certifications in real-time.
-          </p>
+            <span className="text-igo-green font-bold text-sm uppercase tracking-widest">Trust Your Protein</span>
+            <h2 className="text-4xl md:text-5xl font-display font-bold mt-4 text-neutral-dark">
+              Know Your Source. <br />
+              <span className="text-igo-gold">Trust Your Cut.</span>
+            </h2>
+            <p className="mt-8 text-neutral-500 text-lg leading-relaxed">
+              Our technology-driven traceability system provides complete 
+              farm-to-table transparency. Every pack comes with a unique QR code 
+              that reveals the journey of your meat—from the specific farm to 
+              the temperature logs of its journey.
+            </p>
+            <div className="mt-10 flex flex-col gap-6">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-igo-green/10 flex items-center justify-center flex-shrink-0 text-igo-green">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-neutral-dark">Verified Origins</h4>
+                  <p className="text-sm text-neutral-400">Traced back to heritage farms in Tamil Nadu & Ooty.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-igo-gold/10 flex items-center justify-center flex-shrink-0 text-igo-gold">
+                  <Truck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-neutral-dark">Cold Chain Transparency</h4>
+                  <p className="text-sm text-neutral-400">View real-time temperature logs (0-4°C) for your specific batch.</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="relative"
+          >
+            <div className="relative rounded-[3rem] overflow-hidden shadow-2xl">
+              <img 
+                src="/images/traceability-scan.png" 
+                alt="Scanning QR code for traceability" 
+                className="w-full aspect-[4/5] object-cover hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              <div className="absolute bottom-8 left-8 right-8 bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold text-white uppercase tracking-widest mb-1">Live Tracking Enabled</p>
+                    <p className="text-sm font-display font-bold text-white">Batch #IGO-7729V | Scanned</p>
+                  </div>
+                  <div className="w-10 h-10 bg-igo-green rounded-full flex items-center justify-center">
+                    <CheckCircle2 className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Decorative elements */}
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-igo-green/5 rounded-full blur-3xl -z-10" />
+            <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-igo-gold/5 rounded-full blur-3xl -z-10" />
+          </motion.div>
         </div>
 
         {/* Interactive Lookup Tool */}
@@ -109,6 +162,22 @@ const Traceability = () => {
 
                   <div className="flex flex-col md:flex-row gap-10 items-start">
                     <div className="w-full md:w-1/3">
+                      {/* Mini Map Visual */}
+                      <div className="aspect-square bg-neutral-100 rounded-2xl mb-6 relative overflow-hidden border border-neutral-200">
+                        <div className="absolute inset-0 bg-[url('https://api.mapbox.com/styles/v1/mapbox/light-v10/static/77.5946,12.9716,10,0/400x400?access_token=mock')] bg-cover opacity-60" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="relative">
+                            <div className="absolute -inset-4 bg-igo-green/20 rounded-full animate-ping" />
+                            <div className="absolute -inset-8 bg-igo-green/10 rounded-full animate-ping delay-300" />
+                            <div className="absolute -inset-12 bg-igo-green/5 rounded-full animate-ping delay-700" />
+                            <MapPin className="w-8 h-8 text-igo-green fill-white relative z-10" />
+                          </div>
+                        </div>
+                        <div className="absolute bottom-2 left-2 right-2 bg-white/90 backdrop-blur-md p-2 rounded-lg text-[8px] font-bold text-neutral-500 uppercase tracking-widest text-center">
+                          Current Hub: Pollachi, TN
+                        </div>
+                      </div>
+
                       <div className="bg-neutral-light rounded-2xl p-6 mb-6">
                         <div className="text-[10px] font-bold text-igo-gold uppercase tracking-[0.2em] mb-2">Verified Batch</div>
                         <div className="text-2xl font-display font-bold text-neutral-dark mb-1">#{batchId.toUpperCase()}</div>
@@ -154,6 +223,28 @@ const Traceability = () => {
                             </div>
                           </div>
                         ))}
+                      </div>
+
+                      {/* Cold Chain Log */}
+                      <div className="mt-10 p-6 bg-igo-green/5 border border-igo-green/10 rounded-2xl">
+                        <div className="flex items-center gap-2 mb-4">
+                          <ThermometerSnowflake className="w-4 h-4 text-igo-green" />
+                          <h4 className="text-[10px] font-bold uppercase tracking-widest text-igo-green">Cold Chain Log (0-4°C)</h4>
+                        </div>
+                        <div className="flex justify-between items-end h-16 gap-1">
+                          {[2.1, 1.8, 2.4, 2.0, 1.9, 2.2, 2.5, 2.1, 1.7, 2.0].map((temp, i) => (
+                            <div 
+                              key={i} 
+                              className="w-full bg-igo-green/20 rounded-t-sm relative group/bar"
+                              style={{ height: `${(temp / 4) * 100}%` }}
+                            >
+                              <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-neutral-dark text-white text-[8px] px-1 rounded opacity-0 group-hover/bar:opacity-100 transition-opacity">
+                                {temp}°
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <p className="mt-3 text-[10px] text-neutral-400 text-center">Consistent temperature maintained for 12h 45m</p>
                       </div>
                     </div>
                   </div>

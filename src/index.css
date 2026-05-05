@@ -1,5 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 @theme {
   --font-display: "DM Sans", ui-sans-serif, system-ui, sans-serif;
@@ -7,71 +7,115 @@
 
   --color-igo-green: #2D7A3A;
   --color-igo-gold: #D4AF37;
-  --color-neutral-light: #F5F5F5;
+  --color-igo-red: #C0392B;
+  --color-neutral-light: #F7F7F5;
   --color-neutral-dark: #1A1A1A;
   --color-accent-sage: #A8C9B5;
 
   --animate-draw: draw 2s ease-out forwards;
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+
+  /* Glassmorphism Tokens */
+  --bg-glass: rgba(255, 255, 255, 0.7);
+  --border-glass: rgba(255, 255, 255, 0.3);
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
 }
 
 @layer base {
   body {
     @apply bg-neutral-light text-neutral-dark font-sans antialiased;
+    scroll-behavior: smooth;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-attachment: fixed;
+    background-size: 200px 200px;
+    background-repeat: repeat;
+    opacity: 0.98;
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-display font-semibold tracking-tight;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+    cursor: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='12' cy='12' r='4' fill='%232D7A3A'/%3E%3C/svg%3E"), auto;
+  }
+  
+  a, button {
+    cursor: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='16' cy='16' r='8' stroke='%232D7A3A' stroke-width='2' fill='none'/%3E%3C/svg%3E"), pointer;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-glass);
+    box-shadow: var(--shadow-glass);
+  }
+
+  .glass-dark {
+    background: rgba(26, 26, 26, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-igo-gold via-[#F3E5AB] to-igo-gold;
   }
 }
 
 @keyframes draw {
-  from {
-    stroke-dashoffset: 1000;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
 }
 
 .trace-line {
   stroke-dasharray: 1000;
   stroke-dashoffset: 1000;
 }
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-@theme {
-  --font-display: "DM Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-
-  --color-igo-green: #2D7A3A;
-  --color-igo-gold: #D4AF37;
-  --color-neutral-light: #F5F5F5;
-  --color-neutral-dark: #1A1A1A;
-  --color-accent-sage: #A8C9B5;
-
-  --animate-draw: draw 2s ease-out forwards;
+/* Safe area for mobile bottom nav */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-@layer base {
-  body {
-    @apply bg-neutral-light text-neutral-dark font-sans antialiased;
-  }
-  
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-display font-semibold tracking-tight;
-  }
+/* Smooth hover scale for product images */
+.group:hover .group-hover\:scale-108 {
+  transform: scale(1.08);
 }
 
-@keyframes draw {
-  from {
-    stroke-dashoffset: 1000;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #2D7A3A;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #1e5428;
 }
 
-.trace-line {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
+/* Add bottom padding for mobile nav */
+@media (max-width: 768px) {
+  main {
+    padding-bottom: 80px;
+  }
 }

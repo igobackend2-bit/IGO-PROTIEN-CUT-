@@ -1,20 +1,37 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# IGO Protein Cuts - Professional E-commerce Platform
 
-# Run and deploy your AI Studio app
+A high-performance, professional meat e-commerce platform built with React, Vite, and Tailwind CSS. Optimized for high conversion and premium user experience.
 
-This contains everything you need to run your app locally.
+## Key Features
+- **Smart Global Search**: Real-time filtering with trending suggestions and auto-scroll.
+- **Advanced Cart**: Integrated Delivery Slot Picker (Express & Scheduled) and Free Delivery progress tracking.
+- **Professional Auth**: Email-only authentication with secure OTP verification logic.
+- **Dynamic Profile**: Comprehensive user dashboard with Order History, Saved Addresses, and Rewards.
+- **Product Quick View**: Detailed product overlays with integrated Recipe and Review tabs.
+- **Responsive Design**: Fully optimized for mobile and desktop shopping.
 
-View your app in AI Studio: https://ai.studio/apps/14bf3b9b-821e-4142-b13c-22391c4fe9af
+## Deployment to Vercel
 
-## Run Locally
+This project is optimized for [Vercel](https://vercel.com/). Follow these steps to take it live:
 
-**Prerequisites:**  Node.js
+### Option 1: Vercel CLI (Recommended for instant live)
+1. Install Vercel CLI: `npm i -g vercel`
+2. Run `vercel` in the project root.
+3. Follow the prompts to deploy.
 
+### Option 2: GitHub Integration
+1. Push this project to a GitHub repository.
+2. Go to [Vercel Dashboard](https://vercel.com/dashboard).
+3. Click "New Project" and select your repository.
+4. Vercel will automatically detect Vite and deploy.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Environment Variables
+If you want to enable the **Live AI Assistant**, add the following to your Vercel Environment Variables:
+- `VITE_GEMINI_API_KEY`: Your Google Gemini API Key.
+
+## Tech Stack
+- **Frontend**: React 18, Vite
+- **Styling**: Tailwind CSS
+- **Animations**: Framer Motion / Motion for React
+- **Icons**: Lucide React
+- **State Management**: React Context API

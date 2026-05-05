@@ -10,8 +10,11 @@ const DualCTA = () => {
           {/* For Consumers */}
           <motion.div
             whileHover={{ scale: 1.01 }}
-            className="group relative bg-igo-green text-white p-12 lg:p-16 rounded-[40px] overflow-hidden"
+            className="group relative bg-igo-green text-white p-12 lg:p-16 rounded-[40px] overflow-hidden shadow-2xl"
           >
+            <div className="absolute inset-0 opacity-20 mix-blend-overlay">
+              <img src="/images/products/chicken-whole.png" alt="" className="w-full h-full object-cover grayscale brightness-50" />
+            </div>
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
             <div className="relative z-10 h-full flex flex-col justify-between">
               <div>
@@ -29,7 +32,17 @@ const DualCTA = () => {
                 </ul>
               </div>
               
-              <button className="bg-white text-igo-green px-8 py-4 rounded-xl font-bold flex items-center gap-3 w-fit group-hover:bg-igo-gold group-hover:text-white transition-all shadow-lg active:scale-95">
+              <button 
+                onClick={() => {
+                  const el = document.getElementById('products');
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  } else {
+                    window.location.hash = 'products';
+                  }
+                }}
+                className="bg-white text-igo-green px-8 py-4 rounded-xl font-bold flex items-center gap-3 w-fit group-hover:bg-igo-gold group-hover:text-white transition-all shadow-lg active:scale-95"
+              >
                 Shop Fresh Now
                 <ShoppingCart className="w-5 h-5" />
               </button>
@@ -39,8 +52,12 @@ const DualCTA = () => {
           {/* For Businesses */}
           <motion.div
             whileHover={{ scale: 1.01 }}
-            className="group relative bg-neutral-dark text-white p-12 lg:p-16 rounded-[40px] overflow-hidden border-2 border-transparent hover:border-igo-gold/30 transition-all"
+            className="group relative bg-neutral-dark text-white p-12 lg:p-16 rounded-[40px] overflow-hidden border-2 border-transparent hover:border-igo-gold/30 transition-all shadow-2xl"
           >
+            <div className="absolute inset-0 opacity-40">
+              <img src="/images/b2b-supply.png" alt="" className="w-full h-full object-cover grayscale brightness-50" />
+              <div className="absolute inset-0 bg-gradient-to-r from-neutral-dark via-neutral-dark/80 to-transparent" />
+            </div>
             <div className="absolute -bottom-10 -right-10 w-80 h-80 bg-igo-gold/5 rounded-full blur-3xl pointer-events-none" />
             <div className="relative z-10 h-full flex flex-col justify-between">
               <div>
@@ -58,10 +75,13 @@ const DualCTA = () => {
                 </ul>
               </div>
               
-              <button className="bg-igo-gold text-white px-8 py-4 rounded-xl font-bold flex items-center gap-3 w-fit hover:bg-igo-gold/80 transition-all shadow-lg shadow-igo-gold/20 active:scale-95">
+              <a 
+                href="mailto:b2b@igoproteincuts.com?subject=B2B Inquiry"
+                className="bg-igo-gold text-white px-8 py-4 rounded-xl font-bold flex items-center gap-3 w-fit hover:bg-igo-gold/80 transition-all shadow-lg shadow-igo-gold/20 active:scale-95"
+              >
                 Request Quote
                 <Briefcase className="w-5 h-5" />
-              </button>
+              </a>
             </div>
           </motion.div>
         </div>
