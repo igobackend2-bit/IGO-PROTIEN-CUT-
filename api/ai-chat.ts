@@ -4,7 +4,7 @@ export default async function handler(req: any, res: any) {
   }
 
   const { message, systemPrompt } = req.body;
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
 
   if (!apiKey || apiKey === "YOUR_API_KEY_HERE" || apiKey.includes("MY_GEMINI")) {
     console.error("AI API Error: GEMINI_API_KEY is missing or invalid");
@@ -14,7 +14,8 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
     
     const response = await fetch(url, {
       method: 'POST',

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Home, ShoppingBag, Search, User, Crown } from 'lucide-react';
+import { Home, ShoppingBag, Search, User, Crown, Mic } from 'lucide-react';
+
 import { useCart } from '../context/CartContext';
 
 const MobileBottomNav = () => {
@@ -8,11 +9,12 @@ const MobileBottomNav = () => {
 
   const tabs = [
     { icon: Home, label: 'Home', href: '#' },
+    { icon: Mic, label: 'Voice', action: () => window.dispatchEvent(new CustomEvent('startVoiceSearch')) },
     { icon: Search, label: 'Search', href: '#products' },
     { icon: ShoppingBag, label: 'Cart', action: () => setIsCartOpen(true), badge: cartCount },
-    { icon: Crown, label: 'Prime', href: '#prime' },
     { icon: User, label: 'Account', action: () => window.dispatchEvent(new CustomEvent('openProfile')) },
   ];
+
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-100 z-50 md:hidden safe-area-bottom">

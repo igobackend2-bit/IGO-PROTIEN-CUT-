@@ -112,12 +112,20 @@ const Navbar = () => {
     const handleProfileTrigger = () => {
       handleProfileClick();
     };
+
+    const handleVoiceTrigger = () => {
+      handleVoiceSearch();
+    };
+
     window.addEventListener('openProfile', handleProfileTrigger);
+    window.addEventListener('startVoiceSearch', handleVoiceTrigger);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('openProfile', handleProfileTrigger);
+      window.removeEventListener('startVoiceSearch', handleVoiceTrigger);
     };
+
   }, [isAuthenticated]); // Re-bind when auth state changes
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

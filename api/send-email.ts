@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 /**
  * Creates a transporter instance. 
@@ -162,9 +163,27 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: 'Invalid email type' });
   }
 
+  // Priority 1: Resend
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const resData = await resend.emails.send({
+        from: 'IGO Protein Cuts <onboarding@resend.dev>',
+        to: [to],
+        subject: subject,
+        html: html,
+      });
+      console.log('Resend Success:', resData);
+      return res.status(200).json({ success: true, provider: 'resend', id: resData.id });
+    } catch (error: any) {
+      console.error('Resend Error, falling back to Gmail:', error);
+    }
+  }
+
+  // Priority 2: Nodemailer/Gmail
   try {
     const transporter = getTransporter();
-    console.log(`Attempting to send ${type} email to ${to}...`);
+    console.log(`Attempting to send ${type} email via Gmail to ${to}...`);
 
     const info = await transporter.sendMail({
       from: `"IGO Protein Cuts" <${process.env.GMAIL_USER}>`,
@@ -174,12 +193,13 @@ export default async function handler(req: any, res: any) {
     });
 
     console.log('Nodemailer Success:', info.messageId);
-    res.status(200).json({ success: true, messageId: info.messageId });
+    return res.status(200).json({ success: true, provider: 'gmail', messageId: info.messageId });
   } catch (error: any) {
     console.error('Nodemailer Error:', error);
-    res.status(500).json({ 
+    return res.status(500).json({ 
       error: 'Failed to send email', 
       details: error.message || error 
     });
   }
 }
+

@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageSquare, X, Send, Bot, User, Sparkles, ShoppingCart, Loader2 } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, User, Sparkles, ShoppingCart, Loader2, Mic } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
+import { cn } from '../lib/utils';
 
 console.log("AIAssistant.tsx is being executed");
 
@@ -48,6 +49,38 @@ const AIAssistant = () => {
       window.removeEventListener('openAI', handleOpenAI);
     };
   }, []);
+
+  const [isListening, setIsListening] = useState(false);
+
+  const handleVoiceInput = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Voice search is not supported in this browser. Please use Chrome or Safari.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = false;
+    
+    setIsListening(true);
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+
+    try {
+      recognition.start();
+    } catch (e) {
+      console.error(e);
+      setIsListening(false);
+    }
+  };
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -196,15 +229,24 @@ const AIAssistant = () => {
                   </button>
                 ))}
               </div>
-              <div className="flex gap-2 bg-white rounded-2xl p-1 shadow-inner border border-neutral-100 focus-within:border-igo-green transition-all">
+              <div className="flex gap-2 bg-white rounded-2xl p-1 shadow-inner border border-neutral-100 focus-within:border-igo-green transition-all relative">
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                   placeholder="Ask me anything..."
-                  className="flex-1 px-4 py-3 text-sm focus:outline-none"
+                  className="flex-1 px-4 py-3 text-sm focus:outline-none pr-10"
                 />
+                <button 
+                  onClick={handleVoiceInput}
+                  className={cn(
+                    "absolute right-12 top-1/2 -translate-y-1/2 p-2 transition-all",
+                    isListening ? "text-red-500 scale-125 animate-pulse" : "text-neutral-400 hover:text-igo-green"
+                  )}
+                >
+                  <Mic className="w-4 h-4" />
+                </button>
                 <button
                   id="ai-send-button"
                   onClick={handleSend}
@@ -214,6 +256,7 @@ const AIAssistant = () => {
                   <Send className="w-4 h-4" />
                 </button>
               </div>
+
               <div className="mt-3 flex items-center justify-center gap-4">
                 <button 
                   onClick={() => { setInput("Suggest a recipe"); handleSend(); }}
