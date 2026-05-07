@@ -26,14 +26,16 @@ const Footer = () => {
   const footerLinks = {
     Shop: [
       { name: 'Fresh Chicken', href: '#products' },
-      { name: 'Mutton Cuts', href: '#products' },
-      { name: 'Fish & Seafood', href: '#products' },
-      { name: 'Exotic Meats', href: '#products' },
-      { name: 'Bulk Ordering', href: '#b2b' }
+      { name: 'Premium Mutton', href: '#products' },
+      { name: 'Sea Fresh Fish', href: '#products' },
+      { name: 'Prawns & Seafood', href: '#products' },
+      { name: 'Heritage Eggs', href: '#products' },
+      { name: 'Exotic Delights', href: '#products' },
+      { name: 'Bulk & B2B', href: '#b2b' }
     ],
     B2B: [
       { name: 'Wholesale Portal', href: '#b2b' },
-      { name: 'Partner Login', href: '#b2b' },
+      { name: 'Partner Login', href: '/admin/login' },
       { name: 'White Label', href: '#b2b' },
       { name: 'Supply Chain', href: '#b2b' },
       { name: 'Inquiry Form', href: '#b2b' }

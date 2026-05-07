@@ -101,15 +101,15 @@ const ProductGrid = () => {
             <p className="text-neutral-400 mt-2">Slaughtered fresh daily · Delivered within 90 mins</p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex overflow-x-auto pb-4 -mx-6 px-6 md:pb-0 md:mx-0 md:px-0 scrollbar-hide gap-2">
             {categories.map(cat => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${
+                className={`px-5 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap flex-shrink-0 ${
                   selectedCategory === cat
                     ? 'bg-igo-green text-white shadow-lg shadow-igo-green/25'
-                    : 'bg-white text-neutral-500 hover:bg-white/80 shadow-sm'
+                    : 'bg-white text-neutral-500 hover:bg-white/80 shadow-sm border border-neutral-100'
                 }`}
               >
                 {cat}
@@ -208,6 +208,18 @@ const ProductGrid = () => {
                     <div className="p-5 flex flex-col flex-1">
                       {/* Name + Price */}
                       <div className="flex justify-between items-start gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${
+                            product.category === 'Chicken' ? 'bg-orange-100 text-orange-600' :
+                            product.category === 'Mutton' ? 'bg-red-100 text-red-600' :
+                            product.category === 'Fish' ? 'bg-blue-100 text-blue-600' :
+                            product.category === 'Seafood' ? 'bg-teal-100 text-teal-600' :
+                            product.category === 'Eggs' ? 'bg-amber-100 text-amber-600' :
+                            'bg-purple-100 text-purple-600'
+                          }`}>
+                            {product.category}
+                          </span>
+                        </div>
                         <h3 className="font-display font-bold text-sm text-neutral-dark group-hover:text-igo-green transition-colors leading-tight line-clamp-2 flex-1">
                           {product.name}
                         </h3>

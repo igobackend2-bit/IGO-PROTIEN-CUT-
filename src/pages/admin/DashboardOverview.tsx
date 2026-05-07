@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { IndianRupee, ShoppingBag, Users, TrendingUp, ArrowUpRight, ArrowDownRight, Clock, ExternalLink } from 'lucide-react';
-import { getOrders } from '../../services/orderService';
+import { getOrders, getAnalytics } from '../../services/orderService';
 
 
 const StatCard = ({ title, value, change, trend, icon: Icon, color }: any) => (
@@ -37,7 +37,7 @@ const DashboardOverview = () => {
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const { getAnalytics, getOrders } = await import('../../services/orderService');
+      // Use statically imported functions instead of dynamic import
       const data = await getOrders();
       const analytics = await getAnalytics();
       

@@ -22,6 +22,10 @@ interface CartContextType {
   lastAddedItem: CartItem | null;
   isAddedModalOpen: boolean;
   setIsAddedModalOpen: (open: boolean) => void;
+  deliverySlot: string;
+  setDeliverySlot: (slot: string) => void;
+  deliveryDate: string;
+  setDeliveryDate: (date: string) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -33,6 +37,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [wishlist, setWishlist] = useState<number[]>([]);
   const [lastAddedItem, setLastAddedItem] = useState<CartItem | null>(null);
   const [isAddedModalOpen, setIsAddedModalOpen] = useState(false);
+  const [deliverySlot, setDeliverySlot] = useState('express');
+  const [deliveryDate, setDeliveryDate] = useState(new Date().toISOString().split('T')[0]);
 
   const showNotification = (msg: string) => {
     setNotification(msg);
@@ -94,7 +100,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       cartCount, cartTotal, notification,
       isCartOpen, setIsCartOpen,
       wishlist, toggleWishlist,
-      lastAddedItem, isAddedModalOpen, setIsAddedModalOpen
+      lastAddedItem, isAddedModalOpen, setIsAddedModalOpen,
+      deliverySlot, setDeliverySlot, deliveryDate, setDeliveryDate
     }}>
       {children}
     </CartContext.Provider>

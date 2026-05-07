@@ -28,20 +28,32 @@ import MobileBottomNav from './components/MobileBottomNav';
 import AIAssistant from './components/AIAssistant';
 import CrossSellModal from './components/CrossSellModal';
 import FloatingCheckoutBar from './components/FloatingCheckoutBar';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 
-// Admin Pages
-import AdminLogin from './pages/admin/AdminLogin';
-import AdminLayout from './pages/admin/AdminLayout';
-import DashboardOverview from './pages/admin/DashboardOverview';
-import ProductManagement from './pages/admin/ProductManagement';
-import SystemSettings from './pages/admin/SystemSettings';
-import Analytics from './pages/admin/Analytics';
-import CustomerManagement from './pages/admin/CustomerManagement';
-import AdminHelp from './pages/admin/AdminHelp';
-import OrderManagement from './pages/admin/OrderManagement';
-import OrderReview from './pages/OrderReview';
-import BlogPage from './pages/Blog';
+// Admin Pages - Lazy Loaded for Production Stability
+const AdminLogin = React.lazy(() => import('./pages/admin/AdminLogin'));
+const AdminLayout = React.lazy(() => import('./pages/admin/AdminLayout'));
+const DashboardOverview = React.lazy(() => import('./pages/admin/DashboardOverview'));
+const ProductManagement = React.lazy(() => import('./pages/admin/ProductManagement'));
+const SystemSettings = React.lazy(() => import('./pages/admin/SystemSettings'));
+const Analytics = React.lazy(() => import('./pages/admin/Analytics'));
+const CustomerManagement = React.lazy(() => import('./pages/admin/CustomerManagement'));
+const AdminHelp = React.lazy(() => import('./pages/admin/AdminHelp'));
+const OrderManagement = React.lazy(() => import('./pages/admin/OrderManagement'));
+const OrderReview = React.lazy(() => import('./pages/OrderReview'));
+const BlogPage = React.lazy(() => import('./pages/Blog'));
+
+const LoadingFallback = () => (
+  <div className="min-h-screen bg-neutral-dark flex flex-col items-center justify-center gap-4">
+    <motion.div 
+      animate={{ rotate: 360 }}
+      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+    >
+      <Loader2 className="w-12 h-12 text-igo-green" />
+    </motion.div>
+    <p className="text-white/50 font-display font-bold uppercase tracking-widest text-xs">IGO Protein Cuts</p>
+  </div>
+);
 
 
 const Notification = () => {
@@ -128,30 +140,32 @@ function Home() {
 export default function App() {
   return (
     <CartProvider>
-      <Routes>
-        {/* Admin Routes - Defined first to ensure priority */}
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<DashboardOverview />} />
-          <Route path="products" element={<ProductManagement />} />
-          <Route path="orders" element={<OrderManagement />} />
-          <Route path="customers" element={<CustomerManagement />} />
-          <Route path="promotions" element={<div className="p-8"><h1 className="text-2xl font-bold">Promotions & Offers</h1><p className="text-neutral-500">Coming soon...</p></div>} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="content" element={<div className="p-8"><h1 className="text-2xl font-bold">Content Management</h1><p className="text-neutral-500">Coming soon...</p></div>} />
-          <Route path="settings" element={<SystemSettings />} />
-          <Route path="help" element={<AdminHelp />} />
-        </Route>
+      <React.Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          {/* Admin Routes - Priority matching */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/*" element={<AdminLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<DashboardOverview />} />
+            <Route path="products" element={<ProductManagement />} />
+            <Route path="orders" element={<OrderManagement />} />
+            <Route path="customers" element={<CustomerManagement />} />
+            <Route path="promotions" element={<div className="p-8"><h1 className="text-2xl font-bold">Promotions & Offers</h1><p className="text-neutral-500">Coming soon...</p></div>} />
+            <Route path="analytics" element={<Analytics />} />
+            <Route path="content" element={<div className="p-8"><h1 className="text-2xl font-bold">Content Management</h1><p className="text-neutral-500">Coming soon...</p></div>} />
+            <Route path="settings" element={<SystemSettings />} />
+            <Route path="help" element={<AdminHelp />} />
+          </Route>
 
-        {/* Public Routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/review/:orderId" element={<OrderReview />} />
-        <Route path="/blog" element={<BlogPage />} />
-        
-        {/* Fallback Catch-all */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/review/:orderId" element={<OrderReview />} />
+          <Route path="/blog" element={<BlogPage />} />
+          
+          {/* Fallback Catch-all - Redirect to Home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </React.Suspense>
     </CartProvider>
   );
 }

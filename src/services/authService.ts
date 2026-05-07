@@ -49,15 +49,17 @@ export const syncUserProfile = async (email: string, name: string, avatarUrl?: s
         email, 
         name,
         avatar_url: avatarUrl,
-        last_login: new Date().toISOString()
+        last_login: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }, {
         onConflict: 'email'
-      });
-
+      })
+      .select()
+      .single();
 
     if (error) throw error;
     console.log('User profile synced to Supabase:', data);
-    return { success: true };
+    return { success: true, data };
   } catch (error) {
     console.error('Supabase Sync Error:', error);
     return { success: false, error };

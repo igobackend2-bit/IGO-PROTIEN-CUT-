@@ -29,6 +29,22 @@ This project is optimized for [Vercel](https://vercel.com/). Follow these steps 
 If you want to enable the **Live AI Assistant**, add the following to your Vercel Environment Variables:
 - `VITE_GEMINI_API_KEY`: Your Google Gemini API Key.
 
+## Production Configuration
+
+### 1. Environment Variables
+Add these to your Vercel project settings:
+
+| Variable Name | Value | Purpose |
+| :--- | :--- | :--- |
+| `VITE_GEMINI_API_KEY` | `Your_Key` | AI Meat Assistant |
+| `RESEND_API_KEY` | `re_...` | Real OTP Emails (Optional) |
+
+### 2. Real OTP Delivery
+To enable real email verification, create `api/send-otp.ts` with the handler logic provided in the setup guides (using [Resend](https://resend.com/)).
+
+### 3. AI Assistant Mode
+The `AIAssistant.tsx` switches from **Demo Mode** (mock responses) to **Live Mode** automatically when `VITE_GEMINI_API_KEY` is detected.
+
 ## Tech Stack
 - **Frontend**: React 18, Vite
 - **Styling**: Tailwind CSS

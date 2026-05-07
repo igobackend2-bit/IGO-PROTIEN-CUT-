@@ -14,7 +14,7 @@ interface OneClickCheckoutProps {
 const OneClickCheckout: React.FC<OneClickCheckoutProps> = ({ isOpen, onClose, total }) => {
   const [step, setStep] = useState<'auth' | 'processing' | 'success'>('auth');
   const [orderId, setOrderId] = useState('');
-  const { cart, clearCart } = useCart();
+  const { cart, clearCart, deliverySlot, deliveryDate } = useCart();
 
   useEffect(() => {
     if (!isOpen) {
@@ -49,7 +49,9 @@ const OneClickCheckout: React.FC<OneClickCheckoutProps> = ({ isOpen, onClose, to
           price: item.finalPrice,
           weight: item.selectedWeight,
           image: item.image
-        }))
+        })),
+        delivery_slot: deliverySlot,
+        delivery_date: deliveryDate
       });
 
       // Clear gift details after use if it was a gift

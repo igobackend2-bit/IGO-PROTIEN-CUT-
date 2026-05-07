@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
 import { Clock, Zap, Sun, Moon, Check } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
 const slots = [
   { id: 'express', label: 'Express Delivery', time: '90 Mins', icon: Zap, price: '₹49', color: 'bg-orange-50 text-orange-600 border-orange-200' },
@@ -10,7 +11,7 @@ const slots = [
 ];
 
 const DeliverySlotPicker = () => {
-  const [selectedSlot, setSelectedSlot] = useState('express');
+  const { deliverySlot, setDeliverySlot } = useCart();
 
   return (
     <div className="space-y-4">
@@ -25,12 +26,12 @@ const DeliverySlotPicker = () => {
       <div className="grid grid-cols-2 gap-3">
         {slots.map((slot) => {
           const Icon = slot.icon;
-          const isSelected = selectedSlot === slot.id;
+          const isSelected = deliverySlot === slot.id;
           
           return (
             <button
               key={slot.id}
-              onClick={() => setSelectedSlot(slot.id)}
+              onClick={() => setDeliverySlot(slot.id)}
               className={`relative p-3 rounded-2xl border-2 transition-all text-left flex flex-col justify-between h-24 ${
                 isSelected 
                   ? 'border-igo-green bg-igo-green/5 ring-4 ring-igo-green/10' 

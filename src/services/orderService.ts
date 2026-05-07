@@ -15,6 +15,8 @@ export interface Order {
   billing_address?: string;
   payment_method?: string;
   pincode?: string;
+  delivery_slot?: string;
+  delivery_date?: string;
 }
 
 
@@ -90,8 +92,19 @@ export const createOrder = async (orderData: Omit<Order, 'id' | 'created_at' | '
       const { data, error } = await supabase
         .from('orders')
         .insert([{
-          ...orderData,
+          id: tempId,
+          customer_email: orderData.customer_email,
+          customer_name: orderData.customer_name,
+          customer_phone: orderData.customer_phone,
+          amount: orderData.amount,
           status: 'Processing',
+          items: orderData.items,
+          delivery_address: orderData.delivery_address,
+          billing_address: orderData.billing_address,
+          pincode: orderData.pincode,
+          payment_method: orderData.payment_method || 'COD',
+          delivery_slot: orderData.delivery_slot,
+          delivery_date: orderData.delivery_date,
           created_at: new Date().toISOString()
         }])
         .select()
@@ -102,6 +115,8 @@ export const createOrder = async (orderData: Omit<Order, 'id' | 'created_at' | '
         const updatedLocal = [data, ...localOrders];
         localStorage.setItem('igo_orders_cache', JSON.stringify(updatedLocal));
         return { success: true, data: newOrder };
+      } else if (error) {
+        console.error('Supabase Order Insert Error:', error);
       }
     }
 

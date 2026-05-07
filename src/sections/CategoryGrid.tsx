@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Building2 } from 'lucide-react';
+import { Building2, Sparkles } from 'lucide-react';
 
 const categories = [
   { name: 'Chicken', image: '/images/products/chicken-whole.png', color: 'bg-orange-50 hover:bg-orange-100', borderColor: 'border-orange-200', filter: 'Chicken' },
@@ -10,6 +10,7 @@ const categories = [
   { name: 'Eggs', image: '/images/products/eggs.png', color: 'bg-amber-50 hover:bg-amber-100', borderColor: 'border-amber-200', filter: 'Eggs' },
   { name: 'Exotic', image: '/images/products/quail.png', color: 'bg-purple-50 hover:bg-purple-100', borderColor: 'border-purple-200', filter: 'Exotic' },
   { name: 'B2B', icon: Building2, color: 'bg-neutral-100 hover:bg-neutral-200', borderColor: 'border-neutral-300', filter: 'B2B' },
+  { name: 'Shop All', icon: Sparkles, color: 'bg-igo-green/5 hover:bg-igo-green/10', borderColor: 'border-igo-green/20', filter: 'All' },
 ];
 
 const CategoryGrid = () => {
