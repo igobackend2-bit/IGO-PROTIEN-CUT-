@@ -10,7 +10,7 @@ import { staticProducts } from '../data/staticProducts';
 
 const STORE_KEY = 'igo_products';
 const VERSION_KEY = 'igo_products_version';
-const STORE_VERSION = 'v2'; // bump this to force a data reset
+const STORE_VERSION = 'v3'; // bump this to force a data reset
 const UPDATE_EVENT = 'igo_products_updated';
 
 /** Returns true if stored data is valid for current version */

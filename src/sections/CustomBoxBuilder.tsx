@@ -29,7 +29,12 @@ const CustomBoxBuilder = () => {
   return (
     <section className="py-24 bg-neutral-light overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-16">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
           <span className="text-igo-gold font-bold text-sm uppercase tracking-widest">Personalized Protein</span>
           <h2 className="text-4xl md:text-5xl font-display font-bold mt-4 text-neutral-dark">
             Build Your <span className="text-igo-green">Custom Box.</span>
@@ -38,11 +43,16 @@ const CustomBoxBuilder = () => {
             Choose your favorite cuts and we'll pack them in our signature 
             temperature-controlled "Smart Cooler" for the ultimate freshness.
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid lg:grid-cols-12 gap-12 items-start">
           {/* Selection Area */}
-          <div className="lg:col-span-7 space-y-6">
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="lg:col-span-7 space-y-6"
+          >
             <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-neutral-100">
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                 <Plus className="w-5 h-5 text-igo-green" />
@@ -77,7 +87,7 @@ const CustomBoxBuilder = () => {
                 <p className="text-sm text-neutral-500">Every custom box includes a reusable ice-gel pack that maintains 0-4°C for up to 6 hours.</p>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Virtual Box Preview */}
           <div className="lg:col-span-5 sticky top-32">

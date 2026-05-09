@@ -16,29 +16,11 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
+        '@': path.resolve(process.cwd(), '.'),
       },
     },
     build: {
       chunkSizeWarningLimit: 2000,
-      rollupOptions: {
-        output: {
-          manualChunks: (id) => {
-            if (id.includes('node_modules')) {
-              if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
-                return 'vendor-core';
-              }
-              if (id.includes('lucide-react') || id.includes('motion')) {
-                return 'vendor-ui';
-              }
-              if (id.includes('@supabase') || id.includes('@google/genai')) {
-                return 'vendor-services';
-              }
-              return 'vendor';
-            }
-          }
-        }
-      },
       minify: 'esbuild',
       sourcemap: false,
       target: 'esnext',

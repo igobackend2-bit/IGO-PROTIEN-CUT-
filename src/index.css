@@ -31,6 +31,8 @@
     background-size: 200px 200px;
     background-repeat: repeat;
     opacity: 0.98;
+    /* Hide default cursor globally for custom cursor */
+    cursor: none;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -39,11 +41,12 @@
 
   * {
     -webkit-tap-highlight-color: transparent;
-    cursor: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='12' cy='12' r='4' fill='%232D7A3A'/%3E%3C/svg%3E"), auto;
+    /* Use custom cursor support */
+    cursor: none;
   }
   
-  a, button {
-    cursor: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='16' cy='16' r='8' stroke='%232D7A3A' stroke-width='2' fill='none'/%3E%3C/svg%3E"), pointer;
+  a, button, [role="button"] {
+    cursor: none;
   }
 }
 

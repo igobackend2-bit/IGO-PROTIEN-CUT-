@@ -13,7 +13,7 @@ const QuickViewModal = ({ product, onClose }: QuickViewModalProps) => {
   const { addToCart, wishlist, toggleWishlist } = useCart();
   const [selectedWeight, setSelectedWeight] = useState('');
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState<'Overview' | 'Recipes' | 'reviews'>('Overview');
+  const [activeTab, setActiveTab] = useState<'Overview' | 'Recipes' | 'Reviews'>('Overview');
 
   // Reset to first weight option when product changes
   useEffect(() => {

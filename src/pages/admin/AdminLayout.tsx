@@ -18,7 +18,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { useNavigate, useLocation, Link, Outlet } from 'react-router-dom';
+import { useNavigate, useLocation, Link, Outlet, Navigate } from 'react-router-dom';
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -41,19 +41,10 @@ const AdminLayout = () => {
     setGlobalSearch('');
   };
 
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const isAuth = localStorage.getItem('admin_auth') === 'true';
 
-  useEffect(() => {
-    const isAuth = localStorage.getItem('admin_auth') === 'true';
-    if (!isAuth) {
-      navigate('/admin/login', { replace: true });
-    } else {
-      setIsCheckingAuth(false);
-    }
-  }, [navigate]);
-
-  if (isCheckingAuth) {
-    return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center" />;
+  if (!isAuth) {
+    return <Navigate to="/admin/login" replace />;
   }
 
 

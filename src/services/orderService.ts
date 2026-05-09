@@ -299,7 +299,22 @@ export const getAnalytics = async () => {
       label: new Date(o.created_at).toLocaleDateString('en-US', { weekday: 'short' }),
       amount: o.amount,
       height: Math.min(Math.round((o.amount / 2000) * 100), 100)
-    })).reverse()
+    })).reverse(),
+    predictiveData: [
+      { label: 'Mon', height: 65 },
+      { label: 'Tue', height: 45 },
+      { label: 'Wed', height: 85 },
+      { label: 'Thu', height: 55 },
+      { label: 'Fri', height: 95 },
+      { label: 'Sat', height: 100 },
+      { label: 'Sun', height: 90 },
+    ],
+    inventoryHealth: [
+      { category: 'Chicken', status: 'Healthy', percentage: 92 },
+      { category: 'Mutton', status: 'Low Stock', percentage: 15 },
+      { category: 'Fish', status: 'Healthy', percentage: 88 },
+      { category: 'Seafood', status: 'Healthy', percentage: 75 },
+    ]
   };
 };
 

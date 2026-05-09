@@ -13,6 +13,8 @@ const categories = [
   { name: 'Shop All', icon: Sparkles, color: 'bg-igo-green/5 hover:bg-igo-green/10', borderColor: 'border-igo-green/20', filter: 'All' },
 ];
 
+import Marquee from '../components/Marquee';
+
 const CategoryGrid = () => {
   const scrollToProducts = (filter: string) => {
     if (filter === 'B2B') {
@@ -27,37 +29,47 @@ const CategoryGrid = () => {
     }
   };
 
+  const CategoryItem = ({ cat, i }: { cat: any, i: number }) => {
+    const Icon = cat.icon;
+    return (
+      <motion.button
+        key={cat.name}
+        whileHover={{ scale: 1.05, y: -4 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => scrollToProducts(cat.filter)}
+        className="flex flex-col items-center gap-3 group mx-4 sm:mx-6 min-w-[90px]"
+      >
+        <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center shadow-md group-hover:shadow-xl transition-all duration-300 border-2 ${cat.borderColor} ${cat.color} overflow-hidden`}>
+          {cat.image ? (
+            <img src={cat.image} alt={cat.name} className="w-14 h-14 sm:w-16 sm:h-16 object-cover group-hover:scale-110 transition-transform duration-500 drop-shadow-md" />
+          ) : Icon ? (
+            <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-neutral-500 group-hover:text-neutral-700 transition-colors" />
+          ) : null}
+        </div>
+        <span className="text-xs sm:text-sm font-bold text-neutral-600 group-hover:text-igo-green transition-colors whitespace-nowrap">
+          {cat.name}
+        </span>
+      </motion.button>
+    );
+  };
+
   return (
-    <section className="py-12 bg-white border-b border-neutral-100">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-center gap-6 sm:gap-10 flex-wrap">
-          {categories.map((cat, i) => {
-            const Icon = cat.icon;
-            return (
-              <motion.button
-                key={cat.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.06 }}
-                viewport={{ once: true }}
-                whileHover={{ scale: 1.05, y: -4 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => scrollToProducts(cat.filter)}
-                className="flex flex-col items-center gap-3 group"
-              >
-                <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center shadow-md group-hover:shadow-xl transition-all duration-300 border-2 ${cat.borderColor} ${cat.color} overflow-hidden`}>
-                  {cat.image ? (
-                    <img src={cat.image} alt={cat.name} className="w-14 h-14 sm:w-16 sm:h-16 object-cover group-hover:scale-110 transition-transform duration-500 drop-shadow-md" />
-                  ) : Icon ? (
-                    <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-neutral-500 group-hover:text-neutral-700 transition-colors" />
-                  ) : null}
-                </div>
-                <span className="text-sm font-bold text-neutral-600 group-hover:text-igo-green transition-colors">
-                  {cat.name}
-                </span>
-              </motion.button>
-            );
-          })}
+    <section className="py-12 bg-white border-b border-neutral-100 overflow-hidden">
+      <div className="max-w-7xl mx-auto">
+        {/* Desktop Grid (centered) */}
+        <div className="hidden md:flex items-center justify-center gap-6 sm:gap-10 px-6">
+          {categories.map((cat, i) => (
+            <CategoryItem key={cat.name} cat={cat} i={i} />
+          ))}
+        </div>
+
+        {/* Mobile Marquee (automatic scroll) */}
+        <div className="md:hidden">
+          <Marquee speed={25} pauseOnHover={false}>
+            {categories.map((cat, i) => (
+              <CategoryItem key={cat.name} cat={cat} i={i} />
+            ))}
+          </Marquee>
         </div>
       </div>
     </section>

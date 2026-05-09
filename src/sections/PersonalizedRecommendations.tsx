@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Heart, Sparkles, History, ArrowRight, ShoppingBag, Star } from 'lucide-react';
+import { Heart, Sparkles, History, ArrowRight, ShoppingBag, Star, TrendingUp } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { Product } from '../types/product';
 import { staticProducts as products } from '../data/staticProducts';
@@ -10,11 +10,31 @@ const PersonalizedRecommendations = () => {
   
   const wishlistProducts = products.filter(p => wishlist.includes(p.id));
   
-  // Mock frequently purchased based on cart or generic popular items
-  const frequentlyPurchased = products.slice(0, 4);
+  // Analyze cart and wishlist for interests
+  const allInterests = [
+    ...cart.map(item => item.category),
+    ...wishlistProducts.map(p => p.category)
+  ];
   
-  // Mock AI recommendations
-  const aiRecommendations = products.slice(4, 8);
+  const topCategory = allInterests.length > 0 
+    ? allInterests.reduce((a, b, i, arr) => 
+        (arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b)
+      , allInterests[0])
+    : 'Chicken';
+
+  // AI recommendations: products in top category not in cart
+  const aiRecommendations = products
+    .filter(p => p.category === topCategory && !cart.find(c => c.id === p.id))
+    .slice(0, 4);
+    
+  // If not enough in top category, backfill with premium items
+  if (aiRecommendations.length < 4) {
+    const extra = products.filter(p => p.isPremium && !aiRecommendations.find(r => r.id === p.id)).slice(0, 4 - aiRecommendations.length);
+    aiRecommendations.push(...extra);
+  }
+
+  // Trending section (mock seasonal data)
+  const trendingProducts = products.filter(p => p.badge === 'Best Seller' || p.badge === 'Fitness Fav').slice(0, 4);
 
   const ProductCard = ({ product }: { product: Product }) => (
     <motion.div 
@@ -80,21 +100,21 @@ const PersonalizedRecommendations = () => {
           </div>
         )}
 
-        {/* Frequently Purchased */}
+        {/* Trending Now */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                <History className="w-5 h-5 text-blue-500" />
+              <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-orange-500" />
               </div>
               <div>
-                <h3 className="font-display font-bold text-2xl text-neutral-dark">Frequently Purchased</h3>
-                <p className="text-sm text-neutral-400 font-medium">Staples for your kitchen</p>
+                <h3 className="font-display font-bold text-2xl text-neutral-dark">Trending Now</h3>
+                <p className="text-sm text-neutral-400 font-medium">Seasonal favorites and crowd-pleasers</p>
               </div>
             </div>
           </div>
           <div className="flex gap-6 overflow-x-auto pb-6 no-scrollbar snap-x">
-            {frequentlyPurchased.map(product => (
+            {trendingProducts.map(product => (
               <div key={product.id} className="snap-start">
                 <ProductCard product={product} />
               </div>

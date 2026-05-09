@@ -26,6 +26,7 @@ interface CartContextType {
   setDeliverySlot: (slot: string) => void;
   deliveryDate: string;
   setDeliveryDate: (date: string) => void;
+  setNotification: (msg: string | null) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -101,7 +102,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       isCartOpen, setIsCartOpen,
       wishlist, toggleWishlist,
       lastAddedItem, isAddedModalOpen, setIsAddedModalOpen,
-      deliverySlot, setDeliverySlot, deliveryDate, setDeliveryDate
+      deliverySlot, setDeliverySlot, deliveryDate, setDeliveryDate,
+      setNotification
     }}>
       {children}
     </CartContext.Provider>

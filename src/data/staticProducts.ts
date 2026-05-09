@@ -24,6 +24,10 @@ export const staticProducts: Product[] = [
       { label: '1kg', priceMultiplier: 1 },
       { label: '2kg', priceMultiplier: 1.9 },
     ],
+    basePrice: 320,
+    demandFactor: 1.2,
+    freshnessIndex: 0.95,
+    isDynamicPricingEnabled: true,
   },
   {
     id: 2,
@@ -46,6 +50,10 @@ export const staticProducts: Product[] = [
       { label: '500g', priceMultiplier: 0.5 },
       { label: '1kg', priceMultiplier: 1 },
     ],
+    basePrice: 420,
+    demandFactor: 0.9,
+    freshnessIndex: 0.98,
+    isDynamicPricingEnabled: true,
   },
   {
     id: 3,
@@ -68,6 +76,10 @@ export const staticProducts: Product[] = [
       { label: '500g', priceMultiplier: 0.5 },
       { label: '1kg', priceMultiplier: 1 },
     ],
+    basePrice: 480,
+    demandFactor: 1.5,
+    freshnessIndex: 0.92,
+    isDynamicPricingEnabled: true,
   },
   // MUTTON
   {
@@ -92,6 +104,10 @@ export const staticProducts: Product[] = [
       { label: '1kg', priceMultiplier: 1 },
       { label: '2kg', priceMultiplier: 1.85 },
     ],
+    basePrice: 520,
+    demandFactor: 1.1,
+    freshnessIndex: 0.88,
+    isDynamicPricingEnabled: true,
   },
   {
     id: 5,
@@ -113,6 +129,10 @@ export const staticProducts: Product[] = [
       { label: '500g', priceMultiplier: 0.5 },
       { label: '1kg', priceMultiplier: 1 },
     ],
+    basePrice: 580,
+    demandFactor: 1.3,
+    freshnessIndex: 0.9,
+    isDynamicPricingEnabled: true,
   },
   // FISH
   {
@@ -136,6 +156,10 @@ export const staticProducts: Product[] = [
       { label: '500g', priceMultiplier: 0.5 },
       { label: '1kg', priceMultiplier: 1 },
     ],
+    basePrice: 700,
+    demandFactor: 1.4,
+    freshnessIndex: 0.85,
+    isDynamicPricingEnabled: true,
   },
   {
     id: 7,
@@ -158,6 +182,10 @@ export const staticProducts: Product[] = [
       { label: '250g', priceMultiplier: 0.25 },
       { label: '500g', priceMultiplier: 0.5 },
     ],
+    basePrice: 1850,
+    demandFactor: 1.0,
+    freshnessIndex: 0.99,
+    isDynamicPricingEnabled: true,
   },
   // SEAFOOD
   {
@@ -179,6 +207,10 @@ export const staticProducts: Product[] = [
       { label: '500g', priceMultiplier: 0.5 },
       { label: '1kg', priceMultiplier: 1 },
     ],
+    basePrice: 1200,
+    demandFactor: 0.8,
+    freshnessIndex: 0.9,
+    isDynamicPricingEnabled: true,
   },
   {
     id: 9,
@@ -202,6 +234,10 @@ export const staticProducts: Product[] = [
       { label: '500g', priceMultiplier: 0.5 },
       { label: '1kg', priceMultiplier: 1 },
     ],
+    basePrice: 950,
+    demandFactor: 1.2,
+    freshnessIndex: 0.94,
+    isDynamicPricingEnabled: true,
   },
   // EGGS
   {
@@ -224,6 +260,10 @@ export const staticProducts: Product[] = [
       { label: '12pk', priceMultiplier: 1 },
       { label: '24pk', priceMultiplier: 1.9 },
     ],
+    basePrice: 180,
+    demandFactor: 1.4,
+    freshnessIndex: 0.97,
+    isDynamicPricingEnabled: true,
   },
   // EXOTIC
   {
@@ -247,5 +287,9 @@ export const staticProducts: Product[] = [
       { label: '500g', priceMultiplier: 0.5 },
       { label: '1kg', priceMultiplier: 1 },
     ],
+    basePrice: 1200,
+    demandFactor: 0.7,
+    freshnessIndex: 0.9,
+    isDynamicPricingEnabled: true,
   },
 ];

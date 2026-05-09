@@ -77,20 +77,63 @@ const WhyIGO = () => {
           </table>
         </div>
 
-        {/* Trust Badges */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {[
-            { icon: ShieldCheck, title: 'Sterile Process', desc: 'Surgical hygiene levels' },
-            { icon: Zap, title: 'No Freezing', desc: 'Farm to door chilled' },
-            { icon: Truck, title: 'Express Delivery', desc: 'Averaging 72 mins' },
-            { icon: Award, title: 'Heritage Sourced', desc: 'Selected local farms' },
-          ].map((item, i) => (
-            <div key={item.title} className="text-center p-6 bg-neutral-light rounded-3xl border border-neutral-200">
-              <item.icon className="w-10 h-10 text-igo-green mx-auto mb-4" />
-              <h4 className="font-bold text-neutral-dark mb-1">{item.title}</h4>
-              <p className="text-xs text-neutral-400 leading-relaxed">{item.desc}</p>
-            </div>
-          ))}
+        {/* Trust Badges - Bento Grid Layout */}
+        <div className="mt-20 grid grid-cols-1 md:grid-cols-4 gap-6 h-auto md:h-[400px]">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="md:col-span-2 md:row-span-2 bg-igo-green/5 rounded-[2.5rem] p-10 border border-igo-green/10 flex flex-col justify-between group overflow-hidden relative"
+          >
+             <div className="relative z-10">
+               <div className="w-16 h-16 bg-igo-green rounded-2xl flex items-center justify-center text-white mb-6 shadow-xl shadow-igo-green/20 group-hover:scale-110 transition-transform duration-500">
+                 <ShieldCheck className="w-8 h-8" />
+               </div>
+               <h3 className="text-3xl font-display font-bold text-neutral-dark mb-4">Sterile Process</h3>
+               <p className="text-neutral-500 text-lg max-w-sm">Surgical hygiene levels maintained in our ISO 22000 certified facilities.</p>
+             </div>
+             <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-igo-green/10 rounded-full blur-3xl" />
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            viewport={{ once: true }}
+            className="md:col-span-1 bg-neutral-light rounded-[2.5rem] p-8 border border-neutral-200 flex flex-col justify-center text-center group"
+          >
+             <Zap className="w-10 h-10 text-igo-gold mx-auto mb-4 group-hover:scale-110 transition-transform" />
+             <h4 className="font-bold text-neutral-dark text-xl mb-2">No Freezing</h4>
+             <p className="text-sm text-neutral-400">Farm to door chilled, never frozen.</p>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            viewport={{ once: true }}
+            className="md:col-span-1 bg-neutral-light rounded-[2.5rem] p-8 border border-neutral-200 flex flex-col justify-center text-center group"
+          >
+             <Truck className="w-10 h-10 text-igo-green mx-auto mb-4 group-hover:scale-110 transition-transform" />
+             <h4 className="font-bold text-neutral-dark text-xl mb-2">Express</h4>
+             <p className="text-sm text-neutral-400">Averaging 72 mins across cities.</p>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            viewport={{ once: true }}
+            className="md:col-span-2 bg-neutral-dark rounded-[2.5rem] p-8 border border-white/5 flex flex-row items-center gap-8 group"
+          >
+             <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center flex-shrink-0">
+               <Award className="w-10 h-10 text-igo-gold" />
+             </div>
+             <div>
+               <h4 className="font-bold text-white text-xl mb-1">Heritage Sourced</h4>
+               <p className="text-sm text-white/40">Hand-selected local farms from heritage belts.</p>
+             </div>
+          </motion.div>
         </div>
       </div>
     </section>

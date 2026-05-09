@@ -23,4 +23,9 @@ export interface Product {
   protein?: string;
   piecesPerKg?: string;
   weightOptions?: WeightOption[];
+  // AI related fields
+  basePrice?: number;
+  demandFactor?: number; // 0.5 to 1.5
+  freshnessIndex?: number; // 0 to 1
+  isDynamicPricingEnabled?: boolean;
 }

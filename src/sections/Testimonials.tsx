@@ -35,6 +35,8 @@ const testimonials = [
   }
 ];
 
+import Marquee from '../components/Marquee';
+
 const Testimonials = () => {
   const [allTestimonials, setAllTestimonials] = React.useState(testimonials);
 
@@ -55,14 +57,12 @@ const Testimonials = () => {
     };
 
     loadReviews();
-    // Listen for changes in same tab
     window.addEventListener('storage', loadReviews);
     return () => window.removeEventListener('storage', loadReviews);
   }, []);
 
   return (
     <section className="py-24 bg-white overflow-hidden relative">
-      {/* Decorative Gradient Background */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-igo-green/5 blur-[120px] -z-0" />
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -83,22 +83,12 @@ const Testimonials = () => {
           </p>
         </div>
 
-        {/* Auto-scrolling Slider Container */}
-        <div className="relative">
-          <div className="flex gap-8 overflow-x-hidden py-10 group">
-            {/* Double the list for infinite scroll effect */}
-            {[...allTestimonials, ...allTestimonials].map((t, i) => (
-              <motion.div
+        <div className="relative -mx-6">
+          <Marquee speed={60} pauseOnHover={true}>
+            {allTestimonials.map((t, i) => (
+              <div
                 key={`${t.name}-${i}`}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                animate={{ x: [0, -1000] }}
-                transition={{ 
-                  duration: 40, 
-                  repeat: Infinity, 
-                  ease: "linear" 
-                }}
-                className="min-w-[380px] bg-neutral-light/50 backdrop-blur-sm p-8 rounded-[3rem] border border-neutral-100 flex flex-col group/card hover:bg-white hover:shadow-2xl transition-all duration-500"
+                className="min-w-[320px] sm:min-w-[380px] bg-neutral-light/50 backdrop-blur-sm p-8 rounded-[3rem] border border-neutral-100 flex flex-col group/card hover:bg-white hover:shadow-2xl transition-all duration-500 mx-4 my-4"
               >
                 <div className="flex justify-between items-start mb-6">
                   <Quote className="w-10 h-10 text-igo-green/20" />
@@ -131,13 +121,12 @@ const Testimonials = () => {
                     <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mt-1">{t.role}</div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
-          </div>
+          </Marquee>
 
-          {/* Fade Gradients for Slider */}
-          <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-white to-transparent pointer-events-none" />
-          <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+          <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white to-transparent pointer-events-none z-10" />
+          <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-white to-transparent pointer-events-none z-10" />
         </div>
       </div>
     </section>

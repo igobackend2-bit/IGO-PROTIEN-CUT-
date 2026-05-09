@@ -38,31 +38,7 @@ const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isListening, setIsListening] = useState(false);
-  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
 
-  const categories = [
-    { name: 'Chicken', filter: 'Chicken', icon: '🍗' },
-    { name: 'Mutton', filter: 'Mutton', icon: '🍖' },
-    { name: 'Fish', filter: 'Fish', icon: '🐟' },
-    { name: 'Seafood', filter: 'Seafood', icon: '🍤' },
-    { name: 'Eggs', filter: 'Eggs', icon: '🥚' },
-    { name: 'Exotic', filter: 'Exotic', icon: '🦢' },
-  ];
-
-  const handleCategoryClick = (filter: string) => {
-    setIsCategoriesOpen(false);
-    const el = document.getElementById('products');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-      window.dispatchEvent(new CustomEvent('categoryFilter', { detail: filter }));
-    } else {
-      // If not on home page, we might need a different logic, but for now:
-      window.location.href = `/#products`;
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('categoryFilter', { detail: filter }));
-      }, 500);
-    }
-  };
 
   const [searchQuery, setSearchQuery] = useState('');
   const { cartCount, setIsCartOpen, wishlist } = useCart();
@@ -170,7 +146,6 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Products', href: '/#products' },
     { name: 'Traceability', href: '/#traceability' },
-    { name: 'Categories', isDropdown: true },
     { name: 'B2B', href: '/#b2b' },
     { name: 'About', href: '/#about' },
     { name: 'Blog', href: '/blog' },
@@ -202,14 +177,20 @@ const Navbar = () => {
               className="w-full pl-10 pr-10 py-2.5 bg-neutral-100 rounded-xl text-sm border border-transparent focus:border-igo-green/40 focus:bg-white focus:outline-none transition-all"
             />
             <button 
-              onClick={handleVoiceSearch}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("Mic button clicked");
+                handleVoiceSearch();
+              }}
               className={cn(
-                "absolute right-3 top-1/2 -translate-y-1/2 transition-all",
-                isListening ? "text-red-500 scale-125 animate-pulse" : "text-neutral-400 hover:text-igo-green"
+                "absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg transition-all z-[70] cursor-pointer hover:bg-neutral-200",
+                isListening ? "text-red-500 bg-red-50 scale-110 animate-pulse" : "text-neutral-400 hover:text-igo-green"
               )}
               title="Voice Search (Tamil/English)"
+              type="button"
             >
-              <Mic className="w-4 h-4" />
+              <Mic className="w-4 h-4 pointer-events-none" />
             </button>
           </div>
 
@@ -245,43 +226,6 @@ const Navbar = () => {
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-6">
           {navLinks.map((link) => {
-            if (link.isDropdown) {
-              return (
-                <div 
-                  key={link.name}
-                  className="relative group/cat"
-                  onMouseEnter={() => setIsCategoriesOpen(true)}
-                  onMouseLeave={() => setIsCategoriesOpen(false)}
-                >
-                  <button className="text-sm font-medium text-neutral-600 hover:text-igo-green transition-all flex items-center gap-1 py-2">
-                    {link.name}
-                    <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-300", isCategoriesOpen && "rotate-180")} />
-                  </button>
-                  
-                  <AnimatePresence>
-                    {isCategoriesOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute top-full left-0 w-48 bg-white rounded-2xl shadow-2xl border border-neutral-100 p-2 z-50 mt-1"
-                      >
-                        {categories.map((cat) => (
-                          <button
-                            key={cat.name}
-                            onClick={() => handleCategoryClick(cat.filter)}
-                            className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium text-neutral-600 hover:bg-igo-green/10 hover:text-igo-green transition-all flex items-center gap-3"
-                          >
-                            <span className="text-lg">{cat.icon}</span>
-                            {cat.name}
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            }
 
             const LinkComponent: any = link.href?.startsWith('/#') ? 'a' : Link;
             return (
@@ -400,13 +344,18 @@ const Navbar = () => {
                   className="w-full pl-10 pr-12 py-3 bg-neutral-100 rounded-xl text-sm border border-transparent focus:border-igo-green/40 focus:bg-white focus:outline-none transition-all"
                 />
                 <button 
-                  onClick={handleVoiceSearch}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log("Mobile mic button clicked");
+                    handleVoiceSearch();
+                  }}
                   className={cn(
-                    "absolute right-3 top-1/2 -translate-y-1/2 p-2 transition-all",
+                    "absolute right-3 top-1/2 -translate-y-1/2 p-2 transition-all z-[60] cursor-pointer",
                     isListening ? "text-red-500 scale-125 animate-pulse" : "text-neutral-400 hover:text-igo-green"
                   )}
                 >
-                  <Mic className="w-4 h-4" />
+                  <Mic className="w-4 h-4 pointer-events-none" />
                 </button>
               </div>
             </div>

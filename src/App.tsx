@@ -21,6 +21,7 @@ import Testimonials from './sections/Testimonials';
 import Blog from './sections/Blog';
 import Newsletter from './sections/Newsletter';
 import PersonalizedRecommendations from './sections/PersonalizedRecommendations';
+import BrandNarrative from './sections/BrandNarrative';
 import Footer from './sections/Footer';
 import { CartProvider, useCart } from './context/CartContext';
 import CartDrawer from './components/CartDrawer';
@@ -28,6 +29,8 @@ import MobileBottomNav from './components/MobileBottomNav';
 import AIAssistant from './components/AIAssistant';
 import CrossSellModal from './components/CrossSellModal';
 import FloatingCheckoutBar from './components/FloatingCheckoutBar';
+import SmoothScroll from './components/SmoothScroll';
+import CustomCursor from './components/CustomCursor';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 
 // Admin Pages - Lazy Loaded for Production Stability
@@ -140,7 +143,9 @@ function Home() {
 export default function App() {
   return (
     <CartProvider>
-      <React.Suspense fallback={<LoadingFallback />}>
+      <SmoothScroll>
+        <CustomCursor />
+        <React.Suspense fallback={<LoadingFallback />}>
         <Routes>
           {/* Admin Routes - Priority matching */}
           <Route path="/admin/login" element={<AdminLogin />} />
@@ -166,6 +171,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </React.Suspense>
+      </SmoothScroll>
     </CartProvider>
   );
 }

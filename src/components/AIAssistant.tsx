@@ -13,6 +13,7 @@ const AIAssistant = () => {
     { role: 'bot', text: "Hi! I'm your IGO Meat Assistant. Need help picking a cut or planning a recipe?" }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -22,6 +23,21 @@ const AIAssistant = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    const path = window.location.pathname;
+    let suggestions = ['High Protein', 'Family Pack', 'Low Carb', 'Quick Snack'];
+    
+    if (path.includes('products')) {
+      suggestions = ['How to cook this?', 'Is this fresh?', 'Weight options?', 'Nutrition info'];
+    } else if (path.includes('cart')) {
+      suggestions = ['Delivery time?', 'Promo codes?', 'Bulk discount?', 'Modify order'];
+    } else if (path.includes('admin')) {
+      suggestions = ['Sales trends', 'Stock alerts', 'Price optimization', 'Customer insights'];
+    }
+    
+    setSuggestedQuestions(suggestions);
+  }, [isOpen, window.location.pathname]);
 
   useEffect(() => {
     const handleSearchAI = (e: any) => {
@@ -95,14 +111,24 @@ const AIAssistant = () => {
       const systemPrompt = `You are the IGO Culinary Expert for "IGO Protein Cuts". 
       Your goal is to help customers choose the best meat cuts and provide professional recipes.
       
-      OUR PRODUCTS: Chicken (Whole, Breast, Naattu Kozhi), Mutton (Curry Cut, Keema), Fish (Vanjaram, Salmon), Seafood (Crab, Prawns).
+      OUR PRODUCTS & KNOWLEDGE:
+      - CHICKEN: Whole, Breast (Boneless), Naattu Kozhi (Heritage). Naattu Kozhi is tougher but more flavorful; suggest slow cooking or pressure cooking.
+      - MUTTON: Goat Mutton Curry Cut (Bone-in), Premium Keema (80/20 lean). Bone-in mutton is best for slow-simmered curries to extract marrow.
+      - FISH: Vanjaram (Seer Fish) - The King of South Indian fish, great for fry. Wild Atlantic Salmon - Sushi grade, high Omega-3.
+      - SEAFOOD: Live Mud Crab (meaty/sweet), Jumbo Tiger Prawns (cleaned/deveined).
+      
       OUR STANDARDS: 100% Traceable, Never Frozen, Antibiotic-Free, Farm-Fresh to home within 120 mins.
+      
+      COOKING ADVICE:
+      - Always rest meat for 5-10 mins after cooking.
+      - Pat meat dry before searing for a better crust.
+      - Marinate Naattu Kozhi for at least 4 hours.
       
       GUIDELINES:
       1. Give detailed, chef-quality recipes using IGO cuts.
       2. Always emphasize freshness and "Never Frozen" quality.
       3. Use markdown (bold, lists) for clarity.
-      4. Tone: Premium, helpful, and passionate.`;
+      4. Tone: Premium, helpful, and passionate. Use emojis like 🥩, 🍗, 🐟.`;
 
       const res = await fetch('/api/ai-chat', {
         method: 'POST',
@@ -219,7 +245,7 @@ const AIAssistant = () => {
             {/* Input Section Wrapper */}
             <div className="p-6 bg-white/50 backdrop-blur-md border-t border-neutral-100">
               <div className="flex gap-2 mb-4 overflow-x-auto no-scrollbar pb-1">
-                {['High Protein', 'Family Pack', 'Low Carb', 'Quick Snack'].map(tag => (
+                {suggestedQuestions.map(tag => (
                   <button 
                     key={tag}
                     onClick={() => { setInput(tag); handleSend(); }}
@@ -240,12 +266,14 @@ const AIAssistant = () => {
                 />
                 <button 
                   onClick={handleVoiceInput}
+                  type="button"
                   className={cn(
-                    "absolute right-12 top-1/2 -translate-y-1/2 p-2 transition-all",
-                    isListening ? "text-red-500 scale-125 animate-pulse" : "text-neutral-400 hover:text-igo-green"
+                    "absolute right-12 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-lg transition-all z-10",
+                    isListening ? "text-red-500 bg-red-50 scale-110 animate-pulse" : "text-neutral-400 hover:text-igo-green hover:bg-neutral-50"
                   )}
+                  title="Voice Search"
                 >
-                  <Mic className="w-4 h-4" />
+                  <Mic className="w-4 h-4 pointer-events-none" />
                 </button>
                 <button
                   id="ai-send-button"

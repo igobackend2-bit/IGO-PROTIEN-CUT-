@@ -141,11 +141,15 @@ const ProductGrid = () => {
                     <motion.div
                       layout
                       key={product.id}
-                      initial={{ opacity: 0, scale: 0.92 }}
-                      animate={{ opacity: 1, scale: 1 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.92 }}
-                      transition={{ duration: 0.25 }}
-                      className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-400 flex flex-col"
+                      transition={{ 
+                        duration: 0.4, 
+                        delay: (liveProducts.indexOf(product) % 8) * 0.05,
+                        ease: [0.215, 0.61, 0.355, 1] 
+                      }}
+                      className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 flex flex-col border border-neutral-100"
                     >
                     {/* Image Area */}
                     <div 

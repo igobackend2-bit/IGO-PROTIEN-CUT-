@@ -8,7 +8,9 @@ import {
   Download,
   Filter,
   PieChart as PieChartIcon,
-  Activity
+  Activity,
+  Sparkles,
+  Zap
 } from 'lucide-react';
 
 const ChartBar = ({ height, label, active }: any) => (
@@ -133,6 +135,68 @@ const Analytics = () => {
           <button className="mt-8 w-full py-4 bg-white/10 hover:bg-white/20 rounded-2xl text-sm font-bold transition-all border border-white/5">
             Detailed Breakdown
           </button>
+        </div>
+      </div>
+
+      {/* AI Forecasting Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Predictive Demand */}
+        <div className="bg-white p-8 rounded-[40px] border border-neutral-100 shadow-sm">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="text-xl font-bold text-neutral-800 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-igo-gold" />
+                Predictive Demand
+              </h3>
+              <p className="text-neutral-400 text-xs mt-1">AI-powered sales forecast for the next 7 days.</p>
+            </div>
+          </div>
+          <div className="h-[200px] flex items-end gap-3 px-2">
+            {data?.predictiveData?.map((item: any, i: number) => (
+              <div key={i} className="flex flex-col items-center gap-2 flex-1 h-full justify-end group">
+                <div className="relative w-full flex justify-center items-end h-full">
+                  <motion.div 
+                    initial={{ height: 0 }}
+                    animate={{ height: `${item.height}%` }}
+                    className="w-full max-w-[32px] rounded-t-lg bg-igo-gold/20 group-hover:bg-igo-gold/40 transition-all border-t-2 border-igo-gold/30"
+                  />
+                </div>
+                <span className="text-[10px] font-bold text-neutral-400 uppercase">{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Inventory Health */}
+        <div className="bg-white p-8 rounded-[40px] border border-neutral-100 shadow-sm">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="text-xl font-bold text-neutral-800 flex items-center gap-2">
+                <Zap className="w-5 h-5 text-blue-500" />
+                Inventory Health
+              </h3>
+              <p className="text-neutral-400 text-xs mt-1">Real-time stock level and freshness monitoring.</p>
+            </div>
+          </div>
+          <div className="space-y-6">
+            {data?.inventoryHealth?.map((item: any, i: number) => (
+              <div key={i} className="flex items-center gap-4">
+                <div className="w-12 text-xs font-bold text-neutral-400">{item.category}</div>
+                <div className="flex-1 h-3 bg-neutral-100 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${item.percentage}%` }}
+                    className={`h-full ${item.percentage < 30 ? 'bg-red-500' : 'bg-igo-green'}`}
+                  />
+                </div>
+                <div className={`text-[10px] font-bold px-2 py-1 rounded-md ${
+                  item.status === 'Healthy' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'
+                }`}>
+                  {item.status}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

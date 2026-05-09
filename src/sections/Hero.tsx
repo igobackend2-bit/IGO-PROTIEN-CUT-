@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronRight, ShieldCheck, Truck, Star, Users, Package, MapPin, CheckCircle2, Flame } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ShieldCheck, Truck, Star, Users, Package, MapPin, CheckCircle2, Flame, QrCode, Loader2 } from 'lucide-react';
+
+const Hero3D = React.lazy(() => import('../components/3d/Hero3D'));
 
 const SERVICEABLE_PINCODES = ['641001', '641002', '641003', '641004', '641005', '641006', '641007', '641008', '641009', '641010', '641011', '641012', '641013', '641014', '641015', '641016', '641017', '641018', '641019', '641020', '600001', '600002', '600003', '560001', '560002'];
 
@@ -125,170 +127,268 @@ const FlashSaleCountdown = () => {
   );
 };
 
+const slides = [
+  {
+    id: 1,
+    image: '/images/narrative/farm.png',
+    tag: 'Heritage Tamil Farms',
+    title: <>Farm-Fresh <br /><span className="text-igo-green">Proteins, Traced</span> <br />Every Step.</>,
+    desc: 'Never Frozen. Always Fresh. Always Traced. Same-day delivery from heritage Tamil farms with 100% cold-chain integrity.',
+    icon: MapPin,
+    accent: 'text-igo-green'
+  },
+  {
+    id: 2,
+    image: '/images/narrative/facility.png',
+    tag: 'Cold-Chain Integrity',
+    title: <>Pure <br /><span className="text-blue-500">Cold-Chain</span>.</>,
+    desc: 'Never frozen, always chilled. 0-4°C integrity from farm to fork. Absolute freshness, guaranteed.',
+    icon: Truck,
+    accent: 'text-blue-500'
+  },
+  {
+    id: 3,
+    image: '/images/narrative/packaging.png',
+    tag: 'Total Traceability',
+    title: <>Total <br /><span className="text-igo-gold">Traceability</span>.</>,
+    desc: 'Scan the QR code to see the exact journey of your meat and its quality metrics.',
+    icon: QrCode,
+    accent: 'text-igo-gold'
+  }
+];
+
 const Hero = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [statsStarted, setStatsStarted] = useState(false);
+  const [direction, setDirection] = useState(0);
+
+  const nextSlide = useCallback(() => {
+    setDirection(1);
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  }, []);
+
+  const prevSlide = useCallback(() => {
+    setDirection(-1);
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(nextSlide, 5000);
+    return () => clearInterval(timer);
+  }, [nextSlide]);
 
   useEffect(() => {
     const timer = setTimeout(() => setStatsStarted(true), 800);
     return () => clearTimeout(timer);
   }, []);
 
+  const slide = slides[currentSlide];
+
   return (
-    <section className="relative min-h-[88vh] flex items-center overflow-hidden bg-white">
-      {/* Background */}
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-neutral-light -skew-x-12 translate-x-1/4 hidden lg:block" />
-      <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-igo-green/5 rounded-full blur-3xl" />
-      <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-igo-gold/5 rounded-full blur-3xl hidden lg:block" />
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-white">
+      {/* Background Slideshow */}
+      <div className="absolute inset-0 z-0">
+        <AnimatePresence>
+          <motion.div
+            key={currentSlide}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: "easeInOut" }}
+            className="absolute inset-0"
+          >
+            <img 
+              src={slide.image} 
+              alt="Background" 
+              className="absolute inset-0 w-full h-full object-cover lg:object-right-top z-0"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/60 to-transparent z-10 lg:w-2/3" />
+          </motion.div>
+        </AnimatePresence>
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full grid lg:grid-cols-2 gap-12 items-center py-16 sm:py-20">
         {/* Left Content */}
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          {/* Delivery Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="inline-flex items-center gap-2 bg-igo-green/10 border border-igo-green/20 px-4 py-2 rounded-full mb-6"
-          >
-            <div className="w-2 h-2 rounded-full bg-igo-green animate-pulse" />
-            <span className="text-xs font-bold text-igo-green uppercase tracking-wider">
-              🚚 Delivering in 60-90 mins · Free above ₹499
-            </span>
-          </motion.div>
-
-          <FlashSaleCountdown />
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex items-center gap-2 mb-5"
-          >
-            <span className="h-px w-8 bg-igo-gold" />
-            <span className="text-igo-gold font-bold text-xs uppercase tracking-[0.2em]">
-              Established Excellence
-            </span>
-          </motion.div>
-
-          <h1 className="text-5xl md:text-7xl font-display font-extrabold text-neutral-dark leading-[1.05] mb-6 tracking-tighter">
-            Farm-Fresh <br />
-            <span className="text-igo-green">Proteins, Traced</span> <br />
-            Every Step.
-          </h1>
-
-          <p className="text-neutral-500 text-lg md:text-xl max-w-lg mb-8 leading-relaxed font-medium">
-            Never Frozen. Always Fresh. <span className="text-igo-gold font-bold">Always Traced.</span> <br />
-            Same-day delivery from heritage Tamil farms with 100% cold-chain integrity.
-          </p>
-
-          {/* Rating bar */}
-          <div className="flex items-center gap-3 mb-8">
-            <div className="flex gap-0.5">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 fill-igo-gold text-igo-gold" />
-              ))}
+        <div className="relative">
+          {/* Persistent Elements (Don't reset on slide change) */}
+          <div className="mb-6">
+            <div className="inline-flex items-center gap-2 bg-igo-green/10 border border-igo-green/20 px-4 py-2 rounded-full mb-4">
+              <div className="w-2 h-2 rounded-full bg-igo-green animate-pulse" />
+              <span className="text-[10px] sm:text-xs font-bold text-igo-green uppercase tracking-wider">
+                🚚 Delivering in 60-90 mins · Free above ₹499
+              </span>
             </div>
-            <span className="font-bold text-neutral-dark">4.9</span>
-            <span className="text-neutral-400 text-sm">from 12,000+ verified reviews</span>
+            <FlashSaleCountdown />
           </div>
 
-          <div className="flex flex-wrap gap-4 mb-6">
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={currentSlide}
+              custom={direction}
+              initial={{ opacity: 0, x: direction > 0 ? 50 : -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: direction > 0 ? -50 : 50 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <span className="h-px w-8 bg-igo-gold" />
+                <span className="text-igo-gold font-bold text-[10px] uppercase tracking-[0.2em]">
+                  {slide.tag}
+                </span>
+              </div>
+
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-display font-extrabold text-neutral-dark leading-[1.05] mb-6 tracking-tighter">
+                {slide.title}
+              </h1>
+
+              <p className="text-neutral-500 text-base sm:text-lg md:text-xl max-w-lg mb-8 leading-relaxed font-medium">
+                {slide.desc}
+              </p>
+
+              {/* Rating bar (Only on Slide 1 for relevance) */}
+              {currentSlide === 0 && (
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-igo-gold text-igo-gold" />
+                    ))}
+                  </div>
+                  <span className="font-bold text-neutral-dark">4.9</span>
+                  <span className="text-neutral-400 text-xs sm:text-sm">from 12,000+ verified reviews</span>
+                </div>
+              )}
+
+              {/* Pincode Checker (Only on Slide 1) */}
+              {currentSlide === 0 && <PincodeChecker />}
+
+              {/* Stats (Only on Slide 1) */}
+              {currentSlide === 0 && (
+                <div className="flex flex-wrap gap-6 pt-6 border-t border-neutral-100">
+                  {stats.map(stat => (
+                    <StatCard key={stat.label} {...stat} started={statsStarted} />
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Persistent Action Buttons */}
+          <div className="flex flex-wrap gap-4 mt-8">
             <a href="/#products">
-              <button className="group bg-igo-green text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-2 hover:bg-igo-green/90 transition-all shadow-xl shadow-igo-green/20 active:scale-95">
+              <button className="group bg-igo-green text-white px-6 sm:px-8 py-3 sm:py-4 rounded-2xl font-bold flex items-center gap-2 hover:bg-igo-green/90 transition-all shadow-xl shadow-igo-green/20 active:scale-95 text-sm sm:text-base">
                 Shop Fresh Now
                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </a>
 
             <a href="#b2b">
-              <button className="bg-white text-neutral-dark border-2 border-neutral-200 px-8 py-4 rounded-2xl font-bold hover:border-igo-gold hover:text-igo-gold transition-all active:scale-95">
+              <button className="bg-white text-neutral-dark border-2 border-neutral-200 px-6 sm:px-8 py-3 sm:py-4 rounded-2xl font-bold hover:border-igo-gold hover:text-igo-gold transition-all active:scale-95 text-sm sm:text-base">
                 B2B Bulk Orders
               </button>
             </a>
           </div>
+             {/* Right: 3D Visualization */}
+        <div className="relative hidden lg:flex justify-end items-center h-[600px]">
+           <React.Suspense fallback={
+             <div className="w-full h-full flex items-center justify-center">
+               <Loader2 className="w-12 h-12 text-igo-green animate-spin opacity-20" />
+             </div>
+           }>
+             <div className="w-full h-full relative">
+                <Hero3D />
+                
+                {/* Overlay Contextual Cards */}
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                   <AnimatePresence mode="wait">
+                      <motion.div
+                        key={currentSlide}
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                        transition={{ duration: 0.8 }}
+                        className="relative z-20 pointer-events-auto"
+                      >
+                        {/* Badge based on slide */}
+                        {currentSlide === 0 && (
+                          <div className="bg-white/80 backdrop-blur-md p-6 rounded-[2rem] shadow-2xl border border-white/50 max-w-[280px]">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="p-3 bg-igo-green/10 rounded-xl">
+                                <ShieldCheck className="text-igo-green w-6 h-6" />
+                              </div>
+                              <span className="font-bold text-xs uppercase tracking-widest text-neutral-400">Verified Origin</span>
+                            </div>
+                            <div className="font-display font-bold text-xl text-neutral-dark">High Meadows Farm</div>
+                            <div className="text-sm text-neutral-400 mt-2">Certified heritage pastures in the Nilgiris range.</div>
+                          </div>
+                        )}
 
-          {/* Pincode Checker */}
-          <PincodeChecker />
+                        {currentSlide === 1 && (
+                          <div className="bg-white/80 backdrop-blur-md p-6 rounded-[2rem] shadow-2xl border border-white/50 max-w-[280px]">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="p-3 bg-blue-500/10 rounded-xl">
+                                <Truck className="text-blue-500 w-6 h-6" />
+                              </div>
+                              <span className="font-bold text-xs uppercase tracking-widest text-neutral-400">Cold Chain Log</span>
+                            </div>
+                            <div className="font-display font-bold text-xl text-neutral-dark">Locked at 2.4°C</div>
+                            <div className="text-sm text-neutral-400 mt-2">Real-time GPS tracking with temperature sensors.</div>
+                          </div>
+                        )}
 
-          {/* Stats */}
-          <div className="flex flex-wrap gap-6 pt-6 border-t border-neutral-100">
-            {stats.map(stat => (
-              <StatCard key={stat.label} {...stat} started={statsStarted} />
-            ))}
-          </div>
-        </motion.div>
+                        {currentSlide === 2 && (
+                          <div className="bg-white/80 backdrop-blur-md p-6 rounded-[2rem] shadow-2xl border border-white/50 max-w-[280px]">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="p-3 bg-igo-gold/10 rounded-xl">
+                                <QrCode className="text-igo-gold w-6 h-6" />
+                              </div>
+                              <span className="font-bold text-xs uppercase tracking-widest text-neutral-400">Scan & Trace</span>
+                            </div>
+                            <div className="font-display font-bold text-xl text-neutral-dark">Batch #IGO-9421</div>
+                            <div className="text-sm text-neutral-400 mt-2">Scan your pack to see the complete journey log.</div>
+                          </div>
+                        )}
+                      </motion.div>
+                   </AnimatePresence>
+                </div>
+             </div>
+           </React.Suspense>
+        </div>        </div>
+      </div>
 
-        {/* Right: Hero Image */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.92, rotate: 1 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="relative hidden lg:block"
+      {/* Navigation Controls */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex items-center gap-8">
+        <button 
+          onClick={prevSlide}
+          className="p-3 rounded-full border border-neutral-200 hover:bg-igo-green hover:text-white hover:border-igo-green transition-all active:scale-90"
         >
-          <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl z-20 group">
-            <div className="absolute inset-0 bg-igo-green/5 mix-blend-multiply pointer-events-none z-10" />
-            <img
-              src="/images/hero.png"
-              alt="Premium Farm-Fresh Protein Cuts"
-              className="w-full h-full object-cover aspect-[4/3] group-hover:scale-105 transition-transform duration-700"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1607623814075-e512199b4472?auto=format&fit=crop&q=80&w=1200';
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+
+        <div className="flex gap-3">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                setDirection(i > currentSlide ? 1 : -1);
+                setCurrentSlide(i);
               }}
+              className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
+                i === currentSlide ? 'w-8 bg-igo-green' : 'bg-neutral-200 hover:bg-neutral-300'
+              }`}
             />
+          ))}
+        </div>
 
-            {/* Live Trace Overlay */}
-            <div className="absolute bottom-5 left-5 right-5 bg-white/90 backdrop-blur-md p-4 rounded-2xl border border-white/60 shadow-xl z-20">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] text-igo-green font-bold uppercase tracking-widest leading-none mb-1">Live Trace Data</p>
-                  <p className="text-sm font-display font-bold text-neutral-dark">Batch #IGO-7729V | Origin: Tiruppur</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-igo-green animate-pulse" />
-                  <span className="text-[10px] font-bold text-igo-green uppercase">Fresh</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Floating Verified Badge */}
-          <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-8 -left-8 bg-white p-5 rounded-2xl shadow-xl z-30 max-w-[190px]"
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-igo-green/10 rounded-lg">
-                <ShieldCheck className="text-igo-green w-5 h-5" />
-              </div>
-              <span className="font-bold text-xs uppercase tracking-wider text-neutral-400">Verified Batch</span>
-            </div>
-            <div className="font-display font-bold text-base text-neutral-dark">Batch #IGO-9421</div>
-            <div className="text-[10px] text-neutral-400 mt-1">Traced to: High Meadows Farm</div>
-          </motion.div>
-
-          {/* Offer Badge */}
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-            className="absolute -top-6 -right-6 bg-igo-gold text-white p-4 rounded-2xl shadow-xl z-30"
-          >
-            <p className="text-xs font-bold">First Order</p>
-            <p className="text-xl font-display font-extrabold">15% Off</p>
-            <p className="text-[10px] opacity-80">Use: IGOFRESH15</p>
-          </motion.div>
-
-          {/* Decorative */}
-          <div className="absolute -top-12 -right-12 w-48 h-48 bg-igo-gold/10 rounded-full blur-3xl z-10" />
-          <div className="absolute -bottom-20 -right-20 w-64 h-64 border border-igo-green/10 rounded-full z-10" />
-        </motion.div>
+        <button 
+          onClick={nextSlide}
+          className="p-3 rounded-full border border-neutral-200 hover:bg-igo-green hover:text-white hover:border-igo-green transition-all active:scale-90"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
       </div>
     </section>
   );
 };
 
 export default Hero;
+

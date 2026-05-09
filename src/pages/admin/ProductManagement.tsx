@@ -15,7 +15,8 @@ import {
   Image as ImageIcon,
   X,
   PackageX,
-  Package
+  Package,
+  Sparkles
 } from 'lucide-react';
 import { Product } from '../../types/product';
 import { loadProducts, upsertProduct, removeProduct, fileToDataUrl } from '../../services/productStore';
@@ -244,7 +245,12 @@ const ProductManagement = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
-                      <span className="text-sm font-bold text-neutral-800">₹{product.price}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-bold text-neutral-800">₹{product.price}</span>
+                        {product.isDynamicPricingEnabled && (
+                          <Sparkles className="w-3 h-3 text-igo-gold" />
+                        )}
+                      </div>
                       {product.originalPrice && (
                         <span className="text-[10px] text-neutral-300 line-through">₹{product.originalPrice}</span>
                       )}
@@ -440,6 +446,60 @@ const ProductManagement = () => {
                         className="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-sm focus:ring-2 focus:ring-igo-green/30 outline-none transition-all"
                       />
                     </div>
+                  </div>
+
+                  {/* AI Dynamic Pricing Section */}
+                  <div className="p-5 bg-igo-gold/5 border border-igo-gold/20 rounded-2xl space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-igo-gold/10 rounded-lg flex items-center justify-center">
+                          <Sparkles className="w-4 h-4 text-igo-gold" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-neutral-800">AI Dynamic Pricing</p>
+                          <p className="text-[10px] text-neutral-400">Optimize revenue based on demand & freshness</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({
+                          ...prev,
+                          isDynamicPricingEnabled: !prev.isDynamicPricingEnabled
+                        }))}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                          formData.isDynamicPricingEnabled ? 'bg-igo-gold' : 'bg-neutral-200'
+                        }`}
+                      >
+                        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+                          formData.isDynamicPricingEnabled ? 'translate-x-4.5' : 'translate-x-1'
+                        }`} />
+                      </button>
+                    </div>
+
+                    {formData.isDynamicPricingEnabled && (
+                      <div className="grid grid-cols-2 gap-4 pt-2 border-t border-igo-gold/10">
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Suggested Price</p>
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-lg font-bold text-igo-gold">
+                              ₹{Math.round((formData.basePrice || formData.price || 0) * (formData.demandFactor || 1) * ((formData.freshnessIndex || 1) >= 0.9 ? 1 : 0.85))}
+                            </span>
+                            <span className="text-[10px] text-neutral-400 font-medium">/ {formData.unit}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 justify-end">
+                          <button 
+                            onClick={() => setFormData(prev => ({
+                              ...prev,
+                              price: Math.round((prev.basePrice || prev.price || 0) * (prev.demandFactor || 1) * ((prev.freshnessIndex || 1) >= 0.9 ? 1 : 0.85))
+                            }))}
+                            className="text-[10px] font-bold text-igo-gold hover:underline uppercase tracking-wider"
+                          >
+                            Apply AI Price
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Stock status toggle */}

@@ -33,6 +33,8 @@ const pillars = [
   },
 ];
 
+import Marquee from '../components/Marquee';
+
 const FreshnessStrip = () => {
   return (
     <section className="py-16 bg-neutral-dark overflow-hidden relative">
@@ -41,12 +43,12 @@ const FreshnessStrip = () => {
         backgroundSize: '40px 40px'
       }} />
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+      <div className="relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center mb-12 max-w-7xl mx-auto px-6"
         >
           <span className="text-igo-gold font-bold text-xs uppercase tracking-[0.2em]">Our Freshness Promise</span>
           <h2 className="text-3xl font-display font-bold text-white mt-3">
@@ -54,27 +56,23 @@ const FreshnessStrip = () => {
           </h2>
         </motion.div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <Marquee speed={30} className="py-4">
           {pillars.map((pillar, i) => {
             const Icon = pillar.icon;
             return (
-              <motion.div
+              <div
                 key={pillar.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                viewport={{ once: true }}
-                className="group flex flex-col items-center text-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all"
+                className="group flex flex-col items-center text-center p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all mx-4 w-[280px]"
               >
                 <div className={`w-14 h-14 rounded-2xl ${pillar.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                   <Icon className={`w-7 h-7 ${pillar.color}`} />
                 </div>
                 <h3 className="font-bold text-white mb-2">{pillar.title}</h3>
                 <p className="text-white/50 text-sm leading-relaxed">{pillar.desc}</p>
-              </motion.div>
+              </div>
             );
           })}
-        </div>
+        </Marquee>
       </div>
     </section>
   );

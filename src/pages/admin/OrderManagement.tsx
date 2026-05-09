@@ -3,10 +3,110 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShoppingBag, Search, Filter, Eye, CheckCircle2, 
   Truck, Package, XCircle, RefreshCw, X, 
-  MapPin, Phone, Mail, CreditCard, Clock, FileText 
+  MapPin, Phone, Mail, CreditCard, Clock, FileText,
+  Award, ShieldCheck, Calendar as CalendarIcon, Map as MapIcon
 } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getOrders, updateOrderStatus, Order } from '../../services/orderService';
+
+const TraceabilityModal = ({ order, onClose }: { order: Order, onClose: () => void }) => {
+  return (
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="absolute inset-0 bg-neutral-900/80 backdrop-blur-md"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        className="relative bg-white w-full max-w-2xl rounded-[40px] shadow-2xl overflow-hidden border border-neutral-100"
+      >
+        {/* Certificate Header */}
+        <div className="bg-igo-green p-10 text-white text-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+          <Award className="w-16 h-16 mx-auto mb-4 text-igo-gold drop-shadow-lg" />
+          <h2 className="text-3xl font-display font-bold">Certificate of Traceability</h2>
+          <p className="text-white/70 text-sm mt-2 tracking-widest uppercase font-bold">Batch ID: #IGO-TR-{order.id.slice(-6)}</p>
+        </div>
+
+        <div className="p-10 space-y-8">
+          <div className="grid grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                  <MapIcon className="w-5 h-5 text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-neutral-400 font-bold uppercase">Farm Source</p>
+                  <p className="text-sm font-bold text-neutral-800">IGO Heritage Farms, TN</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+                  <CalendarIcon className="w-5 h-5 text-orange-500" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-neutral-400 font-bold uppercase">Slaughter Date</p>
+                  <p className="text-sm font-bold text-neutral-800">{new Date(new Date(order.created_at).getTime() - 86400000).toLocaleDateString()}</p>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
+                  <ShieldCheck className="w-5 h-5 text-green-500" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-neutral-400 font-bold uppercase">Quality Grade</p>
+                  <p className="text-sm font-bold text-neutral-800">Prime Plus A+</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-purple-500" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-neutral-400 font-bold uppercase">Vet Certificate</p>
+                  <p className="text-sm font-bold text-neutral-800">Verified & Signed</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-neutral-50 rounded-3xl p-6 border border-neutral-100">
+            <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-widest mb-4">Batch Details</h4>
+            <div className="space-y-3">
+              {order.items?.map((item: any, i: number) => (
+                <div key={i} className="flex justify-between items-center text-sm">
+                  <span className="text-neutral-600 font-medium">{item.name}</span>
+                  <span className="font-bold text-neutral-800">{item.weight || '500g'} · Fresh Iced</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-4">
+            <div className="flex items-center gap-2">
+              <img src="/logo-green.png" alt="IGO" className="h-6 opacity-30 grayscale" />
+              <div className="h-4 w-px bg-neutral-200 mx-2" />
+              <p className="text-[10px] text-neutral-300 font-medium">Digital Signature: 0x8F...2E9A</p>
+            </div>
+            <button 
+              onClick={onClose}
+              className="px-8 py-3 bg-neutral-900 text-white rounded-2xl text-sm font-bold hover:bg-neutral-800 transition-all"
+            >
+              Close Certificate
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
 const OrderManagement = () => {
   const [searchParams] = useSearchParams();
@@ -15,6 +115,7 @@ const OrderManagement = () => {
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [filterStatus, setFilterStatus] = useState('All');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showTraceability, setShowTraceability] = useState<Order | null>(null);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -234,12 +335,21 @@ const OrderManagement = () => {
                       <p className="text-sm text-neutral-500">Placed on {new Date(selectedOrder.created_at).toLocaleString()}</p>
                     </div>
                   </div>
-                  <button 
-                    onClick={() => setSelectedOrder(null)}
-                    className="w-10 h-10 rounded-full bg-neutral-50 flex items-center justify-center text-neutral-400 hover:bg-neutral-100 transition-all"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={() => setShowTraceability(selectedOrder)}
+                      className="flex items-center gap-2 px-4 py-2 bg-igo-gold/10 text-igo-gold rounded-xl text-xs font-bold hover:bg-igo-gold/20 transition-all"
+                    >
+                      <Award className="w-4 h-4" />
+                      Traceability
+                    </button>
+                    <button 
+                      onClick={() => setSelectedOrder(null)}
+                      className="w-10 h-10 rounded-full bg-neutral-50 flex items-center justify-center text-neutral-400 hover:bg-neutral-100 transition-all"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -431,6 +541,13 @@ const OrderManagement = () => {
               </div>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* Traceability Modal Overlay */}
+      <AnimatePresence>
+        {showTraceability && (
+          <TraceabilityModal order={showTraceability} onClose={() => setShowTraceability(null)} />
         )}
       </AnimatePresence>
     </div>

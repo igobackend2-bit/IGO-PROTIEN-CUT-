@@ -32,7 +32,7 @@ export default async function handler(req: any, res: any) {
   if (process.env.RESEND_API_KEY) {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
-      const data = await resend.emails.send({
+      const { data: resendData, error: resendError } = await resend.emails.send({
         from: 'IGO Protein Cuts <onboarding@resend.dev>',
         to: [email],
         subject: 'Your IGO Verification Code',
@@ -47,8 +47,14 @@ export default async function handler(req: any, res: any) {
           </div>
         `,
       });
-      console.log('Resend Success:', data);
-      return res.status(200).json({ success: true, provider: 'resend', id: data.id });
+
+      if (resendError) {
+        console.error('Resend API Error:', resendError);
+        throw resendError;
+      }
+
+      console.log('Resend Success:', resendData);
+      return res.status(200).json({ success: true, provider: 'resend', id: resendData?.id });
     } catch (error: any) {
       console.error('Resend Error, falling back to Gmail:', error);
       // Fall through to Nodemailer if Resend fails

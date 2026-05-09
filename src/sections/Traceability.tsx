@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, MapPin, Factory, Truck, Home, CheckCircle2, X, ChevronRight, ThermometerSnowflake } from 'lucide-react';
+import { Search, MapPin, Factory, Truck, Home, CheckCircle2, X, ChevronRight, ThermometerSnowflake, Loader2 } from 'lucide-react';
+
+const Traceability3D = React.lazy(() => import('../components/3d/Traceability3D'));
 
 const pillars = [
   {
@@ -92,18 +94,24 @@ const Traceability = () => {
             viewport={{ once: true }}
             className="relative"
           >
-            <div className="relative rounded-[3rem] overflow-hidden shadow-2xl">
-              <img 
-                src="/images/traceability-scan.png" 
-                alt="Scanning QR code for traceability" 
-                className="w-full aspect-[4/5] object-cover hover:scale-105 transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-              <div className="absolute bottom-8 left-8 right-8 bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl">
+            <div className="relative rounded-[3rem] overflow-hidden shadow-2xl bg-neutral-dark min-h-[500px]">
+               <React.Suspense fallback={
+                 <div className="absolute inset-0 flex items-center justify-center">
+                   <Loader2 className="w-10 h-10 text-igo-green animate-spin opacity-20" />
+                 </div>
+               }>
+                 <div className="absolute inset-0 z-0">
+                    <Traceability3D />
+                 </div>
+               </React.Suspense>
+               
+               <div className="absolute inset-0 bg-gradient-to-t from-neutral-dark/80 via-transparent to-transparent z-10 pointer-events-none" />
+               
+               <div className="absolute bottom-8 left-8 right-8 bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl z-20">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-bold text-white uppercase tracking-widest mb-1">Live Tracking Enabled</p>
-                    <p className="text-sm font-display font-bold text-white">Batch #IGO-7729V | Scanned</p>
+                    <p className="text-[10px] font-bold text-white uppercase tracking-widest mb-1">Interactive Journey</p>
+                    <p className="text-sm font-display font-bold text-white">0–4°C Supply Chain Integrity</p>
                   </div>
                   <div className="w-10 h-10 bg-igo-green rounded-full flex items-center justify-center">
                     <CheckCircle2 className="w-5 h-5 text-white" />
