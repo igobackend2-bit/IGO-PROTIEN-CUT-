@@ -404,6 +404,10 @@ const CartDrawer = () => {
             <AuthModal 
               isOpen={isAuthModalOpen}
               onClose={() => setIsAuthModalOpen(false)}
+              onLoginSuccess={() => {
+                setIsAuthModalOpen(false);
+                setIsFastLaneOpen(true);
+              }}
             />
           </motion.div>
         </>
