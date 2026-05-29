@@ -185,7 +185,7 @@ const Hero = () => {
   const slide = slides[currentSlide];
 
   return (
-    <section className="relative h-[calc(100vh-130px)] flex items-start pt-4 sm:pt-8 lg:pt-16 overflow-hidden bg-white">
+    <section className="relative min-h-[100vh] flex items-center pt-24 pb-12 overflow-hidden bg-white mb-12 lg:mb-20">
       {/* Background Slideshow */}
       <div className="absolute inset-0 z-0">
         <AnimatePresence>
@@ -207,7 +207,7 @@ const Hero = () => {
         </AnimatePresence>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-start py-4 sm:py-8 lg:py-0">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-4 sm:py-8 lg:py-0">
         {/* Left Content */}
         <div className="relative pb-24">
           {/* Persistent Elements (Don't reset on slide change) */}
