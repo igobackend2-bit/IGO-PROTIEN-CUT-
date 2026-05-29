@@ -179,13 +179,13 @@ const Hero = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => setStatsStarted(true), 800);
-    return () => clearTimeout(timer);
+    return () => clearInterval(timer);
   }, []);
 
   const slide = slides[currentSlide];
 
   return (
-    <section className="relative min-h-[80vh] flex items-center overflow-hidden bg-neutral-900">
+    <section className="relative h-[calc(100vh-130px)] flex items-start pt-4 sm:pt-8 lg:pt-16 overflow-hidden bg-white">
       {/* Background Slideshow */}
       <div className="absolute inset-0 z-0">
         <AnimatePresence>
@@ -200,20 +200,19 @@ const Hero = () => {
             <img 
               src={slide.image} 
               alt="Background" 
-              className="absolute inset-0 w-full h-full object-cover z-0"
+              className="absolute inset-0 w-full h-full object-cover lg:object-right-top z-0"
             />
-            {/* Subtle dark overlay to make the image pop without covering it completely */}
-            <div className="absolute inset-0 bg-black/20 z-10" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/50 to-transparent z-10 lg:w-1/2" />
           </motion.div>
         </AnimatePresence>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-12 sm:py-16">
-        {/* Left Content in a Glassmorphism Box to mimic Bighaat text box */}
-        <div className="relative bg-white/90 backdrop-blur-md p-6 sm:p-10 rounded-[2rem] shadow-2xl border border-white/50 mt-10 lg:mt-0">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-start py-4 sm:py-8 lg:py-0">
+        {/* Left Content */}
+        <div className="relative pb-24">
           {/* Persistent Elements (Don't reset on slide change) */}
           <div className="mb-6">
-            <div className="inline-flex items-center gap-2 bg-igo-green/10 border border-igo-green/20 px-4 py-2 rounded-full mb-4">
+            <div className="inline-flex items-center gap-2 bg-igo-green/10 border border-igo-green/20 px-4 py-1.5 rounded-full mb-3">
               <div className="w-2 h-2 rounded-full bg-igo-green animate-pulse" />
               <span className="text-[10px] sm:text-xs font-bold text-igo-green uppercase tracking-wider">
                 🚚 Delivering in 60-90 mins · Free above ₹499
@@ -231,24 +230,24 @@ const Hero = () => {
               exit={{ opacity: 0, x: direction > 0 ? -50 : 50 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
             >
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-3">
                 <span className="h-px w-8 bg-igo-gold" />
                 <span className="text-igo-gold font-bold text-[10px] uppercase tracking-[0.2em]">
                   {slide.tag}
                 </span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl md:text-7xl font-display font-extrabold text-neutral-dark leading-[1.05] mb-6 tracking-tighter">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-extrabold text-neutral-dark leading-[1.05] mb-4 tracking-tighter">
                 {slide.title}
               </h1>
 
-              <p className="text-neutral-500 text-base sm:text-lg md:text-xl max-w-lg mb-8 leading-relaxed font-medium">
+              <p className="text-neutral-600 text-sm sm:text-base md:text-lg max-w-lg mb-5 leading-relaxed font-medium">
                 {slide.desc}
               </p>
 
               {/* Rating bar (Only on Slide 1 for relevance) */}
               {currentSlide === 0 && (
-                <div className="flex items-center gap-3 mb-8">
+                <div className="flex items-center gap-3 mb-5">
                   <div className="flex gap-0.5">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className="w-4 h-4 fill-igo-gold text-igo-gold" />
@@ -264,7 +263,7 @@ const Hero = () => {
 
               {/* Stats (Only on Slide 1) */}
               {currentSlide === 0 && (
-                <div className="flex flex-wrap gap-6 pt-6 border-t border-neutral-100">
+                <div className="flex flex-wrap gap-4 pt-4 border-t border-neutral-100">
                   {stats.map(stat => (
                     <StatCard key={stat.label} {...stat} started={statsStarted} />
                   ))}
@@ -276,20 +275,22 @@ const Hero = () => {
           {/* Persistent Action Buttons */}
           <div className="flex flex-wrap gap-4 mt-8">
             <a href="/#products">
-              <button className="group bg-igo-green text-white px-6 sm:px-8 py-3 sm:py-4 rounded-2xl font-bold flex items-center gap-2 hover:bg-igo-green/90 transition-all shadow-xl shadow-igo-green/20 active:scale-95 text-sm sm:text-base">
+              <button className="group bg-igo-green text-white px-6 py-3 sm:py-3.5 rounded-2xl font-bold flex items-center gap-2 hover:bg-igo-green/90 transition-all shadow-xl shadow-igo-green/20 active:scale-95 text-sm">
                 Shop Fresh Now
                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </a>
 
             <a href="#b2b">
-              <button className="bg-white text-neutral-dark border-2 border-neutral-200 px-6 sm:px-8 py-3 sm:py-4 rounded-2xl font-bold hover:border-igo-gold hover:text-igo-gold transition-all active:scale-95 text-sm sm:text-base">
+              <button className="bg-white text-neutral-dark border-2 border-neutral-200 px-6 py-3 sm:py-3.5 rounded-2xl font-bold hover:border-igo-gold hover:text-igo-gold transition-all active:scale-95 text-sm">
                 B2B Bulk Orders
               </button>
             </a>
           </div>
-             {/* Right: 3D Visualization */}
-        <div className="relative hidden lg:flex justify-end items-center h-[600px]">
+        </div>
+
+        {/* Right: 3D Visualization */}
+        <div className="relative hidden lg:flex justify-end items-center h-[500px]">
            <React.Suspense fallback={
              <div className="w-full h-full flex items-center justify-center">
                <Loader2 className="w-12 h-12 text-igo-green animate-spin opacity-20" />
@@ -307,7 +308,7 @@ const Hero = () => {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: -20 }}
                         transition={{ duration: 0.8 }}
-                        className="relative z-20 pointer-events-auto"
+                        className="relative z-20 pointer-events-auto mt-[-100px]"
                       >
                         {/* Badge based on slide */}
                         {currentSlide === 0 && (
@@ -353,14 +354,14 @@ const Hero = () => {
                 </div>
              </div>
            </React.Suspense>
-        </div>        </div>
+        </div>
       </div>
 
       {/* Navigation Controls */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex items-center gap-8">
+      <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-8">
         <button 
           onClick={prevSlide}
-          className="p-3 rounded-full border border-neutral-200 hover:bg-igo-green hover:text-white hover:border-igo-green transition-all active:scale-90"
+          className="p-3 rounded-full border border-neutral-200 hover:bg-igo-green hover:text-white hover:border-igo-green transition-all active:scale-90 bg-white/50 backdrop-blur-sm"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -374,7 +375,7 @@ const Hero = () => {
                 setCurrentSlide(i);
               }}
               className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
-                i === currentSlide ? 'w-8 bg-igo-green' : 'bg-neutral-200 hover:bg-neutral-300'
+                i === currentSlide ? 'w-8 bg-igo-green' : 'bg-neutral-300 hover:bg-neutral-400'
               }`}
             />
           ))}
@@ -382,7 +383,7 @@ const Hero = () => {
 
         <button 
           onClick={nextSlide}
-          className="p-3 rounded-full border border-neutral-200 hover:bg-igo-green hover:text-white hover:border-igo-green transition-all active:scale-90"
+          className="p-3 rounded-full border border-neutral-200 hover:bg-igo-green hover:text-white hover:border-igo-green transition-all active:scale-90 bg-white/50 backdrop-blur-sm"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -392,4 +393,3 @@ const Hero = () => {
 };
 
 export default Hero;
-
