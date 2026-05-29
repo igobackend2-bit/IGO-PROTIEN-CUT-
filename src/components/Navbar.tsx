@@ -373,16 +373,28 @@ const Navbar = () => {
             className="overflow-hidden md:hidden border-t border-neutral-100 bg-white"
           >
             <div className="flex flex-col px-4 py-4 gap-1">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className="text-base font-medium text-neutral-dark hover:text-igo-green py-2 hover:bg-neutral-50 px-3 rounded-xl transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {link.name}
-                </a>
-              ))}
+              {navLinks.map((link) => {
+                const isSpaRoute = link.href && !link.href.startsWith('/#') && !link.href.startsWith('#');
+                return isSpaRoute ? (
+                  <Link
+                    key={link.name}
+                    to={link.href}
+                    className="text-base font-medium text-neutral-dark hover:text-igo-green py-2 hover:bg-neutral-50 px-3 rounded-xl transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.name}
+                  </Link>
+                ) : (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    className="text-base font-medium text-neutral-dark hover:text-igo-green py-2 hover:bg-neutral-50 px-3 rounded-xl transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.name}
+                  </a>
+                );
+              })}
               <div className="mt-2 pt-2 border-t border-neutral-100">
                 <button 
                   onClick={handleProfileClick}

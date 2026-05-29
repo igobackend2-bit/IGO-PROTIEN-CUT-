@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronRight, ChevronLeft, ShieldCheck, Truck, Star, Users, Package, MapPin, CheckCircle2, Flame, QrCode, Loader2 } from 'lucide-react';
 
-const Hero3D = React.lazy(() => import('../components/3d/Hero3D'));
+
 
 const SERVICEABLE_PINCODES = ['641001', '641002', '641003', '641004', '641005', '641006', '641007', '641008', '641009', '641010', '641011', '641012', '641013', '641014', '641015', '641016', '641017', '641018', '641019', '641020', '600001', '600002', '600003', '560001', '560002'];
 
@@ -295,7 +295,7 @@ const Hero = () => {
              </div>
            }>
              <div className="w-full h-full relative">
-                <Hero3D />
+
                 
                 {/* Overlay Contextual Cards */}
                 <div className="absolute inset-0 pointer-events-none flex items-center justify-center">

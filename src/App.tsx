@@ -146,31 +146,31 @@ export default function App() {
       <SmoothScroll>
         <CustomCursor />
         <React.Suspense fallback={<LoadingFallback />}>
-        <Routes>
-          {/* Admin Routes - Priority matching */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/*" element={<AdminLayout />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<DashboardOverview />} />
-            <Route path="products" element={<ProductManagement />} />
-            <Route path="orders" element={<OrderManagement />} />
-            <Route path="customers" element={<CustomerManagement />} />
-            <Route path="promotions" element={<div className="p-8"><h1 className="text-2xl font-bold">Promotions & Offers</h1><p className="text-neutral-500">Coming soon...</p></div>} />
-            <Route path="analytics" element={<Analytics />} />
-            <Route path="content" element={<div className="p-8"><h1 className="text-2xl font-bold">Content Management</h1><p className="text-neutral-500">Coming soon...</p></div>} />
-            <Route path="settings" element={<SystemSettings />} />
-            <Route path="help" element={<AdminHelp />} />
-          </Route>
+          <Routes>
+            {/* Admin Routes - Priority matching */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/*" element={<AdminLayout />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<DashboardOverview />} />
+              <Route path="products" element={<ProductManagement />} />
+              <Route path="orders" element={<OrderManagement />} />
+              <Route path="customers" element={<CustomerManagement />} />
+              <Route path="promotions" element={<div className="p-8"><h1 className="text-2xl font-bold">Promotions & Offers</h1><p className="text-neutral-500">Coming soon...</p></div>} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="content" element={<div className="p-8"><h1 className="text-2xl font-bold">Content Management</h1><p className="text-neutral-500">Coming soon...</p></div>} />
+              <Route path="settings" element={<SystemSettings />} />
+              <Route path="help" element={<AdminHelp />} />
+            </Route>
 
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/review/:orderId" element={<OrderReview />} />
-          <Route path="/blog" element={<BlogPage />} />
-          
-          {/* Fallback Catch-all - Redirect to Home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </React.Suspense>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/review/:orderId" element={<OrderReview />} />
+            <Route path="/blog" element={<BlogPage />} />
+
+            {/* Fallback Catch-all - Redirect to Home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </React.Suspense>
       </SmoothScroll>
     </CartProvider>
   );

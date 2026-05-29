@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Lock, User, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Lock, User, ArrowRight, ShieldCheck, AlertCircle, ArrowLeft } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 
 const AdminLogin = () => {
   const [password, setPassword] = useState('');
@@ -111,8 +111,19 @@ const AdminLogin = () => {
           </form>
         </div>
 
+        {/* Back to Store Link */}
+        <div className="mt-6 text-center">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-neutral-500 hover:text-igo-green text-xs font-bold uppercase tracking-widest transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Back to Storefront
+          </Link>
+        </div>
+
         {/* Footer */}
-        <p className="mt-8 text-center text-neutral-600 text-xs uppercase tracking-widest font-medium">
+        <p className="mt-4 text-center text-neutral-600 text-xs uppercase tracking-widest font-medium">
           Protected by Enterprise-Grade Security
         </p>
       </motion.div>

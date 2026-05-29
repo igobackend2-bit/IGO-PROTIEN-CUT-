@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { IndianRupee, ShoppingBag, Users, TrendingUp, ArrowUpRight, ArrowDownRight, Clock, ExternalLink } from 'lucide-react';
 import { getOrders, getAnalytics } from '../../services/orderService';
+import { useNavigate } from 'react-router-dom';
 
 
 const StatCard = ({ title, value, change, trend, icon: Icon, color }: any) => (
@@ -27,6 +28,7 @@ const StatCard = ({ title, value, change, trend, icon: Icon, color }: any) => (
 );
 
 const DashboardOverview = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = React.useState<any[]>([]);
   const [stats, setStats] = React.useState([
     { title: 'Total Revenue', value: '₹0', change: '0%', trend: 'up', icon: IndianRupee, color: 'bg-igo-green' },
@@ -75,7 +77,10 @@ const DashboardOverview = () => {
         <div className="lg:col-span-2 bg-white rounded-[32px] border border-neutral-100 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-neutral-50 flex items-center justify-between">
             <h2 className="font-bold text-lg">Recent Transactions</h2>
-            <button className="text-igo-green text-sm font-bold flex items-center gap-1 hover:underline">
+            <button
+              onClick={() => navigate('/admin/orders')}
+              className="text-igo-green text-sm font-bold flex items-center gap-1 hover:underline"
+            >
               View All <ExternalLink className="w-3 h-3" />
             </button>
           </div>

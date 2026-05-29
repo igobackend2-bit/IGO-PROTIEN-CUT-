@@ -14,7 +14,6 @@
     "@google/genai": "^1.29.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
-    "@studio-freight/lenis": "^1.0.42",
     "@supabase/supabase-js": "^2.105.3",
     "@tailwindcss/vite": "^4.1.14",
     "@types/nodemailer": "^8.0.0",

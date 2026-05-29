@@ -1,29 +1,29 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Home, ShoppingBag, Search, User, Crown, Mic } from 'lucide-react';
-
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 const MobileBottomNav = () => {
   const { cartCount, setIsCartOpen, wishlist } = useCart();
+  const navigate = useNavigate();
 
   const tabs = [
-    { icon: Home, label: 'Home', href: '#' },
+    { icon: Home, label: 'Home', action: () => navigate('/') },
     { icon: Mic, label: 'Voice', action: () => window.dispatchEvent(new CustomEvent('startVoiceSearch')) },
-    { icon: Search, label: 'Search', href: '#products' },
+    { icon: Search, label: 'Search', action: () => { navigate('/'); setTimeout(() => { document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }); }, 100); } },
     { icon: ShoppingBag, label: 'Cart', action: () => setIsCartOpen(true), badge: cartCount },
     { icon: User, label: 'Account', action: () => window.dispatchEvent(new CustomEvent('openProfile')) },
   ];
 
-
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-100 z-50 md:hidden safe-area-bottom">
       <div className="flex items-center justify-around px-2 py-2">
-        {tabs.map(({ icon: Icon, label, href, action, badge }) => (
+        {tabs.map(({ icon: Icon, label, action, badge }) => (
           <motion.button
             key={label}
             whileTap={{ scale: 0.9 }}
-            onClick={action || (href ? () => { window.location.hash = href.replace('#', ''); } : undefined)}
+            onClick={action}
             className="flex flex-col items-center gap-1 py-1 px-3 relative group"
           >
             <div className="relative">

@@ -1,14 +1,15 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Mail, Phone, MapPin, Facebook, Instagram, Twitter, MessageSquare, Shield, Award } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const BrandLogo = () => (
-    <a href="/" className="flex items-center gap-4 group">
+    <Link to="/" className="flex items-center gap-4 group">
       <div className="relative w-16 h-16 overflow-hidden rounded-full border border-white/10 bg-white flex items-center justify-center transition-transform group-hover:scale-105 duration-300">
-        <img 
-          src="/logo.png" 
-          alt="Protein Cuts Logo" 
+        <img
+          src="/logo.png"
+          alt="Protein Cuts Logo"
           className="w-full h-full object-cover scale-110"
         />
       </div>
@@ -20,39 +21,39 @@ const Footer = () => {
           Unit of IGO Group
         </span>
       </div>
-    </a>
+    </Link>
   );
 
   const footerLinks = {
     Shop: [
-      { name: 'Fresh Chicken', href: '#products' },
-      { name: 'Premium Mutton', href: '#products' },
-      { name: 'Sea Fresh Fish', href: '#products' },
-      { name: 'Prawns & Seafood', href: '#products' },
-      { name: 'Heritage Eggs', href: '#products' },
-      { name: 'Exotic Delights', href: '#products' },
-      { name: 'Bulk & B2B', href: '#b2b' }
+      { name: 'Fresh Chicken', href: '/#products' },
+      { name: 'Premium Mutton', href: '/#products' },
+      { name: 'Sea Fresh Fish', href: '/#products' },
+      { name: 'Prawns & Seafood', href: '/#products' },
+      { name: 'Heritage Eggs', href: '/#products' },
+      { name: 'Exotic Delights', href: '/#products' },
+      { name: 'Bulk & B2B', href: '/#b2b' }
     ],
     B2B: [
-      { name: 'Wholesale Portal', href: '#b2b' },
-      { name: 'Partner Login', href: '/admin/login' },
-      { name: 'White Label', href: '#b2b' },
-      { name: 'Supply Chain', href: '#b2b' },
-      { name: 'Inquiry Form', href: '#b2b' }
+      { name: 'Wholesale Portal', href: '/#b2b' },
+      { name: 'Partner Login', href: '/admin/login', isRoute: true },
+      { name: 'White Label', href: '/#b2b' },
+      { name: 'Supply Chain', href: '/#b2b' },
+      { name: 'Inquiry Form', href: '/#b2b' }
     ],
     Company: [
-      { name: 'Our Heritage', href: '#about' },
-      { name: 'Farm Network', href: '#about' },
-      { name: 'Sustainability', href: '#about' },
-      { name: 'Certifications', href: '#about' },
-      { name: 'Careers', href: '#about' }
+      { name: 'Our Heritage', href: '/#about' },
+      { name: 'Farm Network', href: '/#about' },
+      { name: 'Sustainability', href: '/#about' },
+      { name: 'Certifications', href: '/#about' },
+      { name: 'Careers', href: '/#about' }
     ],
     Support: [
-      { name: 'Track Order', href: '#traceability' },
-      { name: 'FAQs', href: '#about' },
-      { name: 'Contact Us', href: '#about' },
-      { name: 'Return Policy', href: '#about' },
-      { name: 'Privacy Policy', href: '#about' }
+      { name: 'Track Order', href: '/#traceability' },
+      { name: 'FAQs', href: '/#about' },
+      { name: 'Contact Us', href: '/#about' },
+      { name: 'Return Policy', href: '/#about' },
+      { name: 'Privacy Policy', href: '/#about' }
     ],
   };
 
@@ -129,11 +130,17 @@ const Footer = () => {
               <div key={title} className="col-span-1">
                 <h4 className="font-display font-bold text-base mb-6 text-white">{title}</h4>
                 <ul className="space-y-3">
-                  {links.map(link => (
+                  {links.map((link: any) => (
                     <li key={link.name}>
-                      <a href={link.href} className="text-white/40 hover:text-igo-gold text-sm transition-colors font-medium">
-                        {link.name}
-                      </a>
+                      {link.isRoute ? (
+                        <Link to={link.href} className="text-white/40 hover:text-igo-gold text-sm transition-colors font-medium">
+                          {link.name}
+                        </Link>
+                      ) : (
+                        <a href={link.href} className="text-white/40 hover:text-igo-gold text-sm transition-colors font-medium">
+                          {link.name}
+                        </a>
+                      )}
                     </li>
                   ))}
                 </ul>

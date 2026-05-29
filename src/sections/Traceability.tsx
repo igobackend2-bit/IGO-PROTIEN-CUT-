@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, MapPin, Factory, Truck, Home, CheckCircle2, X, ChevronRight, ThermometerSnowflake, Loader2 } from 'lucide-react';
 
-const Traceability3D = React.lazy(() => import('../components/3d/Traceability3D'));
+
 
 const pillars = [
   {
@@ -95,15 +95,7 @@ const Traceability = () => {
             className="relative"
           >
             <div className="relative rounded-[3rem] overflow-hidden shadow-2xl bg-neutral-dark min-h-[500px]">
-               <React.Suspense fallback={
-                 <div className="absolute inset-0 flex items-center justify-center">
-                   <Loader2 className="w-10 h-10 text-igo-green animate-spin opacity-20" />
-                 </div>
-               }>
-                 <div className="absolute inset-0 z-0">
-                    <Traceability3D />
-                 </div>
-               </React.Suspense>
+
                
                <div className="absolute inset-0 bg-gradient-to-t from-neutral-dark/80 via-transparent to-transparent z-10 pointer-events-none" />
                

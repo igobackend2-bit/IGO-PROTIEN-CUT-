@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  LayoutDashboard, 
-  ShoppingBag, 
-  Users, 
-  BarChart3, 
-  Settings, 
-  LogOut, 
-  Menu, 
-  X, 
-  Bell, 
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  Users,
+  BarChart3,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+  Bell,
   Search,
   Box,
   TicketPercent,
   FileText,
   HelpCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ExternalLink,
+  Store
 } from 'lucide-react';
 import { useNavigate, useLocation, Link, Outlet, Navigate } from 'react-router-dom';
 
@@ -128,8 +130,16 @@ const AdminLayout = () => {
           </button>
 
           {/* Footer */}
-          <div className="p-4 border-t border-neutral-100">
-            <button 
+          <div className="p-4 border-t border-neutral-100 space-y-1">
+            <Link
+              to="/"
+              className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-neutral-500 hover:bg-igo-green/10 hover:text-igo-green transition-all"
+              title="View Live Store"
+            >
+              <Store className="w-5 h-5 flex-shrink-0" />
+              {isSidebarOpen && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="font-medium text-sm">View Live Store</motion.span>}
+            </Link>
+            <button
               onClick={handleLogout}
               className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-neutral-500 hover:bg-red-50 hover:text-red-600 transition-all"
             >
@@ -192,8 +202,16 @@ const AdminLayout = () => {
               );
             })}
           </nav>
-          <div className="p-6 border-t border-neutral-100">
-            <button 
+          <div className="p-6 border-t border-neutral-100 space-y-3">
+            <Link
+              to="/"
+              onClick={() => setIsMobileOpen(false)}
+              className="flex items-center gap-3 w-full px-4 py-3.5 rounded-2xl text-igo-green bg-igo-green/10 font-bold text-sm"
+            >
+              <Store className="w-5 h-5" />
+              View Live Store
+            </Link>
+            <button
               onClick={handleLogout}
               className="flex items-center gap-3 w-full px-4 py-3.5 rounded-2xl text-red-500 bg-red-50 font-bold text-sm"
             >
@@ -232,11 +250,24 @@ const AdminLayout = () => {
 
           <div className="flex items-center gap-3 lg:gap-6">
             <div className="flex items-center gap-2">
+              <Link
+                to="/"
+                className="hidden md:flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-igo-green bg-igo-green/10 hover:bg-igo-green/20 rounded-xl transition-all"
+                title="Go to Live Storefront"
+              >
+                <Store className="w-4 h-4" />
+                <span>Live Store</span>
+                <ExternalLink className="w-3 h-3" />
+              </Link>
               <button className="p-2 text-neutral-400 hover:bg-neutral-100 rounded-xl relative">
                 <Bell className="w-5 h-5" />
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 border-2 border-white rounded-full"></span>
               </button>
-              <button className="p-2 text-neutral-400 hover:bg-neutral-100 rounded-xl">
+              <button
+                onClick={() => navigate('/admin/help')}
+                className="p-2 text-neutral-400 hover:bg-neutral-100 rounded-xl"
+                title="Help & Documentation"
+              >
                 <HelpCircle className="w-5 h-5" />
               </button>
             </div>
