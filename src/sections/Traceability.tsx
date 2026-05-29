@@ -95,8 +95,8 @@ const Traceability = () => {
             className="relative"
           >
             <div className="relative rounded-[3rem] overflow-hidden shadow-2xl bg-neutral-dark min-h-[500px]">
-               <img src="/images/traceability-scan.png" alt="Interactive Journey" className="absolute inset-0 w-full h-full object-cover opacity-70 mix-blend-overlay" />
-               <div className="absolute inset-0 bg-gradient-to-t from-neutral-dark/90 via-transparent to-transparent z-10 pointer-events-none" />
+               <img src="/images/traceability-scan.png" alt="Interactive Journey" className="absolute inset-0 w-full h-full object-cover" />
+               <div className="absolute inset-0 bg-gradient-to-t from-neutral-dark/90 via-neutral-dark/20 to-transparent z-10 pointer-events-none" />
                
                <div className="absolute bottom-8 left-8 right-8 bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl z-20">
                 <div className="flex items-center justify-between">
