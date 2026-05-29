@@ -96,7 +96,7 @@ CREATE POLICY "Admins can do everything with profiles" ON public.profiles FOR AL
 
 -- Products Policies
 CREATE POLICY "Products are viewable by everyone" ON public.products FOR SELECT USING (true);
-CREATE POLICY "Only admins can modify products" ON public.products FOR ALL USING (role = 'admin');
+CREATE POLICY "Only admins can modify products" ON public.products FOR ALL USING (EXISTS (SELECT 1 FROM public.profiles WHERE public.profiles.id = auth.uid() AND public.profiles.role = 'admin'));
 
 -- Orders Policies
 CREATE POLICY "Orders are viewable by customer email or admin" ON public.orders FOR SELECT USING (customer_email = auth.jwt()->>'email' OR EXISTS (SELECT 1 FROM public.profiles WHERE public.profiles.id = auth.uid() AND public.profiles.role = 'admin'));
