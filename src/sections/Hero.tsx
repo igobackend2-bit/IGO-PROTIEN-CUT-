@@ -185,7 +185,7 @@ const Hero = () => {
   const slide = slides[currentSlide];
 
   return (
-    <section className="relative min-h-[calc(100vh-130px)] flex items-center overflow-hidden bg-white">
+    <section className="relative min-h-[80vh] flex items-center overflow-hidden bg-neutral-900">
       {/* Background Slideshow */}
       <div className="absolute inset-0 z-0">
         <AnimatePresence>
@@ -200,16 +200,17 @@ const Hero = () => {
             <img 
               src={slide.image} 
               alt="Background" 
-              className="absolute inset-0 w-full h-full object-cover lg:object-right-top z-0"
+              className="absolute inset-0 w-full h-full object-cover z-0"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/50 to-transparent z-10 lg:w-1/2" />
+            {/* Subtle dark overlay to make the image pop without covering it completely */}
+            <div className="absolute inset-0 bg-black/20 z-10" />
           </motion.div>
         </AnimatePresence>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full grid lg:grid-cols-2 gap-12 items-center py-16 sm:py-20">
-        {/* Left Content */}
-        <div className="relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-12 sm:py-16">
+        {/* Left Content in a Glassmorphism Box to mimic Bighaat text box */}
+        <div className="relative bg-white/90 backdrop-blur-md p-6 sm:p-10 rounded-[2rem] shadow-2xl border border-white/50 mt-10 lg:mt-0">
           {/* Persistent Elements (Don't reset on slide change) */}
           <div className="mb-6">
             <div className="inline-flex items-center gap-2 bg-igo-green/10 border border-igo-green/20 px-4 py-2 rounded-full mb-4">
