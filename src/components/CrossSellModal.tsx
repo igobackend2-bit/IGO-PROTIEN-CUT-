@@ -142,8 +142,7 @@ const CrossSellModal = () => {
                   <button 
                     onClick={() => {
                       setIsAddedModalOpen(false);
-                      // Simulate direct checkout navigation
-                      window.location.hash = 'checkout';
+                      setIsCartOpen(true);
                     }}
                     className="flex-1 py-3 rounded-xl bg-neutral-dark text-white font-bold text-xs hover:bg-neutral-800 transition-all"
                   >

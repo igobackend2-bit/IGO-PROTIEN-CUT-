@@ -4,12 +4,23 @@ import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, Tag, Zap, Timer, Spark
 import { useCart } from '../context/CartContext';
 import DeliverySlotPicker from './DeliverySlotPicker';
 import OneClickCheckout from './OneClickCheckout';
+import AuthModal from './AuthModal';
 
 const CartDrawer = () => {
   const { cart, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, cartTotal, cartCount } = useCart();
   const [isFastLaneOpen, setIsFastLaneOpen] = React.useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = React.useState(false);
   const [isGifting, setIsGifting] = React.useState(false);
   const [isEditingAddress, setIsEditingAddress] = React.useState(false);
+
+  const handleCheckoutClick = () => {
+    const user = localStorage.getItem('igo_user');
+    if (!user) {
+      setIsAuthModalOpen(true);
+    } else {
+      setIsFastLaneOpen(true);
+    }
+  };
   
   // Load saved address
   const [deliveryAddress, setDeliveryAddress] = React.useState(() => {
@@ -365,14 +376,14 @@ const CartDrawer = () => {
 
                 <div className="flex flex-col gap-3">
                   <button 
-                    onClick={() => setIsFastLaneOpen(true)}
+                    onClick={handleCheckoutClick}
                     className="w-full bg-igo-green text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-igo-green/90 transition-all shadow-lg shadow-igo-green/20 active:scale-[0.98]"
                   >
                     Proceed to Checkout
                     <ArrowRight className="w-5 h-5" />
                   </button>
                   <button 
-                    onClick={() => setIsFastLaneOpen(true)}
+                    onClick={handleCheckoutClick}
                     className="w-full bg-neutral-dark text-white py-3 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-neutral-dark/90 transition-all active:scale-[0.98] text-xs"
                   >
                     <Zap className="w-4 h-4 text-igo-gold fill-igo-gold" />
@@ -388,6 +399,11 @@ const CartDrawer = () => {
               isOpen={isFastLaneOpen} 
               onClose={() => setIsFastLaneOpen(false)} 
               total={cartTotal >= freeDeliveryThreshold ? cartTotal : cartTotal + 49}
+            />
+
+            <AuthModal 
+              isOpen={isAuthModalOpen}
+              onClose={() => setIsAuthModalOpen(false)}
             />
           </motion.div>
         </>

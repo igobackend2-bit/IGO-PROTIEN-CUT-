@@ -38,7 +38,7 @@ const FloatingCheckoutBar = () => {
               </div>
 
               <button
-                onClick={() => setIsCheckoutOpen(true)}
+                onClick={() => setIsCartOpen(true)}
                 className="bg-igo-green text-white px-6 py-3.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-igo-green/20 active:scale-[0.98] transition-transform"
               >
                 Checkout <ArrowRight className="w-4 h-4" />
