@@ -1,89 +1,93 @@
--- IGO Protein Cuts - Supabase Database Schema
+-- IGO Protein Cuts - Robust Supabase Database Schema
 -- Finalized for Production Readiness
 
 -- 1. EXTENSIONS
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 1.5 DROP EXISTING TABLES TO ENSURE CLEAN SCHEMA
-DROP TABLE IF EXISTS public.orders CASCADE;
-DROP TABLE IF EXISTS public.products CASCADE;
-DROP TABLE IF EXISTS public.delivery_slots CASCADE;
-DROP TABLE IF EXISTS public.profiles CASCADE;
+-- 2. TABLES (Using ALTER to ensure columns exist without dropping data if possible)
 
--- 2. TABLES
-
--- Profiles Table (Users)
+-- Profiles Table
 CREATE TABLE IF NOT EXISTS public.profiles (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    email TEXT UNIQUE NOT NULL,
-    name TEXT,
-    phone TEXT,
-    avatar_url TEXT,
-    address TEXT,
-    pincode TEXT,
-    role TEXT DEFAULT 'customer' CHECK (role IN ('customer', 'admin', 'delivery')),
-    last_login TIMESTAMPTZ,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4()
 );
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email TEXT UNIQUE;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS name TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS pincode TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'customer';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS last_login TIMESTAMPTZ;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
--- Products Table (Inventory)
+-- Products Table
 CREATE TABLE IF NOT EXISTS public.products (
-    id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    description TEXT,
-    price NUMERIC NOT NULL,
-    original_price NUMERIC,
-    category TEXT NOT NULL,
-    image TEXT,
-    unit TEXT DEFAULT 'kg',
-    badge TEXT,
-    stock_left INTEGER DEFAULT 50,
-    weight_options JSONB DEFAULT '[{"label": "500g", "priceMultiplier": 0.5}, {"label": "1kg", "priceMultiplier": 1}]',
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    id SERIAL PRIMARY KEY
 );
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS name TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS price NUMERIC;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS original_price NUMERIC;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS category TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS image TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS unit TEXT DEFAULT 'kg';
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS badge TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS stock_left INTEGER DEFAULT 50;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS weight_options JSONB DEFAULT '[{"label": "500g", "priceMultiplier": 0.5}, {"label": "1kg", "priceMultiplier": 1}]';
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
--- Orders Table (Transactions)
+-- Orders Table
 CREATE TABLE IF NOT EXISTS public.orders (
-    id TEXT PRIMARY KEY, -- Format: IGO-XXXXX
-    customer_email TEXT NOT NULL,
-    customer_name TEXT NOT NULL,
-    customer_phone TEXT,
-    amount NUMERIC NOT NULL,
-    status TEXT DEFAULT 'Processing' CHECK (status IN ('Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled')),
-    items JSONB NOT NULL DEFAULT '[]',
-    delivery_address TEXT,
-    billing_address TEXT,
-    pincode TEXT,
-    payment_method TEXT DEFAULT 'COD',
-    delivery_slot TEXT,
-    delivery_date DATE DEFAULT CURRENT_DATE,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    delivered_at TIMESTAMPTZ,
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    id TEXT PRIMARY KEY
 );
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS customer_email TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS customer_name TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS customer_phone TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS amount NUMERIC;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'Processing';
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS items JSONB DEFAULT '[]';
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS delivery_address TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS billing_address TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS pincode TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS payment_method TEXT DEFAULT 'COD';
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS delivery_slot TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS delivery_date DATE DEFAULT CURRENT_DATE;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMPTZ;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
--- Delivery Slots Table (Availability)
+-- Delivery Slots Table
 CREATE TABLE IF NOT EXISTS public.delivery_slots (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    date DATE NOT NULL,
-    slot_type TEXT NOT NULL, -- express, morning, afternoon, evening
-    start_time TIME,
-    end_time TIME,
-    max_capacity INTEGER DEFAULT 20,
-    current_usage INTEGER DEFAULT 0,
-    is_active BOOLEAN DEFAULT TRUE,
-    UNIQUE(date, slot_type)
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4()
 );
+ALTER TABLE public.delivery_slots ADD COLUMN IF NOT EXISTS date DATE;
+ALTER TABLE public.delivery_slots ADD COLUMN IF NOT EXISTS slot_type TEXT;
+ALTER TABLE public.delivery_slots ADD COLUMN IF NOT EXISTS start_time TIME;
+ALTER TABLE public.delivery_slots ADD COLUMN IF NOT EXISTS end_time TIME;
+ALTER TABLE public.delivery_slots ADD COLUMN IF NOT EXISTS max_capacity INTEGER DEFAULT 20;
+ALTER TABLE public.delivery_slots ADD COLUMN IF NOT EXISTS current_usage INTEGER DEFAULT 0;
+ALTER TABLE public.delivery_slots ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 
 -- 3. ROW LEVEL SECURITY (RLS)
-
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.delivery_slots ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies to avoid conflicts
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Admins can do everything with profiles" ON public.profiles;
+DROP POLICY IF EXISTS "Products are viewable by everyone" ON public.products;
+DROP POLICY IF EXISTS "Only admins can modify products" ON public.products;
+DROP POLICY IF EXISTS "Orders are viewable by customer email or admin" ON public.orders;
+DROP POLICY IF EXISTS "Anyone can create an order" ON public.orders;
+DROP POLICY IF EXISTS "Admins can update orders" ON public.orders;
+DROP POLICY IF EXISTS "Slots are viewable by everyone" ON public.delivery_slots;
+DROP POLICY IF EXISTS "Only admins can modify slots" ON public.delivery_slots;
 
 -- Profiles Policies
 CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles FOR SELECT USING (true);
@@ -95,17 +99,15 @@ CREATE POLICY "Products are viewable by everyone" ON public.products FOR SELECT 
 CREATE POLICY "Only admins can modify products" ON public.products FOR ALL USING (role = 'admin');
 
 -- Orders Policies
-CREATE POLICY "Orders are viewable by customer email or admin" ON public.orders FOR SELECT USING (customer_email = auth.jwt()->>'email' OR EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin'));
+CREATE POLICY "Orders are viewable by customer email or admin" ON public.orders FOR SELECT USING (customer_email = auth.jwt()->>'email' OR EXISTS (SELECT 1 FROM public.profiles WHERE public.profiles.id = auth.uid() AND public.profiles.role = 'admin'));
 CREATE POLICY "Anyone can create an order" ON public.orders FOR INSERT WITH CHECK (true);
-CREATE POLICY "Admins can update orders" ON public.orders FOR UPDATE USING (EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin'));
+CREATE POLICY "Admins can update orders" ON public.orders FOR UPDATE USING (EXISTS (SELECT 1 FROM public.profiles WHERE public.profiles.id = auth.uid() AND public.profiles.role = 'admin'));
 
 -- Delivery Slots Policies
 CREATE POLICY "Slots are viewable by everyone" ON public.delivery_slots FOR SELECT USING (true);
-CREATE POLICY "Only admins can modify slots" ON public.delivery_slots FOR ALL USING (EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin'));
+CREATE POLICY "Only admins can modify slots" ON public.delivery_slots FOR ALL USING (EXISTS (SELECT 1 FROM public.profiles WHERE public.profiles.id = auth.uid() AND public.profiles.role = 'admin'));
 
 -- 4. FUNCTIONS & TRIGGERS
-
--- Auto-update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -114,11 +116,24 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON public.profiles;
 CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_products_updated_at ON public.products;
 CREATE TRIGGER update_products_updated_at BEFORE UPDATE ON public.products FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_orders_updated_at ON public.orders;
 CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON public.orders FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
 
 -- 5. INITIAL DATA (Seed)
+-- Use ON CONFLICT DO NOTHING (requires unique constraint, which we add here if missing)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'unique_date_slot') THEN
+    ALTER TABLE public.delivery_slots ADD CONSTRAINT unique_date_slot UNIQUE(date, slot_type);
+  END IF;
+END $$;
+
 INSERT INTO public.delivery_slots (date, slot_type, start_time, end_time, max_capacity) 
 VALUES 
 (CURRENT_DATE, 'express', '09:00:00', '21:00:00', 50),
