@@ -61,10 +61,10 @@ const AdminLayout = () => {
     { icon: Box, label: 'Orders', path: '/admin/orders' },
     { icon: Users, label: 'Customers', path: '/admin/customers' },
     { icon: TicketPercent, label: 'Promotions', path: '/admin/promotions' },
+    { icon: HelpCircle, label: 'Queries', path: '/admin/queries' },
     { icon: BarChart3, label: 'Analytics', path: '/admin/analytics' },
     { icon: FileText, label: 'Content', path: '/admin/content' },
     { icon: Settings, label: 'Settings', path: '/admin/settings' },
-    { icon: HelpCircle, label: 'Help', path: '/admin/help' },
   ];
 
   return (

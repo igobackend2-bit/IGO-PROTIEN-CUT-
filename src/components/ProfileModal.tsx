@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Package, Settings, LogOut, MapPin, CreditCard, ChevronRight, Crown, Bell, ArrowLeft, CheckCircle2, Clock } from 'lucide-react';
+import { X, Package, Settings, LogOut, MapPin, CreditCard, ChevronRight, Crown, Bell, ArrowLeft, CheckCircle2, Clock, MessageSquare, Inbox } from 'lucide-react';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -9,9 +9,11 @@ interface ProfileModalProps {
 
 const ProfileModal = ({ isOpen, onClose }: ProfileModalProps) => {
   const [user, setUser] = React.useState<any>(null);
-  const [activeView, setActiveView] = React.useState<'main' | 'orders' | 'addresses' | 'payments' | 'settings'>('main');
+  const [activeView, setActiveView] = React.useState<'main' | 'orders' | 'addresses' | 'payments' | 'settings' | 'inbox' | 'help'>('main');
   const [orders, setOrders] = React.useState<any[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = React.useState(false);
+  const [inboxMessages, setInboxMessages] = React.useState<any[]>([]);
+  const [queries, setQueries] = React.useState<any[]>([]);
 
 
   useEffect(() => {
@@ -40,6 +42,30 @@ const ProfileModal = ({ isOpen, onClose }: ProfileModalProps) => {
     }
   };
 
+  const fetchInboxAndQueries = async (email: string) => {
+    try {
+      const { getInboxMessages, getCustomerQueries, markMessageAsRead } = await import('../services/queryService');
+      const [messages, userQueries] = await Promise.all([
+        getInboxMessages(email),
+        getCustomerQueries(email)
+      ]);
+      setInboxMessages(messages);
+      setQueries(userQueries);
+
+      // Auto-mark unread messages as read when opening inbox
+      const unread = messages.filter(m => !m.is_read);
+      unread.forEach(m => markMessageAsRead(m.id));
+    } catch (err) {
+      console.error('Failed to fetch inbox/queries:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.email && (activeView === 'inbox' || activeView === 'help')) {
+      fetchInboxAndQueries(user.email);
+    }
+  }, [activeView, user]);
+
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -67,6 +93,8 @@ const ProfileModal = ({ isOpen, onClose }: ProfileModalProps) => {
 
   const menuItems = [
     { id: 'orders', icon: Package, label: 'Order History', value: orders.length > 0 ? `${orders.length} Orders` : 'No orders yet' },
+    { id: 'inbox', icon: Inbox, label: 'Inbox & Notifications', value: inboxMessages.filter(m => !m.is_read).length > 0 ? `${inboxMessages.filter(m => !m.is_read).length} Unread` : null },
+    { id: 'help', icon: MessageSquare, label: 'Help & Support', value: 'Contact Admin' },
     { id: 'addresses', icon: MapPin, label: 'Saved Addresses', value: 'Coimbatore, TN' },
     { id: 'payments', icon: CreditCard, label: 'Payment Methods', value: 'Saved Cards' },
     { id: 'settings', icon: Settings, label: 'Account Settings', value: null },
@@ -315,6 +343,118 @@ const ProfileModal = ({ isOpen, onClose }: ProfileModalProps) => {
     </motion.div>
   );
 
+  const renderInboxView = () => (
+    <motion.div 
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="p-6 h-full flex flex-col"
+    >
+      <button onClick={() => setActiveView('main')} className="flex items-center gap-2 text-white/50 hover:text-white mb-6 transition-colors">
+        <ArrowLeft className="w-4 h-4" />
+        <span className="text-sm font-bold">Back to Profile</span>
+      </button>
+      
+      <h3 className="text-xl font-display font-bold text-white mb-6">Inbox</h3>
+      
+      <div className="space-y-4 flex-1 overflow-y-auto custom-scrollbar pr-2">
+        {inboxMessages.length === 0 ? (
+          <div className="py-20 text-center text-white/30 italic">No messages yet.</div>
+        ) : (
+          inboxMessages.map(msg => (
+            <div key={msg.id} className="bg-white/5 border border-white/10 rounded-2xl p-4 relative">
+              {!msg.is_read && <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-igo-green animate-pulse" />}
+              <h4 className="font-bold text-white text-sm mb-1 pr-4">{msg.title}</h4>
+              <p className="text-xs text-white/60 mb-2 whitespace-pre-wrap">{msg.message}</p>
+              <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{new Date(msg.created_at).toLocaleString()}</p>
+            </div>
+          ))
+        )}
+      </div>
+    </motion.div>
+  );
+
+  const [querySubject, setQuerySubject] = React.useState('');
+  const [queryMessage, setQueryMessage] = React.useState('');
+  const [isSubmittingQuery, setIsSubmittingQuery] = React.useState(false);
+
+  const submitQuery = async () => {
+    if (!querySubject || !queryMessage || !user?.email) return;
+    setIsSubmittingQuery(true);
+    try {
+      const { createQuery } = await import('../services/queryService');
+      await createQuery(user.email, querySubject, queryMessage);
+      setQuerySubject('');
+      setQueryMessage('');
+      fetchInboxAndQueries(user.email);
+    } catch (err) {
+      console.error('Failed to submit query', err);
+    } finally {
+      setIsSubmittingQuery(false);
+    }
+  };
+
+  const renderHelpView = () => (
+    <motion.div 
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="p-6 h-full flex flex-col"
+    >
+      <button onClick={() => setActiveView('main')} className="flex items-center gap-2 text-white/50 hover:text-white mb-6 transition-colors">
+        <ArrowLeft className="w-4 h-4" />
+        <span className="text-sm font-bold">Back to Profile</span>
+      </button>
+      
+      <h3 className="text-xl font-display font-bold text-white mb-6">Help & Support</h3>
+      
+      <div className="space-y-6 flex-1 overflow-y-auto custom-scrollbar pr-2">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+          <h4 className="font-bold text-white text-sm mb-4">Send us a message</h4>
+          <input
+            type="text"
+            placeholder="Subject"
+            value={querySubject}
+            onChange={(e) => setQuerySubject(e.target.value)}
+            className="w-full bg-neutral-dark border border-white/10 rounded-lg p-3 text-sm text-white focus:border-igo-green focus:outline-none transition-colors mb-3"
+          />
+          <textarea
+            placeholder="How can we help you?"
+            value={queryMessage}
+            onChange={(e) => setQueryMessage(e.target.value)}
+            rows={4}
+            className="w-full bg-neutral-dark border border-white/10 rounded-lg p-3 text-sm text-white focus:border-igo-green focus:outline-none transition-colors mb-3 resize-none custom-scrollbar"
+          />
+          <button 
+            onClick={submitQuery}
+            disabled={isSubmittingQuery || !querySubject || !queryMessage}
+            className="w-full py-3 bg-igo-green text-white font-bold rounded-lg disabled:opacity-50 transition-colors"
+          >
+            {isSubmittingQuery ? 'Sending...' : 'Send Message'}
+          </button>
+        </div>
+
+        {queries.length > 0 && (
+          <div>
+            <h4 className="font-bold text-white text-sm mb-4 border-b border-white/10 pb-2">Previous Queries</h4>
+            <div className="space-y-3">
+              {queries.map(q => (
+                <div key={q.id} className="bg-white/5 border border-white/10 rounded-xl p-3">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="font-bold text-white text-sm">{q.subject}</span>
+                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${q.status === 'resolved' ? 'bg-green-500/20 text-green-400' : 'bg-orange-500/20 text-orange-400'}`}>
+                      {q.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-white/60 mb-2 truncate">{q.message}</p>
+                  <p className="text-[10px] text-white/30 uppercase">{new Date(q.created_at).toLocaleDateString()}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -370,6 +510,8 @@ const ProfileModal = ({ isOpen, onClose }: ProfileModalProps) => {
                 <AnimatePresence mode="wait">
                   {activeView === 'main' && renderMainView()}
                   {activeView === 'orders' && renderOrdersView()}
+                  {activeView === 'inbox' && renderInboxView()}
+                  {activeView === 'help' && renderHelpView()}
                   {activeView === 'addresses' && renderAddressesView()}
                   {activeView === 'payments' && (
                      <div className="p-8 text-center text-white/40 font-bold italic mt-20">Payment details encrypted & secure.</div>

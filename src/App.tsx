@@ -45,6 +45,7 @@ const AdminHelp = React.lazy(() => import('./pages/admin/AdminHelp'));
 const OrderManagement = React.lazy(() => import('./pages/admin/OrderManagement'));
 const OrderReview = React.lazy(() => import('./pages/OrderReview'));
 const BlogPage = React.lazy(() => import('./pages/Blog'));
+const CustomerQueries = React.lazy(() => import('./pages/admin/CustomerQueries'));
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-neutral-dark flex flex-col items-center justify-center gap-4">
@@ -156,6 +157,7 @@ export default function App() {
               <Route path="orders" element={<OrderManagement />} />
               <Route path="customers" element={<CustomerManagement />} />
               <Route path="promotions" element={<div className="p-8"><h1 className="text-2xl font-bold">Promotions & Offers</h1><p className="text-neutral-500">Coming soon...</p></div>} />
+              <Route path="queries" element={<CustomerQueries />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="content" element={<div className="p-8"><h1 className="text-2xl font-bold">Content Management</h1><p className="text-neutral-500">Coming soon...</p></div>} />
               <Route path="settings" element={<SystemSettings />} />

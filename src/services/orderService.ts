@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { createInboxMessage } from './queryService';
 
 export interface Order {
   id: string;
@@ -223,6 +224,9 @@ export const updateOrderStatus = async (orderId: string, status: string, orderDa
 
     const info = statusInfo[status];
     if (info) {
+      if (orderData.customer_email) {
+        createInboxMessage(orderData.customer_email, info.subject, info.message, 'order_update');
+      }
       fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

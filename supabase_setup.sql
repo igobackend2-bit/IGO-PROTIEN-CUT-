@@ -146,3 +146,50 @@ ON CONFLICT (date, slot_type) DO NOTHING;
 CREATE INDEX IF NOT EXISTS idx_orders_customer_email ON public.orders(customer_email);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders(status);
 CREATE INDEX IF NOT EXISTS idx_products_category ON public.products(category);
+
+-- 6. INBOX & QUERIES (New Features)
+-- Inbox Messages Table
+CREATE TABLE IF NOT EXISTS public.inbox_messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4()
+);
+ALTER TABLE public.inbox_messages ADD COLUMN IF NOT EXISTS customer_email TEXT;
+ALTER TABLE public.inbox_messages ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE public.inbox_messages ADD COLUMN IF NOT EXISTS message TEXT;
+ALTER TABLE public.inbox_messages ADD COLUMN IF NOT EXISTS type TEXT DEFAULT 'order_update';
+ALTER TABLE public.inbox_messages ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.inbox_messages ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+
+-- Customer Queries Table
+CREATE TABLE IF NOT EXISTS public.customer_queries (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4()
+);
+ALTER TABLE public.customer_queries ADD COLUMN IF NOT EXISTS customer_email TEXT;
+ALTER TABLE public.customer_queries ADD COLUMN IF NOT EXISTS subject TEXT;
+ALTER TABLE public.customer_queries ADD COLUMN IF NOT EXISTS message TEXT;
+ALTER TABLE public.customer_queries ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'open';
+ALTER TABLE public.customer_queries ADD COLUMN IF NOT EXISTS admin_reply TEXT;
+ALTER TABLE public.customer_queries ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.customer_queries ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+-- Setup Policies for the new tables
+ALTER TABLE public.inbox_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.customer_queries ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Inbox viewable by customer or admin" ON public.inbox_messages;
+DROP POLICY IF EXISTS "Inbox insertable by admin or system" ON public.inbox_messages;
+DROP POLICY IF EXISTS "Inbox updatable by customer" ON public.inbox_messages;
+DROP POLICY IF EXISTS "Queries viewable by customer or admin" ON public.customer_queries;
+DROP POLICY IF EXISTS "Queries insertable by customer" ON public.customer_queries;
+DROP POLICY IF EXISTS "Queries updatable by admin" ON public.customer_queries;
+
+CREATE POLICY "Inbox viewable by customer or admin" ON public.inbox_messages FOR SELECT USING (customer_email = auth.jwt()->>'email' OR EXISTS (SELECT 1 FROM public.profiles WHERE public.profiles.id = auth.uid() AND public.profiles.role = 'admin'));
+CREATE POLICY "Inbox insertable by admin or system" ON public.inbox_messages FOR INSERT WITH CHECK (true);
+CREATE POLICY "Inbox updatable by customer" ON public.inbox_messages FOR UPDATE USING (customer_email = auth.jwt()->>'email');
+
+CREATE POLICY "Queries viewable by customer or admin" ON public.customer_queries FOR SELECT USING (customer_email = auth.jwt()->>'email' OR EXISTS (SELECT 1 FROM public.profiles WHERE public.profiles.id = auth.uid() AND public.profiles.role = 'admin'));
+CREATE POLICY "Queries insertable by customer" ON public.customer_queries FOR INSERT WITH CHECK (true);
+CREATE POLICY "Queries updatable by admin" ON public.customer_queries FOR UPDATE USING (EXISTS (SELECT 1 FROM public.profiles WHERE public.profiles.id = auth.uid() AND public.profiles.role = 'admin'));
+
+-- Trigger for customer_queries
+DROP TRIGGER IF EXISTS update_customer_queries_updated_at ON public.customer_queries;
+CREATE TRIGGER update_customer_queries_updated_at BEFORE UPDATE ON public.customer_queries FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
