@@ -185,7 +185,7 @@ const Hero = () => {
   const slide = slides[currentSlide];
 
   return (
-    <section className="relative h-[calc(100vh-130px)] min-h-[600px] max-h-[800px] flex items-center overflow-hidden bg-white">
+    <section className="relative min-h-[calc(100vh-130px)] flex items-center overflow-hidden bg-white">
       {/* Background Slideshow */}
       <div className="absolute inset-0 z-0">
         <AnimatePresence>
@@ -202,17 +202,17 @@ const Hero = () => {
               alt="Background" 
               className="absolute inset-0 w-full h-full object-cover lg:object-right-top z-0"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/60 to-transparent z-10 lg:w-2/3" />
+            <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/40 to-transparent z-10 lg:w-2/3" />
           </motion.div>
         </AnimatePresence>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full grid lg:grid-cols-2 gap-12 items-center py-16 sm:py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-10 sm:py-12">
         {/* Left Content */}
         <div className="relative">
           {/* Persistent Elements (Don't reset on slide change) */}
           <div className="mb-6">
-            <div className="inline-flex items-center gap-2 bg-igo-green/10 border border-igo-green/20 px-4 py-2 rounded-full mb-4">
+            <div className="inline-flex items-center gap-2 bg-igo-green/10 border border-igo-green/20 px-4 py-1.5 rounded-full mb-3">
               <div className="w-2 h-2 rounded-full bg-igo-green animate-pulse" />
               <span className="text-[10px] sm:text-xs font-bold text-igo-green uppercase tracking-wider">
                 🚚 Delivering in 60-90 mins · Free above ₹499
@@ -230,24 +230,24 @@ const Hero = () => {
               exit={{ opacity: 0, x: direction > 0 ? -50 : 50 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
             >
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-3">
                 <span className="h-px w-8 bg-igo-gold" />
                 <span className="text-igo-gold font-bold text-[10px] uppercase tracking-[0.2em]">
                   {slide.tag}
                 </span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl md:text-7xl font-display font-extrabold text-neutral-dark leading-[1.05] mb-6 tracking-tighter">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-extrabold text-neutral-dark leading-[1.05] mb-4 tracking-tighter">
                 {slide.title}
               </h1>
 
-              <p className="text-neutral-500 text-base sm:text-lg md:text-xl max-w-lg mb-8 leading-relaxed font-medium">
+              <p className="text-neutral-600 text-sm sm:text-base md:text-lg max-w-lg mb-5 leading-relaxed font-medium">
                 {slide.desc}
               </p>
 
               {/* Rating bar (Only on Slide 1 for relevance) */}
               {currentSlide === 0 && (
-                <div className="flex items-center gap-3 mb-8">
+                <div className="flex items-center gap-3 mb-5">
                   <div className="flex gap-0.5">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className="w-4 h-4 fill-igo-gold text-igo-gold" />
@@ -263,7 +263,7 @@ const Hero = () => {
 
               {/* Stats (Only on Slide 1) */}
               {currentSlide === 0 && (
-                <div className="flex flex-wrap gap-6 pt-6 border-t border-neutral-100">
+                <div className="flex flex-wrap gap-4 pt-4 border-t border-neutral-100">
                   {stats.map(stat => (
                     <StatCard key={stat.label} {...stat} started={statsStarted} />
                   ))}
@@ -275,14 +275,14 @@ const Hero = () => {
           {/* Persistent Action Buttons */}
           <div className="flex flex-wrap gap-4 mt-8">
             <a href="/#products">
-              <button className="group bg-igo-green text-white px-6 sm:px-8 py-3 sm:py-4 rounded-2xl font-bold flex items-center gap-2 hover:bg-igo-green/90 transition-all shadow-xl shadow-igo-green/20 active:scale-95 text-sm sm:text-base">
+              <button className="group bg-igo-green text-white px-6 py-3 sm:py-3.5 rounded-2xl font-bold flex items-center gap-2 hover:bg-igo-green/90 transition-all shadow-xl shadow-igo-green/20 active:scale-95 text-sm">
                 Shop Fresh Now
                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
             </a>
 
             <a href="#b2b">
-              <button className="bg-white text-neutral-dark border-2 border-neutral-200 px-6 sm:px-8 py-3 sm:py-4 rounded-2xl font-bold hover:border-igo-gold hover:text-igo-gold transition-all active:scale-95 text-sm sm:text-base">
+              <button className="bg-white text-neutral-dark border-2 border-neutral-200 px-6 py-3 sm:py-3.5 rounded-2xl font-bold hover:border-igo-gold hover:text-igo-gold transition-all active:scale-95 text-sm">
                 B2B Bulk Orders
               </button>
             </a>
