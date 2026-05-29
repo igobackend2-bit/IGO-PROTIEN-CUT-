@@ -30,7 +30,6 @@ import AIAssistant from './components/AIAssistant';
 import CrossSellModal from './components/CrossSellModal';
 import FloatingCheckoutBar from './components/FloatingCheckoutBar';
 import SmoothScroll from './components/SmoothScroll';
-import CustomCursor from './components/CustomCursor';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 
 // Admin Pages - Lazy Loaded for Production Stability
@@ -145,7 +144,6 @@ export default function App() {
   return (
     <CartProvider>
       <SmoothScroll>
-        <CustomCursor />
         <React.Suspense fallback={<LoadingFallback />}>
           <Routes>
             {/* Admin Routes - Priority matching */}
