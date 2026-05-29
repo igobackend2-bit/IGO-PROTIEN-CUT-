@@ -185,7 +185,7 @@ const Hero = () => {
   const slide = slides[currentSlide];
 
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-white">
+    <section className="relative h-[calc(100vh-130px)] min-h-[600px] max-h-[800px] flex items-center overflow-hidden bg-white">
       {/* Background Slideshow */}
       <div className="absolute inset-0 z-0">
         <AnimatePresence>
