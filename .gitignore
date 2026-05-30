@@ -2,7 +2,8 @@ node_modules/
 build/
 dist/
 coverage/
-# Note: /public is the Vite build output for Hostinger — do NOT add it here
+# Note: /public is the Vite build output for Hostinger
+/public
 .DS_Store
 *.log
 .env*

@@ -19,8 +19,10 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(process.cwd(), '.'),
       },
     },
+    publicDir: 'static',
     build: {
-      outDir: 'dist',
+      outDir: 'public',
+      emptyOutDir: true,
       chunkSizeWarningLimit: 2000,
       minify: 'esbuild',
       sourcemap: false,
