@@ -28,7 +28,7 @@ const posts = [
 
 const Blog = () => {
   return (
-    <section id="blog" className="py-24 bg-white">
+    <section id="blog" className="py-16 sm:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex justify-between items-end mb-12">
           <div>
@@ -41,7 +41,7 @@ const Blog = () => {
           </button>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-10">
+        <div className="grid md:grid-cols-3 gap-6 sm:gap-10">
           {posts.map((post, i) => (
             <motion.article
               key={post.title}

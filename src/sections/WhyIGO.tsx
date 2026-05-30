@@ -23,11 +23,11 @@ const WhyIGO = () => {
           </p>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+        <div className="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0 rounded-2xl">
+          <table className="w-full border-collapse min-w-[560px]">
             <thead>
               <tr className="border-b-2 border-neutral-100">
-                <th className="py-6 px-4 text-left text-neutral-400 font-bold uppercase text-xs tracking-wider">Feature</th>
+                <th className="py-4 px-3 sm:py-6 sm:px-4 text-left text-neutral-400 font-bold uppercase text-xs tracking-wider">Feature</th>
                 <th className="py-6 px-4 text-left">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-igo-green rounded-lg flex items-center justify-center text-white">
@@ -36,8 +36,8 @@ const WhyIGO = () => {
                     <span className="font-display font-bold text-igo-green text-lg">IGO Standard</span>
                   </div>
                 </th>
-                <th className="py-6 px-4 text-left text-neutral-500 font-bold">Local Market</th>
-                <th className="py-6 px-4 text-left text-neutral-500 font-bold">Competitors</th>
+                <th className="py-4 px-3 sm:py-6 sm:px-4 text-left text-neutral-500 font-bold text-sm">Local Market</th>
+                <th className="py-4 px-3 sm:py-6 sm:px-4 text-left text-neutral-500 font-bold text-sm">Competitors</th>
               </tr>
             </thead>
             <tbody>
@@ -50,24 +50,24 @@ const WhyIGO = () => {
                   viewport={{ once: true }}
                   className="border-b border-neutral-50 group hover:bg-neutral-light/50 transition-colors"
                 >
-                  <td className="py-6 px-4 font-bold text-neutral-dark">{row.feature}</td>
-                  <td className="py-6 px-4">
-                    <div className="flex items-center gap-3 text-igo-green font-bold">
-                      <div className="w-5 h-5 rounded-full bg-igo-green/10 flex items-center justify-center">
+                  <td className="py-4 px-3 sm:py-6 sm:px-4 font-bold text-neutral-dark text-sm">{row.feature}</td>
+                  <td className="py-4 px-3 sm:py-6 sm:px-4">
+                    <div className="flex items-center gap-2 text-igo-green font-bold text-sm">
+                      <div className="w-5 h-5 rounded-full bg-igo-green/10 flex items-center justify-center flex-shrink-0">
                         <Check className="w-3 h-3" />
                       </div>
                       {row.igo}
                     </div>
                   </td>
-                  <td className="py-6 px-4 text-neutral-400 text-sm">
-                    <div className="flex items-center gap-3">
-                      <X className="w-4 h-4 text-red-300" />
+                  <td className="py-4 px-3 sm:py-6 sm:px-4 text-neutral-400 text-sm">
+                    <div className="flex items-center gap-2">
+                      <X className="w-4 h-4 text-red-300 flex-shrink-0" />
                       {row.local}
                     </div>
                   </td>
-                  <td className="py-6 px-4 text-neutral-400 text-sm">
-                    <div className="flex items-center gap-3">
-                      <Zap className="w-4 h-4 text-igo-gold/50" />
+                  <td className="py-4 px-3 sm:py-6 sm:px-4 text-neutral-400 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-igo-gold/50 flex-shrink-0" />
                       {row.competitor}
                     </div>
                   </td>

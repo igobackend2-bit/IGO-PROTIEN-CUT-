@@ -30,6 +30,8 @@ import AIAssistant from './components/AIAssistant';
 import CrossSellModal from './components/CrossSellModal';
 import FloatingCheckoutBar from './components/FloatingCheckoutBar';
 import SmoothScroll from './components/SmoothScroll';
+import WhatsAppButton from './components/WhatsAppButton';
+import AdminGuard from './components/AdminGuard';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 
 // Admin Pages - Lazy Loaded for Production Stability
@@ -45,6 +47,8 @@ const OrderManagement = React.lazy(() => import('./pages/admin/OrderManagement')
 const OrderReview = React.lazy(() => import('./pages/OrderReview'));
 const BlogPage = React.lazy(() => import('./pages/Blog'));
 const CustomerQueries = React.lazy(() => import('./pages/admin/CustomerQueries'));
+const NotFound = React.lazy(() => import('./pages/NotFound'));
+const Checkout = React.lazy(() => import('./pages/Checkout'));
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-neutral-dark flex flex-col items-center justify-center gap-4">
@@ -127,6 +131,7 @@ function Home() {
         <Testimonials />
         <PersonalizedRecommendations />
         <Blog />
+        <BrandNarrative />
         <Newsletter />
       </main>
       <Footer />
@@ -136,6 +141,7 @@ function Home() {
       <Notification />
       <AIAssistant />
       <CrossSellModal />
+      <WhatsAppButton />
     </div>
   );
 }
@@ -146,15 +152,15 @@ export default function App() {
       <SmoothScroll>
         <React.Suspense fallback={<LoadingFallback />}>
           <Routes>
-            {/* Admin Routes - Priority matching */}
+            {/* Admin Routes - Protected */}
             <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/*" element={<AdminLayout />}>
+            <Route path="/admin/*" element={<AdminGuard><AdminLayout /></AdminGuard>}>
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<DashboardOverview />} />
               <Route path="products" element={<ProductManagement />} />
               <Route path="orders" element={<OrderManagement />} />
               <Route path="customers" element={<CustomerManagement />} />
-              <Route path="promotions" element={<div className="p-8"><h1 className="text-2xl font-bold">Promotions & Offers</h1><p className="text-neutral-500">Coming soon...</p></div>} />
+              <Route path="promotions" element={<div className="p-8"><h1 className="text-2xl font-bold">Promotions &amp; Offers</h1><p className="text-neutral-500">Coming soon...</p></div>} />
               <Route path="queries" element={<CustomerQueries />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="content" element={<div className="p-8"><h1 className="text-2xl font-bold">Content Management</h1><p className="text-neutral-500">Coming soon...</p></div>} />
@@ -164,11 +170,14 @@ export default function App() {
 
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route path="/review/:orderId" element={<OrderReview />} />
             <Route path="/blog" element={<BlogPage />} />
 
-            {/* Fallback Catch-all - Redirect to Home */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Fallback Catch-all - Custom 404 Page */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </React.Suspense>
       </SmoothScroll>

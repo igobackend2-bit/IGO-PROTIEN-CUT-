@@ -47,9 +47,9 @@ const Traceability = () => {
   };
 
   return (
-    <section id="traceability" className="py-24 bg-white overflow-hidden scroll-mt-20">
+    <section id="traceability" className="py-16 sm:py-24 bg-white overflow-hidden scroll-mt-20">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid lg:grid-cols-2 gap-16 items-center mb-24">
+        <div className="grid lg:grid-cols-2 gap-8 sm:gap-16 items-center mb-12 sm:mb-24">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -73,7 +73,7 @@ const Traceability = () => {
                 </div>
                 <div>
                   <h4 className="font-bold text-neutral-dark">Verified Origins</h4>
-                  <p className="text-sm text-neutral-400">Traced back to heritage farms in Tamil Nadu & Ooty.</p>
+                  <p className="text-sm text-neutral-400">Traced back to heritage farms in Tamil Nadu &amp; Ooty.</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -94,7 +94,7 @@ const Traceability = () => {
             viewport={{ once: true }}
             className="relative"
           >
-            <div className="relative rounded-[3rem] overflow-hidden shadow-2xl bg-neutral-dark min-h-[500px]">
+            <div className="relative rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl bg-neutral-dark min-h-[300px] sm:min-h-[500px]">
                <img src="/images/traceability-scan.png" alt="Interactive Journey" className="absolute inset-0 w-full h-full object-cover" />
                <div className="absolute inset-0 bg-gradient-to-t from-neutral-dark/90 via-neutral-dark/20 to-transparent z-10 pointer-events-none" />
                
@@ -149,7 +149,7 @@ const Traceability = () => {
                 exit={{ opacity: 0, y: 20, scale: 0.95 }}
                 className="absolute top-full left-0 right-0 mt-6 z-30"
               >
-                <div className="bg-white border border-igo-green/20 shadow-2xl rounded-[32px] p-8 lg:p-12 relative overflow-hidden">
+                <div className="bg-white border border-igo-green/20 shadow-2xl rounded-[1.5rem] sm:rounded-[32px] p-5 sm:p-8 lg:p-12 relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-igo-green to-igo-gold" />
                   
                   <button 

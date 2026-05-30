@@ -18,6 +18,7 @@ const AdminLogin = () => {
     setTimeout(() => {
       if (password === 'Admin@123') {
         localStorage.setItem('admin_auth', 'true');
+        localStorage.setItem('igo_admin_session', JSON.stringify({ isAdmin: true, loginTime: Date.now() }));
         navigate('/admin/dashboard');
       } else {
         setError('Invalid administrator credentials');
@@ -124,7 +125,7 @@ const AdminLogin = () => {
 
         {/* Footer */}
         <p className="mt-4 text-center text-neutral-600 text-xs uppercase tracking-widest font-medium">
-          Protected by Enterprise-Grade Security
+          Protected by Enterprise Security
         </p>
       </motion.div>
     </div>

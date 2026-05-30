@@ -457,7 +457,7 @@ const ProductManagement = () => {
                         </div>
                         <div>
                           <p className="text-sm font-bold text-neutral-800">AI Dynamic Pricing</p>
-                          <p className="text-[10px] text-neutral-400">Optimize revenue based on demand & freshness</p>
+                          <p className="text-[10px] text-neutral-400">Optimize revenue based on demand &amp; freshness</p>
                         </div>
                       </div>
                       <button

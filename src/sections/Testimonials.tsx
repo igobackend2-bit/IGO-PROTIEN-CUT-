@@ -73,7 +73,7 @@ const Testimonials = () => {
               <span className="text-xs font-bold text-igo-green uppercase tracking-widest font-sans">12k+ Global Reviews</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-display font-bold text-neutral-dark">
-              Loved by Home <span className="text-igo-green">Chefs</span> & <br />
+              Loved by Home <span className="text-igo-green">Chefs</span> &amp; <br />
               <span className="text-igo-gold">Pros</span> Alike.
             </h2>
           </div>

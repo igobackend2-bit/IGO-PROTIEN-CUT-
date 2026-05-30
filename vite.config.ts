@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
+      outDir: 'public',        // Hostinger deployment expects output in /public
       chunkSizeWarningLimit: 2000,
       minify: 'esbuild',
       sourcemap: false,

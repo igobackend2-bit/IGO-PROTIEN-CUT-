@@ -32,7 +32,7 @@ const SubscribeSave: React.FC<SubscribeSaveProps> = ({ onToggle, basePrice, disc
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className={`text-sm font-bold ${isActive ? 'text-igo-green' : 'text-neutral-600'}`}>Subscribe & Save</span>
+              <span className={`text-sm font-bold ${isActive ? 'text-igo-green' : 'text-neutral-600'}`}>Subscribe &amp; Save</span>
               <span className="px-1.5 py-0.5 bg-red-100 text-red-500 text-[9px] font-bold rounded uppercase">-{discountPercent}%</span>
             </div>
             <p className="text-[10px] text-neutral-400 font-medium">Regular delivery, better price</p>

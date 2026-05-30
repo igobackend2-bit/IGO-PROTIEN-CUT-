@@ -45,7 +45,7 @@ const CustomBoxBuilder = () => {
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-12 gap-12 items-start">
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           {/* Selection Area */}
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
@@ -53,7 +53,7 @@ const CustomBoxBuilder = () => {
             viewport={{ once: true }}
             className="lg:col-span-7 space-y-6"
           >
-            <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-neutral-100">
+            <div className="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-8 shadow-sm border border-neutral-100">
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
                 <Plus className="w-5 h-5 text-igo-green" />
                 Select Your Cuts
@@ -78,7 +78,7 @@ const CustomBoxBuilder = () => {
               </div>
             </div>
 
-            <div className="bg-igo-green/5 rounded-[2rem] p-8 border border-igo-green/10 flex items-center gap-6">
+            <div className="bg-igo-green/5 rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-8 border border-igo-green/10 flex items-center gap-4 sm:gap-6">
               <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-igo-green shadow-sm shrink-0">
                 <ThermometerSnowflake className="w-8 h-8" />
               </div>
@@ -90,8 +90,8 @@ const CustomBoxBuilder = () => {
           </motion.div>
 
           {/* Virtual Box Preview */}
-          <div className="lg:col-span-5 sticky top-32">
-            <div className="bg-neutral-dark rounded-[3rem] p-8 shadow-2xl relative overflow-hidden">
+          <div className="lg:col-span-5 lg:sticky lg:top-32">
+            <div className="bg-neutral-dark rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-8 shadow-2xl relative overflow-hidden">
               {/* Box Top Lip Visual */}
               <div className="absolute top-0 left-0 right-0 h-4 bg-white/10" />
               

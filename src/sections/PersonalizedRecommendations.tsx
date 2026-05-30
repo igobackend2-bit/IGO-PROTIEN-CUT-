@@ -131,7 +131,7 @@ const PersonalizedRecommendations = () => {
               </div>
               <div>
                 <h3 className="font-display font-bold text-2xl text-neutral-dark">Recommended for You</h3>
-                <p className="text-sm text-neutral-400 font-medium">Based on current freshness & trends</p>
+                <p className="text-sm text-neutral-400 font-medium">Based on current freshness &amp; trends</p>
               </div>
             </div>
           </div>

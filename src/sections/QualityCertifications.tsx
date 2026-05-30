@@ -13,7 +13,7 @@ import Marquee from '../components/Marquee';
 
 const QualityCertifications = () => {
   return (
-    <section className="py-24 bg-white border-y border-neutral-100 overflow-hidden">
+    <section className="py-16 sm:py-24 bg-white border-y border-neutral-100 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 mb-16">
         <div className="max-w-2xl">
           <span className="text-igo-green font-bold text-sm uppercase tracking-widest">Verified Origins</span>

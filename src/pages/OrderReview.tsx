@@ -99,7 +99,7 @@ const OrderReview = () => {
 
               {/* Review Text */}
               <div>
-                <label className="block text-sm font-bold text-neutral-700 mb-3">Tell us more about the freshness & taste</label>
+                <label className="block text-sm font-bold text-neutral-700 mb-3">Tell us more about the freshness &amp; taste</label>
                 <textarea 
                   value={review}
                   onChange={(e) => setReview(e.target.value)}

@@ -7,19 +7,13 @@ const Footer = () => {
   const BrandLogo = () => (
     <Link to="/" className="flex items-center gap-4 group">
       <div className="relative w-16 h-16 overflow-hidden rounded-full border border-white/10 bg-white flex items-center justify-center transition-transform group-hover:scale-105 duration-300">
-        <img
-          src="/logo.png"
-          alt="Protein Cuts Logo"
-          className="w-full h-full object-cover scale-110"
-        />
+        <img src="/logo.png" alt="Protein Cuts Logo" className="w-full h-full object-cover scale-110" />
       </div>
       <div className="flex flex-col">
         <span className="font-display font-bold text-2xl tracking-tight leading-none text-white">
           PROTEIN <span className="text-igo-green">CUTS</span>
         </span>
-        <span className="text-[10px] font-bold uppercase tracking-[0.2em] mt-1 text-white/40">
-          Unit of IGO Group
-        </span>
+        <span className="text-[10px] font-bold uppercase tracking-[0.2em] mt-1 text-white/40">Unit of IGO Group</span>
       </div>
     </Link>
   );
@@ -29,31 +23,31 @@ const Footer = () => {
       { name: 'Fresh Chicken', href: '/#products' },
       { name: 'Premium Mutton', href: '/#products' },
       { name: 'Sea Fresh Fish', href: '/#products' },
-      { name: 'Prawns & Seafood', href: '/#products' },
+      { name: 'Prawns &amp; Seafood', href: '/#products' },
       { name: 'Heritage Eggs', href: '/#products' },
       { name: 'Exotic Delights', href: '/#products' },
-      { name: 'Bulk & B2B', href: '/#b2b' }
+      { name: 'Bulk &amp; B2B', href: '/#b2b' },
     ],
     B2B: [
       { name: 'Wholesale Portal', href: '/#b2b' },
       { name: 'Partner Login', href: '/admin/login', isRoute: true },
       { name: 'White Label', href: '/#b2b' },
       { name: 'Supply Chain', href: '/#b2b' },
-      { name: 'Inquiry Form', href: '/#b2b' }
+      { name: 'Inquiry Form', href: '/#b2b' },
     ],
     Company: [
       { name: 'Our Heritage', href: '/#about' },
       { name: 'Farm Network', href: '/#about' },
       { name: 'Sustainability', href: '/#about' },
       { name: 'Certifications', href: '/#about' },
-      { name: 'Careers', href: '/#about' }
+      { name: 'Careers', href: '/#about' },
     ],
     Support: [
       { name: 'Track Order', href: '/#traceability' },
       { name: 'FAQs', href: '/#about' },
       { name: 'Contact Us', href: '/#about' },
       { name: 'Return Policy', href: '/#about' },
-      { name: 'Privacy Policy', href: '/#about' }
+      { name: 'Privacy Policy', href: '/#about' },
     ],
   };
 
@@ -81,7 +75,7 @@ const Footer = () => {
                 </div>
               </div>
             ))}
-            <div className="flex items-center gap-3 group">
+            <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-igo-green/10 border border-igo-green/20 flex items-center justify-center">
                 <Shield className="w-5 h-5 text-igo-green" />
               </div>
@@ -97,8 +91,8 @@ const Footer = () => {
       {/* Main Footer */}
       <div className="pt-16 pb-10">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10 mb-16">
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 sm:gap-10 mb-16">
+            <div className="sm:col-span-2">
               <div className="mb-6">
                 <BrandLogo />
               </div>
@@ -110,8 +104,8 @@ const Footer = () => {
                 {[
                   { Icon: Facebook, href: 'https://www.facebook.com/igoproteincuts/' },
                   { Icon: Instagram, href: 'https://www.instagram.com/igoproteincuts/' },
-                  { Icon: Twitter, href: '#' },
-                  { Icon: MessageSquare, href: '#' }
+                  { Icon: Twitter, href: 'https://twitter.com/igoproteincuts' },
+                  { Icon: MessageSquare, href: 'https://wa.me/919421000000' },
                 ].map((social, i) => (
                   <a
                     key={i}
@@ -152,26 +146,36 @@ const Footer = () => {
           <div className="bg-white/5 rounded-3xl p-8 mb-10 border border-white/10">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div>
-                <h3 className="font-display font-bold text-xl text-white mb-2">📱 Order Faster on Our App</h3>
+                <h3 className="font-display font-bold text-xl text-white mb-2">Order Faster on Our App</h3>
                 <p className="text-white/50 text-sm">Get exclusive app-only deals and real-time order tracking</p>
               </div>
               <div className="flex gap-3 flex-shrink-0">
-                <button className="bg-white text-neutral-dark px-6 py-3 rounded-2xl font-bold text-sm hover:bg-neutral-100 transition-colors flex items-center gap-2">
-                  <span>🍎</span> App Store
-                </button>
-                <button className="bg-white text-neutral-dark px-6 py-3 rounded-2xl font-bold text-sm hover:bg-neutral-100 transition-colors flex items-center gap-2">
-                  <span>🤖</span> Google Play
-                </button>
+                <a
+                  href="https://apps.apple.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white text-neutral-dark px-6 py-3 rounded-2xl font-bold text-sm hover:bg-neutral-100 transition-colors flex items-center gap-2"
+                >
+                  App Store
+                </a>
+                <a
+                  href="https://play.google.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white text-neutral-dark px-6 py-3 rounded-2xl font-bold text-sm hover:bg-neutral-100 transition-colors flex items-center gap-2"
+                >
+                  Google Play
+                </a>
               </div>
             </div>
           </div>
 
           {/* Bottom Bar */}
-          <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
             <div className="flex flex-wrap items-center gap-8 text-[10px] uppercase font-bold tracking-[0.2em] text-white/30">
               <div className="flex items-center gap-2">
                 <Phone className="w-3 h-3 text-igo-gold" />
-                +91 9421-IGO-000
+                +91 98400 00000
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 text-igo-gold" />
@@ -182,9 +186,8 @@ const Footer = () => {
                 Coimbatore, Tamil Nadu
               </div>
             </div>
-
             <div className="text-[10px] uppercase font-bold tracking-[0.2em] text-white/20">
-              © 2026 IGO Agritech Farms. Quality & Traceability CoE.
+              &copy; 2026 IGO Agritech Farms. Quality &amp; Traceability CoE.
             </div>
           </div>
         </div>

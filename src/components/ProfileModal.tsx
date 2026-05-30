@@ -404,7 +404,7 @@ const ProfileModal = ({ isOpen, onClose }: ProfileModalProps) => {
         <span className="text-sm font-bold">Back to Profile</span>
       </button>
       
-      <h3 className="text-xl font-display font-bold text-white mb-6">Help & Support</h3>
+      <h3 className="text-xl font-display font-bold text-white mb-6">Help &amp; Support</h3>
       
       <div className="space-y-6 flex-1 overflow-y-auto custom-scrollbar pr-2">
         <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
@@ -514,7 +514,7 @@ const ProfileModal = ({ isOpen, onClose }: ProfileModalProps) => {
                   {activeView === 'help' && renderHelpView()}
                   {activeView === 'addresses' && renderAddressesView()}
                   {activeView === 'payments' && (
-                     <div className="p-8 text-center text-white/40 font-bold italic mt-20">Payment details encrypted & secure.</div>
+                     <div className="p-8 text-center text-white/40 font-bold italic mt-20">Payment details encrypted &amp; secure.</div>
                   )}
                   {activeView === 'settings' && (
                      <div className="p-8 text-center text-white/40 font-bold italic mt-20">Account settings coming soon in production.</div>

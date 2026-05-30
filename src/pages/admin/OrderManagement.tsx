@@ -71,7 +71,7 @@ const TraceabilityModal = ({ order, onClose }: { order: Order, onClose: () => vo
                 </div>
                 <div>
                   <p className="text-[10px] text-neutral-400 font-bold uppercase">Vet Certificate</p>
-                  <p className="text-sm font-bold text-neutral-800">Verified & Signed</p>
+                  <p className="text-sm font-bold text-neutral-800">Verified &amp; Signed</p>
                 </div>
               </div>
             </div>
@@ -458,7 +458,7 @@ const OrderManagement = () => {
                             <div className="absolute top-8 left-1/2 -translate-x-1/2 w-px h-full bg-neutral-100" />
                           </div>
                           <div className="pb-4">
-                            <p className="text-sm font-bold text-neutral-800">Packed & Ready</p>
+                            <p className="text-sm font-bold text-neutral-800">Packed &amp; Ready</p>
                             <p className="text-[10px] text-neutral-400">Status: {selectedOrder.status === 'Pending' ? 'Waiting' : 'Completed'}</p>
                           </div>
                         </div>

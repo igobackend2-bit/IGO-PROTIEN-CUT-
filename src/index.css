@@ -93,6 +93,19 @@
   transform: scale(1.08);
 }
 
+/* ── Lenis Smooth Scroll Fix ── */
+/* Prevents ghost blank space at page bottom */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -112,5 +125,43 @@
 @media (max-width: 768px) {
   main {
     padding-bottom: 80px;
+  }
+}
+
+/* ── Scrollbar hide utility ── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Mobile tap highlight fix ── */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Image lazy-load fade-in ── */
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+img[loading="lazy"].loaded,
+img[loading="lazy"]:not([src=""]) {
+  opacity: 1;
+}
+
+/* ── Prevent horizontal overflow on mobile ── */
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* ── Better mobile font rendering ── */
+@media (max-width: 640px) {
+  h1, h2, h3 {
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
 }
