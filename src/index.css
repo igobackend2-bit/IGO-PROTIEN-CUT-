@@ -142,16 +142,6 @@ html.lenis body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ── Image lazy-load fade-in ── */
-img[loading="lazy"] {
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-img[loading="lazy"].loaded,
-img[loading="lazy"]:not([src=""]) {
-  opacity: 1;
-}
-
 /* ── Prevent horizontal overflow on mobile ── */
 body {
   overflow-x: hidden;

@@ -52,6 +52,7 @@ const AdminLayout = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('admin_auth');
+    localStorage.removeItem('igo_admin_session');
     navigate('/admin/login');
   };
 

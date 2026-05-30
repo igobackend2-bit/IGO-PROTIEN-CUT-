@@ -152,31 +152,31 @@ export default function App() {
       <SmoothScroll>
         <React.Suspense fallback={<LoadingFallback />}>
           <Routes>
-            {/* Admin Routes - Protected */}
+            {/* ── Admin Routes ─────────────────────── */}
+            {/* Login is public — no guard */}
             <Route path="/admin/login" element={<AdminLogin />} />
+            {/* All other admin routes require session */}
             <Route path="/admin/*" element={<AdminGuard><AdminLayout /></AdminGuard>}>
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<DashboardOverview />} />
               <Route path="products" element={<ProductManagement />} />
               <Route path="orders" element={<OrderManagement />} />
               <Route path="customers" element={<CustomerManagement />} />
-              <Route path="promotions" element={<div className="p-8"><h1 className="text-2xl font-bold">Promotions &amp; Offers</h1><p className="text-neutral-500">Coming soon...</p></div>} />
               <Route path="queries" element={<CustomerQueries />} />
               <Route path="analytics" element={<Analytics />} />
-              <Route path="content" element={<div className="p-8"><h1 className="text-2xl font-bold">Content Management</h1><p className="text-neutral-500">Coming soon...</p></div>} />
               <Route path="settings" element={<SystemSettings />} />
               <Route path="help" element={<AdminHelp />} />
+              <Route path="promotions" element={<div className="p-8"><h1 className="text-2xl font-bold">Promotions</h1><p className="text-neutral-500">Coming soon...</p></div>} />
+              <Route path="content" element={<div className="p-8"><h1 className="text-2xl font-bold">Content</h1><p className="text-neutral-500">Coming soon...</p></div>} />
             </Route>
 
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            {/* Public Routes */}
+            {/* ── Public Routes ────────────────────── */}
             <Route path="/" element={<Home />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/review/:orderId" element={<OrderReview />} />
             <Route path="/blog" element={<BlogPage />} />
 
-            {/* Fallback Catch-all - Custom 404 Page */}
+            {/* ── 404 ─────────────────────────────── */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </React.Suspense>
