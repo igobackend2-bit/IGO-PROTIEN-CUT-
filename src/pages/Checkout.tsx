@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -31,6 +31,23 @@ const steps = ['Address', 'Slot', 'Payment'];
 const Checkout = () => {
   const { cart, cartTotal, clearCart, deliverySlot, setDeliverySlot } = useCart();
   const navigate = useNavigate();
+
+  // ── SEO: per-page meta ──────────────────────────────────────
+  useEffect(() => {
+    document.title = 'Checkout — Secure Order | IGO Protein Cuts';
+    const metaDesc = document.querySelector('meta[name="description"]');
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (metaDesc) metaDesc.setAttribute('content', 'Complete your order of farm-fresh chicken, mutton, fish & seafood. Secure checkout with UPI, cards or cash on delivery. Delivered in 60–90 minutes in Coimbatore.');
+    if (canonical) canonical.setAttribute('href', 'https://igoproteincuts.com/checkout');
+    const robots = document.querySelector('meta[name="robots"]');
+    if (robots) robots.setAttribute('content', 'noindex, nofollow');
+    return () => {
+      document.title = 'IGO Protein Cuts — Farm-Fresh Meat Delivery in Coimbatore | Never Frozen';
+      if (metaDesc) metaDesc.setAttribute('content', 'Order fresh chicken, mutton, fish & seafood online in Coimbatore. Farm-to-table, never frozen, delivered in 60–90 minutes from heritage Tamil farms. 100% cold chain integrity.');
+      if (canonical) canonical.setAttribute('href', 'https://igoproteincuts.com/');
+      if (robots) robots.setAttribute('content', 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
+    };
+  }, []);
 
   const [currentStep, setCurrentStep]     = useState(0);
   const [isProcessing, setIsProcessing]   = useState(false);

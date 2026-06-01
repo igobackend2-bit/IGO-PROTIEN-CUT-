@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ChevronRight, Calendar, User, ArrowRight, Tag, Search, TrendingUp, Sparkles } from 'lucide-react';
 import Navbar from '../components/Navbar';
@@ -48,6 +48,19 @@ const blogPosts = [
 ];
 
 const BlogPage = () => {
+  useEffect(() => {
+    document.title = 'Blog — Fresh Meat Tips, Recipes & Food Science | IGO Protein Cuts';
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute('content', 'Explore IGO Protein Cuts blog for expert recipes, food science, freshness guides, and healthy protein tips. Farm-fresh insights from Coimbatore.');
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.setAttribute('href', 'https://igoproteincuts.com/blog');
+    return () => {
+      document.title = 'IGO Protein Cuts — Farm-Fresh Meat Delivery in Coimbatore | Never Frozen';
+      if (metaDesc) metaDesc.setAttribute('content', 'Order fresh chicken, mutton, fish & seafood online in Coimbatore. Farm-to-table, never frozen, delivered in 60–90 minutes from heritage Tamil farms. 100% cold chain integrity.');
+      if (canonical) canonical.setAttribute('href', 'https://igoproteincuts.com/');
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-neutral-50">
       <Navbar />

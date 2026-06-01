@@ -1,4 +1,70 @@
+# ─── SPA Routing ────────────────────────────────────────────────────
 Options -MultiViews
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ index.html [QSA,L]
+
+# ─── Security Headers ───────────────────────────────────────────────
+<IfModule mod_headers.c>
+    # Prevent clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+    # Prevent MIME sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    # XSS Protection (legacy browsers)
+    Header always set X-XSS-Protection "1; mode=block"
+    # Referrer policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    # Permissions policy
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    # HSTS (1 year, include subdomains)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    # Remove server version info
+    Header always unset X-Powered-By
+    Header always unset Server
+</IfModule>
+
+# ─── Gzip Compression ───────────────────────────────────────────────
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript
+    AddOutputFilterByType DEFLATE application/javascript application/json
+    AddOutputFilterByType DEFLATE application/xml image/svg+xml
+    AddOutputFilterByType DEFLATE font/ttf font/woff font/woff2
+</IfModule>
+
+# ─── Browser Caching ────────────────────────────────────────────────
+<IfModule mod_expires.c>
+    ExpiresActive On
+    # Hashed JS/CSS bundles — cache 1 year
+    <FilesMatch "\.(js|css)$">
+        ExpiresDefault "access plus 1 year"
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+    # Images — cache 30 days
+    <FilesMatch "\.(png|jpg|jpeg|gif|webp|svg|ico)$">
+        ExpiresDefault "access plus 30 days"
+        Header set Cache-Control "public, max-age=2592000"
+    </FilesMatch>
+    # Fonts — cache 1 year
+    <FilesMatch "\.(woff|woff2|ttf|eot)$">
+        ExpiresDefault "access plus 1 year"
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+    # HTML & data files — no cache (always fresh)
+    <FilesMatch "\.(html|json|xml|txt)$">
+        ExpiresDefault "access plus 0 seconds"
+        Header set Cache-Control "public, max-age=0, must-revalidate"
+    </FilesMatch>
+</IfModule>
+
+# ─── Force HTTPS ─────────────────────────────────────────────────────
+<IfModule mod_rewrite.c>
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# ─── CORS for fonts ──────────────────────────────────────────────────
+<IfModule mod_headers.c>
+    <FilesMatch "\.(woff|woff2|ttf|eot|svg)$">
+        Header set Access-Control-Allow-Origin "*"
+    </FilesMatch>
+</IfModule>

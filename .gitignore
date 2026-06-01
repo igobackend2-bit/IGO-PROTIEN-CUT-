@@ -2,17 +2,24 @@ node_modules/
 build/
 dist/
 coverage/
-# Note: /public is the Vite build output for Hostinger
-/public
 .DS_Store
 *.log
-.env*
-!.env.example
+.env
+.env.local
+.env.production
 .vite/
 scratch/
-*.js
-*.cjs
-*.mjs
-!api/*.ts
-!src/**/*.ts
-!src/**/*.tsx
+
+# Ignore built JS/CSS at root level (dev artifacts)
+/*.js
+/*.cjs
+/*.mjs
+
+# Keep public_html/ fully tracked (Hostinger deployment target)
+# public_html/ is intentionally NOT ignored
+
+# Keep static/ tracked (Vite publicDir source)
+# static/ is intentionally NOT ignored
+
+# Ignore /public (duplicate of public_html, not needed in git)
+/public/

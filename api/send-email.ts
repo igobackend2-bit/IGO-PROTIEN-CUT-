@@ -153,7 +153,7 @@ export default async function handler(req: any, res: any) {
           <!-- Footer -->
           <div style="background: #f9f9f9; padding: 30px; text-align: center; border-top: 1px solid #f0f0f0;">
             <p style="margin: 0; font-size: 14px; color: #666;">Premium Farm-Fresh Protein Cuts</p>
-            <p style="margin: 5px 0 0 0; font-size: 12px; color: #999;">© 2024 IGO Protein Cuts. All rights reserved.</p>
+            <p style="margin: 5px 0 0 0; font-size: 12px; color: #999;">© 2026 IGO Protein Cuts. All rights reserved.</p>
           </div>
         </div>
       `;
