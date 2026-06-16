@@ -22,6 +22,7 @@ import Blog from './sections/Blog';
 import Newsletter from './sections/Newsletter';
 import PersonalizedRecommendations from './sections/PersonalizedRecommendations';
 import BrandNarrative from './sections/BrandNarrative';
+import BrandsMarquee from './components/BrandsMarquee';
 import Footer from './sections/Footer';
 import { CartProvider, useCart } from './context/CartContext';
 import CartDrawer from './components/CartDrawer';
@@ -134,6 +135,7 @@ function Home() {
         <BrandNarrative />
         <Newsletter />
       </main>
+      <BrandsMarquee />
       <Footer />
       <CartDrawer />
       <FloatingCheckoutBar />
