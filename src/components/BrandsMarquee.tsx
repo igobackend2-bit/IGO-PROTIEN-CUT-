@@ -49,8 +49,8 @@ const BrandsMarquee = () => {
               <div key={`brand-1-${i}`} className="w-[350px] bg-white rounded-[32px] border border-black/5 p-8 flex flex-col justify-between h-[420px] shadow-sm hover:shadow-xl hover:border-secondary/30 transition-all group/card shrink-0 mx-4 cursor-pointer relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-bl-full -z-10 group-hover/card:bg-secondary/10 transition-colors"></div>
                 <div>
-                  <div className="h-28 flex items-center justify-center mb-8 bg-black/[0.02] rounded-2xl group-hover/card:bg-white group-hover/card:shadow-lg transition-all p-4 border border-transparent group-hover/card:border-black/5">
-                    <img src={brand.logo} alt={brand.title} className="max-h-[80px] max-w-full object-contain mix-blend-multiply" />
+                  <div className="h-32 flex items-center justify-center mb-6 bg-black/[0.02] rounded-2xl group-hover/card:bg-white group-hover/card:shadow-lg transition-all p-2 border border-transparent group-hover/card:border-black/5">
+                    <img src={brand.logo} alt={brand.title} className="max-h-[100px] max-w-full object-contain mix-blend-multiply scale-110" />
                   </div>
                   <span className="text-secondary font-black uppercase tracking-[0.2em] text-[10px] block mb-3">{brand.category}</span>
                   <h3 className="text-xl font-black text-primary mb-3">{brand.title}</h3>
@@ -69,8 +69,8 @@ const BrandsMarquee = () => {
               <div key={`brand-2-${i}`} className="w-[350px] bg-white rounded-[32px] border border-black/5 p-8 flex flex-col justify-between h-[420px] shadow-sm hover:shadow-xl hover:border-secondary/30 transition-all group/card shrink-0 mx-4 cursor-pointer relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-bl-full -z-10 group-hover/card:bg-secondary/10 transition-colors"></div>
                 <div>
-                  <div className="h-28 flex items-center justify-center mb-8 bg-black/[0.02] rounded-2xl group-hover/card:bg-white group-hover/card:shadow-lg transition-all p-4 border border-transparent group-hover/card:border-black/5">
-                    <img src={brand.logo} alt={brand.title} className="max-h-[80px] max-w-full object-contain mix-blend-multiply" />
+                  <div className="h-32 flex items-center justify-center mb-6 bg-black/[0.02] rounded-2xl group-hover/card:bg-white group-hover/card:shadow-lg transition-all p-2 border border-transparent group-hover/card:border-black/5">
+                    <img src={brand.logo} alt={brand.title} className="max-h-[100px] max-w-full object-contain mix-blend-multiply scale-110" />
                   </div>
                   <span className="text-secondary font-black uppercase tracking-[0.2em] text-[10px] block mb-3">{brand.category}</span>
                   <h3 className="text-xl font-black text-primary mb-3">{brand.title}</h3>
