@@ -4,9 +4,9 @@ import { X, CheckCircle2, ShoppingBag, ArrowRight, Star, Sparkles, Heart } from 
 import { useCart } from '../context/CartContext';
 
 const relatedProducts = [
-  { id: 101, name: 'Premium Chicken Breast', price: 210, img: '/images/products/chicken-breast.png', rating: 4.9 },
-  { id: 102, name: 'Mutton Curry Cut', price: 450, img: '/images/products/mutton-curry.png', rating: 4.8 },
-  { id: 104, name: 'Nattu Kozhi Eggs', price: 180, img: '/images/products/eggs.png', rating: 5.0 },
+  { id: 101, name: 'Premium Chicken Breast', price: 210, img: '/images/products/chicken-breast.webp', rating: 4.9 },
+  { id: 102, name: 'Mutton Curry Cut', price: 450, img: '/images/products/mutton-curry.webp', rating: 4.8 },
+  { id: 104, name: 'Nattu Kozhi Eggs', price: 180, img: '/images/products/eggs.webp', rating: 5.0 },
 ];
 
 const CrossSellModal = () => {
@@ -53,9 +53,10 @@ const CrossSellModal = () => {
             <div className="p-8">
               {/* Added Item Preview */}
               <div className="flex items-center gap-6 p-4 bg-neutral-light rounded-2xl mb-10 border border-neutral-100">
-                <img 
-                  src={lastAddedItem.image} 
-                  alt={lastAddedItem.name} 
+                <img
+                  src={lastAddedItem.image}
+                  alt={lastAddedItem.name}
+                  loading="lazy"
                   className="w-20 h-20 rounded-xl object-cover shadow-md"
                 />
                 <div className="flex-1">
@@ -83,10 +84,11 @@ const CrossSellModal = () => {
                   {relatedProducts.map(product => (
                     <div key={product.id} className="group cursor-pointer">
                       <div className="relative aspect-square rounded-2xl overflow-hidden mb-3 bg-neutral-100">
-                        <img 
-                          src={product.img} 
-                          alt={product.name} 
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                        <img
+                          src={product.img}
+                          alt={product.name}
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
                         <button 
                           onClick={() => addToCart(product as any, '500g')}

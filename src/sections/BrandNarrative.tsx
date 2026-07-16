@@ -43,9 +43,10 @@ const BrandNarrative = () => {
           className="absolute inset-0 z-0"
         >
           <div className="absolute inset-0 bg-black/40 z-10" />
-          <img 
-            src="/images/narrative/farm.png" 
-            alt="Heritage Tamil Farms" 
+          <img
+            src="/images/narrative/farm.webp"
+            alt="Heritage Tamil Farms"
+            loading="lazy"
             className="w-full h-full object-cover"
           />
         </motion.div>
@@ -56,9 +57,10 @@ const BrandNarrative = () => {
           className="absolute inset-0 z-0"
         >
           <div className="absolute inset-0 bg-black/50 z-10" />
-          <img 
-            src="/images/narrative/facility.png" 
-            alt="Sterile Cold Chain" 
+          <img
+            src="/images/narrative/facility.webp"
+            alt="Sterile Cold Chain"
+            loading="lazy"
             className="w-full h-full object-cover"
           />
         </motion.div>
@@ -69,9 +71,10 @@ const BrandNarrative = () => {
           className="absolute inset-0 z-0"
         >
           <div className="absolute inset-0 bg-black/40 z-10" />
-          <img 
-            src="/images/narrative/packaging.png" 
-            alt="Traceable Packaging" 
+          <img
+            src="/images/narrative/packaging.webp"
+            alt="Traceable Packaging"
+            loading="lazy"
             className="w-full h-full object-cover"
           />
         </motion.div>

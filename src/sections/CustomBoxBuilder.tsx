@@ -3,11 +3,11 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Box, Plus, Minus, Info, ShoppingBag, CheckCircle2, ThermometerSnowflake } from 'lucide-react';
 
 const availableCuts = [
-  { id: 101, name: 'Premium Chicken Breast', weight: '500g', price: 210, img: '/images/products/chicken-breast.png' },
-  { id: 102, name: 'Mutton Curry Cut', weight: '500g', price: 450, img: '/images/products/mutton-curry.png' },
-  { id: 103, name: 'Seer Fish Steaks', weight: '500g', price: 350, img: '/images/products/seer-fish.png' },
-  { id: 104, name: 'Nattu Kozhi Eggs', weight: '6pk', price: 90, img: '/images/products/eggs.png' },
-  { id: 105, name: 'Jumbo Prawns', weight: '250g', price: 240, img: '/images/products/tiger-prawns.png' },
+  { id: 101, name: 'Premium Chicken Breast', weight: '500g', price: 210, img: '/images/products/chicken-breast.webp' },
+  { id: 102, name: 'Mutton Curry Cut', weight: '500g', price: 450, img: '/images/products/mutton-curry.webp' },
+  { id: 103, name: 'Seer Fish Steaks', weight: '500g', price: 350, img: '/images/products/seer-fish.webp' },
+  { id: 104, name: 'Nattu Kozhi Eggs', weight: '6pk', price: 90, img: '/images/products/eggs.webp' },
+  { id: 105, name: 'Jumbo Prawns', weight: '250g', price: 240, img: '/images/products/tiger-prawns.webp' },
 ];
 
 const CustomBoxBuilder = () => {
@@ -65,7 +65,7 @@ const CustomBoxBuilder = () => {
                     className="group flex items-center gap-4 p-4 rounded-2xl bg-neutral-light hover:bg-white hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer border border-transparent hover:border-igo-green/20"
                     onClick={() => addItem(item)}
                   >
-                    <img src={item.img} alt={item.name} className="w-16 h-16 rounded-xl object-cover" />
+                    <img src={item.img} alt={item.name} loading="lazy" className="w-16 h-16 rounded-xl object-cover" />
                     <div className="flex-1 min-w-0">
                       <h4 className="font-bold text-sm text-neutral-dark truncate">{item.name}</h4>
                       <p className="text-xs text-neutral-400">{item.weight} • ₹{item.price}</p>
@@ -126,7 +126,7 @@ const CustomBoxBuilder = () => {
                           exit={{ scale: 0, opacity: 0 }}
                           className="absolute inset-0 bg-white"
                         >
-                          <img src={box[i].img} alt="" className="w-full h-full object-cover" />
+                          <img src={box[i].img} alt="" loading="lazy" className="w-full h-full object-cover" />
                           <button 
                             onClick={() => removeItem(box[i].boxId)}
                             className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover/slot:opacity-100 transition-opacity"

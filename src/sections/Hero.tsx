@@ -2,14 +2,14 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChevronRight, ChevronLeft, ShieldCheck, Truck, Star,
-  Users, Package, MapPin, CheckCircle2, Flame, QrCode
+  Users, Package, MapPin, CheckCircle2, QrCode
 } from 'lucide-react';
 
 /* ─── Serviceable Pincodes ─────────────────────────────────────────── */
 const SERVICEABLE_PINCODES = [
   '641001','641002','641003','641004','641005','641006','641007','641008',
   '641009','641010','641011','641012','641013','641014','641015','641016',
-  '641017','641018','641019','641020','600001','600002','600003','560001','560002',
+  '641017','641018','641019','641020',
 ];
 
 /* ─── Pincode Checker ───────────────────────────────────────────────── */
@@ -105,41 +105,11 @@ const StatCard = ({ value, label, suffix, icon: Icon, started }: any) => {
   );
 };
 
-/* ─── Flash Sale Countdown ──────────────────────────────────────────── */
-const FlashSaleCountdown = () => {
-  const [timeLeft, setTimeLeft] = useState({ h: 2, m: 45, s: 12 });
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev.s > 0) return { ...prev, s: prev.s - 1 };
-        if (prev.m > 0) return { h: prev.h, m: prev.m - 1, s: 59 };
-        if (prev.h > 0) return { h: prev.h - 1, m: 59, s: 59 };
-        return prev;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <div className="flex items-center gap-2.5 bg-red-500 text-white px-3.5 py-2 rounded-xl shadow-lg shadow-red-500/25 mb-5 w-fit">
-      <Flame className="w-4 h-4 fill-white flex-shrink-0" />
-      <span className="text-[10px] font-bold uppercase tracking-widest hidden sm:inline">Flash Sale Ends In:</span>
-      <div className="flex gap-1 font-display font-bold text-sm">
-        <span>{timeLeft.h.toString().padStart(2, '0')}h</span>
-        <span className="opacity-50">:</span>
-        <span>{timeLeft.m.toString().padStart(2, '0')}m</span>
-        <span className="opacity-50">:</span>
-        <span>{timeLeft.s.toString().padStart(2, '0')}s</span>
-      </div>
-    </div>
-  );
-};
-
 /* ─── Slides data ───────────────────────────────────────────────────── */
 const slides = [
   {
     id: 1,
-    image: '/images/narrative/farm.png',
+    image: '/images/narrative/farm.webp',
     tag: 'Heritage Tamil Farms',
     title: (
       <>Farm-Fresh <br />
@@ -157,7 +127,7 @@ const slides = [
   },
   {
     id: 2,
-    image: '/images/narrative/facility.png',
+    image: '/images/narrative/facility.webp',
     tag: 'Cold-Chain Integrity',
     title: (
       <>Pure <br />
@@ -174,7 +144,7 @@ const slides = [
   },
   {
     id: 3,
-    image: '/images/narrative/packaging.png',
+    image: '/images/narrative/packaging.webp',
     tag: 'Total Traceability',
     title: (
       <>Total <br />
@@ -263,7 +233,12 @@ const Hero = () => {
                 Delivering in 60–90 mins · Free above ₹499
               </span>
             </div>
-            <FlashSaleCountdown />
+            <div className="inline-flex items-center gap-2 bg-white border border-neutral-200 px-3.5 py-1.5 rounded-full mb-4 ml-2 shadow-sm">
+              <ShieldCheck className="w-3.5 h-3.5 text-igo-green" />
+              <span className="text-[10px] sm:text-xs font-bold text-neutral-600 uppercase tracking-wider">
+                FSSAI Certified · Antibiotic-Free
+              </span>
+            </div>
           </motion.div>
 
           {/* Slide content */}

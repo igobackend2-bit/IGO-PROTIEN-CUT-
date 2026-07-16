@@ -71,6 +71,7 @@ const QuickViewModal = ({ product, onClose }: QuickViewModalProps) => {
               <img
                 src={product.image}
                 alt={product.name}
+                loading="lazy"
                 className="w-full h-full object-cover"
               />
               {product.badge && (
@@ -264,7 +265,7 @@ const QuickViewModal = ({ product, onClose }: QuickViewModalProps) => {
                             <Plus className="w-6 h-6 text-igo-green rotate-45" />
                           </div>
                         </div>
-                        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800" className="w-full h-full object-cover opacity-60" />
+                        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800" alt={`How to cook ${product.name} — recipe video thumbnail`} loading="lazy" className="w-full h-full object-cover opacity-60" />
                       </div>
                       <p className="text-xs font-bold text-neutral-dark">How to cook {product.name} (Chef's Special)</p>
                     </div>
@@ -309,11 +310,11 @@ const QuickViewModal = ({ product, onClose }: QuickViewModalProps) => {
             <div className="flex gap-6 overflow-x-auto pb-4 no-scrollbar">
               {[
                 { name: 'Tikka Marinade', price: 49, img: 'https://images.unsplash.com/photo-1589187151032-573a91d1707d?w=400' },
-                { name: 'Farm Eggs (6pk)', price: 60, img: '/images/products/eggs.png' },
+                { name: 'Farm Eggs (6pk)', price: 60, img: '/images/products/eggs.webp' },
                 { name: 'Curry Powder', price: 35, img: 'https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?w=400' }
               ].map((addon, i) => (
                 <div key={i} className="min-w-[140px] bg-white rounded-2xl p-4 border border-neutral-100 flex flex-col items-center text-center group/addon hover:shadow-lg transition-all">
-                  <img src={addon.img} alt={addon.name} className="w-16 h-16 rounded-xl object-cover mb-3" />
+                  <img src={addon.img} alt={addon.name} loading="lazy" className="w-16 h-16 rounded-xl object-cover mb-3" />
                   <h5 className="text-[10px] font-bold text-neutral-dark line-clamp-1">{addon.name}</h5>
                   <p className="text-[10px] text-igo-green font-bold mb-3">₹{addon.price}</p>
                   <button className="w-full py-1.5 bg-igo-green/5 border border-igo-green/20 text-igo-green text-[9px] font-bold rounded-lg hover:bg-igo-green hover:text-white transition-colors">

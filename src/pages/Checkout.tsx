@@ -407,7 +407,7 @@ const Checkout = () => {
               <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
                 {cart.map((item, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <img src={item.image || '/images/products/chicken-breast.png'} alt={item.name} loading="lazy"
+                    <img src={item.image || '/images/products/chicken-breast.webp'} alt={item.name} loading="lazy"
                       className="w-12 h-12 rounded-xl object-cover bg-neutral-100" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-neutral-dark truncate">{item.name}</p>

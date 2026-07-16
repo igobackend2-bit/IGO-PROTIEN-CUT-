@@ -3,12 +3,12 @@ import { motion } from 'motion/react';
 import { Building2, Sparkles } from 'lucide-react';
 
 const categories = [
-  { name: 'Chicken', image: '/images/products/chicken-whole.png', color: 'bg-orange-50 hover:bg-orange-100', borderColor: 'border-orange-200', filter: 'Chicken' },
-  { name: 'Mutton', image: '/images/products/mutton-curry.png', color: 'bg-red-50 hover:bg-red-100', borderColor: 'border-red-200', filter: 'Mutton' },
-  { name: 'Fish', image: '/images/products/seer-fish.png', color: 'bg-blue-50 hover:bg-blue-100', borderColor: 'border-blue-200', filter: 'Fish' },
-  { name: 'Seafood', image: '/images/products/tiger-prawns.png', color: 'bg-teal-50 hover:bg-teal-100', borderColor: 'border-teal-200', filter: 'Seafood' },
-  { name: 'Eggs', image: '/images/products/eggs.png', color: 'bg-amber-50 hover:bg-amber-100', borderColor: 'border-amber-200', filter: 'Eggs' },
-  { name: 'Exotic', image: '/images/products/quail.png', color: 'bg-purple-50 hover:bg-purple-100', borderColor: 'border-purple-200', filter: 'Exotic' },
+  { name: 'Chicken', image: '/images/products/chicken-whole.webp', color: 'bg-orange-50 hover:bg-orange-100', borderColor: 'border-orange-200', filter: 'Chicken' },
+  { name: 'Mutton', image: '/images/products/mutton-curry.webp', color: 'bg-red-50 hover:bg-red-100', borderColor: 'border-red-200', filter: 'Mutton' },
+  { name: 'Fish', image: '/images/products/seer-fish.webp', color: 'bg-blue-50 hover:bg-blue-100', borderColor: 'border-blue-200', filter: 'Fish' },
+  { name: 'Seafood', image: '/images/products/tiger-prawns.webp', color: 'bg-teal-50 hover:bg-teal-100', borderColor: 'border-teal-200', filter: 'Seafood' },
+  { name: 'Eggs', image: '/images/products/eggs.webp', color: 'bg-amber-50 hover:bg-amber-100', borderColor: 'border-amber-200', filter: 'Eggs' },
+  { name: 'Exotic', image: '/images/products/quail.webp', color: 'bg-purple-50 hover:bg-purple-100', borderColor: 'border-purple-200', filter: 'Exotic' },
   { name: 'B2B', icon: Building2, color: 'bg-neutral-100 hover:bg-neutral-200', borderColor: 'border-neutral-300', filter: 'B2B' },
   { name: 'Shop All', icon: Sparkles, color: 'bg-igo-green/5 hover:bg-igo-green/10', borderColor: 'border-igo-green/20', filter: 'All' },
 ];
@@ -41,7 +41,7 @@ const CategoryGrid = () => {
       >
         <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center shadow-md group-hover:shadow-xl transition-all duration-300 border-2 ${cat.borderColor} ${cat.color} overflow-hidden`}>
           {cat.image ? (
-            <img src={cat.image} alt={cat.name} className="w-14 h-14 sm:w-16 sm:h-16 object-cover group-hover:scale-110 transition-transform duration-500 drop-shadow-md" />
+            <img src={cat.image} alt={cat.name} loading="lazy" className="w-14 h-14 sm:w-16 sm:h-16 object-cover group-hover:scale-110 transition-transform duration-500 drop-shadow-md" />
           ) : Icon ? (
             <Icon className="w-8 h-8 sm:w-10 sm:h-10 text-neutral-500 group-hover:text-neutral-700 transition-colors" />
           ) : null}

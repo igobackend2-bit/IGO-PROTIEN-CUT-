@@ -8,21 +8,21 @@ const posts = [
     category: 'Logistics',
     date: 'May 12, 2026',
     readTime: '6 min read',
-    image: '/images/blog-cold-chain.png'
+    image: '/images/blog-cold-chain.webp'
   },
   {
     title: 'Why Fresh (Never Frozen) Poultry Retains Better Nutrients',
     category: 'Nutrition',
     date: 'May 08, 2026',
     readTime: '8 min read',
-    image: '/images/blog-fresh-poultry.png'
+    image: '/images/blog-fresh-poultry.webp'
   },
   {
     title: 'Traceability API: Transforming B2B Restaurant Supply Chains',
     category: 'Business',
     date: 'May 05, 2026',
     readTime: '4 min read',
-    image: '/images/blog-b2b-supply.png'
+    image: '/images/blog-b2b-supply.webp'
   }
 ];
 
@@ -55,6 +55,7 @@ const Blog = () => {
                 <img
                   src={post.image}
                   alt={post.title}
+                  loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1586528116311-ad86d34b3e64?auto=format&fit=crop&q=80&w=800';

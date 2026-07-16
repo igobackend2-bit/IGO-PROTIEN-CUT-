@@ -1,44 +1,10 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Star, Quote, TrendingUp } from 'lucide-react';
-
-const testimonials = [
-  {
-    id: 1,
-    name: 'Priya Iyer',
-    role: 'Home Cook · Chennai',
-    content: "The freshest fish I've ever bought online. Being able to scan the QR code and see exactly which farm it came from is a game-changer. My family won't accept anything else now!",
-    rating: 5,
-    initials: 'PI',
-    color: 'from-igo-green to-emerald-400',
-    verified: true,
-  },
-  {
-    id: 2,
-    name: 'Sanjay Kapoor',
-    role: 'Restaurant Owner · Coimbatore',
-    content: "IGO supplies our restaurant with consistent, premium mutton. Their traceability system reduced our compliance audits by 40%. Absolute game-changer for our B2B supply chain.",
-    rating: 5,
-    initials: 'SK',
-    color: 'from-igo-gold to-amber-400',
-    verified: true,
-  },
-  {
-    id: 3,
-    name: 'Anjali Sharma',
-    role: 'Fitness Coach · Bangalore',
-    content: "I only trust IGO for my protein needs. Their lean chicken cuts are perfectly processed and delivered at the right temperature every time. My clients love the traceability feature.",
-    rating: 5,
-    initials: 'AS',
-    color: 'from-purple-500 to-violet-400',
-    verified: true,
-  }
-];
-
 import Marquee from '../components/Marquee';
 
 const Testimonials = () => {
-  const [allTestimonials, setAllTestimonials] = React.useState(testimonials);
+  const [allTestimonials, setAllTestimonials] = React.useState<any[]>([]);
 
   React.useEffect(() => {
     const loadReviews = () => {
@@ -53,13 +19,15 @@ const Testimonials = () => {
         color: 'from-igo-green to-igo-gold',
         verified: true
       }));
-      setAllTestimonials([...formattedLive, ...testimonials]);
+      setAllTestimonials(formattedLive);
     };
 
     loadReviews();
     window.addEventListener('storage', loadReviews);
     return () => window.removeEventListener('storage', loadReviews);
   }, []);
+
+  if (allTestimonials.length === 0) return null;
 
   return (
     <section className="py-24 bg-white overflow-hidden relative">
@@ -70,7 +38,7 @@ const Testimonials = () => {
           <div>
             <div className="inline-flex items-center gap-2 bg-igo-green/10 border border-igo-green/20 px-4 py-2 rounded-full mb-6">
               <TrendingUp className="w-4 h-4 text-igo-green" />
-              <span className="text-xs font-bold text-igo-green uppercase tracking-widest font-sans">12k+ Global Reviews</span>
+              <span className="text-xs font-bold text-igo-green uppercase tracking-widest font-sans">Verified Customer Reviews</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-display font-bold text-neutral-dark">
               Loved by Home <span className="text-igo-green">Chefs</span> &amp; <br />

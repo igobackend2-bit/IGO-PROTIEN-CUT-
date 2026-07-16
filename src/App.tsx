@@ -10,19 +10,14 @@ import FreshnessStrip from './sections/FreshnessStrip';
 import WhyIGO from './sections/WhyIGO';
 import Traceability from './sections/Traceability';
 import HowItWorks from './sections/HowItWorks';
-import OffersSection from './sections/OffersSection';
 import ProductGrid from './sections/ProductGrid';
 import FeaturedRecipes from './sections/FeaturedRecipes';
 import QualityCertifications from './sections/QualityCertifications';
-import AIProductComparison from './sections/AIProductComparison';
 import DualCTA from './sections/DualCTA';
 import IGOPrime from './sections/IGOPrime';
 import Testimonials from './sections/Testimonials';
 import Blog from './sections/Blog';
 import Newsletter from './sections/Newsletter';
-import PersonalizedRecommendations from './sections/PersonalizedRecommendations';
-import BrandNarrative from './sections/BrandNarrative';
-import BrandsMarquee from './components/BrandsMarquee';
 import Footer from './sections/Footer';
 import { CartProvider, useCart } from './context/CartContext';
 import CartDrawer from './components/CartDrawer';
@@ -53,7 +48,7 @@ const Checkout = React.lazy(() => import('./pages/Checkout'));
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-neutral-dark flex flex-col items-center justify-center gap-4">
-    <motion.div 
+    <motion.div
       animate={{ rotate: 360 }}
       transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
     >
@@ -117,25 +112,20 @@ function Home() {
       <main>
         <Hero />
         <CategoryGrid />
-        <CustomBoxBuilder />
+        <ProductGrid />
         <FreshnessStrip />
         <WhyIGO />
-        <Traceability />
-        <ProductGrid />
-        <FeaturedRecipes />
-        <OffersSection />
-        <HowItWorks />
-        <IGOPrime />
-        <DualCTA />
         <QualityCertifications />
-        <AIProductComparison />
+        <Traceability />
+        <FeaturedRecipes />
+        <HowItWorks />
+        <DualCTA />
+        <CustomBoxBuilder />
+        <IGOPrime />
         <Testimonials />
-        <PersonalizedRecommendations />
         <Blog />
-        <BrandNarrative />
         <Newsletter />
       </main>
-      <BrandsMarquee />
       <Footer />
       <CartDrawer />
       <FloatingCheckoutBar />

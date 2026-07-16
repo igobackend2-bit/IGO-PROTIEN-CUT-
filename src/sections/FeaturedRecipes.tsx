@@ -8,7 +8,7 @@ const recipes = [
     title: 'Garlic Butter Salmon with Herbs',
     time: '20 mins',
     serves: '2 People',
-    image: '/images/products/salmon.png',
+    image: '/images/products/salmon.webp',
     tags: ['Quick', 'Healthy'],
     color: 'from-orange-400 to-pink-500'
   },
@@ -16,7 +16,7 @@ const recipes = [
     title: 'Heritage Mutton Biryani',
     time: '45 mins',
     serves: '4 People',
-    image: '/images/products/mutton-curry.png',
+    image: '/images/products/mutton-curry.webp',
     tags: ['Heritage', 'Authentic'],
     color: 'from-amber-500 to-red-600'
   },
@@ -24,7 +24,7 @@ const recipes = [
     title: 'Spicy Tiger Prawn Roast',
     time: '15 mins',
     serves: '3 People',
-    image: '/images/products/tiger-prawns.png',
+    image: '/images/products/tiger-prawns.webp',
     tags: ['Easy', 'Sea Food'],
     color: 'from-teal-400 to-blue-600'
   }
@@ -59,9 +59,10 @@ const FeaturedRecipes = () => {
             >
               <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden mb-6">
                 <div className={`absolute inset-0 bg-gradient-to-br ${recipe.color} opacity-20 group-hover:opacity-40 transition-opacity z-10`} />
-                <img 
-                  src={recipe.image} 
-                  alt={recipe.title} 
+                <img
+                  src={recipe.image}
+                  alt={recipe.title}
+                  loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-neutral-dark/90 via-transparent to-transparent z-20" />

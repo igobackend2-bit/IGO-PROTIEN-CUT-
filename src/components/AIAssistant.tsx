@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Bot, User, Sparkles, ShoppingCart, Loader2, Mic } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
 import { cn } from '../lib/utils';
 
 console.log("AIAssistant.tsx is being executed");

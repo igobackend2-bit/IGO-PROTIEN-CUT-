@@ -14,7 +14,7 @@ const DualCTA = () => {
             className="group relative bg-igo-green text-white p-6 sm:p-10 lg:p-16 rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl"
           >
             <div className="absolute inset-0 opacity-20 mix-blend-overlay">
-              <img src="/images/products/chicken-whole.png" alt="" className="w-full h-full object-cover grayscale brightness-50" />
+              <img src="/images/products/chicken-whole.webp" alt="" loading="lazy" className="w-full h-full object-cover grayscale brightness-50" />
             </div>
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
             <div className="relative z-10 h-full flex flex-col justify-between gap-8">
@@ -54,7 +54,7 @@ const DualCTA = () => {
             className="group relative bg-neutral-dark text-white p-6 sm:p-10 lg:p-16 rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden border-2 border-transparent hover:border-igo-gold/30 transition-all shadow-2xl"
           >
             <div className="absolute inset-0 opacity-40">
-              <img src="/images/b2b-supply.png" alt="" className="w-full h-full object-cover grayscale brightness-50" />
+              <img src="/images/b2b-supply.webp" alt="" loading="lazy" className="w-full h-full object-cover grayscale brightness-50" />
               <div className="absolute inset-0 bg-gradient-to-r from-neutral-dark via-neutral-dark/80 to-transparent" />
             </div>
             <div className="absolute -bottom-10 -right-10 w-80 h-80 bg-igo-gold/5 rounded-full blur-3xl pointer-events-none" />
