@@ -6,6 +6,9 @@ class UserModel {
   final String email;
   final String phoneNumber;
   final String? profileImageUrl;
+  final DateTime? dateOfBirth;
+  final String? gender;
+  final double walletBalance;
   final DateTime createdAt;
 
   UserModel({
@@ -14,6 +17,9 @@ class UserModel {
     required this.email,
     required this.phoneNumber,
     this.profileImageUrl,
+    this.dateOfBirth,
+    this.gender,
+    this.walletBalance = 0,
     required this.createdAt,
   });
 
@@ -27,6 +33,9 @@ class UserModel {
       email: authUser.email ?? '',
       phoneNumber: profile?['phone_number'] as String? ?? '',
       profileImageUrl: profile?['profile_image_url'] as String?,
+      dateOfBirth: DateTime.tryParse(profile?['date_of_birth']?.toString() ?? ''),
+      gender: profile?['gender'] as String?,
+      walletBalance: (profile?['wallet_balance'] as num?)?.toDouble() ?? 0,
       createdAt: DateTime.tryParse(authUser.createdAt) ?? DateTime.now(),
     );
   }
@@ -39,6 +48,9 @@ class UserModel {
       email: map['email'] ?? '',
       phoneNumber: map['phone_number'] ?? map['phoneNumber'] ?? '',
       profileImageUrl: map['profile_image_url'] ?? map['profileImageUrl'],
+      dateOfBirth: DateTime.tryParse((map['date_of_birth'] ?? map['dateOfBirth'] ?? '').toString()),
+      gender: map['gender'],
+      walletBalance: (map['wallet_balance'] as num?)?.toDouble() ?? 0,
       createdAt: DateTime.tryParse(
               map['created_at'] ?? map['createdAt'] ?? '') ??
           DateTime.now(),
@@ -52,6 +64,8 @@ class UserModel {
       'full_name': fullName,
       'phone_number': phoneNumber,
       if (profileImageUrl != null) 'profile_image_url': profileImageUrl,
+      if (dateOfBirth != null) 'date_of_birth': dateOfBirth!.toIso8601String().split('T').first,
+      if (gender != null) 'gender': gender,
     };
   }
 
@@ -62,6 +76,9 @@ class UserModel {
       'email': email,
       'phoneNumber': phoneNumber,
       'profileImageUrl': profileImageUrl,
+      'dateOfBirth': dateOfBirth?.toIso8601String(),
+      'gender': gender,
+      'walletBalance': walletBalance,
       'createdAt': createdAt.toIso8601String(),
     };
   }
@@ -72,6 +89,9 @@ class UserModel {
     String? email,
     String? phoneNumber,
     String? profileImageUrl,
+    DateTime? dateOfBirth,
+    String? gender,
+    double? walletBalance,
     DateTime? createdAt,
   }) {
     return UserModel(
@@ -80,6 +100,9 @@ class UserModel {
       email: email ?? this.email,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      gender: gender ?? this.gender,
+      walletBalance: walletBalance ?? this.walletBalance,
       createdAt: createdAt ?? this.createdAt,
     );
   }

@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_model.dart';
+import 'loyalty_service.dart';
 
 /// Singleton AuthService backed by Supabase Auth + Profiles table.
 class AuthService {
@@ -62,6 +65,7 @@ class AuthService {
     required String phoneNumber,
     required String password,
     required String confirmPassword,
+    String? referralCode,
   }) async {
     // Client-side validation
     if (fullName.trim().isEmpty) {
@@ -88,12 +92,20 @@ class AuthService {
         return AuthResult.failure('Sign up failed. Please try again.');
       }
 
+      String? referrerId;
+      if (referralCode != null && referralCode.trim().isNotEmpty) {
+        // Best-effort — an invalid/unknown code just means no referrer is
+        // linked, never blocks account creation.
+        referrerId = await LoyaltyService().resolveReferralCode(referralCode);
+      }
+
       try {
         // Insert profile into the `profiles` table
         await _supabase.from('profiles').insert({
           'id': response.user!.id,
           'full_name': fullName.trim(),
           'phone_number': phoneNumber.trim(),
+          if (referrerId != null) 'referred_by': referrerId,
         });
       } catch (dbError) {
         print('Warning: public.profiles table insert failed: $dbError');
@@ -154,30 +166,129 @@ class AuthService {
           .select()
           .eq('id', uid)
           .maybeSingle();
-
-      _currentUser = UserModel(
-        id: uid,
-        fullName: data?['full_name'] as String? ??
-            authUser.userMetadata?['full_name'] as String? ??
-            'Protein Fan',
-        email: authUser.email ?? '',
-        phoneNumber: data?['phone_number'] as String? ??
-            authUser.userMetadata?['phone_number'] as String? ??
-            '',
-        createdAt: authUser.createdAt != null
-            ? DateTime.parse(authUser.createdAt)
-            : DateTime.now(),
-      );
+      _currentUser = UserModel.fromSupabase(authUser, data);
     } catch (_) {
       // Fallback to auth metadata if profile row doesn't exist
-      _currentUser = UserModel(
-        id: uid,
-        fullName: authUser.userMetadata?['full_name'] as String? ?? 'Protein Fan',
-        email: authUser.email ?? '',
-        phoneNumber: authUser.userMetadata?['phone_number'] as String? ?? '',
-        createdAt: DateTime.now(),
-      );
+      _currentUser = UserModel.fromSupabase(authUser, null);
     }
+  }
+
+  // ─── Profile (Phase 10) ────────────────────────────────────────────────
+
+  /// Updates the editable profile fields and refreshes [currentUser].
+  Future<UserModel> updateProfile({
+    required String fullName,
+    required String phoneNumber,
+    DateTime? dateOfBirth,
+    String? gender,
+  }) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) throw Exception('Please log in to update your profile.');
+
+    final payload = {
+      'full_name': fullName.trim(),
+      'phone_number': phoneNumber.trim(),
+      if (dateOfBirth != null) 'date_of_birth': dateOfBirth.toIso8601String().split('T').first,
+      if (gender != null) 'gender': gender,
+    };
+
+    await _supabase.from('profiles').update(payload).eq('id', user.id);
+
+    _currentUser = (_currentUser ?? UserModel.fromSupabase(user, null)).copyWith(
+      fullName: fullName.trim(),
+      phoneNumber: phoneNumber.trim(),
+      dateOfBirth: dateOfBirth,
+      gender: gender,
+    );
+    return _currentUser!;
+  }
+
+  /// Uploads a new avatar to the `avatars` Storage bucket (path
+  /// `<userId>/avatar.<ext>`, upserted so it replaces the old image at the
+  /// same path) and stores the public URL on the profile row.
+  Future<String> uploadProfilePhoto(List<int> bytes, {String fileExt = 'jpg'}) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) throw Exception('Please log in to update your photo.');
+
+    final path = '${user.id}/avatar.$fileExt';
+    await _supabase.storage.from('avatars').uploadBinary(
+          path,
+          Uint8List.fromList(bytes),
+          fileOptions: const FileOptions(upsert: true),
+        );
+    // Cache-bust the CDN URL so the new image shows immediately.
+    final publicUrl = '${_supabase.storage.from('avatars').getPublicUrl(path)}?t=${DateTime.now().millisecondsSinceEpoch}';
+
+    await _supabase.from('profiles').update({'profile_image_url': publicUrl}).eq('id', user.id);
+    _currentUser = (_currentUser ?? UserModel.fromSupabase(user, null)).copyWith(profileImageUrl: publicUrl);
+    return publicUrl;
+  }
+
+  /// Re-authenticates with the current password before applying the new
+  /// one — Supabase's `updateUser` doesn't require the old password itself,
+  /// so this sign-in call is what actually enforces it.
+  Future<AuthResult> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null || user.email == null) {
+      return AuthResult.failure('Please log in again to change your password.');
+    }
+    try {
+      await _supabase.auth.signInWithPassword(email: user.email!, password: currentPassword);
+    } on AuthException {
+      return AuthResult.failure('Current password is incorrect.');
+    }
+
+    try {
+      await _supabase.auth.updateUser(UserAttributes(password: newPassword));
+      return AuthResult.success(_currentUser, message: 'Password updated successfully.');
+    } on AuthException catch (e) {
+      return AuthResult.failure(_mapAuthError(e.message));
+    } catch (_) {
+      return AuthResult.failure('Could not update your password. Please try again.');
+    }
+  }
+
+  /// Signs out this session and every other active session for this user.
+  Future<void> logoutAllDevices() async {
+    await _supabase.auth.signOut(scope: SignOutScope.global);
+    _currentUser = null;
+  }
+
+  Future<Map<String, dynamic>> fetchNotificationPreferences() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return _defaultNotificationPrefs;
+    try {
+      final row = await _supabase
+          .from('profiles')
+          .select('notify_order_updates, notify_promotions, notify_offers, notify_stock_alerts')
+          .eq('id', user.id)
+          .maybeSingle();
+      if (row == null) return _defaultNotificationPrefs;
+      return {
+        'notify_order_updates': row['notify_order_updates'] as bool? ?? true,
+        'notify_promotions': row['notify_promotions'] as bool? ?? true,
+        'notify_offers': row['notify_offers'] as bool? ?? true,
+        'notify_stock_alerts': row['notify_stock_alerts'] as bool? ?? true,
+      };
+    } catch (_) {
+      return _defaultNotificationPrefs;
+    }
+  }
+
+  Map<String, dynamic> get _defaultNotificationPrefs => const {
+        'notify_order_updates': true,
+        'notify_promotions': true,
+        'notify_offers': true,
+        'notify_stock_alerts': true,
+      };
+
+  Future<void> updateNotificationPreference(String column, bool value) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) throw Exception('Please log in.');
+    await _supabase.from('profiles').update({column: value}).eq('id', user.id);
   }
 
   /// Maps Supabase/GoTrue error messages to user-friendly strings.

@@ -6,7 +6,10 @@ plugins {
 
 android {
     namespace = "com.example.protein_cuts"
-    compileSdk = flutter.compileSdkVersion
+    // Pinned above flutter.compileSdkVersion: geocoding_android's transitive
+    // androidx deps (fragment 1.7.1, window 1.2.0, etc.) require compileSdk
+    // 34+, which this Flutter version's default didn't provide.
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

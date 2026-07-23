@@ -1,4 +1,5 @@
 import '../../../../models/product_model.dart';
+import '../../../promotions/domain/entities/combo_pack.dart';
 import '../../data/models/home_banner_model.dart';
 import '../../data/models/category_ui_model.dart';
 
@@ -16,6 +17,7 @@ class HomeData {
   final List<Product> todaysDeals;
   final List<Product> recommended;
   final List<Product> recentlyViewed;
+  final List<ComboPack> comboPacks;
 
   /// productId -> discount percent, used consistently by any section that
   /// renders a strikethrough "was" price for the same product.
@@ -33,6 +35,7 @@ class HomeData {
     required this.recommended,
     required this.recentlyViewed,
     required this.discountPercentByProductId,
+    this.comboPacks = const [],
   });
 
   bool get isEmpty =>

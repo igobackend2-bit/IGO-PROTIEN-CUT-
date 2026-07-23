@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../utils/app_colors.dart';
-import '../services/auth_service.dart';
 import '../features/home/presentation/screens/home_tab_screen.dart';
-import 'orders_tab.dart';
+import '../features/notifications/presentation/widgets/notification_toast_listener.dart';
+import '../features/orders/presentation/screens/orders_screen.dart';
+import '../features/profile/presentation/screens/profile_screen.dart';
+import '../features/subscriptions/presentation/widgets/subscription_processor_runner.dart';
 
 /// Bottom-nav shell: Home / Search / Orders / Profile.
-/// The Home tab content lives in the feature-first `features/home` module
-/// (see HomeTabScreen) — Search, Orders and Profile tabs below are
-/// untouched from their previous implementation.
+/// Home tab content lives in features/home; Orders tab lives in
+/// features/orders (Phase 8); Profile tab lives in features/profile
+/// (Phase 10) — Search is unchanged.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -18,7 +20,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  final _authService = AuthService();
   bool _isInit = true;
 
   @override
@@ -40,68 +41,24 @@ class _HomeScreenState extends State<HomeScreen> {
     _NavItem(icon: Icons.person_rounded, label: 'Profile'),
   ];
 
-  Future<void> _handleLogout() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Logout?',
-          style: GoogleFonts.outfit(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to sign out?',
-          style: GoogleFonts.outfit(color: AppColors.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.outfit(color: AppColors.textSecondary),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              'Logout',
-              style: GoogleFonts.outfit(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      await _authService.logout();
-      if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/login');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final user = _authService.currentUser;
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: [
-          const HomeTabScreen(),
-          _buildSearchTab(),
-          const OrdersTab(),
-          _buildProfileTab(user?.fullName ?? 'Protein Fan', user?.email ?? 'user@example.com'),
-        ],
+    return SubscriptionProcessorRunner(
+      child: NotificationToastListener(
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          body: IndexedStack(
+            index: _selectedIndex,
+            children: [
+              const HomeTabScreen(),
+              _buildSearchTab(),
+              const OrdersScreen(),
+              const ProfileScreen(),
+            ],
+          ),
+          bottomNavigationBar: _buildBottomNav(),
+        ),
       ),
-      bottomNavigationBar: _buildBottomNav(),
     );
   }
 
@@ -261,84 +218,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProfileTab(String name, String email) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text('My Profile', style: GoogleFonts.outfit(fontWeight: FontWeight.w700, color: Colors.white)),
-        backgroundColor: AppColors.primary,
-        elevation: 0,
-      ),
-      body: ListView(
-        physics: const BouncingScrollPhysics(),
-        children: [
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
-            child: Column(
-              children: [
-                Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.primary, width: 3),
-                    color: AppColors.surfaceLight,
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.person_rounded, size: 56, color: AppColors.primary),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  name,
-                  style: GoogleFonts.outfit(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  email,
-                  style: GoogleFonts.outfit(
-                    fontSize: 13,
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          _buildProfileOption(Icons.settings_rounded, 'Account Settings', () {}),
-          _buildProfileOption(Icons.location_on_rounded, 'Manage Addresses', () {}),
-          _buildProfileOption(Icons.payment_rounded, 'Payment Methods', () {}),
-          _buildProfileOption(Icons.help_outline_rounded, 'Help & Support', () {}),
-          _buildProfileOption(Icons.logout_rounded, 'Sign Out', _handleLogout, isLogout: true),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfileOption(IconData icon, String title, VoidCallback onTap, {bool isLogout = false}) {
-    return Material(
-      color: Colors.white,
-      child: ListTile(
-        leading: Icon(icon, color: isLogout ? Colors.red : AppColors.primary),
-        title: Text(
-          title,
-          style: GoogleFonts.outfit(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: isLogout ? Colors.red : AppColors.textPrimary,
-          ),
-        ),
-        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textHint),
-        onTap: onTap,
-      ),
-    );
-  }
 }
 
 class _NavItem {

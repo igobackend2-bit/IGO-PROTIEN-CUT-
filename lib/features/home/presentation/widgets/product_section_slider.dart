@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../models/product_model.dart';
+import '../../../../services/cart_service.dart';
+import '../../../../shared/widgets/product_grid_card.dart';
 import '../../../../utils/app_colors.dart';
 import '../../domain/entities/home_data.dart';
-import 'home_product_card.dart';
+import '../providers/home_providers.dart';
 
 /// Generic "title + See all + horizontal product list" section reused by
 /// Featured, Best Sellers, Today's Deals, Recommended and Recently Viewed —
-/// avoids re-implementing the same slider six times.
-class ProductSectionSlider extends StatelessWidget {
+/// avoids re-implementing the same slider six times. Cards themselves are
+/// the shared [ProductGridCard] (also used by Product Discovery) so card
+/// UI/add-to-cart logic exists in exactly one place.
+class ProductSectionSlider extends ConsumerWidget {
   final String title;
   final String? subtitle;
   final List<Product> products;
@@ -28,7 +33,7 @@ class ProductSectionSlider extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (products.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -81,10 +86,19 @@ class ProductSectionSlider extends StatelessWidget {
               final discount = homeData.discountFor(product.id);
               return Padding(
                 padding: const EdgeInsets.only(right: 12),
-                child: HomeProductCard(
+                child: ProductGridCard(
+                  key: ValueKey(product.id),
                   product: product,
+                  enableHero: false,
                   discountPercent: discount,
                   originalPrice: discount > 0 ? homeData.strikeThroughPriceFor(product) : null,
+                  onTap: () async {
+                    await ref.read(homeDataProvider.notifier).recordProductView(product);
+                    if (context.mounted) {
+                      Navigator.pushNamed(context, '/product-detail', arguments: product);
+                    }
+                  },
+                  onAddToCart: () => CartService().addToCart(product.id),
                 ),
               );
             },

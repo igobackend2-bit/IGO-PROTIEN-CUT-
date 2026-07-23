@@ -10,12 +10,13 @@ import 'screens/signup_screen.dart';
 import 'screens/home_screen.dart';
 import 'utils/app_colors.dart';
 import 'utils/supabase_config.dart';
-import 'features/products/product_screen.dart';
-import 'screens/products_screen.dart';
-import 'screens/cart_screen.dart';
-import 'features/products/product_detail_screen.dart';
+import 'features/product_discovery/presentation/screens/product_discovery_screen.dart';
+import 'features/cart/presentation/screens/cart_screen.dart';
+import 'features/address/presentation/screens/address_list_screen.dart';
+import 'features/checkout/presentation/screens/checkout_screen.dart';
+import 'features/product_detail/presentation/screens/product_detail_screen.dart';
 import 'screens/order_success_screen.dart';
-import 'screens/order_detail_screen.dart';
+import 'shared/providers/theme_providers.dart';
 
 
 
@@ -40,16 +41,19 @@ class AppScrollBehavior extends MaterialScrollBehavior {
       };
 }
 
-class ProteinCutsApp extends StatelessWidget {
+class ProteinCutsApp extends ConsumerWidget {
   const ProteinCutsApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
     return MaterialApp(
       title: 'Protein Cuts',
       debugShowCheckedModeBanner: false,
       scrollBehavior: AppScrollBehavior(),
       theme: _buildTheme(),
+      darkTheme: _buildDarkTheme(),
+      themeMode: themeMode,
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
@@ -59,12 +63,13 @@ class ProteinCutsApp extends StatelessWidget {
         '/cart': (context) => const CartScreen(),
         '/products': (context) {
           final args = ModalRoute.of(context)?.settings.arguments;
-          final category = args is String ? args : null;
-          return ProductScreen(initialCategory: category);
+          final initialArg = args is String ? args : null;
+          return ProductDiscoveryScreen(initialArg: initialArg);
         },
         '/product-detail': (context) => const ProductDetailScreen(),
+        '/addresses': (context) => const AddressListScreen(),
+        '/checkout': (context) => const CheckoutScreen(),
         '/success': (context) => const OrderSuccessScreen(),
-        '/order-detail': (context) => const OrderDetailScreen(),
       },
     );
   }
@@ -135,6 +140,91 @@ class ProteinCutsApp extends StatelessWidget {
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.surface,
         contentTextStyle: GoogleFonts.outfit(color: AppColors.textPrimary),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        behavior: SnackBarBehavior.floating,
+      ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
+    );
+  }
+
+  ThemeData _buildDarkTheme() {
+    const darkBackground = Color(0xFF121612);
+    const darkSurface = Color(0xFF1C221D);
+    const darkTextPrimary = Color(0xFFEDF2ED);
+    const darkTextSecondary = Color(0xFFB6C2B7);
+    const darkTextHint = Color(0xFF7E8C7F);
+    const darkBorder = Color(0xFF2C352D);
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: darkBackground,
+      colorScheme: const ColorScheme.dark(
+        primary: AppColors.primaryLight,
+        secondary: AppColors.accent,
+        surface: darkSurface,
+        onPrimary: Colors.white,
+        onSurface: darkTextPrimary,
+        error: AppColors.error,
+      ),
+      textTheme: GoogleFonts.outfitTextTheme(
+        const TextTheme(
+          displayLarge: TextStyle(color: darkTextPrimary),
+          displayMedium: TextStyle(color: darkTextPrimary),
+          displaySmall: TextStyle(color: darkTextPrimary),
+          headlineLarge: TextStyle(color: darkTextPrimary),
+          headlineMedium: TextStyle(color: darkTextPrimary),
+          headlineSmall: TextStyle(color: darkTextPrimary),
+          titleLarge: TextStyle(color: darkTextPrimary),
+          titleMedium: TextStyle(color: darkTextPrimary),
+          titleSmall: TextStyle(color: darkTextSecondary),
+          bodyLarge: TextStyle(color: darkTextPrimary),
+          bodyMedium: TextStyle(color: darkTextSecondary),
+          bodySmall: TextStyle(color: darkTextHint),
+          labelLarge: TextStyle(color: darkTextPrimary),
+        ),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: darkSurface,
+        elevation: 0,
+        centerTitle: false,
+        iconTheme: IconThemeData(color: darkTextPrimary),
+        titleTextStyle: TextStyle(
+          color: darkTextPrimary,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: darkSurface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: darkBorder),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primaryLight,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          minimumSize: const Size(double.infinity, 54),
+          textStyle: GoogleFonts.outfit(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: darkSurface,
+        contentTextStyle: GoogleFonts.outfit(color: darkTextPrimary),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         behavior: SnackBarBehavior.floating,
       ),

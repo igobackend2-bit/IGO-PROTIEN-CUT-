@@ -21,6 +21,7 @@ class _SignupScreenState extends State<SignupScreen>
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _referralController = TextEditingController();
 
   final _nameFocus = FocusNode();
   final _emailFocus = FocusNode();
@@ -60,6 +61,7 @@ class _SignupScreenState extends State<SignupScreen>
     _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _referralController.dispose();
     _nameFocus.dispose();
     _emailFocus.dispose();
     _phoneFocus.dispose();
@@ -89,6 +91,7 @@ class _SignupScreenState extends State<SignupScreen>
       phoneNumber: _phoneController.text,
       password: _passwordController.text,
       confirmPassword: _confirmPasswordController.text,
+      referralCode: _referralController.text,
     );
 
     if (!mounted) return;
@@ -358,6 +361,18 @@ class _SignupScreenState extends State<SignupScreen>
                               }
                               return null;
                             },
+                          ),
+
+                          const SizedBox(height: 14),
+
+                          // ── Referral Code (optional) ───────────────────
+                          CustomTextField(
+                            controller: _referralController,
+                            hintText: 'e.g. PC1A2B3C4D',
+                            labelText: 'Referral Code (optional)',
+                            prefixIcon: Icons.card_giftcard_outlined,
+                            textInputAction: TextInputAction.done,
+                            onEditingComplete: _handleSignup,
                           ),
 
                           const SizedBox(height: 28),

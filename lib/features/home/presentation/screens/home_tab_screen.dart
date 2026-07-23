@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../utils/app_colors.dart';
+import '../../../promotions/presentation/screens/offers_screen.dart';
+import '../../../promotions/presentation/widgets/combo_pack_section.dart';
 import '../../domain/entities/home_data.dart';
 import '../providers/home_providers.dart';
 import '../widgets/flash_sale_section.dart';
@@ -96,6 +99,24 @@ class _HomeContent extends StatelessWidget {
           SliverToBoxAdapter(
             child: StaggeredEntrance(
               delay: const Duration(milliseconds: 100),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Offers for You', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    TextButton(
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OffersScreen())),
+                      child: Text('See all', style: GoogleFonts.outfit(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: StaggeredEntrance(
+              delay: const Duration(milliseconds: 100),
               child: OfferCardsRow(offers: data.offers),
             ),
           ),
@@ -108,6 +129,15 @@ class _HomeContent extends StatelessWidget {
           ),
         ),
         if (data.flashSale.isNotEmpty) const SliverToBoxAdapter(child: SizedBox(height: 28)),
+        if (data.comboPacks.isNotEmpty) ...[
+          SliverToBoxAdapter(
+            child: StaggeredEntrance(
+              delay: const Duration(milliseconds: 175),
+              child: ComboPackSection(comboPacks: data.comboPacks),
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 28)),
+        ],
         SliverToBoxAdapter(
           child: StaggeredEntrance(
             delay: const Duration(milliseconds: 200),

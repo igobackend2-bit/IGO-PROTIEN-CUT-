@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../address/presentation/providers/address_providers.dart';
+import '../../../address/presentation/screens/address_form_screen.dart';
+import '../../../notifications/presentation/providers/notification_providers.dart';
+import '../../../notifications/presentation/screens/notification_center_screen.dart';
+import '../../../notifications/presentation/widgets/notification_badge.dart';
+import '../../../wishlist/presentation/screens/wishlist_screen.dart';
 import '../providers/home_providers.dart';
 
 /// Top-of-hero row: personalized greeting + tappable delivery location.
@@ -59,7 +65,12 @@ class HomeAppHeader extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 12),
-        _NotificationBell(onTap: () => _showComingSoon(context, 'Notifications')),
+        _HeaderIconButton(
+          icon: Icons.favorite_border_rounded,
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WishlistScreen())),
+        ),
+        const SizedBox(width: 10),
+        const _NotificationBell(),
       ],
     );
   }
@@ -71,16 +82,6 @@ class HomeAppHeader extends ConsumerWidget {
     return 'Good Evening';
   }
 
-  void _showComingSoon(BuildContext context, String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$feature coming soon!', style: GoogleFonts.outfit()),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
-  }
-
   void _openLocationSheet(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
@@ -89,61 +90,104 @@ class HomeAppHeader extends ConsumerWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (sheetContext) {
-        final options = const [
-          ('Kanathur, Chennai', 'Home • Uthandi, Kanathur, Chennai'),
-          ('Anna Nagar, Chennai', 'Work • 2nd Ave, Anna Nagar, Chennai'),
-        ];
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Select Delivery Location',
-                  style: GoogleFonts.outfit(fontSize: 17, fontWeight: FontWeight.w800),
+        return Consumer(
+          builder: (context, sheetRef, _) {
+            final addressState = sheetRef.watch(addressListProvider);
+            final savedAddresses = addressState.addresses;
+
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Select Delivery Location',
+                      style: GoogleFonts.outfit(fontSize: 17, fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 16),
+                    if (savedAddresses.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          'No saved addresses yet.',
+                          style: GoogleFonts.outfit(fontSize: 13, color: Colors.grey),
+                        ),
+                      )
+                    else
+                      ...savedAddresses.map(
+                        (address) => ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Icon(
+                            address.isDefault ? Icons.location_on_rounded : Icons.location_on_outlined,
+                            color: const Color(0xFF1D8348),
+                          ),
+                          title: Text(
+                            '${address.area}, ${address.city}',
+                            style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 14),
+                          ),
+                          subtitle: Text(
+                            '${address.addressType.label} • ${address.formattedOneLine}',
+                            style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          onTap: () {
+                            ref.read(selectedDeliveryLocationProvider.notifier).state = '${address.area}, ${address.city}';
+                            Navigator.pop(sheetContext);
+                          },
+                        ),
+                      ),
+                    const Divider(),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.add_location_alt_outlined, color: Color(0xFF1D8348)),
+                      title: Text('Add New Address', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 14, color: const Color(0xFF1D8348))),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const AddressFormScreen()));
+                      },
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                ...options.map(
-                  (o) => ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.location_on_rounded, color: Color(0xFF1D8348)),
-                    title: Text(o.$1, style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 14)),
-                    subtitle: Text(o.$2, style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey)),
-                    onTap: () {
-                      ref.read(selectedDeliveryLocationProvider.notifier).state = o.$1;
-                      Navigator.pop(sheetContext);
-                    },
-                  ),
-                ),
-                const Divider(),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.add_location_alt_outlined, color: Colors.grey),
-                  title: Text('Add New Address', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey)),
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    _showComingSoon(context, 'Address management');
-                  },
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
   }
 }
 
-class _NotificationBell extends StatelessWidget {
+class _HeaderIconButton extends StatelessWidget {
+  final IconData icon;
   final VoidCallback onTap;
-  const _NotificationBell({required this.onTap});
+  const _HeaderIconButton({required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      child: Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), shape: BoxShape.circle),
+        child: Icon(icon, color: Colors.white, size: 20),
+      ),
+    );
+  }
+}
+
+class _NotificationBell extends ConsumerWidget {
+  const _NotificationBell();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unreadCount = ref.watch(notificationListProvider.select((s) => s.unreadCount));
+
+    return GestureDetector(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationCenterScreen())),
       child: Container(
         width: 42,
         height: 42,
@@ -155,18 +199,7 @@ class _NotificationBell extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             const Icon(Icons.notifications_none_rounded, color: Colors.white, size: 22),
-            Positioned(
-              top: 10,
-              right: 11,
-              child: Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE67E22),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
+            Positioned(top: 6, right: 6, child: NotificationBadge(count: unreadCount)),
           ],
         ),
       ),

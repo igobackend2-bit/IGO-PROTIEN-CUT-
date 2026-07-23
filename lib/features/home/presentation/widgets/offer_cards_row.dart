@@ -14,7 +14,7 @@ class OfferCardsRow extends StatelessWidget {
     if (offers.isEmpty) return const SizedBox.shrink();
 
     return SizedBox(
-      height: 92,
+      height: 100,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -53,7 +53,7 @@ class _OfferCard extends StatelessWidget {
       onTap: () => _copyCode(context),
       child: Container(
         width: 220,
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: offer.gradientColors,

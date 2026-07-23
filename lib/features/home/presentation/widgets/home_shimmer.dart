@@ -80,7 +80,9 @@ class _ShimmerCategoryRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: 76,
-      child: Row(
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        physics: const NeverScrollableScrollPhysics(),
         children: List.generate(
           5,
           (i) => Padding(
@@ -114,7 +116,9 @@ class _ShimmerSection extends StatelessWidget {
         const SizedBox(height: 12),
         SizedBox(
           height: cardHeight,
-          child: Row(
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            physics: const NeverScrollableScrollPhysics(),
             children: List.generate(
               4,
               (i) => Padding(
@@ -129,21 +133,6 @@ class _ShimmerSection extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Lightweight shimmer placeholder for a single product image while it
-/// loads over the network (used inside [CachedNetworkImage]'s placeholder).
-class ProductImageShimmer extends StatelessWidget {
-  const ProductImageShimmer({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Shimmer.fromColors(
-      baseColor: AppColors.surfaceLight,
-      highlightColor: Colors.white,
-      child: Container(color: Colors.white),
     );
   }
 }

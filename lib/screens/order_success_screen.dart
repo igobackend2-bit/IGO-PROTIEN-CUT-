@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../features/orders/presentation/screens/order_tracking_screen.dart';
 import '../utils/app_colors.dart';
-import 'order_tracking_screen.dart';
+import '../utils/id_format.dart';
 
 class OrderSuccessScreen extends StatefulWidget {
   final String? orderId;
+  final String paymentMethodLabel;
+  final String statusLabel;
+  final String? deliveryEtaLabel;
 
-  const OrderSuccessScreen({super.key, this.orderId});
+  const OrderSuccessScreen({
+    super.key,
+    this.orderId,
+    this.paymentMethodLabel = 'Cash on Delivery',
+    this.statusLabel = 'Packing',
+    this.deliveryEtaLabel,
+  });
 
   @override
   State<OrderSuccessScreen> createState() => _OrderSuccessScreenState();
@@ -52,10 +62,19 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
   }
 
   void goToTracking() {
+    final realId = widget.orderId;
+    if (realId == null) {
+      // Only happens if this screen is somehow reached without a real
+      // placed order (the synthetic 'PC-...' fallback ID is not trackable).
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Tracking is unavailable for this order.', style: GoogleFonts.outfit()), behavior: SnackBarBehavior.floating),
+      );
+      return;
+    }
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => OrderTrackingScreen(orderId: orderId),
+        builder: (_) => OrderTrackingScreen(orderId: realId),
       ),
     );
   }
@@ -134,11 +153,15 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
                 ),
                 child: Column(
                   children: [
-                    _row("Order ID", orderId, bold: true),
+                    _row("Order ID", '#${shortId(orderId)}', bold: true),
                     const Divider(),
-                    _row("Payment", "Cash on Delivery"),
+                    _row("Payment", widget.paymentMethodLabel),
                     const Divider(),
-                    _row("Status", "Packing"),
+                    _row("Status", widget.statusLabel),
+                    if (widget.deliveryEtaLabel != null) ...[
+                      const Divider(),
+                      _row("Delivery ETA", widget.deliveryEtaLabel!),
+                    ],
                   ],
                 ),
               ),
@@ -173,7 +196,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
                     (route) => false,
                   );
                 },
-                child: const Text("Back to Home"),
+                child: const Text("Continue Shopping"),
               ),
 
               const SizedBox(height: 24),
