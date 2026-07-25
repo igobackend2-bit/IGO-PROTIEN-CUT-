@@ -11,6 +11,8 @@ import '../../../notifications/presentation/screens/notification_center_screen.d
 import '../../../notifications/presentation/widgets/notification_badge.dart';
 import '../../../loyalty/presentation/screens/loyalty_dashboard_screen.dart';
 import '../../../support/presentation/screens/support_center_screen.dart';
+import '../../../admin/presentation/screens/admin_product_photos_screen.dart';
+import '../../../../shared/providers/admin_providers.dart';
 import '../../../subscriptions/presentation/screens/subscription_dashboard_screen.dart';
 import '../../../payment/presentation/screens/payment_history_screen.dart';
 import '../../../wishlist/presentation/screens/wishlist_screen.dart';
@@ -149,6 +151,11 @@ class ProfileScreen extends ConsumerWidget {
         _sectionHeader('Privacy & Support'),
         _option(context, Icons.privacy_tip_outlined, 'Privacy', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PrivacyScreen()))),
         _option(context, Icons.help_outline_rounded, 'Help & Support', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SupportCenterScreen()))),
+        if (ref.watch(isAdminProvider).value == true) ...[
+          const SizedBox(height: 12),
+          _sectionHeader('Admin'),
+          _option(context, Icons.photo_camera_back_outlined, 'Product Photos', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminProductPhotosScreen()))),
+        ],
         _option(context, Icons.logout_rounded, 'Sign Out', () => _handleLogout(context), isLogout: true),
         const SizedBox(height: 24),
       ],

@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../utils/app_colors.dart';
+import '../features/cart/presentation/providers/cart_providers.dart';
+import '../features/cart/presentation/screens/cart_screen.dart';
 import '../features/home/presentation/screens/home_tab_screen.dart';
 import '../features/notifications/presentation/widgets/notification_toast_listener.dart';
 import '../features/orders/presentation/screens/orders_screen.dart';
 import '../features/profile/presentation/screens/profile_screen.dart';
 import '../features/subscriptions/presentation/widgets/subscription_processor_runner.dart';
 
-/// Bottom-nav shell: Home / Search / Orders / Profile.
-/// Home tab content lives in features/home; Orders tab lives in
-/// features/orders (Phase 8); Profile tab lives in features/profile
-/// (Phase 10) — Search is unchanged.
+/// Bottom-nav shell: Home / Search / Cart / Orders / Profile.
+/// Home tab content lives in features/home; Cart tab reuses the existing
+/// features/cart CartScreen as-is (same widget the /cart route already
+/// pushes from Wishlist/Product Detail/Order Detail — no duplicate
+/// implementation); Orders tab lives in features/orders (Phase 8); Profile
+/// tab lives in features/profile (Phase 10) — Search is unchanged.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -37,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<_NavItem> _navItems = const [
     _NavItem(icon: Icons.home_rounded, label: 'Home'),
     _NavItem(icon: Icons.search_rounded, label: 'Search'),
+    _NavItem(icon: Icons.shopping_cart_rounded, label: 'Cart', showsCartBadge: true),
     _NavItem(icon: Icons.shopping_bag_rounded, label: 'Orders'),
     _NavItem(icon: Icons.person_rounded, label: 'Profile'),
   ];
@@ -52,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               const HomeTabScreen(),
               _buildSearchTab(),
+              const CartScreen(),
               const OrdersScreen(),
               const ProfileScreen(),
             ],
@@ -98,12 +105,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        item.icon,
-                        color: isSelected
-                            ? AppColors.primary
-                            : AppColors.textHint,
-                        size: 22,
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Icon(
+                            item.icon,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.textHint,
+                            size: 22,
+                          ),
+                          if (item.showsCartBadge) _CartBadge(),
+                        ],
                       ),
                       const SizedBox(height: 3),
                       Text(
@@ -223,5 +236,32 @@ class _HomeScreenState extends State<HomeScreen> {
 class _NavItem {
   final IconData icon;
   final String label;
-  const _NavItem({required this.icon, required this.label});
+  final bool showsCartBadge;
+  const _NavItem({required this.icon, required this.label, this.showsCartBadge = false});
+}
+
+/// Live cart item count on the Cart tab icon — reuses the existing
+/// cartProvider (no new state, no new fetch); hidden entirely when the
+/// cart is empty.
+class _CartBadge extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final count = ref.watch(cartProvider.select((s) => s.items.length));
+    if (count == 0) return const SizedBox.shrink();
+
+    return Positioned(
+      right: -8,
+      top: -4,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+        constraints: const BoxConstraints(minWidth: 16),
+        decoration: BoxDecoration(color: AppColors.error, borderRadius: BorderRadius.circular(10)),
+        child: Text(
+          count > 99 ? '99+' : '$count',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.outfit(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white),
+        ),
+      ),
+    );
+  }
 }

@@ -119,23 +119,43 @@ class _ProductDiscoveryScreenState extends ConsumerState<ProductDiscoveryScreen>
           const SizedBox(width: 4),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-            child: DiscoverySearchField(
-              initialQuery: state.filters.searchQuery,
-              onSubmit: notifier.submitSearch,
-            ),
-          ),
-          const SizedBox(height: 10),
-          ActiveFilterChipsRow(
-            filters: state.filters,
-            onChanged: notifier.applyFilters,
-          ),
-          if (state.filters.hasAnyFilter) const SizedBox(height: 8),
-          Expanded(child: _buildBody(context, state, notifier)),
-        ],
+      // LayoutBuilder here sees the Scaffold body's TRUE available height —
+      // already reduced for the on-screen keyboard by resizeToAvoidBottomInset
+      // — which is what DiscoverySearchField's suggestions panel needs to cap
+      // itself against without overflowing. Everything subtracted below has
+      // a known, fixed size (no guessing): the padding above the search box,
+      // the search box itself, the spacing/filter-chips row below it, and
+      // the panel's own top margin.
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          const paddingAboveSearchBox = 12.0;
+          const searchBoxHeight = 48.0;
+          const spacingAfterSearchField = 10.0;
+          const panelTopMargin = 10.0;
+          final filterChipsRowHeight = state.filters.hasAnyFilter ? 40.0 + 8.0 : 0.0;
+          final reserved = paddingAboveSearchBox + searchBoxHeight + spacingAfterSearchField + filterChipsRowHeight + panelTopMargin;
+          final maxSuggestionsHeight = (constraints.maxHeight - reserved).clamp(120.0, constraints.maxHeight);
+
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, paddingAboveSearchBox, 16, 0),
+                child: DiscoverySearchField(
+                  initialQuery: state.filters.searchQuery,
+                  onSubmit: notifier.submitSearch,
+                  maxSuggestionsHeight: maxSuggestionsHeight,
+                ),
+              ),
+              const SizedBox(height: spacingAfterSearchField),
+              ActiveFilterChipsRow(
+                filters: state.filters,
+                onChanged: notifier.applyFilters,
+              ),
+              if (state.filters.hasAnyFilter) const SizedBox(height: 8),
+              Expanded(child: _buildBody(context, state, notifier)),
+            ],
+          );
+        },
       ),
     );
   }

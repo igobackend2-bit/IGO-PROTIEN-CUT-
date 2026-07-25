@@ -29,8 +29,16 @@ final cartSummaryProvider = Provider<CartSummary>((ref) {
 /// "You may also like" — full catalog minus anything already in the cart
 /// or saved for later, ranked by protein content (same heuristic used on
 /// Home's Best Sellers row) rather than randomly.
+///
+/// Fetches straight from ProductService rather than watching the shared
+/// catalogSnapshotProvider cache — that cache lives for the whole app
+/// session, so a product photo (or price, or availability) changed via the
+/// admin tools while the app was already open wouldn't show up here until
+/// something else happened to invalidate it. Cart is opened often enough,
+/// and the list is small enough, that a fresh fetch every time is worth
+/// trading away the shared-cache optimization for correctness here.
 final recommendedForCartProvider = FutureProvider.autoDispose<List<Product>>((ref) async {
-  final catalog = await ref.watch(catalogSnapshotProvider.future);
+  final catalog = await ref.read(productServiceProvider).fetchProducts();
   final cartState = ref.watch(cartProvider);
   final excludedIds = {
     ...cartState.items.map((i) => i.product.id),

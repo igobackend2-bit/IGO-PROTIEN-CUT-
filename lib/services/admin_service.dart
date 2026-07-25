@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Thin, typed client for the Phase 18 admin-* Edge Functions. Not called
@@ -29,6 +31,19 @@ class AdminService {
   // ─── Products, categories, review moderation ────────────────────────────
   Future<Map<String, dynamic>> products(String action, [Map<String, dynamic> params = const {}]) =>
       _invoke('admin-products', action, params);
+
+  /// Uploads a product photo straight to Storage (same direct-client-upload
+  /// pattern as avatars/review photos/support attachments — no Edge
+  /// Function round-trip for the binary itself) and returns its public URL.
+  /// The `product-images` bucket's write policy checks `products.manage`
+  /// via `admin_has_permission`, so this only succeeds for an admin.
+  /// Callers still need to call `products('update', {...})` with the
+  /// returned URL to actually attach it to a product row.
+  Future<String> uploadProductImage(String productId, Uint8List bytes, {required String fileExt}) async {
+    final path = 'products/$productId/${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+    await _client.storage.from('product-images').uploadBinary(path, bytes, fileOptions: const FileOptions(upsert: true));
+    return _client.storage.from('product-images').getPublicUrl(path);
+  }
 
   // ─── Stock in/out/adjustment, low/out-of-stock, history ─────────────────
   Future<Map<String, dynamic>> inventory(String action, [Map<String, dynamic> params = const {}]) =>

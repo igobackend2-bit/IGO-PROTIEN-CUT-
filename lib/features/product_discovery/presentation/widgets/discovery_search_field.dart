@@ -16,7 +16,22 @@ class DiscoverySearchField extends ConsumerStatefulWidget {
   final String initialQuery;
   final ValueChanged<String> onSubmit;
 
-  const DiscoverySearchField({super.key, required this.initialQuery, required this.onSubmit});
+  /// The most the suggestions panel is allowed to grow to, computed by the
+  /// parent screen from a LayoutBuilder around its Scaffold body (see
+  /// ProductDiscoveryScreen) — that's the one place the TRUE remaining
+  /// height (already reduced for the on-screen keyboard by Scaffold's
+  /// resizeToAvoidBottomInset) is actually known. Guessing that number
+  /// from in here via MediaQuery/View both proved unreliable: MediaQuery's
+  /// viewInsets.bottom reads 0 inside the resized body, and View's raw
+  /// value can be read mid-keyboard-animation with no follow-up rebuild.
+  final double maxSuggestionsHeight;
+
+  const DiscoverySearchField({
+    super.key,
+    required this.initialQuery,
+    required this.onSubmit,
+    required this.maxSuggestionsHeight,
+  });
 
   @override
   ConsumerState<DiscoverySearchField> createState() => _DiscoverySearchFieldState();
@@ -193,16 +208,26 @@ class _DiscoverySearchFieldState extends ConsumerState<DiscoverySearchField> {
   Widget _buildSuggestionsPanel() {
     final query = _debouncedQuery;
 
+    // Capped + internally scrollable — this panel sits as a plain (non-
+    // flexible) child in the screen's outer Column, so once the on-screen
+    // keyboard shrinks the available height, an uncapped list of
+    // suggestions/recent/trending terms can overflow the bottom of the
+    // screen instead of scrolling. The cap itself is computed by the
+    // parent screen (see maxSuggestionsHeight's doc comment) rather than
+    // guessed from in here.
     return Container(
       margin: const EdgeInsets.only(top: 10),
       padding: const EdgeInsets.symmetric(vertical: 8),
+      constraints: BoxConstraints(maxHeight: widget.maxSuggestionsHeight),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.inputBorder),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, 4))],
       ),
-      child: query.isEmpty ? _recentAndTrending() : _liveSuggestions(query),
+      child: SingleChildScrollView(
+        child: query.isEmpty ? _recentAndTrending() : _liveSuggestions(query),
+      ),
     );
   }
 

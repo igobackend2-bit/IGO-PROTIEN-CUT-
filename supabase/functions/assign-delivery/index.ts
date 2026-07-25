@@ -15,6 +15,12 @@ import { isCallerAdmin } from "../_shared/admin.ts";
 
 const ACTIVE_STATUSES = ["Accepted", "Partner Assigned", "Picked Up", "On The Way", "Near You"];
 const TERMINAL_ORDER_STATUSES = ["Delivered", "Cancelled", "Refunded"];
+// A partner can only be picked once the store has actually accepted, packed,
+// and readied the order — never the moment it's placed. "Out For Delivery"
+// stays assignable too so an already-assigned order's opportunistic re-check
+// (see the customer app's DeliveryBootstrapNotifier) stays idempotent instead
+// of erroring after pickup.
+const ASSIGNABLE_ORDER_STATUSES = ["Ready", "Out For Delivery"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -45,6 +51,9 @@ Deno.serve(async (req) => {
 
     if (TERMINAL_ORDER_STATUSES.includes(order.status)) {
       return errorResponse(`Order is already ${order.status} — nothing to assign.`, 409);
+    }
+    if (!ASSIGNABLE_ORDER_STATUSES.includes(order.status)) {
+      return errorResponse(`Order is ${order.status} — delivery can only be assigned once it's Ready for pickup.`, 409);
     }
 
     const { data: existing } = await db
