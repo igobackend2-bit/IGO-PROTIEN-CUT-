@@ -4,11 +4,18 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'apps/website/**'
+      - '.github/workflows/deploy.yml'
 
 jobs:
   build-and-deploy:
     name: Build → Deploy to Hostinger
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: apps/website
 
     steps:
       # ── 1. Checkout code ────────────────────────────────────────────
@@ -21,6 +28,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: apps/website/package-lock.json
 
       # ── 3. Install dependencies ───────────────────────────────────────
       - name: Install dependencies
@@ -55,7 +63,7 @@ jobs:
           server: 148.135.140.223
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./dist/
+          local-dir: ./apps/website/dist/
           server-dir: ./
           dangerous-clean-slate: false
           exclude: |

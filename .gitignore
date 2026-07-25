@@ -1,25 +1,57 @@
-node_modules/
-build/
-dist/
-coverage/
 .DS_Store
 *.log
+
+# ── Secrets ────────────────────────────────────────────────────────────
 .env
 .env.local
 .env.production
+
+# ── apps/website (Node / Vite) ─────────────────────────────────────────
+node_modules/
+dist/
+coverage/
 .vite/
 scratch/
 
-# Ignore built JS/CSS at root level (dev artifacts)
-/*.js
-/*.cjs
-/*.mjs
+# Built JS/CSS dropped at the website root by dev tooling
+apps/website/*.js
+apps/website/*.cjs
+apps/website/*.mjs
 
-# Keep public_html/ fully tracked (Hostinger deployment target)
-# public_html/ is intentionally NOT ignored
+# Duplicate of public_html/ — public_html is the tracked Hostinger target.
+# static/ is Vite's publicDir source and is intentionally NOT ignored.
+apps/website/public/
 
-# Keep static/ tracked (Vite publicDir source)
-# static/ is intentionally NOT ignored
+# ── apps/mobile + apps/admin (Flutter / Dart) ──────────────────────────
+*.class
+*.pyc
+*.swp
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+app.*.symbols
+app.*.map.json
+apps/*/android/app/debug
+apps/*/android/app/profile
+apps/*/android/app/release
 
-# Ignore /public (duplicate of public_html, not needed in git)
-/public/
+# IntelliJ / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# ── supabase/ (shared backend) ─────────────────────────────────────────
+supabase/.temp/
+supabase/.branches/
