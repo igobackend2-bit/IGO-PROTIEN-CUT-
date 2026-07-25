@@ -1,152 +1,163 @@
-# IGO Protein Cuts
+# IGO Protein Cuts — Monorepo
 
-A farm-to-fork fresh meat and seafood delivery platform for Coimbatore. Customers browse and order fresh chicken, mutton, fish, seafood, and eggs with 60–90 minute delivery, batch-level QR traceability back to the source farm, and an FSSAI-certified, never-frozen supply chain.
+Farm-to-fork fresh meat and seafood delivery for Coimbatore. Customers order fresh chicken, mutton, fish, seafood and eggs with 60–90 minute delivery, batch-level QR traceability back to the source farm, and an FSSAI-certified, never-frozen supply chain.
 
-Live site: [igoproteincuts.com](https://igoproteincuts.com)
+Live website: [igoproteincuts.com](https://igoproteincuts.com)
 
-This README is written for whoever picks this codebase up next. Section 6 ("Known Issues & What's Real vs. Mocked") is the most important part — read it before you assume any number on the admin dashboard is live data.
+This repository holds all three client surfaces plus the shared backend:
 
-## Tech Stack
+| Path | What it is | Stack | Status |
+| --- | --- | --- | --- |
+| [`apps/website`](apps/website) | Public marketing site + storefront + a React admin panel at `/admin` | React 19, TypeScript, Vite 6, Tailwind 4 | Live in production |
+| [`apps/mobile`](apps/mobile) | Customer mobile app (Android, iOS, Windows) | Flutter, Riverpod 2, Supabase | Feature-complete, not shipped to stores |
+| [`apps/admin`](apps/admin) | Internal admin dashboard (Flutter Web) | Flutter Web, Riverpod 3, go_router 17 | Built, deploys to Vercel |
+| [`supabase`](supabase) | Shared backend — 18 migrations, 15 Edge Functions | Postgres, RLS, Deno Edge Functions | Backs `apps/mobile` + `apps/admin` |
+| [`docs`](docs) | Website audit + planning documents (`.docx`) | — | Reference only |
 
-- **Frontend:** React 19, TypeScript, Vite 6
-- **Styling:** Tailwind CSS 4
-- **Animation:** Motion (Framer Motion)
-- **3D:** Three.js / React Three Fiber (hero visuals, traceability scene)
-- **Routing:** React Router v7
-- **Backend/data:** Supabase (Postgres, auth, row-level security)
-- **Payments:** Razorpay
-- **Email:** Resend (primary) with Nodemailer/Gmail fallback
-- **AI:** Google Gemini, called only from a serverless proxy — key never reaches the browser
-- **Icons:** Lucide React
+## ⚠️ Read this first: there are two separate backends
 
-## Features
+**`apps/website` and the two Flutter apps do not share a database.** This is the single most important thing to understand before changing anything here.
 
-- **Product catalog & cart** — category browsing, quick-view modals, custom protein-box builder, cross-sell suggestions, wishlist toggle.
-- **Checkout** — Razorpay (UPI/cards/net banking) and Cash on Delivery, delivery slot picker, one-click checkout for returning customers, subscribe & save recurring orders, one working coupon code (`IGO10`, 10% off).
-- **IGO Prime membership** — paid annual membership (Razorpay) with free-delivery and priority-slot benefits, membership status persisted in Supabase (`profiles.is_prime_member`).
-- **Traceability** — QR-code scan flow tying a product back to its source farm batch, with a 3D visualization.
-- **AI shopping assistant** — chat widget backed by a server-side Gemini proxy (`/api/ai-chat`).
-- **Customer accounts** — email + OTP sign-in, order history, saved addresses, wishlist, in-app inbox for order/support notifications.
-- **Admin dashboard** (`/admin`) — order management, product/inventory management, customer management, customer support queries, analytics.
-- **B2B / wholesale** — bulk ordering section for restaurants and businesses.
+- The last committed production bundle of the website (`apps/website/public_html`) points at Supabase project **`rwasfuhrvqscqnpwqooq`**, using its own 6-table schema in [`apps/website/supabase_setup.sql`](apps/website/supabase_setup.sql) (`profiles`, `products`, `orders`, `delivery_slots`, `inbox_messages`, `customer_queries`).
+- Both Flutter apps hardcode Supabase project **`aweevhgnbjuxcvnvjeie`** (see `apps/mobile/lib/utils/supabase_config.dart` and `apps/admin/lib/core/config/supabase_config.dart`), backed by the ~38-table schema under [`supabase/migrations`](supabase/migrations).
 
-## Project Structure
+Consequences, in plain terms:
+
+- A customer who signs up on the website does **not** exist in the mobile app, and vice versa.
+- An order placed on the website never appears in the Flutter admin dashboard. An order placed in the mobile app never appears in the website's `/admin`.
+- The two schemas disagree on the shape of the tables they share names for (`products`, `orders`, `profiles`), so you cannot simply repoint one at the other's project without a migration.
+- There are effectively **two admin panels** governing two different datasets — the React one at `apps/website/src/pages/admin` and the Flutter one in `apps/admin`.
+
+Unifying these is the biggest outstanding architectural decision in this repo. See [Roadmap](#roadmap--the-real-punch-list).
+
+## Architecture
 
 ```
-src/
-  components/     Shared UI (Navbar, modals, AuthModal, AdminGuard, cart drawer, etc.)
-  sections/       Homepage sections (Hero, ProductGrid, IGOPrime, Testimonials, etc.)
-  pages/          Routed pages: Checkout, Blog, OrderReview, NotFound, admin/*
-  pages/admin/    Admin dashboard pages (Dashboard, Products, Orders, Customers, Analytics, Queries, Settings)
-  context/        CartContext — cart, wishlist, delivery slot state (in-memory, see section 6)
-  services/       Data layer — orderService, productService, authService, queryService, productStore
-  lib/            Supabase client setup (src/lib/supabase.ts)
-  data/           Static product catalog fallback (used when Supabase isn't configured)
-  types/          Shared TypeScript types (Product, etc.)
-api/              Serverless functions: send-email.ts, send-otp.ts, ai-chat.ts
-static/           Deployed static assets — this is Vite's publicDir (see vite.config.ts), NOT /public
-supabase_setup.sql  Full database schema + RLS policies — run this in the Supabase SQL editor
+                     ┌──────────────────────────┐
+ apps/website  ─────► Supabase rwasfuhr…  (6 tables, own schema)
+ (React, live)       │ + /api serverless fns    │
+                     │   send-email, send-otp,  │
+                     │   ai-chat (Gemini proxy) │
+                     └──────────────────────────┘
+
+ apps/mobile   ─────┐
+ (Flutter)          │  ┌────────────────────────────────────────┐
+                    ├──► Supabase aweevhgn…  (~38 tables, RLS)  │
+ apps/admin    ─────┘  │  supabase/migrations  phase7 → phase20 │
+ (Flutter Web)         │  supabase/functions   admin-* (10)     │
+                       │                       delivery (5)     │
+                       └────────────────────────────────────────┘
 ```
 
-## Getting Started
+The Flutter side follows a strict rule worth preserving: **no business logic in Flutter.** Customers read their own rows through RLS-restricted `SELECT`s; every privileged write goes through an Edge Function running with the service role. `apps/admin` never touches tables directly — all of its reads and writes go through the `admin-*` functions via a single call site, `apps/admin/lib/core/network/edge_function_client.dart`.
 
-### Prerequisites
-- Node.js 18+
-- A Supabase project
-- A Razorpay account (test keys are fine for development)
+### Shared backend layout
 
-### Setup
+- **`supabase/migrations`** — 18 migrations, named by development phase (`phase7_8_payments_orders` → `phase20_delivery_partner_app`). Apply in filename order. Covers products/categories, payments, wishlist, profiles, notifications, reviews, loyalty, subscriptions, offers/coupons, support tickets, delivery tracking, and the admin RBAC system.
+- **`supabase/functions`** — 15 Edge Functions plus `_shared` helpers:
+  - `admin-analytics`, `admin-coupons`, `admin-delivery`, `admin-inventory`, `admin-notifications`, `admin-orders`, `admin-products`, `admin-reports`, `admin-support`, `admin-users` — the admin API. Every one takes `{ action, ...params }` and returns JSON or `{ error }`.
+  - `assign-delivery`, `complete-delivery`, `estimate-eta`, `update-location`, `verify-delivery-otp` — the delivery pipeline.
+- **Admin RBAC** — `admin_users` grants membership, and the `admin_has_permission` RPC is the single source of truth for the 17 permission codes mirrored in `apps/admin/lib/core/permissions/permission_codes.dart` (`products.manage`, `orders.manage`, `roles.manage`, …). The dashboard hides nav items and gates screens on these.
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Copy the env template and fill in your own keys (see the table below for what each one does):
-   ```bash
-   cp .env.example .env
-   ```
-3. Run `supabase_setup.sql` in your Supabase project's SQL editor. It creates all six tables (`profiles`, `products`, `orders`, `delivery_slots`, `inbox_messages`, `customer_queries`) and their RLS policies, and is safe to re-run (uses `IF NOT EXISTS` / `ADD COLUMN IF NOT EXISTS`).
-4. Start the dev server:
-   ```bash
-   npm run dev
-   ```
-   Runs at `http://localhost:5173`.
+## Getting started
 
-### Available Scripts
+Clone once, then work in whichever app you need. Node 20+ for the website; Flutter 3.x with Dart SDK 3.12+ for the two Flutter apps.
 
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Start the local dev server |
-| `npm run build` | Production build to `dist/`, then mirrored into `.next/`, `public/`, `public_html/`, and `build/` for different hosting targets |
-| `npm run preview` | Preview the production build locally |
-| `npm run lint` | TypeScript type-check (`tsc --noEmit`) — there is no automated test suite in this repo |
-| `npm run clean` | Remove the `dist/` build output |
+### apps/website
 
-## Environment Variables
+```bash
+cd apps/website && npm install && npm run dev
+```
 
-Set these in `.env` locally, and in your hosting provider's dashboard for production (Vercel Project Settings, or Hostinger's environment config — they are not read from a committed `.env` file in production).
+Runs at `http://localhost:5173`. Needs a `.env` — copy `apps/website/.env.example` and fill it in. Without `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` the storefront falls back to a static catalog, and support-query features silently do nothing.
 
-| Variable | Used for | Exposed to browser? |
-| --- | --- | --- |
-| `VITE_SUPABASE_URL` | Supabase project URL | Yes (public by design) |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous/public key | Yes (public by design) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Reserved for server-side admin Supabase access | **No — not currently used anywhere in `src/`; never reference it from client code** |
-| `VITE_RAZORPAY_KEY_ID` | Razorpay checkout widget | Yes (public by design) |
-| `VITE_GEMINI_API_KEY` (or `GEMINI_API_KEY`) | Gemini AI, read server-side only by `api/ai-chat.ts` (proxy) | No — despite the `VITE_` prefix, it's only read inside the serverless function, never in browser code |
-| `RESEND_API_KEY` | Transactional email (OTP, order updates) — checked first | No — stays server-side |
-| `GMAIL_USER` / `GMAIL_PASS` | Nodemailer/Gmail SMTP fallback if Resend isn't configured or fails | No — stays server-side |
+### apps/mobile
 
-Anything prefixed `VITE_` is bundled into the client-side JavaScript and visible to anyone who views the page source — expected for public keys (Supabase anon key, Razorpay key ID), but a genuinely secret key must never get a `VITE_` prefix.
+```bash
+cd apps/mobile && flutter pub get && flutter run
+```
 
-## Known Issues & What's Real vs. Mocked
+Supabase credentials are compiled in from `lib/utils/supabase_config.dart` — there is no `.env` step. Targets Android, iOS and Windows.
 
-This section exists so the next developer doesn't have to reverse-engineer what's actually wired up. Everything below was verified by reading the source, not assumed.
+### apps/admin
 
-**Real / live data:**
-- Orders, revenue, active-order count, average order value, and category mix on the admin dashboard and Analytics page are computed from real orders (Supabase `orders` table, with a localStorage cache as an offline fallback).
-- Order confirmation, status-update, and support-reply emails all send for real via `/api/send-email` (Resend, falling back to Gmail SMTP).
-- IGO Prime membership purchase runs a real Razorpay charge and persists `is_prime_member` to Supabase.
-- Customer support queries (`customer_queries`, `inbox_messages`) are fully Supabase-backed — **but silently do nothing if `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` aren't configured** (no localStorage fallback for these two).
+```bash
+cd apps/admin && flutter pub get && flutter run -d chrome
+```
 
-**Cosmetic / hardcoded — looks live, isn't:**
-- Admin Dashboard → "Inventory Alerts" (Chicken Breast 2kg, Vanjaram Steaks 5kg, etc.) and "Live System Feed" are static hardcoded arrays in `DashboardOverview.tsx`, not read from real stock or activity data.
-- Analytics page → "Predictive Demand" (labeled "AI-powered sales forecast") and "Inventory Health" (labeled "Real-time stock level monitoring") are static hardcoded arrays in `orderService.ts::getAnalytics()`. "Batch Health: 100%" is a fixed string, not a calculation.
-- "IGO Rewards" points balance (250 pts) and referral code (`FRESH-IGO-100`) in the profile menu are static, not tied to any account or ledger. The "IGO Prime — Cashback Rewards, 5% instant credit" benefit listed on the homepage has no implementation anywhere in the code.
-- Order review flow (`/review/:orderId`) awards "50 IGO Reward Points" — this message displays unconditionally; there's no points system to actually credit.
-- The photo-upload box on the review page is decorative — it isn't wired to a file input or any upload handler.
+Login requires a real Supabase Auth user that also has an active row in `admin_users`. Without one, the router bounces you straight back to `/login` — create the membership row in Supabase first.
 
-**Functional gaps:**
-- Product stock (`stockLeft` / `stock_left`) is not decremented when an order is placed. Admin can only toggle a product fully in-stock (50) or out-of-stock (0) — there's no per-unit inventory tracking tied to real sales.
-- Cart and wishlist live in React state only (`CartContext.tsx`), not persisted to `localStorage` or Supabase — a page refresh clears both.
-- Customer reviews submitted at `/review/:orderId` are saved to `localStorage` (`igo_reviews`) only, never to Supabase. They won't survive a cleared browser or show up on another device, and the homepage testimonials section reads from this same local-only store.
-- Only one coupon code exists (`IGO10`, hardcoded 10% off in `Checkout.tsx`) — there's no coupon table or admin UI to manage codes.
+### supabase
 
-**Security notes worth fixing before this goes further into production use:**
-- Admin login (`AdminLogin.tsx`) checks a hardcoded plaintext password (`Admin@123`) in client-side code and sets a `localStorage` flag — this is visible to anyone who reads the bundled JS and is not real authentication. `AdminGuard.tsx` only checks that same localStorage flag; there's no server-side session check.
-- Customer OTP verification (`AuthModal.tsx`) compares the code the user types against a value generated and held in browser state — plus a permanent hardcoded bypass code `1234` that authenticates any email. There is no server-side OTP verification.
-- `supabase_setup.sql`'s RLS policies restrict admin writes (`products`, `orders` UPDATE/ALL) to rows where `auth.uid()` resolves to a `profiles.role = 'admin'` row — but the app never signs users into Supabase Auth (it uses the custom OTP flow above), so `auth.uid()` is always null for requests from this app. On a fresh Supabase project with these exact policies applied, admin panel writes (editing a product, updating an order's status) will likely be rejected by RLS. Either relax those specific policies or wire real Supabase Auth sessions for the admin flow — right now there's a mismatch between the schema's security model and how the app actually authenticates.
+```bash
+supabase link --project-ref <your-project-ref>
+supabase db push
+supabase functions deploy
+```
 
-## SQL Files in This Repo
-
-- `supabase_setup.sql` — the only schema file to run. Creates `profiles`, `products`, `orders`, `delivery_slots`, `inbox_messages`, `customer_queries`, enables RLS on all of them, and defines the policies referenced above. Safe to re-run.
-- `supabase/` directory — check here for any migration history before assuming `supabase_setup.sql` is the sole source of truth; reconcile the two if they've drifted.
+Run from the repo root. Local CLI link state (`supabase/.temp`) is gitignored — you will need to `link` on a fresh clone.
 
 ## Deployment
 
-Builds to static files, deployable to Vercel or a traditional host (Hostinger). See `DEPLOY_NOW.md` and `HOSTINGER_DEPLOY.md` for provider-specific steps. Set environment variables in the hosting provider's dashboard in both cases — they don't travel with the build.
+| Target | How | Notes |
+| --- | --- | --- |
+| Website → Hostinger | `.github/workflows/deploy.yml` on push to `main` | Builds `apps/website`, copies SEO files, FTP-uploads `dist/`. Only fires on changes under `apps/website/**`. |
+| Website → Vercel | `apps/website/vercel.json` | Set the Vercel project's **Root Directory** to `apps/website`. |
+| Admin → Vercel | `apps/admin/vercel.json` | Set **Root Directory** to `apps/admin`. The build clones the Flutter SDK inline and runs `flutter build web --release`. |
+| Mobile | `flutter build apk` / `flutter build ipa` | No CI pipeline yet. |
+| Backend | `supabase db push` + `supabase functions deploy` | Manual, from the repo root. |
 
-## Project Status
+Secrets live in the hosting provider (Vercel project settings, GitHub Actions secrets) — never in the repo. The Hostinger workflow expects `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_RAZORPAY_KEY_ID`, `VITE_GEMINI_API_KEY`, `FTP_USERNAME`, `FTP_PASSWORD`.
 
-This is a working, actively developed storefront with real checkout, real payments, and real order/email flows — it is not a static demo. But large parts of the admin dashboard's "intelligence" (forecasting, inventory health, live activity feed) are placeholder visuals, and the admin/OTP auth described above is not production-grade security. Treat the "Known Issues" section as the punch list before a serious production launch.
+Website environment variables are documented in full in [`apps/website/README.md`](apps/website/README.md). Anything prefixed `VITE_` is bundled into client JS and publicly visible — that is fine for the Supabase anon key and Razorpay key ID, and must never happen to a genuinely secret key.
 
-## Suggested Next Steps for Whoever Picks This Up
+## What's real vs. what looks real
 
-1. Replace the hardcoded admin password with real Supabase Auth (or another proper auth provider) and update the RLS policies to match how the app actually authenticates.
-2. Move OTP verification server-side and remove the `1234` bypass code.
-3. Decide whether cart/wishlist/reviews should persist to Supabase — right now all three are either in-memory or localStorage-only.
-4. Either wire the Analytics "Predictive Demand" / "Inventory Health" widgets to real data or relabel them as illustrative.
-5. Add stock decrement logic to `createOrder` (or a Supabase trigger) if inventory tracking needs to be accurate.
-6. Add a coupon table + admin UI if more discount codes are needed beyond the one hardcoded `IGO10`.
+Verified by reading the source, not assumed. The per-app READMEs go deeper; this is the cross-cutting summary.
+
+**Real and working:**
+- Website storefront, cart, checkout, and the order/OTP/support emails through `/api/send-email` (Resend, falling back to Gmail SMTP).
+- `apps/admin` — every screen reads live data from the `admin-*` Edge Functions. The dashboard fans out to eight of them in parallel. Nothing on it is a hardcoded placeholder.
+- `apps/mobile` — real Supabase Auth (email + password), and 17 feature modules across 49 screens covering discovery, cart, checkout, orders, tracking, invoices, subscriptions, loyalty, wallet, support tickets, wishlist, offers and profile.
+- Admin RBAC, enforced server-side via `admin_has_permission` rather than trusted from the client.
+
+**Payments are not fully wired anywhere:**
+- `apps/mobile` supports **Cash on Delivery only**. `RazorpayPaymentGateway` throws `UnimplementedError` — the interface is there, the key is not.
+- The website's last committed production bundle contains the Razorpay key `rzp_test_placeholder`. Confirm what is actually set in the live host's environment before assuming card payments work in production.
+
+**Website-only placeholders** (detailed in [`apps/website/README.md`](apps/website/README.md)): the React admin's "Inventory Alerts", "Live System Feed", "Predictive Demand" and "Inventory Health" widgets are hardcoded arrays; IGO Rewards points and referral codes are static; cart/wishlist are in-memory and reset on refresh; customer reviews save to `localStorage` only.
+
+**Built but unused:**
+- Phase 20 shipped the full backend for a **delivery partner app** — partner auth identity, RLS, Edge Functions. No such app exists in this repo yet.
+- `apps/mobile/lib/services/admin_service.dart` is a complete typed client for the admin Edge Functions, left over from before `apps/admin` existed. The mobile app's only admin surface today is a product-photo upload screen.
+
+## Security issues to fix before scaling up
+
+These are known and load-bearing — treat them as blockers, not nits.
+
+1. **The website's admin login is not authentication.** `apps/website/src/pages/admin/AdminLogin.tsx` compares against a hardcoded plaintext password in client-side code and sets a `localStorage` flag; `AdminGuard.tsx` checks only that flag. The password is readable in the shipped JS bundle. There is no server-side session check. `apps/admin` does this correctly — real Supabase Auth plus a server-checked membership row — and is the model to follow.
+2. **The website's customer OTP is not verified server-side.** `AuthModal.tsx` compares the typed code against a value held in browser state, and a hardcoded bypass code authenticates any email address.
+3. **The website's RLS policies don't match how it authenticates.** `apps/website/supabase_setup.sql` gates admin writes on `auth.uid()` resolving to a `profiles.role = 'admin'` row, but the website never establishes a Supabase Auth session, so `auth.uid()` is always null. On a fresh project with those policies applied, website admin writes will be rejected.
+4. Supabase anon keys are committed in the Flutter sources. Anon keys are public by design, so this is not a leak — but it does mean pointing an app at a different project requires a code change and a rebuild.
+
+## Roadmap — the real punch list
+
+Roughly in dependency order:
+
+1. **Decide the backend question.** Either migrate the website onto the `aweevhgn…` schema (one database, one customer base, one admin panel) or formally accept two products. Everything below is cheaper after this call.
+2. **Replace the website's admin auth and OTP with real Supabase Auth**, then reconcile its RLS policies with the result. Reuse the pattern in `apps/admin`.
+3. **Retire one of the two admin panels.** `apps/admin` is the more complete and more secure of the two.
+4. **Wire a real payment gateway** — the mobile `PaymentGateway` interface is ready for it, and the website's live Razorpay key needs verifying.
+5. **Ship the mobile app.** It is feature-complete but has no store release or CI pipeline.
+6. Build the delivery partner app the Phase 20 backend is already waiting for.
+7. Fix the website's cosmetic-but-labelled-live admin widgets, or relabel them as illustrative.
+
+## Repository notes
+
+- History from all three original repositories is preserved. `apps/mobile` and `apps/admin` were merged with `git subtree`, so `git log` covers everything; their standalone GitHub remotes (`igobackend6/Protein-Cuts-App`, `igobackend6/Protein-cuts-admin`) still exist as separate mirrors.
+- `apps/website/public_html`, `apps/website/.next` and `apps/website/public` are committed **build output** mirrors for different hosting targets, generated by `npm run build`. They are not source — do not edit them by hand.
+- `apps/website/supabase_setup_website_variant.sql` is a second, drifted copy of the website schema that predated this merge. Reconcile it against `supabase_setup.sql` before trusting either.
+- There is no automated test suite in any of the three apps. `npm run lint` in `apps/website` is a TypeScript type-check; the Flutter projects have only the default generated test file.
 
 ## License
 
