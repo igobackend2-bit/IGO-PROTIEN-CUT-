@@ -1,41 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-
-  <!-- Homepage -->
-  <url>
-    <loc>https://igoproteincuts.com/</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-    <image:image>
-      <image:loc>https://igoproteincuts.com/logo.png</image:loc>
-      <image:title>IGO Protein Cuts — Farm-Fresh Meat Delivery in Coimbatore</image:title>
-    </image:image>
-  </url>
-
-  <!-- Blog listing -->
-  <url>
-    <loc>https://igoproteincuts.com/blog</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- Checkout -->
-  <url>
-    <loc>https://igoproteincuts.com/checkout</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-
-  <!-- Products anchor section (homepage shop view) -->
-  <url>
-    <loc>https://igoproteincuts.com/#products</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://igo-protien-cut.vercel.app/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/search</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/offers</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/subscriptions</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/recipes</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/gifts</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/about</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/franchise</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/b2b</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/careers</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/contact</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/support</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/policy</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/category/chicken</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/category/mutton</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/category/beef</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/category/fish</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/category/dry-fish</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/category/eggs</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/category/ready-to-cook</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/category/combo-packs</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/category/healthy-addons</loc><changefreq>daily</changefreq><priority>0.5</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/category/frozen-food</loc><changefreq>daily</changefreq><priority>0.5</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/category/biryani</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
+  <url><loc>https://igo-protien-cut.vercel.app/category/cold-cuts</loc><changefreq>daily</changefreq><priority>0.5</priority></url>
 </urlset>

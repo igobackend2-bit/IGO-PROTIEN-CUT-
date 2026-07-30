@@ -1,178 +1,430 @@
-import React, { useEffect, useState } from 'react';
-import { motion, useScroll, useSpring, AnimatePresence } from 'motion/react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import DeliveryBar from './components/DeliveryBar';
-import Hero from './sections/Hero';
-import CategoryGrid from './sections/CategoryGrid';
-import CustomBoxBuilder from './sections/CustomBoxBuilder';
-import FreshnessStrip from './sections/FreshnessStrip';
-import WhyIGO from './sections/WhyIGO';
-import Traceability from './sections/Traceability';
-import HowItWorks from './sections/HowItWorks';
-import ProductGrid from './sections/ProductGrid';
-import FeaturedRecipes from './sections/FeaturedRecipes';
-import QualityCertifications from './sections/QualityCertifications';
-import DualCTA from './sections/DualCTA';
-import IGOPrime from './sections/IGOPrime';
-import Testimonials from './sections/Testimonials';
-import Blog from './sections/Blog';
-import Newsletter from './sections/Newsletter';
-import Footer from './sections/Footer';
-import { CartProvider, useCart } from './context/CartContext';
-import CartDrawer from './components/CartDrawer';
-import MobileBottomNav from './components/MobileBottomNav';
-import AIAssistant from './components/AIAssistant';
-import CrossSellModal from './components/CrossSellModal';
-import FloatingCheckoutBar from './components/FloatingCheckoutBar';
-import SmoothScroll from './components/SmoothScroll';
-import WhatsAppButton from './components/WhatsAppButton';
-import AdminGuard from './components/AdminGuard';
-import { CheckCircle2, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Navbar } from './components/Navbar';
+import { Footer } from './components/Footer';
+import { ProductModal } from './components/ProductModal';
+import { CartDrawer } from './components/CartDrawer';
+import { LiveOrderTracking } from './components/LiveOrderTracking';
+import { AISearchModal } from './components/AISearchModal';
+import { VoiceSearchModal } from './components/VoiceSearchModal';
+import { UserAuthModal } from './components/UserAuthModal';
+import { IGOEcosystemModal } from './components/IGOEcosystemModal';
+import { ProteinCalculatorModal } from './components/ProteinCalculatorModal';
+import { NotificationCenterModal } from './components/NotificationCenterModal';
+import { FloatingContactWidget } from './components/FloatingContactWidget';
+import { StickyOfferRibbon } from './components/StickyOfferRibbon';
+import { MobileTabBar } from './components/MobileTabBar';
 
-// Admin Pages - Lazy Loaded for Production Stability
-const AdminLogin = React.lazy(() => import('./pages/admin/AdminLogin'));
-const AdminLayout = React.lazy(() => import('./pages/admin/AdminLayout'));
-const DashboardOverview = React.lazy(() => import('./pages/admin/DashboardOverview'));
-const ProductManagement = React.lazy(() => import('./pages/admin/ProductManagement'));
-const SystemSettings = React.lazy(() => import('./pages/admin/SystemSettings'));
-const Analytics = React.lazy(() => import('./pages/admin/Analytics'));
-const CustomerManagement = React.lazy(() => import('./pages/admin/CustomerManagement'));
-const AdminHelp = React.lazy(() => import('./pages/admin/AdminHelp'));
-const OrderManagement = React.lazy(() => import('./pages/admin/OrderManagement'));
-const OrderReview = React.lazy(() => import('./pages/OrderReview'));
-const BlogPage = React.lazy(() => import('./pages/Blog'));
-const CustomerQueries = React.lazy(() => import('./pages/admin/CustomerQueries'));
-const NotFound = React.lazy(() => import('./pages/NotFound'));
-const Checkout = React.lazy(() => import('./pages/Checkout'));
+import { HomePage } from './pages/HomePage';
+import { SearchBrowsePage } from './pages/SearchBrowsePage';
+import { ProductDetailPage } from './pages/ProductDetailPage';
+import { OffersPage } from './pages/OffersPage';
+import { SupportPage } from './pages/SupportPage';
+import { CategoryPage } from './pages/CategoryPage';
+import { SubscriptionsPage } from './pages/SubscriptionsPage';
+import { RecipesPage } from './pages/RecipesPage';
+import { AboutPage } from './pages/AboutPage';
+import { FranchisePage } from './pages/FranchisePage';
+import { B2BPage } from './pages/B2BPage';
+import { GiftingPage } from './pages/GiftingPage';
+import { WishlistPage } from './pages/WishlistPage';
+import { CareersPage } from './pages/CareersPage';
+import { ContactPage } from './pages/ContactPage';
+import { PolicyPage } from './pages/PolicyPage';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { UserAccountPage } from './pages/UserAccountPage';
+import { CartPage } from './pages/CartPage';
+import { AdminDashboard } from './pages/AdminDashboard';
 
-const LoadingFallback = () => (
-  <div className="min-h-screen bg-neutral-dark flex flex-col items-center justify-center gap-4">
-    <motion.div
-      animate={{ rotate: 360 }}
-      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-    >
-      <Loader2 className="w-12 h-12 text-igo-green" />
-    </motion.div>
-    <p className="text-white/50 font-display font-bold uppercase tracking-widest text-xs">IGO Protein Cuts</p>
-  </div>
-);
-
-
-const Notification = () => {
-  const { notification, setNotification } = useCart();
-
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const orderId = (e as CustomEvent).detail;
-      setNotification(`Tracking order ${orderId}. Freshness incoming!`);
-    };
-    window.addEventListener('trackOrder', handler);
-    return () => window.removeEventListener('trackOrder', handler);
-  }, [setNotification]);
-
-  return (
-    <AnimatePresence>
-      {notification && (
-        <motion.div
-          initial={{ opacity: 0, y: 80, x: '-50%' }}
-          animate={{ opacity: 1, y: 0, x: '-50%' }}
-          exit={{ opacity: 0, y: 40, x: '-50%' }}
-          className="fixed bottom-20 md:bottom-10 left-1/2 z-[100] bg-neutral-dark text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[280px] max-w-[90vw]"
-        >
-          <div className="w-8 h-8 bg-igo-green rounded-full flex items-center justify-center flex-shrink-0">
-            <CheckCircle2 className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <p className="text-xs font-bold text-igo-green uppercase tracking-widest leading-none mb-1">Status Update</p>
-            <p className="text-sm font-medium">{notification}</p>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
-
-function Home() {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001
-  });
-
-  return (
-    <div className="min-h-screen selection:bg-igo-green/30">
-      <motion.div
-        className="fixed top-0 left-0 right-0 h-[3px] bg-igo-green z-[60] origin-left"
-        style={{ scaleX }}
-      />
-      <DeliveryBar />
-      <Navbar />
-      <main>
-        <Hero />
-        <CategoryGrid />
-        <ProductGrid />
-        <FreshnessStrip />
-        <WhyIGO />
-        <QualityCertifications />
-        <Traceability />
-        <FeaturedRecipes />
-        <HowItWorks />
-        <DualCTA />
-        <CustomBoxBuilder />
-        <IGOPrime />
-        <Testimonials />
-        <Blog />
-        <Newsletter />
-      </main>
-      <Footer />
-      <CartDrawer />
-      <FloatingCheckoutBar />
-      <MobileBottomNav />
-      <Notification />
-      <AIAssistant />
-      <CrossSellModal />
-      <WhatsAppButton />
-    </div>
-  );
-}
+import { Product, ProductWeightOption, ProductCategory } from './types';
+import { StoreService } from './lib/storage';
+import { Language } from './lib/language';
+import { isActiveAdmin, onAuthStateChange } from './lib/api/auth';
 
 export default function App() {
+  const [currentPath, setCurrentPath] = useState<string>(() => {
+    return window.location.pathname || '/';
+  });
+  // Tracked separately from currentPath so query-string-only navigations
+  // (e.g. /search?q=chicken -> /search?q=mutton) still trigger a re-render
+  // and remount of the target page even though the pathname is unchanged.
+  const [currentQuery, setCurrentQuery] = useState<string>(() => window.location.search || '');
+
+  const [products, setProducts] = useState<Product[]>(() => StoreService.getProducts());
+  const [lang, setLang] = useState<Language>('en');
+
+  // Modal States
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isAISearchOpen, setIsAISearchOpen] = useState(false);
+  const [isVoiceSearchOpen, setIsVoiceSearchOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isEcosystemOpen, setIsEcosystemOpen] = useState(false);
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [trackingOrderId, setTrackingOrderId] = useState<string | null>(null);
+
+  // Admin access. Starts as 'checking' so the dashboard is never rendered
+  // optimistically while the membership lookup is still in flight — the old
+  // behaviour rendered /admin to everyone with no check at all.
+  const [adminAccess, setAdminAccess] = useState<'checking' | 'allowed' | 'denied'>('checking');
+
+  // Sync Products from storage
+  const refreshProducts = () => {
+    setProducts(StoreService.getProducts());
+  };
+
+  // Pull the live catalog and coupons from the canonical, admin-owned tables.
+  // getProducts() has already returned the cached/seed copy synchronously, so
+  // this only ever upgrades what's on screen — it never blocks first paint.
+  useEffect(() => {
+    let cancelled = false;
+
+    StoreService.hydrateCatalog()
+      .then((fresh) => {
+        if (!cancelled && fresh) setProducts(fresh);
+      })
+      .catch(() => {
+        // Non-fatal: the cached catalog stays on screen.
+      });
+
+    StoreService.hydrateCoupons().catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Re-check admin membership against the app's `admin_users` table whenever
+  // the session changes. This replaces the previous `email.includes('admin')`
+  // check, which handed Super Admin to anyone who typed the right address.
+  useEffect(() => {
+    let cancelled = false;
+
+    const check = () => {
+      isActiveAdmin()
+        .then((allowed) => {
+          if (!cancelled) setAdminAccess(allowed ? 'allowed' : 'denied');
+        })
+        .catch(() => {
+          if (!cancelled) setAdminAccess('denied');
+        });
+    };
+
+    check();
+    const unsubscribe = onAuthStateChange(check);
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleProductsUpdate = () => {
+      setProducts(StoreService.getProducts());
+    };
+
+    window.addEventListener('protein_cuts_products_updated', handleProductsUpdate);
+
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname || '/');
+      setCurrentQuery(window.location.search || '');
+    };
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('protein_cuts_products_updated', handleProductsUpdate);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  const navigate = (path: string) => {
+    window.history.pushState({}, '', path);
+    const [pathname, query = ''] = path.split('?');
+    setCurrentPath(pathname);
+    setCurrentQuery(query ? `?${query}` : '');
+    setTrackingOrderId(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleAddToCart = (product: Product, weight: ProductWeightOption, quantity: number) => {
+    const cart = StoreService.getCart();
+    const existingIdx = cart.findIndex(
+      (item) => item.product.id === product.id && item.selectedWeight.label === weight.label
+    );
+
+    if (existingIdx >= 0) {
+      cart[existingIdx].quantity += quantity;
+    } else {
+      cart.push({
+        product,
+        selectedWeight: weight,
+        quantity
+      });
+    }
+
+    StoreService.saveCart(cart);
+  };
+
+  const handleTrackOrder = (orderId: string) => {
+    setTrackingOrderId(orderId);
+    navigate('/account');
+  };
+
+  // Route Renderer
+  const renderMainContent = () => {
+    if (currentPath === '/admin') {
+      // Gated on a real row in the app's `admin_users` table (checked via its
+      // existing self-read RLS policy — nothing about that table is modified).
+      if (adminAccess === 'checking') {
+        return (
+          <div className="min-h-[60vh] flex items-center justify-center">
+            <p className="text-neutral-500">Checking access…</p>
+          </div>
+        );
+      }
+
+      if (adminAccess === 'denied') {
+        return (
+          <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 px-6 text-center">
+            <h1 className="text-2xl font-bold text-neutral-900">Admin access required</h1>
+            <p className="max-w-md text-neutral-600">
+              This area is restricted to IGO staff accounts. Sign in with an admin account, or
+              use the main admin dashboard for products, orders, inventory and customers.
+            </p>
+            <button
+              onClick={() => navigate('/')}
+              className="mt-2 rounded-full bg-[#0F7B3A] px-6 py-2.5 font-semibold text-white"
+            >
+              Back to store
+            </button>
+          </div>
+        );
+      }
+
+      return (
+        <AdminDashboard
+          products={products}
+          onNavigate={navigate}
+          onRefreshProducts={refreshProducts}
+        />
+      );
+    }
+
+    if (trackingOrderId) {
+      return (
+        <LiveOrderTracking
+          orderId={trackingOrderId}
+          onBack={() => setTrackingOrderId(null)}
+        />
+      );
+    }
+
+    if (currentPath.startsWith('/product/')) {
+      const prodId = currentPath.replace('/product/', '');
+      const matched = products.find((p) => p.id === prodId) || products[0];
+      return (
+        <ProductDetailPage
+          key={currentPath}
+          product={matched}
+          allProducts={products}
+          onAddToCart={handleAddToCart}
+          onSelectProduct={(p) => navigate(`/product/${p.id}`)}
+          onNavigate={navigate}
+        />
+      );
+    }
+
+    if (currentPath.startsWith('/category/')) {
+      const cat = currentPath.replace('/category/', '') as ProductCategory;
+      return (
+        <SearchBrowsePage
+          key={currentPath}
+          products={products}
+          initialCategory={cat}
+          onSelectProduct={(p) => navigate(`/product/${p.id}`)}
+          onAddToCart={handleAddToCart}
+          onNavigate={navigate}
+        />
+      );
+    }
+
+    switch (currentPath) {
+      case '/search': {
+        const qParam = new URLSearchParams(currentQuery).get('q') || '';
+        return (
+          <SearchBrowsePage
+            key={currentQuery}
+            products={products}
+            initialSearchQuery={qParam}
+            onSelectProduct={(p) => navigate(`/product/${p.id}`)}
+            onAddToCart={handleAddToCart}
+            onNavigate={navigate}
+          />
+        );
+      }
+      case '/offers':
+        return (
+          <OffersPage
+            products={products}
+            onSelectProduct={(p) => navigate(`/product/${p.id}`)}
+            onAddToCart={handleAddToCart}
+            onNavigate={navigate}
+          />
+        );
+      case '/support':
+        return <SupportPage onNavigate={navigate} />;
+      case '/subscriptions':
+        return <SubscriptionsPage products={products} />;
+      case '/recipes':
+        return <RecipesPage products={products} onAddToCart={handleAddToCart} />;
+      case '/about':
+        return <AboutPage />;
+      case '/franchise':
+        return <FranchisePage />;
+      case '/b2b':
+        return <B2BPage />;
+      case '/gifts':
+        return (
+          <GiftingPage
+            products={products}
+            onSelectProduct={(p) => navigate(`/product/${p.id}`)}
+            onAddToCart={handleAddToCart}
+            onNavigate={navigate}
+          />
+        );
+      case '/wishlist':
+        return (
+          <WishlistPage
+            products={products}
+            onSelectProduct={(p) => navigate(`/product/${p.id}`)}
+            onAddToCart={handleAddToCart}
+            onNavigate={navigate}
+          />
+        );
+      case '/careers':
+        return <CareersPage />;
+      case '/contact':
+        return <ContactPage onNavigate={navigate} />;
+      case '/policy':
+        return <PolicyPage />;
+      case '/account':
+        return (
+          <UserAccountPage
+            onNavigate={navigate}
+          />
+        );
+      case '/cart':
+        return (
+          <CartPage
+            products={products}
+            onSelectProduct={(p) => navigate(`/product/${p.id}`)}
+            onAddToCart={handleAddToCart}
+            onNavigate={navigate}
+            onTrackOrder={handleTrackOrder}
+          />
+        );
+      case '/':
+        return (
+          <HomePage
+            products={products}
+            onSelectProduct={(p) => navigate(`/product/${p.id}`)}
+            onAddToCart={handleAddToCart}
+            onNavigate={navigate}
+          />
+        );
+      default:
+        return <NotFoundPage onNavigate={navigate} />;
+    }
+  };
+
   return (
-    <CartProvider>
-      <SmoothScroll>
-        <React.Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            {/* ── Admin Routes ─────────────────────── */}
-            {/* Login is public — no guard */}
-            <Route path="/admin/login" element={<AdminLogin />} />
-            {/* All other admin routes require session */}
-            <Route path="/admin/*" element={<AdminGuard><AdminLayout /></AdminGuard>}>
-              <Route index element={<Navigate to="dashboard" replace />} />
-              <Route path="dashboard" element={<DashboardOverview />} />
-              <Route path="products" element={<ProductManagement />} />
-              <Route path="orders" element={<OrderManagement />} />
-              <Route path="customers" element={<CustomerManagement />} />
-              <Route path="queries" element={<CustomerQueries />} />
-              <Route path="analytics" element={<Analytics />} />
-              <Route path="settings" element={<SystemSettings />} />
-              <Route path="help" element={<AdminHelp />} />
-              <Route path="promotions" element={<div className="p-8"><h1 className="text-2xl font-bold">Promotions</h1><p className="text-neutral-500">Coming soon...</p></div>} />
-              <Route path="content" element={<div className="p-8"><h1 className="text-2xl font-bold">Content</h1><p className="text-neutral-500">Coming soon...</p></div>} />
-            </Route>
+    <div className="min-h-screen bg-white font-sans text-[#08120B] antialiased selection:bg-[#0F7B3A] selection:text-white flex flex-col justify-between">
+      {/* Navbar */}
+      <Navbar
+        onOpenCart={() => setIsCartOpen(true)}
+        onOpenAuth={() => setIsAuthOpen(true)}
+        onOpenAISearch={() => setIsAISearchOpen(true)}
+        onOpenVoiceSearch={() => setIsVoiceSearchOpen(true)}
+        onOpenEcosystem={() => setIsEcosystemOpen(true)}
+        onOpenCalculator={() => setIsCalculatorOpen(true)}
+        onOpenNotifications={() => setIsNotificationsOpen(true)}
+        onNavigate={navigate}
+        currentPath={currentPath}
+        lang={lang}
+        onToggleLang={() => setLang((prev) => (prev === 'en' ? 'ta' : 'en'))}
+      />
 
-            {/* ── Public Routes ────────────────────── */}
-            <Route path="/" element={<Home />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/review/:orderId" element={<OrderReview />} />
-            <Route path="/blog" element={<BlogPage />} />
+      {/* Main View Area */}
+      <main className="flex-1 pb-16 lg:pb-0">{renderMainContent()}</main>
 
-            {/* ── 404 ─────────────────────────────── */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </React.Suspense>
-      </SmoothScroll>
-    </CartProvider>
+      {/* Footer */}
+      <Footer onNavigate={navigate} />
+
+      {/* Persistent floating contact + mobile bottom tab bar */}
+      <FloatingContactWidget onNavigate={navigate} />
+      <StickyOfferRibbon onNavigate={navigate} />
+      <MobileTabBar
+        currentPath={currentPath}
+        onNavigate={navigate}
+        onOpenVoiceSearch={() => setIsVoiceSearchOpen(true)}
+      />
+
+      {/* Modals & Drawers */}
+      {selectedProduct && (
+        <ProductModal
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          onAddToCart={handleAddToCart}
+        />
+      )}
+
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        onNavigate={navigate}
+      />
+
+      <AISearchModal
+        isOpen={isAISearchOpen}
+        onClose={() => setIsAISearchOpen(false)}
+        onSelectProduct={(p) => navigate(`/product/${p.id}`)}
+        products={products}
+      />
+
+      <VoiceSearchModal
+        isOpen={isVoiceSearchOpen}
+        onClose={() => setIsVoiceSearchOpen(false)}
+        onSearchQuery={(q) => {
+          const match = products.find((p) => p.name.toLowerCase().includes(q.toLowerCase())) || products[0];
+          navigate(`/product/${match.id}`);
+        }}
+      />
+
+      <UserAuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onNavigate={navigate}
+      />
+
+      <IGOEcosystemModal
+        isOpen={isEcosystemOpen}
+        onClose={() => setIsEcosystemOpen(false)}
+        onNavigate={navigate}
+      />
+
+      <ProteinCalculatorModal
+        isOpen={isCalculatorOpen}
+        onClose={() => setIsCalculatorOpen(false)}
+        products={products}
+        onSelectProduct={(p) => navigate(`/product/${p.id}`)}
+      />
+
+      <NotificationCenterModal
+        isOpen={isNotificationsOpen}
+        onClose={() => setIsNotificationsOpen(false)}
+        onNavigate={navigate}
+      />
+    </div>
   );
 }

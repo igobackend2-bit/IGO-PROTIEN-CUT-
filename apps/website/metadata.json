@@ -1,0 +1,6 @@
+{
+  "name": "IGO Protein Cuts",
+  "description": "Enterprise-grade luxury fresh meat e-commerce platform under IGO Groups specializing in fresh Chicken, Mutton, Fish, Eggs, Ready-to-Cook & Gym Protein Subscriptions.",
+  "requestFramePermissions": ["microphone", "geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
