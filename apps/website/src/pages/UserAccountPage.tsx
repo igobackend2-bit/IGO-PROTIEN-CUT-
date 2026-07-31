@@ -23,12 +23,38 @@ import {
   Shield,
   Phone,
   Mail,
-  Pencil
+  Pencil,
+  Lock,
+  Truck,
+  Star,
+  Users,
+  Trophy,
+  MessageSquareText,
+  Award,
+  LocateFixed
 } from 'lucide-react';
 import { StoreService } from '../lib/storage';
 import { SupabaseService } from '../lib/supabaseClient';
-import { signOut, fetchLoyalty, getCurrentUser } from '../lib/api/auth';
-import { Order, UserSubscription, RewardTransaction, WalletTransaction, SavedAddress } from '../types';
+import {
+  signOut,
+  fetchLoyalty,
+  getCurrentUser,
+  MEMBERSHIP_TIERS,
+  tierForPoints,
+  fetchProfile,
+  upsertProfile
+} from '../lib/api/auth';
+import {
+  fetchMySubscriptions,
+  pauseSubscription,
+  resumeSubscription,
+  cancelSubscription,
+  skipNextDelivery,
+  RemoteSubscription
+} from '../lib/api/subscriptions';
+import { fetchMyPayments, PaymentRecord } from '../lib/api/payments';
+import { fetchAchievements, AchievementRow } from '../lib/api/achievements';
+import { Order, RewardTransaction, WalletTransaction, SavedAddress } from '../types';
 
 interface UserAccountPageProps {
   onNavigate: (path: string) => void;
@@ -60,7 +86,30 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
 
   const [userProfile, setUserProfile] = useState(() => StoreService.getUserProfile());
   const [orders, setOrders] = useState<Order[]>(() => StoreService.getOrders());
-  const [subscriptions, setSubscriptions] = useState<UserSubscription[]>(() => SupabaseService.getSubscriptions());
+  // Real subscriptions from the canonical `subscriptions` table (same one the
+  // app reads/writes). Starts empty and loads in the background — there is no
+  // safe local placeholder since a subscription has real billing/delivery
+  // consequences, unlike orders/wishlist which have a harmless cached copy.
+  const [subscriptions, setSubscriptions] = useState<RemoteSubscription[]>([]);
+  const [subsLoading, setSubsLoading] = useState(true);
+  const [subActionBusyId, setSubActionBusyId] = useState<string | null>(null);
+
+  // Payment history — real rows from the canonical `payments` table.
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(true);
+
+  // Achievement badges — real catalog + this user's unlocks.
+  const [achievements, setAchievements] = useState<AchievementRow[]>([]);
+
+  // Notification preferences — real columns on `profiles`, already read/written
+  // by `fetchProfile`/`upsertProfile` in auth.ts; this page just needed a UI.
+  const [notifyPrefs, setNotifyPrefs] = useState<{
+    notifyOrderUpdates: boolean;
+    notifyPromotions: boolean;
+    notifyOffers: boolean;
+    notifyStockAlerts: boolean;
+  } | null>(null);
+  const [notifyBusyKey, setNotifyBusyKey] = useState<string | null>(null);
   const [rewardHistory] = useState<RewardTransaction[]>(() => SupabaseService.getRewardHistory());
   const [walletHistory, setWalletHistory] = useState<WalletTransaction[]>(() => SupabaseService.getWalletHistory());
 
@@ -112,6 +161,94 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
     };
   }, []);
 
+  // Real subscriptions, loaded from the canonical table this page shares
+  // with the app. Replaces the old hard-coded localStorage sample.
+  useEffect(() => {
+    let cancelled = false;
+    setSubsLoading(true);
+    fetchMySubscriptions()
+      .then((subs) => {
+        if (!cancelled && subs) setSubscriptions(subs);
+      })
+      .finally(() => {
+        if (!cancelled) setSubsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Real payment history, loaded from the canonical `payments` table.
+  useEffect(() => {
+    let cancelled = false;
+    setPaymentsLoading(true);
+    fetchMyPayments()
+      .then((rows) => {
+        if (!cancelled && rows) setPayments(rows);
+      })
+      .finally(() => {
+        if (!cancelled) setPaymentsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Real achievement badges, loaded from the canonical `achievements` /
+  // `user_achievements` tables — unlocking happens via a database trigger,
+  // this page only ever reads.
+  useEffect(() => {
+    let cancelled = false;
+    fetchAchievements()
+      .then((rows) => {
+        if (!cancelled && rows) setAchievements(rows);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Notification preferences, loaded from the real `profiles` columns.
+  useEffect(() => {
+    let cancelled = false;
+    getCurrentUser()
+      .then((user) => (user ? fetchProfile(user.id) : null))
+      .then((profile) => {
+        if (!cancelled && profile) {
+          setNotifyPrefs({
+            notifyOrderUpdates: profile.notifyOrderUpdates,
+            notifyPromotions: profile.notifyPromotions,
+            notifyOffers: profile.notifyOffers,
+            notifyStockAlerts: profile.notifyStockAlerts
+          });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleToggleNotifyPref = async (key: keyof NonNullable<typeof notifyPrefs>) => {
+    if (!notifyPrefs) return;
+    const nextValue = !notifyPrefs[key];
+    setNotifyBusyKey(key);
+    setNotifyPrefs({ ...notifyPrefs, [key]: nextValue });
+    const user = await getCurrentUser();
+    if (!user) {
+      setNotifyBusyKey(null);
+      return;
+    }
+    const result = await upsertProfile(user.id, { [key]: nextValue });
+    if (!result.ok) {
+      // Revert on failure rather than showing a preference that didn't save.
+      setNotifyPrefs({ ...notifyPrefs, [key]: !nextValue });
+      showToast(result.error ?? 'Could not save preference.');
+    }
+    setNotifyBusyKey(null);
+  };
+
   // Addresses
   const [showAddAddressModal, setShowAddAddressModal] = useState(false);
   const [newAddrLabel, setNewAddrLabel] = useState<'Home' | 'Work' | 'Other'>('Home');
@@ -120,6 +257,54 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
   const [newAddrStreet, setNewAddrStreet] = useState('');
   const [newAddrPincode, setNewAddrPincode] = useState('560038');
   const [newAddrCity, setNewAddrCity] = useState('Bengaluru');
+
+  // "Use current location" — browser geolocation + free OpenStreetMap
+  // Nominatim reverse geocoding (no API key required). Best-effort only:
+  // on any failure it leaves the fields as-is so the customer can just type
+  // the address manually, same as before this existed.
+  const [isLocating, setIsLocating] = useState(false);
+  const [locateError, setLocateError] = useState<string | null>(null);
+
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocateError('Location is not supported by this browser.');
+      return;
+    }
+    setLocateError(null);
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`,
+            { headers: { Accept: 'application/json' } }
+          );
+          const data = await res.json();
+          const addr = data?.address ?? {};
+          const streetLine = [addr.house_number, addr.road, addr.suburb || addr.neighbourhood]
+            .filter(Boolean)
+            .join(', ');
+          if (streetLine) setNewAddrStreet(streetLine);
+          const city = addr.city || addr.town || addr.village || addr.county;
+          if (city) setNewAddrCity(city);
+          if (addr.postcode) setNewAddrPincode(addr.postcode);
+          if (!streetLine && !city && !addr.postcode) {
+            setLocateError('Could not detect a precise address here — please fill it in manually.');
+          }
+        } catch {
+          setLocateError('Could not detect your address. Please enter it manually.');
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      () => {
+        setLocateError('Location permission denied. Please enter your address manually.');
+        setIsLocating(false);
+      },
+      { timeout: 10000 }
+    );
+  };
 
   // Edit Profile (name + phone — email stays read-only since it's tied to
   // the login/auth identity, not something to silently change here)
@@ -147,10 +332,47 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
-  const handleToggleSub = (subId: string, currentStatus: string) => {
-    const nextStatus = currentStatus === 'Active' ? 'Paused' : 'Active';
-    const updated = SupabaseService.updateSubscriptionStatus(subId, nextStatus);
-    setSubscriptions(updated);
+  const refreshSubscriptions = async () => {
+    const subs = await fetchMySubscriptions();
+    if (subs) setSubscriptions(subs);
+  };
+
+  const handleToggleSub = async (sub: RemoteSubscription) => {
+    setSubActionBusyId(sub.id);
+    const result =
+      sub.status === 'active' ? await pauseSubscription(sub.id) : await resumeSubscription(sub.id, new Date());
+    if (result.ok) {
+      await refreshSubscriptions();
+      showToast(sub.status === 'active' ? 'Subscription paused.' : 'Subscription resumed.');
+    } else {
+      showToast(result.error ?? 'Could not update the subscription.');
+    }
+    setSubActionBusyId(null);
+  };
+
+  const handleCancelSub = async (sub: RemoteSubscription) => {
+    if (!window.confirm('Cancel this subscription? This cannot be undone.')) return;
+    setSubActionBusyId(sub.id);
+    const result = await cancelSubscription(sub.id);
+    if (result.ok) {
+      await refreshSubscriptions();
+      showToast('Subscription cancelled.');
+    } else {
+      showToast(result.error ?? 'Could not cancel the subscription.');
+    }
+    setSubActionBusyId(null);
+  };
+
+  const handleSkipSub = async (sub: RemoteSubscription) => {
+    setSubActionBusyId(sub.id);
+    const result = await skipNextDelivery(sub);
+    if (result.ok) {
+      await refreshSubscriptions();
+      showToast('Next delivery skipped.');
+    } else {
+      showToast(result.error ?? 'Could not skip the next delivery.');
+    }
+    setSubActionBusyId(null);
   };
 
   const handleCancelOrder = (orderId: string) => {
@@ -431,55 +653,108 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {subscriptions.map((sub) => (
-              <div key={sub.id} className="bg-white border border-neutral-200 rounded-3xl p-6 space-y-4 shadow-sm">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                      sub.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-[#08120B] text-white border border-black'
-                    }`}>
-                      {sub.status}
-                    </span>
-                    <h3 className="font-bold text-[#08120B] text-base mt-2">{sub.planTitle}</h3>
-                    <p className="text-xs text-neutral-500 mt-1">{sub.itemsSummary}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-lg font-black text-emerald-700">₹{sub.pricePerDelivery}</div>
-                    <div className="text-[10px] text-neutral-500">Per {sub.frequency} delivery</div>
-                  </div>
-                </div>
+          {subsLoading ? (
+            <div className="text-xs text-neutral-400 text-center py-10">Loading your subscriptions…</div>
+          ) : subscriptions.length === 0 ? (
+            <div className="bg-white border border-neutral-200 rounded-3xl p-10 text-center space-y-2">
+              <Repeat className="w-8 h-8 text-neutral-300 mx-auto" />
+              <p className="text-sm font-bold text-[#08120B]">No active subscriptions yet</p>
+              <p className="text-xs text-neutral-500">Build a recurring box on the Subscriptions page to get started.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {subscriptions.map((sub) => {
+                const busy = subActionBusyId === sub.id;
+                const scheduleLabel =
+                  sub.scheduleType === 'daily'
+                    ? `Every ${sub.interval > 1 ? `${sub.interval} days` : 'day'}`
+                    : sub.scheduleType === 'weekly'
+                    ? `Every ${sub.interval > 1 ? `${sub.interval} weeks` : 'week'}`
+                    : sub.scheduleType === 'monthly'
+                    ? `Every ${sub.interval > 1 ? `${sub.interval} months` : 'month'}`
+                    : 'Custom weekly days';
+                return (
+                  <div key={sub.id} className="bg-white border border-neutral-200 rounded-3xl p-6 space-y-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                            sub.status === 'active'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : sub.status === 'paused'
+                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                              : 'bg-neutral-100 text-neutral-500 border border-neutral-200'
+                          }`}
+                        >
+                          {sub.status}
+                        </span>
+                        <h3 className="font-bold text-[#08120B] text-base mt-2">{sub.productName}</h3>
+                        <p className="text-xs text-neutral-500 mt-1">
+                          Qty {sub.quantity} · {scheduleLabel}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-black text-emerald-700">₹{sub.pricePerDelivery}</div>
+                        <div className="text-[10px] text-neutral-500">Per delivery</div>
+                      </div>
+                    </div>
 
-                <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-3 text-xs space-y-1">
-                  <div className="flex justify-between text-neutral-600">
-                    <span>Next Scheduled Dispatch:</span>
-                    <strong className="text-emerald-700 font-mono">{sub.nextDeliveryDate}</strong>
-                  </div>
-                  <div className="flex justify-between text-neutral-600">
-                    <span>Time Slot:</span>
-                    <strong className="text-[#08120B]">{sub.deliverySlot}</strong>
-                  </div>
-                  <div className="flex justify-between text-neutral-600">
-                    <span>Deliveries Completed:</span>
-                    <strong className="text-[#08120B]">{sub.deliveriesCompleted} cycles</strong>
-                  </div>
-                </div>
+                    <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-3 text-xs space-y-1">
+                      <div className="flex justify-between text-neutral-600">
+                        <span>Next Scheduled Dispatch:</span>
+                        <strong className="text-emerald-700 font-mono">{sub.nextDelivery || '—'}</strong>
+                      </div>
+                      <div className="flex justify-between text-neutral-600">
+                        <span>Time Slot:</span>
+                        <strong className="text-[#08120B]">{sub.deliverySlot ?? 'Not set'}</strong>
+                      </div>
+                    </div>
 
-                <div className="flex items-center gap-2 pt-2">
-                  <button
-                    onClick={() => handleToggleSub(sub.id, sub.status)}
-                    className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase transition flex items-center justify-center gap-1 ${
-                      sub.status === 'Active'
-                        ? 'bg-neutral-100 hover:bg-neutral-200 text-[#08120B] border border-neutral-200'
-                        : 'bg-[#0F7B3A] hover:bg-emerald-500 text-white'
-                    }`}
-                  >
-                    {sub.status === 'Active' ? <><Pause className="w-3.5 h-3.5" /> Pause Plan</> : <><Play className="w-3.5 h-3.5" /> Resume Plan</>}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+                    {sub.status !== 'cancelled' && (
+                      <div className="flex items-center gap-2 pt-2">
+                        <button
+                          disabled={busy}
+                          onClick={() => handleToggleSub(sub)}
+                          className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase transition flex items-center justify-center gap-1 disabled:opacity-50 ${
+                            sub.status === 'active'
+                              ? 'bg-neutral-100 hover:bg-neutral-200 text-[#08120B] border border-neutral-200'
+                              : 'bg-[#0F7B3A] hover:bg-emerald-500 text-white'
+                          }`}
+                        >
+                          {sub.status === 'active' ? (
+                            <>
+                              <Pause className="w-3.5 h-3.5" /> Pause
+                            </>
+                          ) : (
+                            <>
+                              <Play className="w-3.5 h-3.5" /> Resume
+                            </>
+                          )}
+                        </button>
+                        {sub.status === 'active' && (
+                          <button
+                            disabled={busy}
+                            onClick={() => handleSkipSub(sub)}
+                            className="flex-1 py-2 rounded-xl text-xs font-bold uppercase transition bg-white border border-neutral-200 hover:border-emerald-400 text-[#08120B] disabled:opacity-50"
+                          >
+                            Skip Next
+                          </button>
+                        )}
+                        <button
+                          disabled={busy}
+                          onClick={() => handleCancelSub(sub)}
+                          className="py-2 px-3 rounded-xl text-xs font-bold uppercase transition bg-white border border-neutral-200 hover:border-red-300 hover:text-red-600 text-neutral-500 disabled:opacity-50"
+                          title="Cancel subscription"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -495,69 +770,128 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
             <p className="text-xs text-neutral-300">Earn 10 points for every ₹100 spent. Redeem points directly at checkout for discounts.</p>
           </div>
 
-          {/* Membership Tier Comparison & Upgrade */}
+          {/* Membership Tier Progress — real, automatic, points-based
+              (Bronze/Silver/Gold/Platinum at 0/500/1500/3000 pts), matching
+              the mobile app's model exactly. This replaces a previous
+              "Switch to Gold/Platinum/Elite" picker that showed real prices
+              (₹199–499/month) and said "Upgraded!" on click without ever
+              charging anything or saving it anywhere real — every tier here
+              is earned, never bought, and nothing is written by this page. */}
           <div className="bg-white border border-neutral-200 rounded-3xl p-6 space-y-4 shadow-sm">
-            <h3 className="font-bold text-[#08120B] text-sm">Membership Tiers — Upgrade for Real Checkout Perks</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[
-                {
-                  tier: 'Gold' as const,
-                  price: 'Free',
-                  perks: ['Free delivery above ₹499', 'Standard delivery slots', '10 pts / ₹100 spent']
-                },
-                {
-                  tier: 'Platinum' as const,
-                  price: '₹199/month',
-                  perks: ['FREE delivery on every order', 'Priority express slots', '15 pts / ₹100 spent']
-                },
-                {
-                  tier: 'Elite' as const,
-                  price: '₹499/month',
-                  perks: ['FREE delivery on every order', 'Priority express slots', '20 pts / ₹100 spent', 'Dedicated IGO Butler Concierge']
-                }
-              ].map((t) => {
-                const isCurrent = userProfile.membershipTier === t.tier;
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-[#08120B] text-sm">Membership Tiers — Earned by Reward Points</h3>
+              <span className="text-[10px] text-neutral-400 font-semibold">10 pts per ₹100 spent</span>
+            </div>
+
+            {(() => {
+              const currentPoints = loyalty?.points ?? userProfile.rewardPoints ?? 0;
+              const currentTier = tierForPoints(currentPoints);
+              const currentIndex = MEMBERSHIP_TIERS.findIndex((t) => t.key === currentTier.key);
+              const nextTier = MEMBERSHIP_TIERS[currentIndex + 1];
+
+              return nextTier ? (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5">
+                  <div className="flex justify-between text-[11px] font-bold text-emerald-800 mb-1.5">
+                    <span>{currentPoints} pts</span>
+                    <span>{nextTier.requiredPoints - currentPoints} pts to {nextTier.label}</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-white overflow-hidden">
+                    <div
+                      className="h-full bg-[#0F7B3A] rounded-full"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          Math.round(
+                            ((currentPoints - currentTier.requiredPoints) /
+                              (nextTier.requiredPoints - currentTier.requiredPoints)) *
+                              100
+                          )
+                        )}%`
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 text-[11px] font-bold text-emerald-800">
+                  You&rsquo;ve reached the top tier — {currentPoints} pts and counting.
+                </div>
+              );
+            })()}
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {MEMBERSHIP_TIERS.map((t) => {
+                const currentPoints = loyalty?.points ?? userProfile.rewardPoints ?? 0;
+                const isUnlocked = currentPoints >= t.requiredPoints;
+                const isCurrent = tierForPoints(currentPoints).key === t.key;
                 return (
                   <div
-                    key={t.tier}
-                    className={`rounded-2xl border p-4 space-y-3 flex flex-col justify-between ${
-                      isCurrent ? 'bg-emerald-50 border-emerald-500 shadow-sm' : 'bg-neutral-50 border-neutral-200'
+                    key={t.key}
+                    className={`rounded-2xl border p-3.5 space-y-1.5 ${
+                      isCurrent
+                        ? 'bg-emerald-50 border-emerald-500 shadow-sm'
+                        : isUnlocked
+                        ? 'bg-white border-neutral-200'
+                        : 'bg-neutral-50 border-neutral-200 text-neutral-400'
                     }`}
                   >
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="font-black text-[#08120B] text-sm">{t.tier}</span>
-                        {isCurrent && (
-                          <span className="bg-[#0F7B3A] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">Current</span>
-                        )}
-                      </div>
-                      <div className="text-xs font-bold text-emerald-700 mt-0.5">{t.price}</div>
-                      <ul className="space-y-1.5 mt-3">
-                        {t.perks.map((perk) => (
-                          <li key={perk} className="flex items-start gap-1.5 text-[11px] text-neutral-600">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" /> {perk}
-                          </li>
-                        ))}
-                      </ul>
+                    <div className="flex items-center justify-between">
+                      <span className={`font-black text-sm ${isUnlocked ? 'text-[#08120B]' : 'text-neutral-400'}`}>{t.label}</span>
+                      {isCurrent ? (
+                        <span className="bg-[#0F7B3A] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">Current</span>
+                      ) : isUnlocked ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      ) : (
+                        <Lock className="w-3.5 h-3.5 text-neutral-300" />
+                      )}
                     </div>
-                    {!isCurrent && (
-                      <button
-                        onClick={() => {
-                          const updated = { ...userProfile, membershipTier: t.tier };
-                          setUserProfile(updated);
-                          StoreService.saveUserProfile(updated);
-                          showToast(`Upgraded to IGO ${t.tier}! Your new perks apply from your next cart.`);
-                        }}
-                        className="w-full bg-white hover:bg-[#0F7B3A] hover:text-white border border-emerald-300 text-emerald-700 font-bold py-2 rounded-xl text-[11px] uppercase tracking-wider transition cursor-pointer"
-                      >
-                        Switch to {t.tier}
-                      </button>
-                    )}
+                    <div className="text-[10px] font-semibold">{t.requiredPoints} pts</div>
                   </div>
                 );
               })}
             </div>
           </div>
+
+          {/* Achievement badges — real catalog from `achievements`, unlocked
+              rows joined from `user_achievements`. Locked badges show muted
+              rather than being hidden, so customers can see what's next. */}
+          {achievements.length > 0 && (
+            <div className="bg-white border border-neutral-200 rounded-3xl p-6 space-y-4 shadow-sm">
+              <h3 className="font-bold text-[#08120B] text-sm">Achievement Badges</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                {achievements.map((a) => {
+                  const unlocked = !!a.unlockedAt;
+                  const IconComp =
+                    {
+                      shopping_bag: ShoppingBag,
+                      local_shipping: Truck,
+                      military_tech: Trophy,
+                      rate_review: MessageSquareText,
+                      star: Star,
+                      groups: Users
+                    }[a.icon] ?? Award;
+                  return (
+                    <div
+                      key={a.id}
+                      title={a.description}
+                      className={`rounded-2xl border p-3 flex flex-col items-center text-center gap-1.5 ${
+                        unlocked ? 'bg-emerald-50 border-emerald-200' : 'bg-neutral-50 border-neutral-200 opacity-60'
+                      }`}
+                    >
+                      <div
+                        className={`w-9 h-9 rounded-full flex items-center justify-center ${
+                          unlocked ? 'bg-[#0F7B3A] text-white' : 'bg-neutral-200 text-neutral-400'
+                        }`}
+                      >
+                        <IconComp className="w-4 h-4" />
+                      </div>
+                      <span className="text-[10px] font-bold text-[#08120B] leading-tight">{a.title}</span>
+                      {!unlocked && <Lock className="w-3 h-3 text-neutral-300" />}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="bg-white border border-neutral-200 rounded-3xl p-6 space-y-4 shadow-sm">
             <h3 className="font-bold text-[#08120B] text-sm">Points Activity History</h3>
@@ -610,6 +944,51 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Real payment history — from the canonical `payments` table, the
+              same one order placement writes to. Distinct from the wallet
+              statement above (IGO Cash credits/debits), this shows what was
+              actually charged per order and its status. */}
+          <div className="bg-white border border-neutral-200 rounded-3xl p-6 space-y-4 shadow-sm">
+            <h3 className="font-bold text-[#08120B] text-sm">Payment History</h3>
+            {paymentsLoading ? (
+              <div className="text-xs text-neutral-400 text-center py-6">Loading payment history…</div>
+            ) : payments.length === 0 ? (
+              <div className="text-xs text-neutral-400 text-center py-6">No payments yet.</div>
+            ) : (
+              <div className="space-y-2">
+                {payments.map((p) => (
+                  <div
+                    key={p.id}
+                    className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border border-neutral-200 text-xs"
+                  >
+                    <div>
+                      <div className="font-bold text-[#08120B]">
+                        {p.paymentMethod ?? 'Payment'} {p.orderId ? `· Order #${p.orderId.slice(0, 8).toUpperCase()}` : ''}
+                      </div>
+                      <div className="text-[10px] text-neutral-500 font-mono">
+                        {p.createdAt ? new Date(p.createdAt).toLocaleString() : ''}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-black text-sm text-[#08120B]">₹{p.amount}</div>
+                      <span
+                        className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                          p.status === 'Success'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : p.status === 'Refunded'
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                            : 'bg-neutral-100 text-neutral-500 border border-neutral-200'
+                        }`}
+                      >
+                        {p.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -693,6 +1072,54 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
               + Add New Delivery Address
             </button>
           </div>
+
+          {/* Notification Preferences — real profiles.notify_* columns,
+              already read/written by auth.ts; this is just the missing UI. */}
+          {notifyPrefs && (
+            <div className="bg-white border border-neutral-200 rounded-3xl p-6 space-y-4 shadow-sm">
+              <h3 className="font-bold text-[#08120B] text-base">Notification Preferences</h3>
+              <div className="space-y-2">
+                {(
+                  [
+                    { key: 'notifyOrderUpdates', label: 'Order Updates', desc: 'Status changes on your orders (packed, out for delivery, delivered).' },
+                    { key: 'notifyPromotions', label: 'Promotions', desc: 'New offers, seasonal sales and combo deals.' },
+                    { key: 'notifyOffers', label: 'Coupons & Discounts', desc: 'New coupon codes and personalized discounts.' },
+                    { key: 'notifyStockAlerts', label: 'Stock Alerts', desc: 'When a wishlisted or back-ordered item is back in stock.' }
+                  ] as const
+                ).map((row) => {
+                  const enabled = notifyPrefs[row.key];
+                  const busy = notifyBusyKey === row.key;
+                  return (
+                    <div
+                      key={row.key}
+                      className="flex items-center justify-between p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200"
+                    >
+                      <div className="pr-4">
+                        <div className="text-xs font-bold text-[#08120B]">{row.label}</div>
+                        <div className="text-[11px] text-neutral-500 mt-0.5">{row.desc}</div>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={enabled}
+                        disabled={busy}
+                        onClick={() => handleToggleNotifyPref(row.key)}
+                        className={`shrink-0 w-11 h-6 rounded-full relative transition disabled:opacity-50 cursor-pointer ${
+                          enabled ? 'bg-[#0F7B3A]' : 'bg-neutral-300'
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                            enabled ? 'translate-x-[22px]' : 'translate-x-0.5'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -751,6 +1178,18 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white border border-neutral-200 rounded-3xl max-w-md w-full p-6 text-[#08120B] space-y-4 shadow-2xl">
             <h3 className="text-lg font-bold">Add Delivery Address</h3>
+
+            <button
+              type="button"
+              onClick={handleUseCurrentLocation}
+              disabled={isLocating}
+              className="w-full flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold py-2.5 rounded-xl text-xs uppercase transition disabled:opacity-60 cursor-pointer"
+            >
+              <LocateFixed className={`w-3.5 h-3.5 ${isLocating ? 'animate-pulse' : ''}`} />
+              {isLocating ? 'Detecting your location…' : 'Use Current Location'}
+            </button>
+            {locateError && <p className="text-[11px] text-red-600 font-semibold text-center">{locateError}</p>}
+
             <form onSubmit={handleAddAddressSubmit} className="space-y-4 text-xs">
               <div>
                 <label className="block font-bold text-neutral-600 mb-1">Address Label</label>

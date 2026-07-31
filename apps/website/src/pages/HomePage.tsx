@@ -290,18 +290,6 @@ export const HomePage: React.FC<HomePageProps> = ({
       alt: 'Monsoon Special crispy chicken wings'
     },
     {
-      eyebrow: 'Combo Savings',
-      title: 'Bundle & Save',
-      titleAccent: 'Up to 20% Off',
-      copy: 'Curated combo packs — whole chicken, mutton curry cut, and farm eggs bundled together at a better price than buying separately.',
-      badgeLine1: 'Upto',
-      badgeLine2: '20% Off',
-      cta: 'Shop Combo Packs',
-      path: '/category/combo-packs',
-      image: '/Images/banners/mutton-masterpiece-banner.jpg',
-      alt: 'IGO combo pack — mutton curry cut'
-    },
-    {
       eyebrow: 'Subscriber Perk',
       title: 'Subscribe &',
       titleAccent: 'Save ₹1,200/Month',
@@ -1189,9 +1177,11 @@ export const HomePage: React.FC<HomePageProps> = ({
           full-width banner-carousel style used across meat-delivery sites,
           crossfading between slides instead of an instant cut. Every slide
           is still a real, already-established IGO offer (Monsoon Wings /
-          Combo Savings / Subscription Savings / Free Delivery); no
-          third-party photos, copy, or branding — this is IGO's own
-          photography and pricing throughout. */}
+          Subscription Savings / Free Delivery); no third-party photos, copy,
+          or branding — this is IGO's own photography and pricing throughout.
+          The "Combo Savings" slide that used to live here was removed — it
+          duplicated the dedicated Bundle & Save banner section above
+          word-for-word, so the same offer was appearing twice on the page. */}
       <Reveal>
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div

@@ -82,7 +82,7 @@ export function trackingStepFor(status: OrderStatus): number {
  * An order without a deliverable address is worse than no order, so the caller
  * now aborts instead.
  */
-async function ensureAddress(
+export async function ensureAddress(
   userId: string,
   address: SavedAddress
 ): Promise<{ id: string | null; error?: string }> {
@@ -276,11 +276,16 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
 
 // ── Read orders ─────────────────────────────────────────────────────────────
 
+// `delivery_partners` is publicly readable per CLAUDE.md (`for select using (true)`),
+// same as the app's own rich order select in order_service.dart. Joining it here
+// replaces the placeholder "Assigned rider" / blank phone the website used to
+// show — the customer now sees the actual rider name, phone and vehicle.
 const ORDER_SELECT = `
   id, user_id, total_price, status, created_at, delivery_slot, payment_method,
   coupon_code, discount_amount, delivery_fee, tax_amount, address_id,
   delivery_partner_id, delivery_otp, cancelled_at, cancel_reason,
   addresses ( full_name, phone, house, street, area, landmark, city, state, pincode ),
+  delivery_partners ( name, phone, vehicle_number, rating ),
   order_items ( id, quantity, price, product_id, products ( id, name, image_url, weight ) )
 `;
 
@@ -313,6 +318,12 @@ export interface WebsiteOrderSummary {
     pincode: string;
   } | null;
   deliveryOtp: string | null;
+  deliveryPartner: {
+    name: string;
+    phone: string;
+    vehicleNo: string;
+    rating: number;
+  } | null;
 }
 
 function mapOrderRow(row: Record<string, any>): WebsiteOrderSummary {
@@ -326,6 +337,15 @@ function mapOrderRow(row: Record<string, any>): WebsiteOrderSummary {
           .join(', '),
         city: row.addresses.city ?? '',
         pincode: row.addresses.pincode ?? ''
+      }
+    : null;
+
+  const deliveryPartner = row.delivery_partners
+    ? {
+        name: row.delivery_partners.name ?? 'Assigned rider',
+        phone: row.delivery_partners.phone ?? '',
+        vehicleNo: row.delivery_partners.vehicle_number ?? '',
+        rating: Number(row.delivery_partners.rating ?? 0)
       }
     : null;
 
@@ -355,7 +375,8 @@ function mapOrderRow(row: Record<string, any>): WebsiteOrderSummary {
     itemCount: items.length,
     items,
     address,
-    deliveryOtp: row.delivery_otp ?? null
+    deliveryOtp: row.delivery_otp ?? null,
+    deliveryPartner
   };
 }
 

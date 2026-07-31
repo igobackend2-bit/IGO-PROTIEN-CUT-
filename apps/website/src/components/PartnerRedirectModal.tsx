@@ -29,7 +29,11 @@ export const PartnerRedirectModal = ({
   if (!isOpen) return null;
 
   const isFarmer = targetStore === "Farmer's Factory";
-  const storeUrl = isFarmer ? 'https://farmersfactory.com' : 'https://igomart.com';
+  // Farmer's Factory is live at famersfactory.com (part of the same IGO
+  // Group ecosystem). IGO Mart's own storefront isn't live yet, so it has no
+  // real URL to send anyone to — this shows "Coming Soon" instead of
+  // redirecting to a domain that doesn't exist.
+  const storeUrl = isFarmer ? 'https://famersfactory.com' : null;
   const storeBadgeColor = isFarmer ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-[#0F7B3A] text-white border-emerald-600';
 
   const [selectedItems, setSelectedItems] = useState<string[]>(ingredients.map((i) => i.id));
@@ -44,23 +48,19 @@ export const PartnerRedirectModal = ({
   };
 
   const handleProceedToStore = () => {
-    // Open target website in new window
+    if (!storeUrl) return; // IGO Mart — no live site to redirect to yet.
     window.open(storeUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleCopyChecklist = () => {
     const active = ingredients.filter((i) => selectedItems.includes(i.id));
     const text = `${targetStore} Ingredients for ${dishName}:\n` +
-      active.map((i) => `• ${i.name} (${i.quantity}) - ₹${i.estimatedPrice}`).join('\n') +
-      `\nOrder online at: ${storeUrl}`;
+      active.map((i) => `• ${i.name} (${i.quantity})`).join('\n') +
+      (storeUrl ? `\nOrder online at: ${storeUrl}` : `\n${targetStore} is coming soon.`);
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  const totalEst = ingredients
-    .filter((i) => selectedItems.includes(i.id))
-    .reduce((sum, item) => sum + item.estimatedPrice, 0);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn">
@@ -95,15 +95,26 @@ export const PartnerRedirectModal = ({
               Selected recipe preparation: <strong className="text-emerald-700">{dishName}</strong>
             </p>
             <p className="text-neutral-500">
-              The following required {isFarmer ? 'farm-fresh vegetables' : 'authentic masalas & spices'} will be pre-filled for your cart on <strong className="text-[#08120B]">{targetStore}</strong> ({storeUrl}).
+              {storeUrl ? (
+                <>
+                  The following required farm-fresh vegetables will be pre-filled for your cart on{' '}
+                  <strong className="text-[#08120B]">{targetStore}</strong> ({storeUrl}).
+                </>
+              ) : (
+                <>
+                  <strong className="text-[#08120B]">{targetStore}</strong> isn&rsquo;t live yet — you can still copy this
+                  checklist of authentic masalas &amp; spices to order elsewhere in the meantime.
+                </>
+              )}
             </p>
           </div>
 
-          {/* Ingredient Checkbox List */}
+          {/* Ingredient Checklist — just what's needed, no pricing or photos
+              since those aren't real numbers/images for a store that isn't
+              live to buy from yet. */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center text-xs text-neutral-500 font-bold uppercase tracking-wider">
-              <span>Required Recipe Items ({selectedItems.length})</span>
-              <span>Est. Cost</span>
+            <div className="text-xs text-neutral-500 font-bold uppercase tracking-wider">
+              Required Recipe Items ({selectedItems.length})
             </div>
 
             <div className="space-y-2">
@@ -113,37 +124,30 @@ export const PartnerRedirectModal = ({
                   <div
                     key={item.id}
                     onClick={() => toggleItem(item.id)}
-                    className={`p-3 rounded-2xl border flex items-center justify-between gap-3 cursor-pointer transition ${
+                    className={`p-3 rounded-2xl border flex items-center gap-3 cursor-pointer transition ${
                       isChecked
                         ? 'bg-emerald-50 border-emerald-400 text-[#08120B]'
                         : 'bg-white border-neutral-200 text-neutral-500 hover:border-emerald-300'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded-lg border flex items-center justify-center transition ${
-                        isChecked ? 'bg-[#0F7B3A] border-emerald-400 text-white' : 'border-neutral-300'
-                      }`}>
-                        {isChecked && <Check className="w-3.5 h-3.5" />}
-                      </div>
-                      <img src={item.image} alt={item.name} className="w-10 h-10 rounded-xl object-cover border border-neutral-200" />
-                      <div>
-                        <div className="text-xs font-bold text-[#08120B]">{item.name}</div>
-                        <div className="text-[10px] text-neutral-500">{item.quantity}</div>
-                      </div>
+                    <div className={`w-5 h-5 rounded-lg border flex items-center justify-center shrink-0 transition ${
+                      isChecked ? 'bg-[#0F7B3A] border-emerald-400 text-white' : 'border-neutral-300'
+                    }`}>
+                      {isChecked && <Check className="w-3.5 h-3.5" />}
                     </div>
-                    <div className="text-xs font-black text-emerald-700">₹{item.estimatedPrice}</div>
+                    <div>
+                      <div className="text-xs font-bold text-[#08120B]">{item.name}</div>
+                      <div className="text-[10px] text-neutral-500">{item.quantity}</div>
+                    </div>
                   </div>
                 );
               })}
             </div>
           </div>
 
-          {/* Total Summary */}
+          {/* Copy the checklist */}
           <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-4 flex items-center justify-between">
-            <div>
-              <span className="text-xs text-neutral-500">Total Est. Partner Order</span>
-              <div className="text-xl font-black text-emerald-700">₹{totalEst}</div>
-            </div>
+            <span className="text-xs text-neutral-500">{selectedItems.length} item{selectedItems.length === 1 ? '' : 's'} selected</span>
             <button
               onClick={handleCopyChecklist}
               className="text-xs text-emerald-700 hover:text-emerald-600 bg-white hover:bg-emerald-50 border border-emerald-200 px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition cursor-pointer"
@@ -164,9 +168,20 @@ export const PartnerRedirectModal = ({
           </button>
           <button
             onClick={handleProceedToStore}
-            className="flex-1 bg-[#0F7B3A] hover:bg-emerald-500 text-white font-black py-3 rounded-2xl text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 cursor-pointer"
+            disabled={!storeUrl}
+            className={`flex-1 font-black py-3 rounded-2xl text-xs uppercase tracking-wider transition flex items-center justify-center gap-2 ${
+              storeUrl
+                ? 'bg-[#0F7B3A] hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 cursor-pointer'
+                : 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
+            }`}
           >
-            Redirect to {targetStore} <ExternalLink className="w-4 h-4" />
+            {storeUrl ? (
+              <>
+                Redirect to {targetStore} <ExternalLink className="w-4 h-4" />
+              </>
+            ) : (
+              `${targetStore} — Coming Soon`
+            )}
           </button>
         </div>
       </div>

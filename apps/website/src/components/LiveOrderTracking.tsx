@@ -79,7 +79,7 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
         </button>
 
         <div className="flex items-center gap-2 text-xs text-emerald-700 font-bold">
-          <RefreshCw className="w-3.5 h-3.5 animate-spin" /> LIVE GPS FEED ACTIVE
+          <RefreshCw className="w-3.5 h-3.5 animate-spin" /> LIVE STATUS UPDATES
         </div>
       </div>
 
@@ -94,10 +94,12 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
             <div className="text-xs text-neutral-500 mt-0.5">Placed on {new Date(order.createdAt).toLocaleTimeString()}</div>
           </div>
 
-          <div className="bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-2xl text-right">
-            <div className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider">Delivery OTP</div>
-            <div className="text-lg font-black text-[#08120B] tracking-widest">{order.driverDetails?.otp || '4892'}</div>
-          </div>
+          {order.driverDetails?.otp && (
+            <div className="bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-2xl text-right">
+              <div className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider">Delivery OTP</div>
+              <div className="text-lg font-black text-[#08120B] tracking-widest">{order.driverDetails.otp}</div>
+            </div>
+          )}
         </div>
 
         {/* Step Timeline */}
@@ -153,7 +155,10 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
         )}
       </div>
 
-      {/* Simulated Live GPS Map Visualizer */}
+      {/* Delivery progress panel. This is a decorative step visualizer, not a
+          live GPS map — the website has no real-time rider coordinates feed,
+          so it deliberately doesn't claim live location or a specific ETA
+          minute count (both were hard-coded/fake before this fix). */}
       <div className="bg-[#08120B] border border-black rounded-3xl p-6 relative overflow-hidden h-64 flex flex-col justify-between shadow-2xl">
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]" />
 
@@ -162,9 +167,11 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
             <MapPin className="w-4 h-4 text-emerald-400 animate-bounce" />
             <span>Delivering to: {order.shippingAddress.flatNo}, {order.shippingAddress.street}</span>
           </div>
-          <span className="text-xs text-emerald-300 font-bold bg-white/10 px-2.5 py-1 rounded-full border border-white/20">
-            ETA: 12 Minutes
-          </span>
+          {order.trackingStep === 3 && (
+            <span className="text-xs text-emerald-300 font-bold bg-white/10 px-2.5 py-1 rounded-full border border-white/20">
+              On The Way
+            </span>
+          )}
         </div>
 
         {/* Route Animation Line */}
@@ -177,7 +184,10 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
           </div>
 
           <div className="flex-1 mx-4 h-1 bg-white/10 rounded-full relative overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 animate-pulse w-3/4" />
+            <div
+              className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all"
+              style={{ width: `${Math.min(100, (order.trackingStep / 4) * 100)}%` }}
+            />
           </div>
 
           <div className="flex flex-col items-center">

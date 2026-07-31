@@ -238,6 +238,13 @@ export interface Coupon {
   minOrderValue: number;
   description: string;
   expiresAt: string;
+  // Optional targeting — when set, the coupon only discounts matching line
+  // items in the cart rather than the whole order. Undefined on both means a
+  // sitewide coupon. Read defensively from the admin's `coupons` table (see
+  // fetchCoupons in lib/api/catalog.ts) since these columns may not exist on
+  // every install.
+  productId?: string;
+  category?: string;
 }
 
 export interface UserProfile {

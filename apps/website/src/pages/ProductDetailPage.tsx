@@ -33,6 +33,8 @@ import { BrowseProductCard } from '../components/BrowseProductCard';
 import { FadeImage } from '../components/FadeImage';
 import { BULK_TIERS, getActiveBulkTier, getBulkUnitPrice, getBulkLineTotal } from '../lib/pricing';
 import { INITIAL_RECIPES } from '../data/mockData';
+import { fetchProduct } from '../lib/api/catalog';
+import { submitReview } from '../lib/api/reviews';
 
 const CUT_PREFERENCES_BY_CATEGORY: Record<string, string[]> = {
   chicken: ['Curry Cut', 'Boneless Cubes', 'Whole (Skinless)', 'Biryani Cut'],
@@ -119,6 +121,9 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   const [newReviewComment, setNewReviewComment] = useState('');
   const [newReviewRating, setNewReviewRating] = useState(5);
   const [reviewsList, setReviewsList] = useState(product.reviews || []);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [reviewSuccess, setReviewSuccess] = useState(false);
 
   const cutOptions = CUT_PREFERENCES_BY_CATEGORY[product.category] || [];
   const [selectedCut, setSelectedCut] = useState(cutOptions[0] || '');
@@ -214,25 +219,54 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
     setIsWishlisted(list.includes(product.id));
   };
 
-  const handleAddReview = (e: React.FormEvent) => {
+  const handleAddReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newReviewComment.trim()) return;
-    const newRev = {
-      id: `r-${Date.now()}`,
-      userName: 'Valued Customer',
-      rating: newReviewRating,
-      date: 'Just now',
-      comment: newReviewComment,
-      verifiedPurchase: true
-    };
-    setReviewsList([newRev, ...reviewsList]);
+    if (!newReviewComment.trim() || isSubmittingReview) return;
+
+    setIsSubmittingReview(true);
+    setReviewError(null);
+    setReviewSuccess(false);
+
+    const result = await submitReview(product.id, newReviewRating, newReviewComment);
+
+    if (!result.ok) {
+      setReviewError(result.error ?? 'Could not submit your review. Please try again.');
+      setIsSubmittingReview(false);
+      return;
+    }
+
+    // The DB is the source of truth (it also enforces verified-purchase),
+    // so re-read the product's real reviews rather than faking the new row
+    // locally — this is the same fetchProduct() the rest of the catalog
+    // fetch pipeline uses, just scoped to one product.
+    const fresh = await fetchProduct(product.id);
+    if (fresh) setReviewsList(fresh.reviews);
+
     setNewReviewComment('');
+    setNewReviewRating(5);
+    setReviewSuccess(true);
+    setIsSubmittingReview(false);
   };
 
   // Real recently-viewed tracking — records this product view, then reads
   // back whichever real products the shopper actually opened before this one.
   useEffect(() => {
     StoreService.addRecentlyViewed(product.id);
+  }, [product.id]);
+
+  // The `product` prop comes from the catalog list fetch, which never
+  // bundles individual review rows (see toWebsiteProduct in
+  // productAdapter.ts — `reviews: []` always, to keep the list payload
+  // small). Load this product's real reviews once, specifically for this
+  // page, the same way a submitted review refreshes them above.
+  useEffect(() => {
+    let cancelled = false;
+    fetchProduct(product.id).then((fresh) => {
+      if (!cancelled && fresh && fresh.reviews.length > 0) setReviewsList(fresh.reviews);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [product.id]);
 
   const recentlyViewedProducts = StoreService.getRecentlyViewed()
@@ -744,11 +778,20 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-xs text-[#08120B] focus:outline-none focus:border-emerald-500"
             rows={2}
           />
+          {reviewError && (
+            <div className="bg-[#08120B] border border-black rounded-xl p-2.5 text-[11px] text-white">{reviewError}</div>
+          )}
+          {reviewSuccess && (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 text-[11px] text-emerald-700 font-semibold">
+              Thanks — your review is live.
+            </div>
+          )}
           <button
             type="submit"
-            className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs uppercase"
+            disabled={isSubmittingReview}
+            className="bg-[#0F7B3A] hover:bg-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold px-4 py-2 rounded-xl text-xs uppercase"
           >
-            Submit Review
+            {isSubmittingReview ? 'Submitting…' : 'Submit Review'}
           </button>
         </form>
 

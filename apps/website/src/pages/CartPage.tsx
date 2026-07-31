@@ -32,9 +32,14 @@ import {
   BookOpen,
   Copy,
   Truck,
-  PartyPopper
+  PartyPopper,
+  Pencil,
+  Home,
+  Briefcase,
+  Phone,
+  Search
 } from 'lucide-react';
-import { CartItem, Product, ProductWeightOption, CookingType, RequiredIngredient, Order, SavedAddress } from '../types';
+import { CartItem, Product, ProductWeightOption, CookingType, RequiredIngredient, Order, SavedAddress, Coupon } from '../types';
 import { StoreService } from '../lib/storage';
 import { COOKING_RECIPE_MAP } from '../data/cookingIngredientsData';
 import { INITIAL_RECIPES } from '../data/mockData';
@@ -79,8 +84,17 @@ export const CartPage: React.FC<CartPageProps> = ({
   const [appliedDiscount, setAppliedDiscount] = useState(0);
   const [appliedCouponName, setAppliedCouponName] = useState<string | null>(null);
   const [couponMessage, setCouponMessage] = useState<string | null>(null);
+  // Shows the "available offers" dropdown under the promo search box in the
+  // Order Summary. Picking one auto-validates (min order + product/category
+  // targeting) and applies it immediately — see handleApplyCoupon.
+  const [showCouponDropdown, setShowCouponDropdown] = useState(false);
   const [useWallet, setUseWallet] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
+  // Once an address is picked, collapse the full list into a single
+  // professional "deliver to" bar with a Change action — matches the
+  // pattern real checkout flows use instead of always showing every saved
+  // address expanded.
+  const [isAddressListOpen, setIsAddressListOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState('30-Min Express');
   const [paymentMethod, setPaymentMethod] = useState<Order['paymentMethod']>('UPI');
   const [isPlacing, setIsPlacing] = useState(false);
@@ -117,7 +131,10 @@ export const CartPage: React.FC<CartPageProps> = ({
 
   useEffect(() => {
     if (!selectedAddressId && userProfile.addresses && userProfile.addresses.length > 0) {
-      setSelectedAddressId(userProfile.addresses[0].id);
+      // Pre-select whichever address was marked default/most-recently-used
+      // (see handlePlaceOrder) rather than always the first one ever added.
+      const recommended = userProfile.addresses.find((a) => a.isDefault) ?? userProfile.addresses[0];
+      setSelectedAddressId(recommended.id);
     }
   }, [userProfile, selectedAddressId]);
 
@@ -152,25 +169,61 @@ export const CartPage: React.FC<CartPageProps> = ({
 
     const coupons = StoreService.getCoupons();
     const match = coupons.find((c) => c.code.toUpperCase() === targetCode);
-    const subtotalForCoupon = cart.reduce((acc, item) => acc + item.selectedWeight.price * item.quantity, 0);
 
-    if (match) {
-      if (subtotalForCoupon < match.minOrderValue) {
-        setCouponMessage(`Minimum order value ₹${match.minOrderValue} required for coupon ${match.code}.`);
-        setAppliedDiscount(0);
-        setAppliedCouponName(null);
-      } else {
-        const discount = match.discountType === 'flat' ? match.value : Math.round((subtotalForCoupon * match.value) / 100);
-        setAppliedDiscount(discount);
-        setAppliedCouponName(match.code);
-        setCouponMessage(`Coupon ${match.code} applied! Saved ₹${discount}`);
-        setCouponCode(match.code);
-      }
-    } else {
+    if (!match) {
       setCouponMessage('Invalid Coupon Code. Try "PROTEIN100" or "IGO20"');
       setAppliedDiscount(0);
       setAppliedCouponName(null);
+      return;
     }
+
+    const subtotalForCoupon = cart.reduce((acc, item) => acc + item.selectedWeight.price * item.quantity, 0);
+    if (subtotalForCoupon < match.minOrderValue) {
+      setCouponMessage(`Minimum order value ₹${match.minOrderValue} required for coupon ${match.code}.`);
+      setAppliedDiscount(0);
+      setAppliedCouponName(null);
+      return;
+    }
+
+    // Product/category-targeted coupons only ever discount the matching line
+    // items — a coupon scoped to Chicken shouldn't reduce the cost of a
+    // Mutton order just because both are in the same cart. A coupon with
+    // neither field set is sitewide and matches everything.
+    const qualifyingItems = match.productId
+      ? cart.filter((item) => item.product.id === match.productId)
+      : match.category
+      ? cart.filter((item) => item.product.category === match.category)
+      : cart;
+
+    if (qualifyingItems.length === 0) {
+      const scopeLabel = match.productId
+        ? products.find((p) => p.id === match.productId)?.name ?? 'a specific product'
+        : match.category
+        ? `${match.category} products`
+        : 'your cart';
+      setCouponMessage(`${match.code} isn't valid for your cart — it only applies to ${scopeLabel}.`);
+      setAppliedDiscount(0);
+      setAppliedCouponName(null);
+      return;
+    }
+
+    const qualifyingSubtotal = qualifyingItems.reduce((acc, item) => acc + item.selectedWeight.price * item.quantity, 0);
+    const discount =
+      match.discountType === 'flat'
+        ? Math.min(match.value, qualifyingSubtotal)
+        : Math.round((qualifyingSubtotal * match.value) / 100);
+
+    setAppliedDiscount(discount);
+    setAppliedCouponName(match.code);
+    setCouponMessage(`Coupon ${match.code} applied! Saved ₹${discount}`);
+    setCouponCode(match.code);
+  };
+
+  /** Human-readable applicability line for a coupon's Terms & Conditions panel. */
+  const couponScopeLabel = (c: Coupon): string => {
+    if (c.productId) return products.find((p) => p.id === c.productId)?.name ?? 'One specific product';
+    if (c.category) return `${c.category} products only`;
+    return 'All products';
   };
 
   const openPartnerModal = (storeName: "Farmer's Factory" | 'IGO Mart', items: RequiredIngredient[]) => {
@@ -273,6 +326,20 @@ export const CartPage: React.FC<CartPageProps> = ({
     }
 
     StoreService.saveCart([]);
+
+    // Remember the address the customer actually delivered to as the
+    // recommended one for next time, so checkout starts pre-selected on it
+    // instead of always defaulting back to whichever address was added first.
+    if (addresses.length > 1 && !selectedAddress.isDefault) {
+      const reordered: SavedAddress[] = addresses.map((a) => ({
+        ...a,
+        isDefault: a.id === selectedAddress.id
+      }));
+      const updatedProfile = { ...userProfile, addresses: reordered, savedAddresses: reordered };
+      setUserProfile(updatedProfile);
+      StoreService.saveUserProfile(updatedProfile);
+    }
+
     setPlacedOrder(result.order);
     setStep(4);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -656,6 +723,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                 <>
                   <div className="bg-white border border-neutral-200 rounded-3xl p-5 space-y-3 shadow-sm">
                     <div className="flex items-center gap-2 font-bold text-[#08120B] text-sm border-b border-neutral-200 pb-3">
+                      <span className="w-5 h-5 rounded-full bg-[#0F7B3A] text-white text-[10px] font-black flex items-center justify-center shrink-0">1</span>
                       <MapPin className="w-4 h-4 text-emerald-600" /> Deliver To
                     </div>
                     {addresses.length === 0 ? (
@@ -666,36 +734,118 @@ export const CartPage: React.FC<CartPageProps> = ({
                         </button>{' '}
                         to continue.
                       </div>
-                    ) : (
-                      <div className="grid grid-cols-1 gap-2">
-                        {addresses.map((addr) => (
-                          <div
-                            key={addr.id}
-                            onClick={() => setSelectedAddressId(addr.id)}
-                            className={`p-3 rounded-2xl border cursor-pointer transition flex items-start gap-3 ${
-                              selectedAddressId === addr.id
-                                ? 'bg-emerald-50 border-emerald-500 text-[#08120B]'
-                                : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B]'
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              name="address"
-                              checked={selectedAddressId === addr.id}
-                              onChange={() => setSelectedAddressId(addr.id)}
-                              className="mt-1 accent-emerald-500"
-                            />
-                            <div>
-                              <div className="text-xs font-bold text-[#08120B] flex items-center gap-2">
-                                <span>{addr.name} ({addr.type})</span>
-                                {addr.isDefault && <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] px-2 py-0.5 rounded">DEFAULT</span>}
+                    ) : !isAddressListOpen && selectedAddress ? (
+                      // Collapsed "deliver to" bar — the professional-checkout
+                      // pattern (Amazon/Swiggy) of showing one confirmed line
+                      // instead of every saved address expanded at once.
+                      (() => {
+                        const BarIcon = selectedAddress.type === 'Home' ? Home : selectedAddress.type === 'Work' ? Briefcase : MapPin;
+                        return (
+                          <div className="flex items-center gap-3 p-3.5 rounded-2xl border border-emerald-200 bg-emerald-50/60">
+                            <div className="w-9 h-9 rounded-full bg-[#0F7B3A] text-white flex items-center justify-center shrink-0">
+                              <BarIcon className="w-4 h-4" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs font-black text-[#08120B]">{selectedAddress.name}</span>
+                                <span className="text-[9px] font-bold text-neutral-500 bg-white px-1.5 py-0.5 rounded uppercase">
+                                  {selectedAddress.type}
+                                </span>
+                                {selectedAddress.isDefault && (
+                                  <span className="bg-emerald-100 text-emerald-700 border border-emerald-200 text-[9px] font-bold px-2 py-0.5 rounded uppercase">
+                                    Default
+                                  </span>
+                                )}
                               </div>
-                              <div className="text-[11px] text-neutral-600 mt-0.5">
-                                {addr.flatNo}, {addr.street}, {addr.landmark}, {addr.city} - {addr.pincode}
+                              <div className="text-[11px] text-neutral-600 mt-0.5 truncate">
+                                {selectedAddress.flatNo}, {selectedAddress.street}{selectedAddress.landmark ? `, ${selectedAddress.landmark}` : ''}, {selectedAddress.city} - {selectedAddress.pincode}
                               </div>
                             </div>
+                            <button
+                              onClick={() => setIsAddressListOpen(true)}
+                              className="shrink-0 text-[11px] font-bold text-emerald-700 hover:text-emerald-900 cursor-pointer px-2.5 py-1.5 rounded-lg hover:bg-emerald-100/60 transition uppercase tracking-wide"
+                            >
+                              Change
+                            </button>
                           </div>
-                        ))}
+                        );
+                      })()
+                    ) : (
+                      <div className="grid grid-cols-1 gap-2.5">
+                        {addresses.map((addr) => {
+                          const isSelected = selectedAddressId === addr.id;
+                          const TypeIcon = addr.type === 'Home' ? Home : addr.type === 'Work' ? Briefcase : MapPin;
+                          return (
+                            <div
+                              key={addr.id}
+                              onClick={() => {
+                                setSelectedAddressId(addr.id);
+                                setIsAddressListOpen(false);
+                              }}
+                              className={`relative p-4 rounded-2xl border cursor-pointer transition flex items-start gap-3 ${
+                                isSelected
+                                  ? 'bg-emerald-50 border-emerald-500 shadow-sm'
+                                  : 'bg-white border-neutral-200 hover:border-emerald-300'
+                              }`}
+                            >
+                              <div
+                                className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
+                                  isSelected ? 'bg-[#0F7B3A] text-white' : 'bg-neutral-100 text-neutral-500'
+                                }`}
+                              >
+                                <TypeIcon className="w-4 h-4" />
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-xs font-black text-[#08120B]">{addr.name}</span>
+                                  <span className="text-[9px] font-bold text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded uppercase">
+                                    {addr.type}
+                                  </span>
+                                  {addr.isDefault && (
+                                    <span className="bg-emerald-100 text-emerald-700 border border-emerald-200 text-[9px] font-bold px-2 py-0.5 rounded uppercase">
+                                      Default
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-[11px] text-neutral-600 mt-1 leading-relaxed">
+                                  {addr.flatNo}, {addr.street}{addr.landmark ? `, ${addr.landmark}` : ''}, {addr.city} - {addr.pincode}
+                                </div>
+                                {addr.phone && (
+                                  <div className="text-[11px] text-neutral-500 mt-1 flex items-center gap-1.5">
+                                    <Phone className="w-3 h-3 text-emerald-600" /> {addr.phone}
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="flex flex-col items-end gap-2 shrink-0">
+                                {isSelected && (
+                                  <span className="w-5 h-5 rounded-full bg-[#0F7B3A] flex items-center justify-center">
+                                    <Check className="w-3 h-3 text-white" />
+                                  </span>
+                                )}
+                                {/* Editing an address is managed on the Profile page (single
+                                    source of truth for the saved-address list) — this jumps
+                                    straight there instead of duplicating an edit form here. */}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onNavigate('/account');
+                                  }}
+                                  className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 hover:text-emerald-900 cursor-pointer px-2 py-1 rounded-lg hover:bg-emerald-100/60 transition"
+                                >
+                                  <Pencil className="w-3 h-3" /> Edit
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        <button
+                          onClick={() => onNavigate('/account')}
+                          className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 hover:text-emerald-900 cursor-pointer w-fit px-1 py-1"
+                        >
+                          <Plus className="w-3.5 h-3.5" /> Add a new address
+                        </button>
                       </div>
                     )}
                   </div>
@@ -703,6 +853,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                   <div className="bg-white border border-neutral-200 rounded-3xl p-5 space-y-3 shadow-sm">
                     <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
                       <div className="flex items-center gap-2 font-bold text-[#08120B] text-sm">
+                        <span className="w-5 h-5 rounded-full bg-[#0F7B3A] text-white text-[10px] font-black flex items-center justify-center shrink-0">2</span>
                         <Clock className="w-4 h-4 text-emerald-600" /> Select Delivery Time Slot
                       </div>
                       <span className="text-[10px] text-emerald-700 font-mono bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
@@ -710,90 +861,50 @@ export const CartPage: React.FC<CartPageProps> = ({
                       </span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      {deliverySlots.map((s) => (
-                        <button
-                          key={s.id}
-                          onClick={() => setSelectedSlot(s.label === '30-Min Express' ? '30-Min Express' : s.sub)}
-                          className={`p-3 rounded-2xl border text-left transition cursor-pointer ${
-                            selectedSlot === (s.label === '30-Min Express' ? '30-Min Express' : s.sub)
-                              ? 'bg-[#0F7B3A] border-emerald-400 text-white shadow-lg'
-                              : 'bg-white border-neutral-200 text-neutral-600 hover:border-emerald-300'
-                          }`}
-                        >
-                          <div className="text-xs font-bold flex items-center gap-1.5">
-                            <s.Icon className="w-3.5 h-3.5" /> {s.label}
-                          </div>
-                          <div
-                            className={`text-[10px] mt-0.5 ${
-                              selectedSlot === (s.label === '30-Min Express' ? '30-Min Express' : s.sub) ? 'text-emerald-100' : 'text-neutral-400'
-                            }`}
-                          >
-                            {s.sub}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="bg-white border border-neutral-200 rounded-3xl p-5 space-y-4 shadow-sm">
-                    <div className="flex items-center gap-2 font-bold text-[#08120B] text-sm">
-                      <Tag className="w-4 h-4 text-emerald-600" /> Apply Promo Code / Coupon
-                    </div>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="Enter Code (e.g. PROTEIN100)"
-                        value={couponCode}
-                        onChange={(e) => setCouponCode(e.target.value)}
-                        className="flex-1 bg-white border border-neutral-200 focus:border-emerald-500 text-[#08120B] font-bold text-xs px-3.5 py-2.5 rounded-xl focus:outline-none uppercase placeholder:normal-case placeholder:font-normal placeholder:text-neutral-400"
-                      />
-                      <button
-                        onClick={() => handleApplyCoupon()}
-                        className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl uppercase tracking-wider cursor-pointer transition"
-                      >
-                        Apply
-                      </button>
-                    </div>
-                    {couponMessage && (
-                      <div
-                        className={`text-xs p-3 rounded-xl border font-semibold ${
-                          appliedDiscount > 0
-                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                            : 'bg-[#08120B] border-black text-white'
-                        }`}
-                      >
-                        {couponMessage}
-                      </div>
-                    )}
-                    <div className="space-y-2 pt-2 border-t border-neutral-200">
-                      <span className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Available Coupons</span>
-                      <div className="space-y-2">
-                        {availableCoupons.map((c) => (
-                          <div
-                            key={c.code}
-                            onClick={() => handleApplyCoupon(c.code)}
-                            className={`p-2.5 rounded-xl border text-xs flex items-center justify-between cursor-pointer transition ${
-                              appliedCouponName === c.code
-                                ? 'bg-emerald-50 border-emerald-400 text-[#08120B]'
+                      {deliverySlots.map((s) => {
+                        const slotValue = s.label === '30-Min Express' ? '30-Min Express' : s.sub;
+                        const isSelected = selectedSlot === slotValue;
+                        return (
+                          <button
+                            key={s.id}
+                            onClick={() => setSelectedSlot(slotValue)}
+                            className={`relative p-3 rounded-2xl border text-left transition cursor-pointer ${
+                              isSelected
+                                ? 'bg-[#0F7B3A] border-emerald-400 text-white shadow-lg'
                                 : 'bg-white border-neutral-200 text-neutral-600 hover:border-emerald-300'
                             }`}
                           >
-                            <div>
-                              <span className="font-bold text-emerald-700 uppercase">{c.code}</span>
-                              <p className="text-[10px] text-neutral-500">{c.description}</p>
+                            {isSelected && (
+                              <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-white/25 flex items-center justify-center">
+                                <Check className="w-2.5 h-2.5 text-white" />
+                              </span>
+                            )}
+                            <div className="text-xs font-bold flex items-center gap-1.5">
+                              <s.Icon className="w-3.5 h-3.5" /> {s.label}
                             </div>
-                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                              {appliedCouponName === c.code ? 'Applied' : 'Tap to Apply'}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                            <div className={`text-[10px] mt-0.5 ${isSelected ? 'text-emerald-100' : 'text-neutral-400'}`}>
+                              {s.sub}
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
+                  {/* Promo/coupon entry now lives only in the Order Summary card
+                      (right column) — having it duplicated here as its own step
+                      was redundant, and applying was a search box, not a
+                      separate "view terms then confirm" card. */}
+
                   <div className="bg-white border border-neutral-200 rounded-3xl p-5 space-y-4 shadow-sm">
-                    <div className="flex items-center gap-2 font-bold text-[#08120B] text-sm">
-                      <CreditCard className="w-4 h-4 text-emerald-600" /> Select Payment Method
+                    <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
+                      <div className="flex items-center gap-2 font-bold text-[#08120B] text-sm">
+                        <span className="w-5 h-5 rounded-full bg-[#0F7B3A] text-white text-[10px] font-black flex items-center justify-center shrink-0">3</span>
+                        <CreditCard className="w-4 h-4 text-emerald-600" /> Select Payment Method
+                      </div>
+                      <span className="text-[10px] text-neutral-400 font-semibold flex items-center gap-1">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> 256-bit Secure
+                      </span>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {(
@@ -805,16 +916,22 @@ export const CartPage: React.FC<CartPageProps> = ({
                         ] as { id: Order['paymentMethod']; label: string; icon: React.ElementType }[]
                       ).map((method) => {
                         const Icon = method.icon;
+                        const isSelected = paymentMethod === method.id;
                         return (
                           <button
                             key={method.id}
                             onClick={() => setPaymentMethod(method.id)}
-                            className={`p-3 rounded-xl border text-left flex flex-col gap-2 transition cursor-pointer ${
-                              paymentMethod === method.id
-                                ? 'bg-emerald-50 border-emerald-500 text-[#08120B] font-bold'
-                                : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B]'
+                            className={`relative p-3 rounded-xl border text-left flex flex-col gap-2 transition cursor-pointer ${
+                              isSelected
+                                ? 'bg-emerald-50 border-emerald-500 text-[#08120B] font-bold shadow-sm'
+                                : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B] hover:border-emerald-200'
                             }`}
                           >
+                            {isSelected && (
+                              <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-[#0F7B3A] flex items-center justify-center">
+                                <Check className="w-2.5 h-2.5 text-white" />
+                              </span>
+                            )}
                             <Icon className="w-5 h-5 text-emerald-600" />
                             <span className="text-xs">{method.label}</span>
                           </button>
@@ -845,13 +962,16 @@ export const CartPage: React.FC<CartPageProps> = ({
               {step === 3 && (
                 <>
                   <div className="bg-white border border-emerald-200 rounded-3xl p-6 space-y-5 shadow-sm">
-                    <div>
-                      <h3 className="text-lg font-black text-[#08120B] flex items-center gap-2">
-                        <ChefHat className="w-5 h-5 text-[#0F7B3A]" /> What are you planning to cook?
-                      </h3>
-                      <p className="text-xs text-neutral-500 mt-0.5">
-                        Pick a cooking style and we'll match fresh vegetables and masalas to go with your order.
-                      </p>
+                    <div className="flex items-start gap-3 border-b border-neutral-200 pb-4">
+                      <div className="w-9 h-9 rounded-full bg-[#0F7B3A] text-white flex items-center justify-center shrink-0">
+                        <ChefHat className="w-4.5 h-4.5" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-black text-[#08120B]">What are you planning to cook?</h3>
+                        <p className="text-xs text-neutral-500 mt-0.5">
+                          Pick a cooking style and we'll match fresh vegetables and masalas to go with your order.
+                        </p>
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-1.5 bg-neutral-50 p-1 rounded-2xl border border-neutral-200 w-fit flex-wrap">
@@ -927,7 +1047,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                             {activeRecipe.vegetables.map((v) => (
                               <div key={v.id} className="bg-white border border-neutral-200 p-2.5 rounded-xl flex items-center justify-between gap-3 text-xs">
                                 <div className="flex items-center gap-2.5">
-                                  <img src={v.image} alt={v.name} className="w-9 h-9 rounded-lg object-cover border border-neutral-200" />
+                                  <Leaf className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                                   <div>
                                     <div className="font-bold text-[#08120B]">{v.name}</div>
                                     <div className="text-[10px] text-neutral-500">{v.quantity}</div>
@@ -938,8 +1058,11 @@ export const CartPage: React.FC<CartPageProps> = ({
                             ))}
                           </div>
                         </div>
+                        {/* Farmer's Factory is a real, live site now — send
+                            customers straight there instead of through an
+                            extra checklist modal. */}
                         <button
-                          onClick={() => openPartnerModal("Farmer's Factory", activeRecipe.vegetables)}
+                          onClick={() => window.open('https://famersfactory.com', '_blank', 'noopener,noreferrer')}
                           className="w-full bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold py-3 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer shadow-sm mt-2"
                         >
                           <Store className="w-4 h-4 text-emerald-600" />
@@ -953,15 +1076,15 @@ export const CartPage: React.FC<CartPageProps> = ({
                             <div className="flex items-center gap-2 font-black text-[#08120B] text-sm">
                               <Flame className="w-4 h-4 text-emerald-600" /> Masalas, Spices & Groceries
                             </div>
-                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                              IGO Mart Partner
+                            <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                              IGO Mart — Coming Soon
                             </span>
                           </div>
                           <div className="space-y-2">
                             {activeRecipe.masalasAndSpices.map((m) => (
                               <div key={m.id} className="bg-white border border-neutral-200 p-2.5 rounded-xl flex items-center justify-between gap-3 text-xs">
                                 <div className="flex items-center gap-2.5">
-                                  <img src={m.image} alt={m.name} className="w-9 h-9 rounded-lg object-cover border border-neutral-200" />
+                                  <Flame className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                                   <div>
                                     <div className="font-bold text-[#08120B]">{m.name}</div>
                                     <div className="text-[10px] text-neutral-500">{m.quantity}</div>
@@ -977,7 +1100,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                           className="w-full bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer shadow-md mt-2"
                         >
                           <Store className="w-4 h-4" />
-                          Order Spices & Groceries on IGO Mart <ExternalLink className="w-3.5 h-3.5" />
+                          View Masala &amp; Spice List (IGO Mart — Coming Soon)
                         </button>
                       </div>
                     </div>
@@ -1034,6 +1157,84 @@ export const CartPage: React.FC<CartPageProps> = ({
                     <div className="flex justify-between text-emerald-700 font-bold">
                       <span>IGO Wallet Points</span>
                       <span>-₹{walletDiscount}</span>
+                    </div>
+                  )}
+
+                  {/* Quick promo access right from the summary — the only
+                      place to apply a coupon now (the old separate Step 2
+                      card was removed as a duplicate). Tapping the search box
+                      shows available offers; picking one auto-validates
+                      against the cart and applies immediately, or shows why
+                      it can't. */}
+                  {appliedDiscount > 0 && appliedCouponName ? (
+                    <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
+                      <span className="text-[11px] font-bold text-emerald-700">{appliedCouponName} applied</span>
+                      <button
+                        onClick={() => {
+                          setAppliedDiscount(0);
+                          setAppliedCouponName(null);
+                          setCouponMessage(null);
+                        }}
+                        className="text-[10px] font-bold text-neutral-500 hover:text-[#08120B] cursor-pointer uppercase"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <div className="flex gap-1.5">
+                        <div className="relative flex-1 min-w-0">
+                          <Search className="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          <input
+                            type="text"
+                            placeholder="Search offers or enter a code"
+                            value={couponCode}
+                            onChange={(e) => setCouponCode(e.target.value)}
+                            onFocus={() => setShowCouponDropdown(true)}
+                            onBlur={() => setTimeout(() => setShowCouponDropdown(false), 150)}
+                            className="w-full bg-white border border-neutral-200 focus:border-emerald-500 text-[#08120B] font-bold text-[11px] pl-8 pr-3 py-2 rounded-lg focus:outline-none uppercase placeholder:normal-case placeholder:font-normal placeholder:text-neutral-400"
+                          />
+                        </div>
+                        <button
+                          onClick={() => handleApplyCoupon()}
+                          className="bg-neutral-100 hover:bg-[#0F7B3A] hover:text-white text-[#08120B] font-bold text-[10px] px-3 py-2 rounded-lg uppercase tracking-wider cursor-pointer transition shrink-0"
+                        >
+                          Apply
+                        </button>
+                      </div>
+
+                      {showCouponDropdown && availableCoupons.length > 0 && (
+                        <div className="absolute z-20 top-full mt-1.5 left-0 right-0 bg-white border border-neutral-200 rounded-xl shadow-lg overflow-hidden">
+                          <div className="text-[9px] font-bold text-neutral-400 uppercase tracking-wider px-3 pt-2.5 pb-1">
+                            Available Offers
+                          </div>
+                          {availableCoupons
+                            .filter(
+                              (c) =>
+                                !couponCode.trim() ||
+                                c.code.toUpperCase().includes(couponCode.trim().toUpperCase()) ||
+                                c.description.toUpperCase().includes(couponCode.trim().toUpperCase())
+                            )
+                            .map((c) => (
+                              <button
+                                key={c.code}
+                                // onMouseDown fires before the input's onBlur closes the
+                                // dropdown, so the click reliably registers.
+                                onMouseDown={() => {
+                                  setShowCouponDropdown(false);
+                                  handleApplyCoupon(c.code);
+                                }}
+                                className="w-full text-left px-3 py-2 hover:bg-emerald-50 transition cursor-pointer border-t border-neutral-100 first:border-t-0"
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-[11px] font-black text-emerald-700">{c.code}</span>
+                                  <span className="text-[9px] font-bold text-neutral-400">{couponScopeLabel(c)}</span>
+                                </div>
+                                <p className="text-[10px] text-neutral-500 mt-0.5">{c.description}</p>
+                              </button>
+                            ))}
+                        </div>
+                      )}
                     </div>
                   )}
 

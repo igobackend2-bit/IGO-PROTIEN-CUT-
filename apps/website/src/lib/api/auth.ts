@@ -98,11 +98,29 @@ export function onAuthStateChange(callback: (session: Session | null) => void): 
 
 // ── Sign up / in / out ──────────────────────────────────────────────────────
 
+/**
+ * Resolves a referral code to the referrer's user id via the app's own
+ * `resolve_referral_code` RPC (lib/services/loyalty_service.dart calls the
+ * same function). Best-effort: an invalid/unknown code, or the RPC not
+ * existing, just means no referrer gets linked — it never blocks signup.
+ */
+async function resolveReferralCode(code: string): Promise<string | null> {
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase.rpc('resolve_referral_code', { code: code.trim() });
+    if (error) return null;
+    return typeof data === 'string' ? data : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function signUp(
   email: string,
   password: string,
   fullName: string,
-  phone?: string
+  phone?: string,
+  referralCode?: string
 ): Promise<AuthResult> {
   if (!isSupabaseConfigured || !supabase) {
     return { ok: false, error: 'Backend not configured.' };
@@ -121,9 +139,18 @@ export async function signUp(
   if (error) return { ok: false, error: error.message };
   if (!data.user) return { ok: false, error: 'Sign up failed. Please try again.' };
 
+  // Same pattern as the app's signUp(): resolve the code to a referrer id
+  // BEFORE creating the profile row, so `referred_by` is set atomically with
+  // the rest of the profile rather than in a separate follow-up write.
+  const referredBy = referralCode && referralCode.trim() ? await resolveReferralCode(referralCode) : null;
+
   // Ensure a profiles row exists with the details we collected. Uses upsert
   // so it's harmless if the app's own signup trigger already created one.
-  await upsertProfile(data.user.id, { fullName, phoneNumber: phone ?? null });
+  await upsertProfile(data.user.id, {
+    fullName,
+    phoneNumber: phone ?? null,
+    ...(referredBy ? { referredBy } : {})
+  });
 
   notifyAuthChanged();
   return { ok: true, user: data.user };
@@ -212,6 +239,7 @@ export async function upsertProfile(
     notifyPromotions: boolean;
     notifyOffers: boolean;
     notifyStockAlerts: boolean;
+    referredBy: string | null;
   }>
 ): Promise<{ ok: boolean; error?: string }> {
   if (!isSupabaseConfigured || !supabase) {
@@ -226,9 +254,23 @@ export async function upsertProfile(
   if (patch.notifyPromotions !== undefined) row.notify_promotions = patch.notifyPromotions;
   if (patch.notifyOffers !== undefined) row.notify_offers = patch.notifyOffers;
   if (patch.notifyStockAlerts !== undefined) row.notify_stock_alerts = patch.notifyStockAlerts;
+  if (patch.referredBy !== undefined) row.referred_by = patch.referredBy;
 
   const { error } = await supabase.from('profiles').upsert(row, { onConflict: 'id' });
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    // `referred_by` is only set once, at signup — if it's the cause of the
+    // failure (e.g. an FK/type mismatch on an unexpected value), retry
+    // without it rather than losing the rest of the profile write.
+    if ('referred_by' in row) {
+      const { referred_by, ...withoutReferral } = row;
+      const retry = await supabase.from('profiles').upsert(withoutReferral, { onConflict: 'id' });
+      if (!retry.error) {
+        notifyAuthChanged();
+        return { ok: true };
+      }
+    }
+    return { ok: false, error: error.message };
+  }
   notifyAuthChanged();
   return { ok: true };
 }

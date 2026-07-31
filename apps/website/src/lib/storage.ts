@@ -7,6 +7,7 @@ import {
   cancelOrder as cancelOrderApi,
   WebsiteOrderSummary
 } from './api/orders';
+import { fetchWishlistIds, addWishlistItemRemote, removeWishlistItemRemote } from './api/wishlist';
 import { isSupabaseConfigured } from './supabase';
 
 /**
@@ -126,14 +127,15 @@ function mapRemoteOrder(o: WebsiteOrderSummary, catalogById: Map<string, Product
     deliverySlot: o.deliverySlot ?? '',
     trackingStep: o.trackingStep,
     // The delivery OTP is issued by the app's own delivery flow. Only surface
-    // it; never generate one.
+    // it; never generate one. Rider name/phone/vehicle now come from the real
+    // `delivery_partners` join (orders.ts) instead of a hard-coded placeholder.
     ...(o.deliveryOtp
       ? {
           driverDetails: {
-            name: 'Assigned rider',
-            phone: '',
-            vehicleNo: '',
-            rating: 0,
+            name: o.deliveryPartner?.name ?? 'Assigned rider',
+            phone: o.deliveryPartner?.phone ?? '',
+            vehicleNo: o.deliveryPartner?.vehicleNo ?? '',
+            rating: o.deliveryPartner?.rating ?? 0,
             otp: o.deliveryOtp
           }
         }
@@ -576,6 +578,15 @@ export class StoreService {
   }
 
   // WISHLIST
+  //
+  // localStorage stays the synchronous, always-available cache (never the
+  // source of truth, per CLAUDE.md rule #4) — every existing call site keeps
+  // calling getWishlist()/toggleWishlist() exactly as before. When signed
+  // in, toggleWishlist() also fires a background sync to the canonical
+  // `wishlist_items` table so the wishlist survives clearing site data and
+  // matches across the app/website. hydrateWishlist() (called once on app
+  // start / auth change, like hydrateCatalog()) pulls the authoritative
+  // server list down and merges it into the cache.
   static getWishlist(): string[] {
     try {
       const data = localStorage.getItem(WISHLIST_KEY);
@@ -583,19 +594,59 @@ export class StoreService {
     } catch {
       // fallback
     }
-    return ['chk-01', 'fsh-01'];
+    // A first-time visitor (nothing in localStorage yet) has an empty
+    // wishlist — full stop. This used to fall back to two hard-coded fake
+    // ids ('chk-01', 'fsh-01') left over from old mockData.ts, which don't
+    // exist in the real product catalog. That's exactly this bug: the navbar
+    // badge counted them (wishlist.length === 2) while the Wishlist page
+    // correctly filtered them out (no matching real product), showing 0.
+    return [];
   }
 
   static toggleWishlist(productId: string): string[] {
     let list = this.getWishlist();
-    if (list.includes(productId)) {
+    const wasWishlisted = list.includes(productId);
+    if (wasWishlisted) {
       list = list.filter((id) => id !== productId);
     } else {
       list.push(productId);
     }
     localStorage.setItem(WISHLIST_KEY, JSON.stringify(list));
     window.dispatchEvent(new Event('protein_cuts_wishlist_updated'));
+
+    // Best-effort background sync — never blocks the UI, silently no-ops
+    // when signed out (see addWishlistItemRemote/removeWishlistItemRemote).
+    if (isSupabaseConfigured) {
+      const sync = wasWishlisted ? removeWishlistItemRemote(productId) : addWishlistItemRemote(productId);
+      sync.catch(() => {});
+    }
+
     return list;
+  }
+
+  /**
+   * Pulls the signed-in customer's real wishlist from `wishlist_items` and
+   * merges it into the local cache (union of both, so nothing wishlisted
+   * offline is lost). No-ops when signed out or Supabase isn't configured.
+   */
+  static async hydrateWishlist(): Promise<void> {
+    const remoteIds = await fetchWishlistIds();
+    if (!remoteIds) return; // not signed in, or unreachable — keep the local cache as-is
+
+    const localIds = this.getWishlist();
+    const merged = Array.from(new Set([...localIds, ...remoteIds]));
+
+    // Anything only in the local cache (added while offline / before this
+    // sync existed) still needs pushing up so it's not lost server-side.
+    const onlyLocal = localIds.filter((id) => !remoteIds.includes(id));
+    onlyLocal.forEach((id) => addWishlistItemRemote(id).catch(() => {}));
+
+    try {
+      localStorage.setItem(WISHLIST_KEY, JSON.stringify(merged));
+    } catch {
+      // Quota exceeded — the in-memory merge still reaches listeners below.
+    }
+    window.dispatchEvent(new Event('protein_cuts_wishlist_updated'));
   }
 
   // RECENTLY VIEWED — genuinely tracks the products a shopper has opened,

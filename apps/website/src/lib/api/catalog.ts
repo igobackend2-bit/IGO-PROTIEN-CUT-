@@ -267,17 +267,36 @@ export async function fetchComboPacks(): Promise<ComboPackRow[] | null> {
 
 /**
  * Public coupons. The admin owns these; the website only displays and
- * validates them. Targeted coupons (product/category/user specific) are
- * returned too — the cart applies the targeting rules at redemption time.
+ * validates them. Targeted coupons (product/category specific) are returned
+ * too, when the table has those columns — the cart applies the targeting
+ * rules at redemption time (see handleApplyCoupon in CartPage.tsx), only
+ * discounting the matching line items rather than the whole order.
  */
 export async function fetchCoupons(): Promise<Coupon[] | null> {
   if (!isSupabaseConfigured || !supabase) return null;
-  const { data, error } = await supabase
-    .from('coupons')
-    .select(
-      'id, code, description, discount_type, discount_value, min_order_value, is_active, expires_at'
-    )
-    .eq('is_active', true);
+
+  const baseColumns =
+    'id, code, description, discount_type, discount_value, min_order_value, is_active, expires_at';
+  // Optional per-product / per-category targeting columns. Requested
+  // separately rather than assumed, because not every install's `coupons`
+  // table has them — a missing column would fail the whole query otherwise.
+  const richColumns = `${baseColumns}, product_id, category`;
+
+  let data: Record<string, unknown>[] | null = null;
+  let error: { message: string } | null = null;
+  let hasTargetingColumns = true;
+
+  const richResult = await supabase.from('coupons').select(richColumns).eq('is_active', true);
+  data = richResult.data as unknown as Record<string, unknown>[] | null;
+  error = richResult.error;
+
+  if (error) {
+    hasTargetingColumns = false;
+    const baseResult = await supabase.from('coupons').select(baseColumns).eq('is_active', true);
+    data = baseResult.data as unknown as Record<string, unknown>[] | null;
+    error = baseResult.error;
+  }
+
   if (error) {
     console.error('[catalog] coupons query failed:', error.message);
     return null;
@@ -293,6 +312,9 @@ export async function fetchCoupons(): Promise<Coupon[] | null> {
     const discountType: Coupon['discountType'] =
       c.discount_type === 'percent' ? 'percentage' : 'flat';
 
+    const productId = hasTargetingColumns && c.product_id ? String(c.product_id) : undefined;
+    const category = hasTargetingColumns && c.category ? String(c.category) : undefined;
+
     return {
       code: String(c.code ?? ''),
       description: (c.description as string) ?? '',
@@ -301,7 +323,9 @@ export async function fetchCoupons(): Promise<Coupon[] | null> {
       minOrderValue: Number(c.min_order_value ?? 0),
       // No expiry set by the admin means the coupon does not expire. An empty
       // string keeps the required field satisfied without inventing a date.
-      expiresAt: (c.expires_at as string) ?? ''
+      expiresAt: (c.expires_at as string) ?? '',
+      ...(productId ? { productId } : {}),
+      ...(category ? { category } : {})
     };
   });
 }

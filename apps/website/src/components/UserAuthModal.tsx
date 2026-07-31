@@ -34,6 +34,8 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
 
+  const [referralCode, setReferralCode] = useState('');
+
   const [resetToken, setResetToken] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [devHint, setDevHint] = useState<string | null>(null);
@@ -116,7 +118,7 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
     setErrorMsg(null);
     setIsSending(true);
 
-    const result = await signUp(email.trim(), password, name.trim());
+    const result = await signUp(email.trim(), password, name.trim(), undefined, referralCode.trim());
     setIsSending(false);
 
     if (!result.ok || !result.user) {
@@ -443,6 +445,20 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-bold text-white/90 mb-2">
+                        Referral Code <span className="text-white/40 font-normal normal-case">(optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Got a friend's code? Enter it here"
+                        value={referralCode}
+                        onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                        className={inputClasses}
+                        autoComplete="off"
+                      />
                     </div>
 
                     {errorMsg && (

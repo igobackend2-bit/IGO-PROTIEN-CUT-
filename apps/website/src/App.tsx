@@ -112,6 +112,10 @@ export default function App() {
           if (cancelled) return;
           setHasSession(Boolean(user));
           setAdminAccess(allowed ? 'allowed' : 'denied');
+          // Pull the real wishlist down from Supabase whenever a session
+          // appears (sign-in, or already signed in on page load) — no-ops
+          // internally when signed out. See StoreService.hydrateWishlist().
+          if (user) StoreService.hydrateWishlist().catch(() => {});
         })
         .catch(() => {
           if (!cancelled) setAdminAccess('denied');
@@ -328,7 +332,7 @@ export default function App() {
       case '/support':
         return <SupportPage onNavigate={navigate} />;
       case '/subscriptions':
-        return <SubscriptionsPage products={products} />;
+        return <SubscriptionsPage products={products} onNavigate={navigate} />;
       case '/recipes':
         return <RecipesPage products={products} onAddToCart={handleAddToCart} onNavigate={navigate} />;
       case '/about':
@@ -453,7 +457,7 @@ export default function App() {
       {/* Footer — hidden on individual recipe pages (/recipes/:id) and
           product detail pages (/product/:id) per request; still shows on
           the /recipes list, category/search pages, and everywhere else. */}
-      {!currentPath.startsWith('/recipes/') && !currentPath.startsWith('/product/') && (
+      {!currentPath.startsWith('/recipes/') && !currentPath.startsWith('/product/') && currentPath !== '/cart' && (
         <Footer onNavigate={navigate} />
       )}
 

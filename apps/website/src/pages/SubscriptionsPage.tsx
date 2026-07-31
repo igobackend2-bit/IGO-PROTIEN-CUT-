@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Calendar, CheckCircle2, Sparkles, ArrowRight, Dumbbell, Users, Settings2, Minus, Plus, Trash2 } from 'lucide-react';
+import { Calendar, CheckCircle2, Sparkles, ArrowRight, Dumbbell, Users, Settings2, Minus, Plus, Trash2, Loader2 } from 'lucide-react';
 import { INITIAL_SUBSCRIPTION_PLANS } from '../data/mockData';
 import { Product } from '../types';
+import { StoreService } from '../lib/storage';
+import { createSubscription } from '../lib/api/subscriptions';
 
 // Maps each fixed plan to the customer segment it targets — surfaced as a
 // badge on the plan card, and used to steer daily buyers vs. gym users vs.
@@ -14,6 +16,7 @@ const SEGMENT_META: Record<string, { label: string; icon: React.ReactNode }> = {
 
 interface SubscriptionsPageProps {
   products?: Product[];
+  onNavigate?: (path: string) => void;
 }
 
 interface BoxLine {
@@ -21,12 +24,20 @@ interface BoxLine {
   quantity: number;
 }
 
-export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products = [] }) => {
+// Maps the on-screen day chip labels to the 1=Mon..7=Sun numbering the
+// canonical `subscriptions.weekdays` column (and the Flutter app) use.
+const DAY_TO_ISO: Record<string, number> = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7 };
+
+export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products = [], onNavigate }) => {
   const [selectedPlanId, setSelectedPlanId] = useState<string>('plan-01');
   const [selectedDays, setSelectedDays] = useState<string[]>(['Mon', 'Wed', 'Fri']);
   const [subscribed, setSubscribed] = useState(false);
   const [boxFrequency, setBoxFrequency] = useState<'Weekly' | 'Monthly'>('Weekly');
   const [boxLines, setBoxLines] = useState<BoxLine[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const userProfile = StoreService.getUserProfile();
+  const defaultAddress = userProfile.savedAddresses.find((a) => a.isDefault) ?? userProfile.savedAddresses[0];
 
   const selectedPlan = INITIAL_SUBSCRIPTION_PLANS.find((p) => p.id === selectedPlanId);
   const isCustomBuilder = selectedPlan?.category === 'Custom';
@@ -61,6 +72,52 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
   };
 
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  // Real persistence only exists for the Custom box builder — its lines are
+  // tied to actual product ids. The fixed Fitness/Family plans (`itemsIncluded`
+  // are plain description strings, not real product ids) have no safe way to
+  // map onto the `subscriptions.product_id` FK, so we don't fake success for
+  // them; see the button below for the honest message shown instead.
+  const handleConfirmCustomBox = async () => {
+    setSubmitError(null);
+    if (!StoreService.isLoggedIn()) {
+      setSubmitError('Please sign in to start a subscription.');
+      onNavigate?.('/login');
+      return;
+    }
+    if (!defaultAddress) {
+      setSubmitError('Add a delivery address in My Account first.');
+      return;
+    }
+    if (boxLines.length === 0) return;
+
+    setIsSubmitting(true);
+    try {
+      const weekdays = selectedDays.map((d) => DAY_TO_ISO[d]).filter(Boolean);
+      const results = await Promise.all(
+        boxLines.map((line) =>
+          createSubscription({
+            productId: line.productId,
+            quantity: line.quantity,
+            address: defaultAddress,
+            scheduleType: 'custom',
+            weekdays,
+            interval: boxFrequency === 'Weekly' ? 1 : 4,
+            startDate: new Date(),
+            paymentMethod: 'Cash on Delivery'
+          })
+        )
+      );
+      const failed = results.find((r) => !r.ok);
+      if (failed) {
+        setSubmitError(failed.error ?? 'Some items could not be subscribed. Please try again.');
+        return;
+      }
+      setSubscribed(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
@@ -242,16 +299,44 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
           <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center text-xs text-emerald-700 font-bold space-y-1">
             Subscription Activated Successfully!
             <div className="text-[11px] text-neutral-600 font-normal">
-              Your first delivery is scheduled for tomorrow at 6:00 AM.
+              Check My Account → Subscriptions to manage it. Your first delivery is scheduled for{' '}
+              {new Date(Date.now() + 86400000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}.
             </div>
           </div>
+        ) : isCustomBuilder ? (
+          <>
+            {submitError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-xs font-semibold rounded-xl px-3 py-2">
+                {submitError}
+              </div>
+            )}
+            <button
+              onClick={handleConfirmCustomBox}
+              disabled={isSubmitting || boxLines.length === 0}
+              className="w-full bg-[#0F7B3A] hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-3.5 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer shadow-lg shadow-emerald-900/20"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Starting Subscription…
+                </>
+              ) : (
+                <>
+                  Confirm & Start Subscription <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+            {boxLines.length === 0 && (
+              <p className="text-[11px] text-neutral-400 text-center">Add at least one item to your box above.</p>
+            )}
+          </>
         ) : (
-          <button
-            onClick={() => setSubscribed(true)}
-            className="w-full bg-[#0F7B3A] hover:bg-emerald-500 text-white font-black py-3.5 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer shadow-lg shadow-emerald-900/20"
-          >
-            Confirm & Start Subscription <ArrowRight className="w-4 h-4" />
-          </button>
+          <div className="space-y-2">
+            <div className="bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl px-3 py-2.5 text-center">
+              This fixed plan isn't available for instant self-checkout yet — use{' '}
+              <strong>Build Your Own Box</strong> above (the Custom plan) to start a real subscription now, or reach our
+              team via Support to set this plan up for you.
+            </div>
+          </div>
         )}
       </div>
     </div>
