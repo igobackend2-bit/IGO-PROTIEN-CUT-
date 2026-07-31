@@ -85,6 +85,11 @@ export interface WebMetaRow {
   iron_per_100g: number | null;
   prep_time_minutes: number | null;
   recipe_pairing: string | null;
+  /**
+   * Promotional list price, shown struck through. Null (the default) means no
+   * discount is advertised — see 0013_product_list_price.sql.
+   */
+  original_price: number | null;
   slug: string | null;
   seo_title: string | null;
   seo_description: string | null;
@@ -382,6 +387,14 @@ export function toWebsiteProduct(
 
   const description = row.description ?? '';
 
+  // Only treat it as a discount if the list price is genuinely higher.
+  const rawListPrice = meta?.original_price ?? null;
+  const hasDiscount = rawListPrice !== null && rawListPrice > basePrice;
+  const listPrice = hasDiscount ? Math.round(rawListPrice) : basePrice;
+  const discountPercentage = hasDiscount
+    ? Math.round((1 - basePrice / rawListPrice) * 100)
+    : 0;
+
   return {
     id: row.id,
     name: row.name ?? 'Unnamed product',
@@ -391,9 +404,12 @@ export function toWebsiteProduct(
     shortDescription: firstSentence(description, row.brand ?? ''),
 
     basePrice,
-    // No canonical list-price column — see buildWeightOptions.
-    originalPrice: basePrice,
-    discountPercentage: 0,
+    // A discount is advertised ONLY when the admin has set a list price above
+    // the selling price. Otherwise originalPrice mirrors basePrice, and the UI
+    // suppresses both the strikethrough and the badge — rather than rendering
+    // "₹649 ₹649 0% OFF", which is what happened before 0013.
+    originalPrice: listPrice,
+    discountPercentage,
 
     image: primaryImage,
     galleryImages: gallery.length > 0 ? gallery : primaryImage ? [primaryImage] : [],

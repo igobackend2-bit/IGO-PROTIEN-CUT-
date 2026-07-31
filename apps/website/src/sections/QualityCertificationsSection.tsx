@@ -1,14 +1,34 @@
 import React from 'react';
-import { Award, ShieldCheck, Globe, Zap } from 'lucide-react';
+import { useSiteContent } from '../lib/hooks/useSiteContent';
+import { resolveIcon } from '../lib/iconMap';
 
-const certs = [
-  { name: 'ISO 22000', year: '2027', icon: ShieldCheck, desc: 'Food Safety Management' },
-  { name: 'HACCP', year: '2027', icon: Award, desc: 'Risk Assessment Standard' },
-  { name: 'FSSAI Licensed', year: '2027', icon: Globe, desc: 'Lic: 10022043000918' },
-  { name: 'ISO 22000 Certified', year: '2026', icon: Zap, desc: 'Quality Verification' }
-];
+/**
+ * Reads the shared `sections.certifications` block.
+ *
+ * The previous hardcoded list here contained a duplicate — both "ISO 22000" and
+ * "ISO 22000 Certified" — and omitted the Halal entry that OurFarmsSection
+ * showed. One block now feeds all three sections.
+ */
+const CERTS_FALLBACK = {
+  eyebrow: 'Verified Origins',
+  heading: 'Premium Standards, Verified and Trusted.',
+  items: [
+    { name: 'ISO 22000', icon: 'ShieldCheck', desc: 'Food Safety Management', year: '2027' },
+    { name: 'HACCP', icon: 'Award', desc: 'Risk Assessment Standard', year: '2027' },
+    { name: 'FSSAI Licensed', icon: 'Globe', desc: 'Lic: 10022043000918', year: '2027' },
+    { name: '100% Halal', icon: 'Sprout', desc: 'Zabiha certified sourcing', year: '' }
+  ]
+};
 
 export const QualityCertificationsSection: React.FC = () => {
+  const block = useSiteContent('sections.certifications', CERTS_FALLBACK);
+  const certs = block.items.map((c) => ({
+    name: c.name,
+    year: c.year,
+    desc: c.desc,
+    icon: resolveIcon(c.icon)
+  }));
+
   return (
     <section className="bg-emerald-50/60 border-y border-emerald-100 py-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
@@ -42,7 +62,7 @@ export const QualityCertificationsSection: React.FC = () => {
 
         <div className="inline-flex items-center gap-4 px-5 py-3.5 bg-white border border-emerald-100 rounded-2xl shadow-sm">
           <div className="w-11 h-11 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shrink-0">
-            <ShieldCheck className="w-5 h-5" />
+            {React.createElement(resolveIcon('ShieldCheck'), { className: 'w-5 h-5' })}
           </div>
           <div>
             <div className="font-bold text-[#08120B] text-sm">99.9% Compliance</div>

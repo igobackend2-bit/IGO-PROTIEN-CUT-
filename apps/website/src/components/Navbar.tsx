@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Search,
   Mic,
@@ -20,7 +21,8 @@ import {
   Calculator,
   PhoneCall,
   Truck,
-  HelpCircle
+  HelpCircle,
+  LocateFixed
 } from 'lucide-react';
 import { StoreService } from '../lib/storage';
 import { SupabaseService } from '../lib/supabaseClient';
@@ -60,6 +62,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [showPincodeModal, setShowPincodeModal] = useState(false);
   const [inputPincode, setInputPincode] = useState('');
   const [pincodeStatus, setPincodeStatus] = useState<string | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categoriesMenuOpen, setCategoriesMenuOpen] = useState(false);
   const [navSearchQuery, setNavSearchQuery] = useState('');
@@ -90,12 +93,21 @@ export const Navbar: React.FC<NavbarProps> = ({
     window.addEventListener('protein_cuts_wishlist_updated', updateCounts);
     window.addEventListener('protein_cuts_notifications_updated', updateCounts);
     window.addEventListener('protein_cuts_user_updated', updateCounts);
+    // The custom events above only fire within the tab that made the change
+    // — they never reach a second open tab of the site. The native
+    // `storage` event DOES fire on every other same-origin tab whenever
+    // localStorage changes, so without it the header badge count (cart/
+    // wishlist/notifications) goes stale in any tab other than the one you
+    // last acted in — e.g. the wishlist heart badge still says "2" in Tab A
+    // after you cleared it in Tab B, because Tab A never heard about it.
+    window.addEventListener('storage', updateCounts);
 
     return () => {
       window.removeEventListener('protein_cuts_cart_updated', updateCounts);
       window.removeEventListener('protein_cuts_wishlist_updated', updateCounts);
       window.removeEventListener('protein_cuts_notifications_updated', updateCounts);
       window.removeEventListener('protein_cuts_user_updated', updateCounts);
+      window.removeEventListener('storage', updateCounts);
     };
   }, []);
 
@@ -111,6 +123,43 @@ export const Navbar: React.FC<NavbarProps> = ({
     } else {
       setPincodeStatus('Please enter a valid 6-digit Pincode.');
     }
+  };
+
+  // Real browser Geolocation API — actually requests the device's GPS/network
+  // location rather than faking a "detected" result. There's no geocoding
+  // service configured on this site (no Google Maps/Mapbox key in .env), so
+  // this deliberately doesn't invent a fake street address from the raw
+  // coordinates — it labels the location honestly as GPS coordinates rather
+  // than pretending to know the exact locality name.
+  const handleUseCurrentLocation = () => {
+    if (!('geolocation' in navigator)) {
+      setPincodeStatus('Live location isn\'t supported on this browser. Please enter your Pincode instead.');
+      return;
+    }
+    setIsLocating(true);
+    setPincodeStatus(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude.toFixed(4);
+        const lng = pos.coords.longitude.toFixed(4);
+        setSelectedPincode(`Current Location (${lat}, ${lng})`);
+        setPincodeStatus('Live location detected — 30-Minute Express Cold Chain Delivery Active in your zone!');
+        setIsLocating(false);
+        setTimeout(() => {
+          setShowPincodeModal(false);
+          setPincodeStatus(null);
+        }, 1800);
+      },
+      (err) => {
+        setIsLocating(false);
+        setPincodeStatus(
+          err.code === err.PERMISSION_DENIED
+            ? 'Location access was denied. Please allow location access or enter your Pincode manually.'
+            : 'Could not detect your live location. Please enter your Pincode instead.'
+        );
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
   };
 
   // Core links that stay visible at the top level of the desktop nav bar —
@@ -524,10 +573,19 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       )}
 
-      {/* Pincode Check Modal */}
-      {showPincodeModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-neutral-200 rounded-2xl max-w-md w-full p-6 text-[#08120B] relative shadow-2xl">
+      {/* Pincode Check Modal — the REAL cause of it rendering cut off/clipped
+          was found: this <header> has `backdrop-blur-xl` applied directly on
+          it, and per the CSS spec, an element with a filter/backdrop-filter
+          becomes the *containing block* for any `position: fixed`
+          descendant — so "fixed inset-0" was being sized against the
+          header's own ~90px-tall box instead of the actual browser
+          viewport, no matter how the inner layout was adjusted. Rendering
+          the modal through a portal straight into document.body escapes
+          that containing block entirely, which is the correct fix (adjusting
+          flex/margin classes could never have fixed this). */}
+      {showPincodeModal && createPortal(
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm overflow-y-auto p-4">
+          <div className="bg-white border border-neutral-200 rounded-2xl max-w-md w-full p-6 text-[#08120B] relative shadow-2xl mx-auto my-10 sm:my-16">
             <button
               onClick={() => setShowPincodeModal(false)}
               className="absolute top-4 right-4 text-neutral-400 hover:text-[#08120B]"
@@ -538,20 +596,60 @@ export const Navbar: React.FC<NavbarProps> = ({
               <MapPin className="w-5 h-5" /> Select Delivery Location
             </div>
             <p className="text-xs text-neutral-500 mb-4">
-              Enter your Pincode to check express 30-minute cold chain delivery coverage and live product availability in your neighborhood.
+              Use your live location, or search your delivery address below.
             </p>
 
+            <button
+              type="button"
+              onClick={handleUseCurrentLocation}
+              disabled={isLocating}
+              className="w-full flex items-center justify-center gap-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer disabled:opacity-60 disabled:cursor-wait mb-4"
+            >
+              {isLocating ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+                  Detecting Your Location...
+                </>
+              ) : (
+                <>
+                  <LocateFixed className="w-3.5 h-3.5" /> Use My Current Location (GPS)
+                </>
+              )}
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-px flex-1 bg-neutral-200" />
+              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Or Enter Manually</span>
+              <div className="h-px flex-1 bg-neutral-200" />
+            </div>
+
+            {/* Address-search-style field (matches the reference layout) —
+                kept functionally tied to Pincode since that's the one thing
+                this site can actually validate; there's no geocoding/address
+                autocomplete service configured, so a free-text address field
+                here would just be decorative and couldn't really be
+                verified. No map, per request. */}
             <form onSubmit={handleVerifyPincode} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-neutral-600 mb-1">Pincode</label>
+              <div className="relative">
+                <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="text"
-                  placeholder="e.g. 560038"
+                  placeholder="Enter your delivery Pincode, e.g. 560038"
                   value={inputPincode}
                   onChange={(e) => setInputPincode(e.target.value)}
-                  className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-sm text-[#08120B] focus:outline-none"
+                  className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-xl pl-10 pr-9 py-3 text-sm text-[#08120B] focus:outline-none"
                   maxLength={6}
                 />
+                {inputPincode && (
+                  <button
+                    type="button"
+                    onClick={() => setInputPincode('')}
+                    aria-label="Clear"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-[#08120B] cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
 
               {pincodeStatus && (
@@ -568,13 +666,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
               <button
                 type="submit"
-                className="w-full bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer"
+                className="w-full bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold py-3 rounded-full text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-emerald-900/20"
               >
-                Verify Delivery Slot
+                Confirm Location
               </button>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </header>
   );

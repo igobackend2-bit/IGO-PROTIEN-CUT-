@@ -1,34 +1,48 @@
 import React from 'react';
-import { Truck, ShieldCheck, RefreshCw } from 'lucide-react';
+import { useSiteContent } from '../lib/hooks/useSiteContent';
+import { resolveIcon } from '../lib/iconMap';
 
-// NOTE: real customer testimonials aren't live yet — the plan is a proper
-// review pipeline (customer submits a review -> admin approves it in the
-// admin dashboard -> approved reviews surface here) once the site is in
-// production. Until that exists, this section states real, already-
-// established site facts (30-min delivery, freshness grading, subscription
-// support are genuine features documented elsewhere on this site) rather
-// than inventing fake named customers/quotes and labeling them "Verified" —
-// that would be a false-advertising risk. Swap this array for
-// admin-approved reviews once the moderation pipeline is built.
-const valueProps = [
-  {
-    icon: Truck,
-    title: 'Fast, ice-cold delivery',
-    body: 'Cuts are packed in insulated, ice-lined boxes and delivered within your promised morning slot — every order, every time.'
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Hygiene-first sourcing',
-    body: 'Every cut carries a freshness grade and is antibiotic-free, cleaned and portioned exactly to the spec you order.'
-  },
-  {
-    icon: RefreshCw,
-    title: 'Real subscription support',
-    body: 'Pause, reschedule, or change your plan anytime — backed by a support team that actually picks up the phone.'
-  }
-];
+// NOTE: real customer testimonials aren't live yet. `product_reviews` now
+// exists in the database with an enforce_verified_purchase trigger and admin
+// moderation in the Flutter dashboard, so the pipeline is there — this section
+// just isn't wired to it yet.
+//
+// Until it is, the cards state real, already-established site facts (30-min
+// delivery, freshness grading, subscription support) rather than inventing
+// named customers and quotes labelled "Verified", which would be a
+// false-advertising risk.
+//
+// Editable from /admin → Sections → Trust Strip.
+const FALLBACK = {
+  eyebrow: 'WHY CUSTOMERS STAY',
+  heading: 'Built Around Trust, Not Just Delivery',
+  items: [
+    {
+      icon: 'Truck',
+      title: 'Fast, ice-cold delivery',
+      text: 'Cuts are packed in insulated, ice-lined boxes and delivered within your promised morning slot — every order, every time.'
+    },
+    {
+      icon: 'ShieldCheck',
+      title: 'Hygiene-first sourcing',
+      text: 'Every cut carries a freshness grade and is antibiotic-free, cleaned and portioned exactly to the spec you order.'
+    },
+    {
+      icon: 'Repeat',
+      title: 'Real subscription support',
+      text: 'Pause, reschedule, or change your plan anytime — backed by a support team that actually picks up the phone.'
+    }
+  ]
+};
 
 export const TestimonialsSection: React.FC = () => {
+  const block = useSiteContent('sections.trust_strip', FALLBACK);
+  const valueProps = block.items.map((item) => ({
+    icon: resolveIcon(item.icon),
+    title: item.title,
+    body: item.text
+  }));
+
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
       <div className="text-center max-w-xl mx-auto space-y-2">

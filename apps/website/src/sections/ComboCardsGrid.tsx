@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Heart, ArrowRight } from 'lucide-react';
 import { StoreService } from '../lib/storage';
 import type { Product } from '../types';
+import { useSiteContent } from '../lib/hooks/useSiteContent';
 
 interface ComboCardsGridProps {
   products: Product[];
@@ -14,6 +15,15 @@ interface ComboCardsGridProps {
 // (StoreService.toggleWishlist, same as every other product card on this
 // site) rather than a decorative icon.
 export const ComboCardsGrid: React.FC<ComboCardsGridProps> = ({ products, onSelectProduct }) => {
+  // Editable from /admin → Homepage → Combo Packs — heading.
+  const comboHeading = useSiteContent('home.rail_combo_packs', {
+    eyebrow: 'Bundle & Save',
+    heading: 'Combo Packs',
+    subheading: 'Curated bundles at a better price than buying each cut separately.',
+    viewAllLabel: 'View All',
+    viewAllPath: '/category/combo-packs'
+  });
+
   const combos = products.filter((p) => p.category === 'combo-packs');
   const [wishlist, setWishlist] = useState<string[]>(() => StoreService.getWishlist());
 
@@ -30,8 +40,8 @@ export const ComboCardsGrid: React.FC<ComboCardsGridProps> = ({ products, onSele
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
       <div>
-        <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Bundle &amp; Save</div>
-        <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">Combo Packs</h2>
+        <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{comboHeading.eyebrow}</div>
+        <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">{comboHeading.heading}</h2>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -65,7 +75,9 @@ export const ComboCardsGrid: React.FC<ComboCardsGridProps> = ({ products, onSele
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-white font-black text-lg">₹{combo.basePrice}</span>
-                    <span className="text-white/60 text-xs line-through">₹{combo.originalPrice}</span>
+                    {combo.discountPercentage > 0 && (
+                      <span className="text-white/60 text-xs line-through">₹{combo.originalPrice}</span>
+                    )}
                   </div>
                   {!!combo.discountPercentage && (
                     <span className="bg-[#D4AF37] text-[#08120B] text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Flame, Clock3, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Product } from '../types';
+import { useSiteContent } from '../lib/hooks/useSiteContent';
 
 interface TodaysDealsBannerProps {
   products: Product[];
@@ -21,6 +22,16 @@ const pad = (n: number) => String(n).padStart(2, '0');
 const CORE_MEAT_CATEGORIES: Product['category'][] = ['chicken', 'mutton', 'beef', 'fish'];
 
 export const TodaysDealsBanner: React.FC<TodaysDealsBannerProps> = ({ products, onNavigate }) => {
+  // Editable from /admin → Homepage → Flash Deals — heading.
+  // The discount percentage stays computed from the live catalog — it must
+  // never be typed, or it could advertise a discount that isn't real.
+  const flashHeading = useSiteContent('home.rail_flash_deals', {
+    eyebrow: "Today's Special",
+    heading: "Today's Flash Meat Deals",
+    ctaLabel: 'Shop All Deals',
+    ctaPath: '/offers'
+  });
+
   // Best discounted product per core category (deduped, so it's a genuine
   // spread across chicken/mutton/beef/fish rather than 4 chicken items just
   // because chicken happens to dominate the catalogue), highest discount
@@ -95,7 +106,7 @@ export const TodaysDealsBanner: React.FC<TodaysDealsBannerProps> = ({ products, 
           <div className="max-w-xl">
             <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full mb-4">
               <Flame className="w-3.5 h-3.5 text-orange-400 fill-orange-400" />
-              <span className="text-[10px] font-bold text-white uppercase tracking-widest">Today's Special</span>
+              <span className="text-[10px] font-bold text-white uppercase tracking-widest">{flashHeading.eyebrow}</span>
             </div>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-[0.95] tracking-tighter mb-3">
               Up to {maxDiscount}% OFF
@@ -107,7 +118,7 @@ export const TodaysDealsBanner: React.FC<TodaysDealsBannerProps> = ({ products, 
               onClick={() => onNavigate('/offers')}
               className="bg-white hover:bg-orange-50 text-[#08120B] font-black px-7 py-3.5 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg flex items-center gap-2"
             >
-              Shop All Deals <ArrowRight className="w-4 h-4" />
+              {flashHeading.ctaLabel} <ArrowRight className="w-4 h-4" />
             </button>
           </div>
 

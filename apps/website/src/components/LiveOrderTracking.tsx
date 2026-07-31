@@ -13,16 +13,19 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
   orderId,
   onBack
 }) => {
-  const [order, setOrder] = useState<Order | null>(() => {
-    const orders = StoreService.getOrders();
-    return orders.find((o) => o.id === orderId) || orders[0] || null;
-  });
+  // Match the requested order ONLY. This previously fell back to `orders[0]`
+  // when the id didn't match, which silently showed a different order —
+  // including its delivery OTP and address. Harmless when tracking was reached
+  // by pressing a button, actively misleading now that /tracking/<id> is a real
+  // URL someone can mistype or share. An unknown id shows "Order Not Found".
+  const [order, setOrder] = useState<Order | null>(
+    () => StoreService.getOrders().find((o) => o.id === orderId) ?? null
+  );
 
   useEffect(() => {
     const syncOrder = () => {
-      const orders = StoreService.getOrders();
-      const found = orders.find((o) => o.id === orderId) || orders[0];
-      if (found) setOrder(found);
+      const found = StoreService.getOrders().find((o) => o.id === orderId);
+      setOrder(found ?? null);
     };
 
     window.addEventListener('protein_cuts_orders_updated', syncOrder);

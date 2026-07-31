@@ -11,8 +11,19 @@ import {
   Check,
   X,
   AlertCircle,
-  Save
+  Save,
+  Home,
+  LayoutGrid,
+  FolderOpen,
+  BookOpen,
+  FileText,
+  LogOut,
+  Tag
 } from 'lucide-react';
+import { signOut } from '../lib/api/auth';
+import { MediaLibrary } from '../components/admin/MediaLibrary';
+import { ContentEditor } from '../components/admin/ContentEditor';
+import { MerchandisingTab } from '../components/admin/MerchandisingTab';
 import { Product } from '../types';
 import {
   listSiteContent,
@@ -55,13 +66,29 @@ import {
 
 const ADMIN_DASHBOARD_URL = 'https://protein-cuts-admin.vercel.app/';
 
-type Tab = 'banners' | 'weights' | 'seo' | 'leads';
+type Tab =
+  | 'homepage'
+  | 'sections'
+  | 'plans'
+  | 'pages'
+  | 'merch'
+  | 'media'
+  | 'banners'
+  | 'weights'
+  | 'seo'
+  | 'leads';
 
 const TABS: { id: Tab; label: string; icon: typeof ImageIcon }[] = [
-  { id: 'banners', label: 'Banners & Content', icon: ImageIcon },
+  { id: 'homepage', label: 'Homepage', icon: Home },
+  { id: 'sections', label: 'Sections', icon: LayoutGrid },
+  { id: 'plans', label: 'Plans & Recipes', icon: BookOpen },
+  { id: 'pages', label: 'Pages & SEO', icon: FileText },
+  { id: 'media', label: 'Media', icon: FolderOpen },
+  { id: 'banners', label: 'Banners', icon: ImageIcon },
+  { id: 'merch', label: 'Pricing & Badges', icon: Tag },
   { id: 'weights', label: 'Weight Options', icon: Scale },
-  { id: 'seo', label: 'SEO', icon: Search },
-  { id: 'leads', label: 'B2B & Franchise Leads', icon: Users }
+  { id: 'seo', label: 'Product SEO', icon: Search },
+  { id: 'leads', label: 'Leads', icon: Users }
 ];
 
 interface AdminDashboardProps {
@@ -75,7 +102,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onNavigate,
   onRefreshProducts
 }) => {
-  const [activeTab, setActiveTab] = useState<Tab>('banners');
+  const [activeTab, setActiveTab] = useState<Tab>('homepage');
   const [toast, setToast] = useState<{ msg: string; kind: 'ok' | 'err' } | null>(null);
 
   const notify = useCallback((msg: string, kind: 'ok' | 'err' = 'ok') => {
@@ -95,6 +122,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => onNavigate('/')}
+            className="flex items-center gap-2 rounded-full border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
+          >
+            View store
+          </button>
+          <button
+            onClick={async () => {
+              await signOut();
+              onNavigate('/');
+            }}
+            className="flex items-center gap-2 rounded-full border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign out
+          </button>
           <button
             onClick={onRefreshProducts}
             className="flex items-center gap-2 rounded-full border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-50"
@@ -148,6 +191,57 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           );
         })}
       </div>
+
+      {activeTab === 'homepage' && (
+        <ContentEditor
+          keyPrefix="home."
+          title="Homepage content"
+          description="Hero headlines, promo carousel, category circles, Instagram strip, stats and banners. Changes go live as soon as you save."
+          notify={notify}
+        />
+      )}
+
+      {activeTab === 'sections' && (
+        <ContentEditor
+          keyPrefix="sections."
+          title="Page sections"
+          description="Trust cards, the comparison table, certifications, How It Works, Our Farms and promo tiles. Certifications and the comparison table were previously duplicated across several files — editing them here updates every place they appear."
+          notify={notify}
+        />
+      )}
+
+      {activeTab === 'plans' && (
+        <ContentEditor
+          keyPrefix="plans."
+          title="Plans, recipes & guides"
+          description="Subscription plans, signature recipes and the Cook It Right guides. Ingredients and steps are editable as add/remove lists."
+          notify={notify}
+        />
+      )}
+
+      {activeTab === 'pages' && (
+        <ContentEditor
+          keyPrefix="pages."
+          title="Static pages"
+          description="About, B2B, Careers and Contact copy. Each page is a list of heading/body sections you can add to."
+          notify={notify}
+        />
+      )}
+
+      {activeTab === 'pages' && (
+        <div className="mt-6">
+          <ContentEditor
+            keyPrefix="seo."
+            title="Page SEO"
+            description="Browser title, meta description and social share image for each page. These are what Google and WhatsApp previews use."
+            notify={notify}
+          />
+        </div>
+      )}
+
+      {activeTab === 'merch' && <MerchandisingTab notify={notify} />}
+
+      {activeTab === 'media' && <MediaLibrary notify={notify} />}
 
       {activeTab === 'banners' && <BannersTab notify={notify} />}
       {activeTab === 'weights' && <WeightsTab notify={notify} />}

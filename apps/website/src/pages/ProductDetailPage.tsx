@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Star,
   ShieldCheck,
@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   Share2,
   Clock,
-  Sparkles,
   ChevronRight,
   ThumbsUp,
   MapPin,
@@ -24,11 +23,13 @@ import {
   Snowflake,
   ChevronDown,
   BookOpen,
-  Timer
+  Timer,
+  Bone,
+  Check
 } from 'lucide-react';
 import { Product, ProductWeightOption } from '../types';
 import { StoreService } from '../lib/storage';
-import { ProductCard } from '../components/ProductCard';
+import { BrowseProductCard } from '../components/BrowseProductCard';
 import { FadeImage } from '../components/FadeImage';
 import { BULK_TIERS, getActiveBulkTier, getBulkUnitPrice, getBulkLineTotal } from '../lib/pricing';
 import { INITIAL_RECIPES } from '../data/mockData';
@@ -40,6 +41,48 @@ const CUT_PREFERENCES_BY_CATEGORY: Record<string, string[]> = {
   fish: ['Whole (Cleaned)', 'Steak Cut', 'Fillet', 'Curry Cut'],
   'dry-fish': ['As Is'],
 };
+
+/**
+ * Pulls an itemized "what's inside" list out of a combo product's free-text
+ * description.
+ *
+ * There is no structured column for this on the admin's `products` table —
+ * it's admin-owned, read-only free text (see productAdapter.ts /
+ * CLAUDE.md), so the breakdown only exists if the admin typed one into the
+ * Description field. Checking `shortDescription` (the first sentence only,
+ * via `firstSentence()` in productAdapter.ts) was the earlier bug: any
+ * item list written after the opening marketing line got truncated away
+ * before this ever saw it. Reading the FULL description and trying a few
+ * realistic admin phrasings ("+", "Includes: A, B, C") fixes that for any
+ * combo product, not just one.
+ */
+function extractComboItems(description: string): string[] {
+  if (!description) return [];
+
+  if (description.includes('+')) {
+    // Isolate the sentence/clause that actually contains the '+' chain, in
+    // case there's marketing copy before or after it in the same paragraph.
+    const clause =
+      description.split(/(?<=[.!])\s+/).find((s) => s.includes('+')) ?? description;
+    return clause
+      .replace(/^[^:]{0,40}:\s*/, '') // drop a leading "Includes:" / "Contains:" label
+      .replace(/\.$/, '')
+      .split('+')
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  // Fall back to an explicit "Includes / Contains / Inside: A, B, C" clause.
+  const labeled = description.match(/(?:includes?|contains?|inside)[:\-]\s*([^.]+)\./i);
+  if (labeled) {
+    return labeled[1]
+      .split(/,|;/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
 
 interface QAEntry {
   id: string;
@@ -72,10 +115,6 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   const [selectedWeight, setSelectedWeight] = useState<ProductWeightOption>(product.weightOptions[0]);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(product.image);
-  const [isSubscribeSave, setIsSubscribeSave] = useState(false);
-  const [subscribeFreq, setSubscribeFreq] = useState<'Weekly' | 'Monthly'>('Weekly');
-  const [pincode, setPincode] = useState('560038');
-  const [pincodeChecked, setPincodeChecked] = useState(true);
   const [isWishlisted, setIsWishlisted] = useState(() => StoreService.getWishlist().includes(product.id));
   const [newReviewComment, setNewReviewComment] = useState('');
   const [newReviewRating, setNewReviewRating] = useState(5);
@@ -89,13 +128,14 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   // used on marketplace PDPs (Blinkit/Amazon) so shoppers don't have to read
   // the full description to answer basic questions.
   const shelfLifeDays = product.category === 'eggs' ? 14 : product.category === 'dry-fish' ? 60 : 2;
+  const comboItems = product.category === 'combo-packs' ? extractComboItems(product.description) : [];
   const keyFeatures = [
-    { label: 'Shelf Life', value: `${shelfLifeDays} day${shelfLifeDays > 1 ? 's' : ''} (refrigerated)` },
-    { label: 'Bone / Boneless', value: product.boneType },
-    { label: 'Cut Type', value: product.subcategory },
-    { label: 'Antibiotic Residue Free', value: product.freshnessGrade.includes('Antibiotic') ? 'Yes' : 'Not applicable' },
-    { label: 'Prep Time', value: `${product.prepTimeMinutes} mins` },
-    { label: 'Freshness Grade', value: product.freshnessGrade }
+    { label: 'Shelf Life', value: `${shelfLifeDays} day${shelfLifeDays > 1 ? 's' : ''} (refrigerated)`, icon: Snowflake },
+    { label: 'Bone / Boneless', value: product.boneType, icon: Bone },
+    { label: 'Cut Type', value: product.subcategory, icon: Scissors },
+    { label: 'Antibiotic Residue Free', value: product.freshnessGrade.includes('Antibiotic') ? 'Yes' : 'Not applicable', icon: ShieldCheck },
+    { label: 'Prep Time', value: `${product.prepTimeMinutes} mins`, icon: Timer },
+    { label: 'Freshness Grade', value: product.freshnessGrade, icon: Award }
   ];
 
   // Product-specific FAQ — generated from the product's own data fields so
@@ -111,6 +151,21 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
     { question: 'Can I choose a different cut style?', answer: cutOptions.length > 0 ? `Yes — pick from ${cutOptions.join(', ')} above before adding to cart.` : 'This item is prepared in a single standard style.' }
   ];
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  // Q&A + FAQ used to render open on every product page, pushing the recipes
+  // and related products far down. Collapsed behind a single button instead —
+  // the content and all its state/logic below is unchanged, just hidden
+  // until someone actually wants it.
+  const [showQA, setShowQA] = useState(false);
+  const askInputRef = useRef<HTMLInputElement>(null);
+  // "Have a Question?" only told the customer how many questions already
+  // existed — nothing signalled that THEY could ask one. This opens the
+  // panel and drops focus straight into the ask box instead of leaving them
+  // to find it themselves after expanding.
+  const handleOpenAsk = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowQA(true);
+    setTimeout(() => askInputRef.current?.focus(), 50);
+  };
 
   // Recipes tied to this product — exact relatedProductId match first, then
   // any recipe in the same category, mirroring Blinkit's "[Cut] recipes for
@@ -294,11 +349,18 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               <span className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold px-2.5 py-0.5 rounded-full uppercase">
                 {product.boneType}
               </span>
-              <div className="flex items-center gap-1 text-[#08120B] text-xs font-black">
-                <Star className="w-4 h-4 fill-emerald-600 text-emerald-600" />
-                <span>{product.rating}</span>
-                <span className="text-neutral-500 font-normal">({product.reviewCount} reviews)</span>
-              </div>
+              {reviewsList.length > 0 ? (
+                <div className="flex items-center gap-1 text-[#08120B] text-xs font-black">
+                  <Star className="w-4 h-4 fill-emerald-600 text-emerald-600" />
+                  <span>{product.rating}</span>
+                  <span className="text-neutral-500 font-normal">({reviewsList.length} reviews)</span>
+                </div>
+              ) : (
+                // A literal "0 ★ (0 reviews)" reads as a broken/empty widget
+                // rather than "no reviews yet" — hide the star and say so
+                // plainly instead.
+                <span className="text-neutral-400 text-xs font-semibold">No reviews yet</span>
+              )}
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight leading-snug">
@@ -307,24 +369,55 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             <p className="text-xs sm:text-sm text-neutral-600 mt-2 leading-relaxed">
               {product.description}
             </p>
+
+            {/* What's Inside This Box — combo packs bundle several items
+                together; the description alone doesn't always say how much
+                of each is in the box, only the total weight further down
+                does (e.g. "2.5kg Total"). `extractComboItems()` pulls an
+                itemized breakdown out of the full description whenever the
+                admin has written one (e.g. "...Includes 1 Whole Chicken +
+                500g Mutton Curry Cut + 12 Farm Fresh Eggs."). If the live
+                description has no itemized list at all, this box simply
+                doesn't render — that's a real content gap in the admin's
+                Description field for that product, not a website bug. */}
+            {comboItems.length >= 2 && (
+              <div className="mt-4 bg-emerald-50/60 border border-emerald-100 rounded-2xl p-4">
+                <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider mb-2.5">
+                  What&rsquo;s Inside This Box
+                </div>
+                <ul className="space-y-1.5">
+                  {comboItems.map((item) => (
+                    <li key={item} className="flex items-center gap-2 text-xs font-semibold text-[#08120B]">
+                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Key Features — compact spec table for a quick scan, mirrors
               marketplace PDPs (Shelf Life / Bone-Boneless / Cut Type / etc.) */}
-          <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-4">
-            <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-1.5 mb-3">
-              <ListChecks className="w-3.5 h-3.5 text-emerald-600" /> Key Features
-            </label>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
-              {keyFeatures.map((f) => (
-                <div key={f.label} className="flex items-start gap-2">
-                  <Snowflake className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                  <div>
-                    <div className="text-[10px] text-neutral-500 uppercase tracking-wide leading-tight">{f.label}</div>
-                    <div className="text-xs font-bold text-[#08120B] leading-tight">{f.value}</div>
+          <div className="bg-white border border-neutral-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div className="flex items-center gap-1.5 mb-4">
+              <ListChecks className="w-4 h-4 text-emerald-600" />
+              <span className="text-xs font-bold text-[#08120B] uppercase tracking-wider">Key Features</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+              {keyFeatures.map((f) => {
+                const Icon = f.icon;
+                return (
+                  <div key={f.label} className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0">
+                      <Icon className="w-4 h-4 text-emerald-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-[10px] text-neutral-400 uppercase tracking-wider leading-tight">{f.label}</div>
+                      <div className="text-xs font-bold text-[#08120B] leading-tight mt-0.5 truncate">{f.value}</div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -334,28 +427,57 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               Select Pack Size / Weight
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {product.weightOptions.map((opt) => (
-                <button
-                  key={opt.label}
-                  onClick={() => setSelectedWeight(opt)}
-                  className={`p-3.5 rounded-2xl border text-left transition cursor-pointer flex flex-col justify-between ${
-                    selectedWeight.label === opt.label
-                      ? 'bg-emerald-50 border-emerald-500 shadow-sm'
-                      : 'bg-white border-neutral-200 hover:border-neutral-300'
-                  }`}
-                >
-                  <div className="text-xs font-bold text-[#08120B]">{opt.label}</div>
-                  <div className="text-[11px] text-neutral-500 mt-1">{opt.servings} • {opt.pieces || 'Hand Trimmed'}</div>
-                  {opt.netWeightGrams && (
-                    <div className="text-[10px] text-neutral-400 mt-0.5">
-                      Gross {opt.weightGrams}g • Net (edible) {opt.netWeightGrams}g
+              {product.weightOptions.map((opt) => {
+                const isSelected = selectedWeight.label === opt.label;
+                const hasDiscount = opt.originalPrice > opt.price;
+                const savingsPercent = hasDiscount ? Math.round(((opt.originalPrice - opt.price) / opt.originalPrice) * 100) : 0;
+                const perKg = opt.weightGrams > 0 ? Math.round((opt.price / opt.weightGrams) * 1000) : null;
+
+                return (
+                  <button
+                    key={opt.label}
+                    onClick={() => setSelectedWeight(opt)}
+                    className={`relative p-4 rounded-2xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
+                      isSelected
+                        ? 'bg-emerald-50 border-emerald-500 shadow-md'
+                        : 'bg-white border-neutral-200 hover:border-emerald-300 hover:shadow-sm'
+                    }`}
+                  >
+                    {isSelected && (
+                      <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-[#0F7B3A] flex items-center justify-center">
+                        <Check className="w-3 h-3 text-white" />
+                      </span>
+                    )}
+
+                    <div className="pr-6">
+                      <div className="text-sm font-black text-[#08120B]">{opt.label}</div>
+                      <div className="text-[11px] text-neutral-500 mt-1">{opt.servings} • {opt.pieces || 'Hand Trimmed'}</div>
+                      {opt.netWeightGrams && (
+                        <div className="text-[10px] text-neutral-400 mt-0.5">
+                          Gross {opt.weightGrams}g • Net (edible) {opt.netWeightGrams}g
+                        </div>
+                      )}
                     </div>
-                  )}
-                  <div className="mt-2 text-sm font-black text-emerald-700">
-                    ₹{opt.price} <span className="text-xs text-neutral-400 line-through">₹{opt.originalPrice}</span>
-                  </div>
-                </button>
-              ))}
+
+                    <div className="mt-3 pt-3 border-t border-neutral-100 flex items-end justify-between gap-2">
+                      <div>
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-lg font-black text-emerald-700">₹{opt.price}</span>
+                          {hasDiscount && (
+                            <span className="text-xs text-neutral-400 line-through">₹{opt.originalPrice}</span>
+                          )}
+                        </div>
+                        {perKg && <div className="text-[10px] text-neutral-400 mt-0.5">≈ ₹{perKg}/kg</div>}
+                      </div>
+                      {hasDiscount && (
+                        <span className="shrink-0 bg-[#0F7B3A] text-white text-[9px] font-black px-2 py-1 rounded-full uppercase tracking-wide">
+                          {savingsPercent}% Off
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -383,72 +505,6 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               <p className="text-[11px] text-neutral-500">Our butchers will cut fresh to your preference before packing.</p>
             </div>
           )}
-
-          {/* Subscribe & Save Option */}
-          <div className="bg-[#08120B] rounded-2xl p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isSubscribeSave}
-                  onChange={(e) => setIsSubscribeSave(e.target.checked)}
-                  className="w-4 h-4 accent-emerald-500 rounded"
-                />
-                <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> Subscribe & Save 10% Extra
-                </span>
-              </label>
-            </div>
-
-            {isSubscribeSave && (
-              <div className="flex items-center gap-3 pt-2 text-xs">
-                <span className="text-neutral-400">Frequency:</span>
-                <button
-                  onClick={() => setSubscribeFreq('Weekly')}
-                  className={`px-3 py-1 rounded-full font-bold border transition ${
-                    subscribeFreq === 'Weekly' ? 'bg-white text-black border-white' : 'bg-white/5 text-neutral-300 border-white/10'
-                  }`}
-                >
-                  Weekly Delivery
-                </button>
-                <button
-                  onClick={() => setSubscribeFreq('Monthly')}
-                  className={`px-3 py-1 rounded-full font-bold border transition ${
-                    subscribeFreq === 'Monthly' ? 'bg-white text-black border-white' : 'bg-white/5 text-neutral-300 border-white/10'
-                  }`}
-                >
-                  Monthly Supply
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Delivery Availability Checker */}
-          <div className="bg-white border border-neutral-200 rounded-2xl p-4 space-y-2 shadow-sm">
-            <div className="text-xs font-bold text-[#08120B] flex items-center gap-2">
-              <Truck className="w-4 h-4 text-emerald-600" /> Check Express 30-Min Delivery Slot
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={pincode}
-                onChange={(e) => setPincode(e.target.value)}
-                placeholder="Enter Pincode"
-                className="bg-white border border-neutral-200 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-[#08120B] focus:outline-none"
-              />
-              <button
-                onClick={() => setPincodeChecked(true)}
-                className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs"
-              >
-                Check
-              </button>
-            </div>
-            {pincodeChecked && (
-              <p className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Cold chain express delivery active for {pincode}!
-              </p>
-            )}
-          </div>
 
           {/* Buy More, Save More — Bulk Pricing Tiers */}
           <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-4 space-y-2.5">
@@ -521,41 +577,64 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
         </div>
       </div>
 
-      {/* Frequently Bought Together */}
+      {/* Frequently Bought Together — green banner treatment so it reads as
+          a merchandising bundle rather than another plain white card, with
+          each item on its own white card for clear separation. */}
       {frequentlyBoughtWith.length > 0 && (
-        <div className="bg-white border border-neutral-200 rounded-3xl p-6 sm:p-8 shadow-sm">
-          <h3 className="text-xl font-black text-[#08120B] tracking-tight flex items-center gap-2 mb-6">
-            <PackagePlus className="w-5 h-5 text-emerald-600" /> Frequently Bought Together
-          </h3>
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            {[product, ...frequentlyBoughtWith].map((p, idx) => (
-              <React.Fragment key={p.id}>
-                {idx > 0 && <Plus className="w-4 h-4 text-neutral-300 shrink-0 hidden sm:block" />}
-                <div className="flex items-center gap-3 bg-neutral-50 border border-neutral-200 rounded-2xl p-3 w-full sm:w-auto">
-                  <img src={p.image} alt={p.name} referrerPolicy="no-referrer" className="w-14 h-14 rounded-xl object-cover shrink-0" />
-                  <div>
-                    <div className="text-xs font-bold text-[#08120B] line-clamp-1">{p.name}</div>
-                    <div className="text-xs text-emerald-700 font-black">
-                      ₹{idx === 0 ? selectedWeight.price : p.weightOptions[0].price}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0F7B3A] to-[#08120B] p-6 sm:p-8 shadow-xl shadow-emerald-950/20">
+          <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{
+            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+            backgroundSize: '28px 28px'
+          }} />
+
+          <div className="relative z-10">
+            <h3 className="text-lg sm:text-xl font-black text-white tracking-tight flex items-center gap-2 mb-1">
+              <PackagePlus className="w-5 h-5 text-emerald-300" /> Frequently Bought Together
+            </h3>
+            <p className="text-xs text-emerald-100/70 mb-6">Bundle these {frequentlyBoughtWith.length + 1} items and add them to your cart in one go.</p>
+
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              {[product, ...frequentlyBoughtWith].map((p, idx) => (
+                <React.Fragment key={p.id}>
+                  {idx > 0 && (
+                    <div className="hidden sm:flex w-7 h-7 rounded-full bg-white items-center justify-center shrink-0 shadow">
+                      <Plus className="w-3.5 h-3.5 text-[#0F7B3A]" />
+                    </div>
+                  )}
+                  <div className="relative flex items-center gap-3 bg-white rounded-2xl p-3 w-full sm:w-auto shadow-md">
+                    {idx === 0 && (
+                      <span className="absolute -top-2 -left-2 bg-[#D4AF37] text-[#08120B] text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide shadow">
+                        This Item
+                      </span>
+                    )}
+                    <img src={p.image} alt={p.name} referrerPolicy="no-referrer" className="w-14 h-14 rounded-xl object-cover shrink-0" />
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold text-[#08120B] line-clamp-1">{p.name}</div>
+                      <div className="text-xs text-emerald-700 font-black">
+                        ₹{idx === 0 ? selectedWeight.price : p.weightOptions[0].price}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </React.Fragment>
-            ))}
+                </React.Fragment>
+              ))}
 
-            <div className="sm:ml-auto text-center sm:text-right w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-neutral-100">
-              <div className="text-[11px] text-neutral-500">
-                Total: <span className="line-through text-neutral-400">₹{bundleOriginalTotal}</span>{' '}
-                <span className="text-lg font-black text-[#08120B]">₹{bundleTotal}</span>
+              <div className="sm:ml-auto text-center sm:text-right w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-t-0 border-white/15">
+                <div className="text-[11px] text-emerald-100/70">
+                  Total price
+                </div>
+                <div className="flex items-center justify-center sm:justify-end gap-2">
+                  <span className="line-through text-white/40 text-sm">₹{bundleOriginalTotal}</span>
+                  <span className="text-2xl font-black text-white">₹{bundleTotal}</span>
+                </div>
+                <button
+                  onClick={handleAddBundle}
+                  className={`mt-2.5 w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer shadow-lg ${
+                    bundleAdded ? 'bg-emerald-400 text-[#08120B]' : 'bg-white hover:bg-emerald-50 text-[#0F7B3A]'
+                  }`}
+                >
+                  {bundleAdded ? 'Added All 3!' : 'Add All to Cart'}
+                </button>
               </div>
-              <button
-                onClick={handleAddBundle}
-                className={`mt-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer ${
-                  bundleAdded ? 'bg-emerald-500 text-white' : 'bg-[#0F7B3A] hover:bg-emerald-500 text-white'
-                }`}
-              >
-                {bundleAdded ? 'Added All 3!' : 'Add All to Cart'}
-              </button>
             </div>
           </div>
         </div>
@@ -563,10 +642,14 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
       {/* Nutrition & Storage Info Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Nutrition Card */}
-        <div className="bg-white border border-neutral-200 rounded-3xl p-6 space-y-4 shadow-sm">
+        {/* Nutrition Card — amber accent so it reads as its own topic, not
+            a repeat of the green Key Features card above it. */}
+        <div className="bg-white border border-neutral-200 border-t-4 border-t-orange-400 rounded-3xl p-6 space-y-4 shadow-sm">
           <h3 className="text-base font-black text-[#08120B] uppercase tracking-wider flex items-center gap-2">
-            <Flame className="w-5 h-5 text-emerald-600" /> Nutritional Profile (Per 100g)
+            <span className="w-8 h-8 rounded-lg bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0">
+              <Flame className="w-4 h-4 text-orange-500" />
+            </span>
+            Nutritional Profile (Per 100g)
           </h3>
           <div className="grid grid-cols-4 gap-3 text-center">
             <div className="bg-emerald-50 border border-emerald-100 p-3 rounded-2xl">
@@ -588,10 +671,14 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           </div>
         </div>
 
-        {/* Storage Instructions Card */}
-        <div className="bg-white border border-neutral-200 rounded-3xl p-6 space-y-3 shadow-sm">
+        {/* Storage Instructions Card — sky-blue accent (cold-chain/info cue),
+            distinct from the amber Nutrition card beside it. */}
+        <div className="bg-white border border-neutral-200 border-t-4 border-t-sky-400 rounded-3xl p-6 space-y-3 shadow-sm">
           <h3 className="text-base font-black text-[#08120B] uppercase tracking-wider flex items-center gap-2">
-            <Clock className="w-5 h-5 text-emerald-600" /> Storage & Cooking Tips
+            <span className="w-8 h-8 rounded-lg bg-sky-50 border border-sky-100 flex items-center justify-center shrink-0">
+              <Clock className="w-4 h-4 text-sky-500" />
+            </span>
+            Storage & Cooking Tips
           </h3>
           <p className="text-xs text-neutral-600 leading-relaxed">
             <strong className="text-[#08120B]">Storage:</strong> {product.storageInstructions}
@@ -602,23 +689,36 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
         </div>
       </div>
 
-      {/* Verified Reviews Section */}
-      <div className="bg-white border border-neutral-200 rounded-3xl p-8 space-y-6 shadow-sm">
+      {/* Verified Reviews Section — gold accent, matching the star-rating
+          color used everywhere else on the site so this reads as the
+          "trust/social proof" section at a glance. */}
+      <div className="bg-white border border-neutral-200 border-t-4 border-t-[#D4AF37] rounded-3xl p-8 space-y-6 shadow-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200">
           <div>
-            <h3 className="text-2xl font-black text-[#08120B] tracking-tight">Verified Customer Reviews</h3>
-            <p className="text-xs text-neutral-500">100% genuine reviews from customers who ordered this item</p>
+            <h3 className="text-2xl font-black text-[#08120B] tracking-tight flex items-center gap-2">
+              <span className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
+                <Star className="w-4 h-4 text-[#D4AF37] fill-[#D4AF37]" />
+              </span>
+              Verified Customer Reviews
+            </h3>
+            <p className="text-xs text-neutral-500 mt-1">100% genuine reviews from customers who ordered this item</p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="text-3xl font-black text-[#08120B]">{product.rating}</div>
-            <div>
-              <div className="flex text-emerald-600 text-xs">
-                {'★'.repeat(Math.floor(product.rating))}
+          {reviewsList.length > 0 ? (
+            <div className="flex items-center gap-3">
+              <div className="text-3xl font-black text-[#08120B]">{product.rating}</div>
+              <div>
+                <div className="flex text-emerald-600 text-xs">
+                  {'★'.repeat(Math.floor(product.rating))}
+                </div>
+                <div className="text-xs text-neutral-500">{reviewsList.length} Ratings</div>
               </div>
-              <div className="text-xs text-neutral-500">{reviewsList.length} Ratings</div>
             </div>
-          </div>
+          ) : (
+            <div className="text-xs text-neutral-500 font-semibold bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5">
+              No ratings yet — be the first to review this product.
+            </div>
+          )}
         </div>
 
         {/* Add Review Form */}
@@ -674,69 +774,121 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
         </div>
       </div>
 
-      {/* Q&A Section */}
-      <div className="bg-white border border-neutral-200 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
-        <h3 className="text-xl font-black text-[#08120B] tracking-tight flex items-center gap-2">
-          <MessageCircleQuestion className="w-5 h-5 text-emerald-600" /> Questions & Answers
-        </h3>
-
-        <form onSubmit={handleAskQuestion} className="bg-neutral-50 border border-neutral-200 p-4 rounded-2xl flex items-center gap-3">
-          <input
-            type="text"
-            placeholder="Ask about cut, freshness, sourcing, packaging..."
-            value={newQuestion}
-            onChange={(e) => setNewQuestion(e.target.value)}
-            className="flex-1 bg-white border border-neutral-200 rounded-xl px-3 py-2.5 text-xs text-[#08120B] focus:outline-none focus:border-emerald-500"
-          />
+      {/* Q&A + FAQ — collapsed behind one button instead of always taking up
+          a full screen of space; opens in place when clicked. Violet accent
+          marks it as the "help/support" section, distinct from the amber
+          Nutrition, sky Storage and gold Reviews cards above it. */}
+      <div className="bg-white border border-neutral-200 border-t-4 border-t-violet-400 rounded-3xl shadow-sm overflow-hidden">
+        <div className="w-full flex items-center justify-between gap-3 p-6 sm:p-8">
           <button
-            type="submit"
-            className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs uppercase shrink-0"
+            onClick={() => setShowQA((s) => !s)}
+            className="flex items-center gap-3 text-left cursor-pointer min-w-0 flex-1"
           >
-            Ask
+            <span className="w-9 h-9 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center shrink-0">
+              <MessageCircleQuestion className="w-4 h-4 text-violet-500" />
+            </span>
+            <span className="text-left min-w-0">
+              <span className="block text-base sm:text-lg font-black text-[#08120B] tracking-tight">
+                Have a Question About This Product?
+              </span>
+              <span className="block text-xs text-neutral-500 mt-0.5">
+                {qaList.length} answered questions &amp; {productFaqs.length} FAQs — cut, freshness, packaging &amp; more
+              </span>
+            </span>
           </button>
-        </form>
 
-        <div className="space-y-4">
-          {qaList.map((qa) => (
-            <div key={qa.id} className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-2">
-              <div className="flex items-start gap-2 text-xs">
-                <span className="bg-[#08120B] text-white font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px]">Q</span>
-                <p className="text-[#08120B] font-semibold">{qa.question}</p>
-              </div>
-              <div className="flex items-start gap-2 text-xs">
-                <span className="bg-emerald-600 text-white font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px]">A</span>
-                <p className="text-neutral-600 leading-relaxed">{qa.answer}</p>
-              </div>
-              <p className="text-[10px] text-neutral-400 pl-7">Asked by {qa.askedBy} • {qa.date}</p>
-            </div>
-          ))}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Makes it explicit that a customer can ask their own question
+                here, not just read what others already asked. */}
+            <button
+              onClick={handleOpenAsk}
+              className="hidden sm:flex items-center gap-1.5 bg-violet-50 hover:bg-violet-100 border border-violet-200 text-violet-700 font-bold px-3.5 py-2 rounded-full text-[11px] uppercase tracking-wide transition cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" /> Ask a Question
+            </button>
+            <button
+              onClick={() => setShowQA((s) => !s)}
+              aria-label={showQA ? 'Collapse questions' : 'Expand questions'}
+              className="p-1 cursor-pointer"
+            >
+              <ChevronDown className={`w-5 h-5 text-violet-500 shrink-0 transition-transform ${showQA ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Product FAQ Accordion — dynamically generated per product */}
-      <div className="bg-white border border-neutral-200 rounded-3xl p-6 sm:p-8 space-y-4 shadow-sm">
-        <h3 className="text-xl font-black text-[#08120B] tracking-tight flex items-center gap-2">
-          <MessageCircleQuestion className="w-5 h-5 text-emerald-600" /> Frequently Asked Questions
-        </h3>
-        <div className="divide-y divide-neutral-200 border-t border-neutral-200">
-          {productFaqs.map((faq, idx) => {
-            const isOpen = openFaqIndex === idx;
-            return (
-              <div key={idx}>
+        {/* Compact mobile equivalent of the Ask a Question button above */}
+        <button
+          onClick={handleOpenAsk}
+          className="sm:hidden mx-6 mb-5 flex items-center justify-center gap-1.5 bg-violet-50 hover:bg-violet-100 border border-violet-200 text-violet-700 font-bold px-3.5 py-2.5 rounded-full text-[11px] uppercase tracking-wide transition cursor-pointer"
+        >
+          <Plus className="w-3.5 h-3.5" /> Ask a Question
+        </button>
+
+        {showQA && (
+          <div className="px-6 sm:px-8 pb-8 space-y-8 border-t border-neutral-100 pt-6">
+            {/* Q&A Section */}
+            <div className="space-y-6">
+              <h3 className="text-sm font-black text-[#08120B] uppercase tracking-wider">Questions &amp; Answers</h3>
+
+              <form onSubmit={handleAskQuestion} className="bg-neutral-50 border border-neutral-200 p-4 rounded-2xl flex items-center gap-3">
+                <input
+                  ref={askInputRef}
+                  type="text"
+                  placeholder="Ask about cut, freshness, sourcing, packaging..."
+                  value={newQuestion}
+                  onChange={(e) => setNewQuestion(e.target.value)}
+                  className="flex-1 bg-white border border-neutral-200 rounded-xl px-3 py-2.5 text-xs text-[#08120B] focus:outline-none focus:border-emerald-500"
+                />
                 <button
-                  onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                  className="w-full flex items-center justify-between gap-3 py-4 text-left cursor-pointer"
+                  type="submit"
+                  className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs uppercase shrink-0"
                 >
-                  <span className="text-xs sm:text-sm font-bold text-[#08120B]">{faq.question}</span>
-                  <ChevronDown className={`w-4 h-4 text-emerald-600 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                  Ask
                 </button>
-                {isOpen && (
-                  <p className="text-xs text-neutral-600 leading-relaxed pb-4 pr-8">{faq.answer}</p>
-                )}
+              </form>
+
+              <div className="space-y-4">
+                {qaList.map((qa) => (
+                  <div key={qa.id} className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-2">
+                    <div className="flex items-start gap-2 text-xs">
+                      <span className="bg-[#08120B] text-white font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px]">Q</span>
+                      <p className="text-[#08120B] font-semibold">{qa.question}</p>
+                    </div>
+                    <div className="flex items-start gap-2 text-xs">
+                      <span className="bg-emerald-600 text-white font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px]">A</span>
+                      <p className="text-neutral-600 leading-relaxed">{qa.answer}</p>
+                    </div>
+                    <p className="text-[10px] text-neutral-400 pl-7">Asked by {qa.askedBy} • {qa.date}</p>
+                  </div>
+                ))}
               </div>
-            );
-          })}
-        </div>
+            </div>
+
+            {/* Product FAQ Accordion — dynamically generated per product */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-black text-[#08120B] uppercase tracking-wider">Frequently Asked Questions</h3>
+              <div className="divide-y divide-neutral-200 border-t border-neutral-200">
+                {productFaqs.map((faq, idx) => {
+                  const isOpen = openFaqIndex === idx;
+                  return (
+                    <div key={idx}>
+                      <button
+                        onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                        className="w-full flex items-center justify-between gap-3 py-4 text-left cursor-pointer"
+                      >
+                        <span className="text-xs sm:text-sm font-bold text-[#08120B]">{faq.question}</span>
+                        <ChevronDown className={`w-4 h-4 text-emerald-600 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                      {isOpen && (
+                        <p className="text-xs text-neutral-600 leading-relaxed pb-4 pr-8">{faq.answer}</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Recipes for This Cut */}
@@ -749,7 +901,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             {relatedRecipes.map((r) => (
               <button
                 key={r.id}
-                onClick={() => onNavigate('/recipes')}
+                onClick={() => onNavigate(`/recipes/${r.id}`)}
                 className="text-left bg-white border border-neutral-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition group"
               >
                 <div className="aspect-video bg-neutral-100 overflow-hidden">
@@ -775,7 +927,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           <h3 className="text-xl font-black text-[#08120B] tracking-tight mb-6">You Might Also Like</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {relatedProducts.map((p) => (
-              <ProductCard key={p.id} product={p} onSelectProduct={onSelectProduct} onAddToCart={onAddToCart} onNavigate={onNavigate} />
+              <BrowseProductCard key={p.id} product={p} onSelectProduct={onSelectProduct} onAddToCart={onAddToCart} />
             ))}
           </div>
         </div>
@@ -787,7 +939,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           <h3 className="text-xl font-black text-[#08120B] tracking-tight mb-6">Recently Viewed</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {recentlyViewedProducts.map((p) => (
-              <ProductCard key={p.id} product={p} onSelectProduct={onSelectProduct} onAddToCart={onAddToCart} onNavigate={onNavigate} />
+              <BrowseProductCard key={p.id} product={p} onSelectProduct={onSelectProduct} onAddToCart={onAddToCart} />
             ))}
           </div>
         </div>

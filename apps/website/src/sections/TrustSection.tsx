@@ -1,5 +1,8 @@
 import React from 'react';
-import { Check, Minus, Award, ShieldCheck, Globe } from 'lucide-react';
+import { Check, Minus } from 'lucide-react';
+import { useSiteContent } from '../lib/hooks/useSiteContent';
+import { resolveIcon } from '../lib/iconMap';
+import { COMPARISON_FALLBACK } from './WhyIGOSection';
 
 // Consolidated "Why Choose IGO" trust section — merges what used to be five
 // separate stacked sections (Freshness Promise pillars, Farm-to-Home 4-step
@@ -12,21 +15,36 @@ import { Check, Minus, Award, ShieldCheck, Globe } from 'lucide-react';
 // trace tool that used to live at the bottom of this section was removed
 // from the homepage per explicit request.)
 
-const comparison = [
-  { feature: 'Traceability', igo: 'Full Farm-to-Table (QR Scan)', local: 'None / Word of mouth', competitor: 'Limited batch info' },
-  { feature: 'Freshness', igo: 'Never Frozen (0-4°C Always)', local: 'Room temp / Variable', competitor: 'Frozen for storage' },
-  { feature: 'Processing', igo: 'ISO 22000 Sterile Facility', local: 'Open air market', competitor: 'Standard warehouse' },
-  { feature: 'Delivery', igo: '30-90 Min Cold-Chain', local: 'No delivery', competitor: '3-4 hours / Dry bag' },
-  { feature: 'Antibiotics', igo: '100% Antibiotic-Free', local: 'Unknown', competitor: 'Selective' }
-];
-
-const certs = [
-  { name: 'ISO 22000', icon: ShieldCheck, desc: 'Food Safety Management' },
-  { name: 'HACCP', icon: Award, desc: 'Risk Assessment Standard' },
-  { name: 'FSSAI Licensed', icon: Globe, desc: 'Lic: 10022043000918' }
-];
+/**
+ * Reads the SAME two blocks as WhyIGOSection and QualityCertificationsSection.
+ *
+ * Before this, the comparison table was copy-pasted here verbatim and the
+ * certification list existed in three files with three different sets of
+ * entries — TrustSection listed 3, QualityCertifications listed 4 including a
+ * duplicate, OurFarms listed 4 including "100% Halal" that the others omitted.
+ * They're now one authoritative block each, edited in /admin → Sections.
+ */
+const CERTS_FALLBACK = {
+  eyebrow: 'Verified Origins',
+  heading: 'Premium Standards, Verified and Trusted.',
+  items: [
+    { name: 'ISO 22000', icon: 'ShieldCheck', desc: 'Food Safety Management', year: '2027' },
+    { name: 'HACCP', icon: 'Award', desc: 'Risk Assessment Standard', year: '2027' },
+    { name: 'FSSAI Licensed', icon: 'Globe', desc: 'Lic: 10022043000918', year: '2027' },
+    { name: '100% Halal', icon: 'Sprout', desc: 'Zabiha certified sourcing', year: '' }
+  ]
+};
 
 export const TrustSection: React.FC = () => {
+  const comparisonBlock = useSiteContent('sections.comparison', COMPARISON_FALLBACK);
+  const certsBlock = useSiteContent('sections.certifications', CERTS_FALLBACK);
+
+  const comparison = comparisonBlock.rows;
+  const certs = certsBlock.items.map((c) => ({
+    name: c.name,
+    desc: c.desc,
+    icon: resolveIcon(c.icon)
+  }));
 
   return (
     <section className="bg-emerald-50/60 border-y border-emerald-100 py-16 sm:py-20">
@@ -44,17 +62,25 @@ export const TrustSection: React.FC = () => {
           <table className="w-full border-collapse min-w-[640px] text-left">
             <thead>
               <tr className="bg-[#08120B]">
-                <th className="py-5 px-6 text-white/50 font-bold uppercase text-[10px] tracking-wider">Feature</th>
+                <th className="py-5 px-6 text-white/50 font-bold uppercase text-[10px] tracking-wider">
+                  {comparisonBlock.columns.feature}
+                </th>
                 <th className="py-5 px-6 bg-[#0F7B3A]/20 border-x border-emerald-500/20">
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 bg-[#0F7B3A] rounded-lg flex items-center justify-center text-white shadow">
-                      <ShieldCheck className="w-4.5 h-4.5" />
+                      {React.createElement(resolveIcon('ShieldCheck'), { className: 'w-4.5 h-4.5' })}
                     </div>
-                    <span className="font-black text-white text-sm tracking-tight">IGO Standard</span>
+                    <span className="font-black text-white text-sm tracking-tight">
+                      {comparisonBlock.columns.igo}
+                    </span>
                   </div>
                 </th>
-                <th className="py-5 px-6 text-white/50 font-bold uppercase text-[10px] tracking-wider">Local Market</th>
-                <th className="py-5 px-6 text-white/50 font-bold uppercase text-[10px] tracking-wider">Competitors</th>
+                <th className="py-5 px-6 text-white/50 font-bold uppercase text-[10px] tracking-wider">
+                  {comparisonBlock.columns.local}
+                </th>
+                <th className="py-5 px-6 text-white/50 font-bold uppercase text-[10px] tracking-wider">
+                  {comparisonBlock.columns.competitor}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -92,8 +118,10 @@ export const TrustSection: React.FC = () => {
           </table>
         </div>
 
-        {/* Certification Badge Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Certification Badge Strip — 4 items, so the grid steps through
+            1 -> 2 -> 4 columns rather than 3, which stranded the 4th badge
+            alone on its own half-empty row. */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {certs.map((cert) => {
             const Icon = cert.icon;
             return (

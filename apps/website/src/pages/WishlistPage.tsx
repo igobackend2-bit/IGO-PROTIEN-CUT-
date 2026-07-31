@@ -22,7 +22,13 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
   useEffect(() => {
     const sync = () => setWishlistIds(StoreService.getWishlist());
     window.addEventListener('protein_cuts_wishlist_updated', sync);
-    return () => window.removeEventListener('protein_cuts_wishlist_updated', sync);
+    // Also catch changes made from a different open tab (native `storage`
+    // event) — same cross-tab desync fix as the header badge count.
+    window.addEventListener('storage', sync);
+    return () => {
+      window.removeEventListener('protein_cuts_wishlist_updated', sync);
+      window.removeEventListener('storage', sync);
+    };
   }, []);
 
   const wishlistProducts = products.filter((p) => wishlistIds.includes(p.id));

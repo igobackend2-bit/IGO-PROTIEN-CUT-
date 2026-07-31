@@ -1,5 +1,10 @@
 # Project Rules — IGO Protein Cuts Website
 
+> **Resuming work? Read `PROGRESS.md` first.** It records exactly what's done,
+> what's mid-flight, which migrations have been run, and what the next action
+> is. Then come back here for the scope rules below.
+
+
 ## ⛔ HARD SCOPE BOUNDARY — READ BEFORE ANY CHANGE
 
 Work on **the website only**. The mobile app and the admin dashboard are live and

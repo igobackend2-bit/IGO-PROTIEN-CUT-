@@ -1,33 +1,47 @@
 import React from 'react';
-import { ShoppingCart, PackageCheck, Truck } from 'lucide-react';
+import { useSiteContent } from '../lib/hooks/useSiteContent';
+import { resolveIcon } from '../lib/iconMap';
 
-const steps = [
-  {
-    id: 1,
-    title: 'Place Your Order',
-    desc: 'Browse fresh categories, select your cuts, and checkout in under 2 minutes.',
-    icon: ShoppingCart
-  },
-  {
-    id: 2,
-    title: 'Process & Pack Fresh',
-    desc: 'Cuts are processed the same morning in sterile, temperature-controlled dark stores.',
-    icon: PackageCheck
-  },
-  {
-    id: 3,
-    title: 'Delivered Fresh',
-    desc: 'Arrives at your door at peak freshness (0-4°C) with end-to-end cold chain.',
-    icon: Truck
-  }
-];
+/**
+ * Editable from /admin → Sections → How It Works.
+ * The object below is the fallback if the content block is missing.
+ */
+const FALLBACK = {
+  eyebrow: 'SIMPLE PROCESS',
+  heading: 'Fresh to Your Door in 3 Steps',
+  items: [
+    {
+      icon: 'ShoppingCart',
+      title: 'Place Your Order',
+      text: 'Browse fresh categories, select your cuts, and checkout in under 2 minutes.'
+    },
+    {
+      icon: 'PackageCheck',
+      title: 'Process & Pack Fresh',
+      text: 'Cuts are processed the same morning in sterile, temperature-controlled dark stores.'
+    },
+    {
+      icon: 'Truck',
+      title: 'Delivered Fresh',
+      text: 'Arrives at your door at peak freshness (0-4°C) with end-to-end cold chain.'
+    }
+  ]
+};
 
 export const HowItWorksSection: React.FC = () => {
+  const block = useSiteContent('sections.how_it_works', FALLBACK);
+  const steps = block.items.map((item, index) => ({
+    id: index + 1,
+    title: item.title,
+    desc: item.text,
+    icon: resolveIcon(item.icon)
+  }));
+
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
       <div className="text-center max-w-2xl mx-auto space-y-2">
-        <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Efficiency Meets Quality</span>
-        <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">Fresh to Your Door in 3 Steps</h2>
+        <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{block.eyebrow}</span>
+        <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">{block.heading}</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">

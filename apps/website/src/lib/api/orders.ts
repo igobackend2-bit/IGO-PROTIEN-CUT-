@@ -71,11 +71,22 @@ export function trackingStepFor(status: OrderStatus): number {
  * Ensures an `addresses` row exists for this order and returns its id.
  * `orders.address_id` is a FK, so the address must be persisted first.
  */
+/**
+ * Persists the delivery address and returns its id.
+ *
+ * Returns an `error` rather than null-on-failure. The previous version
+ * swallowed the error and returned null, so the order was still created with
+ * `address_id: null` — the customer saw a confirmation, and the admin received
+ * an order nobody could deliver because it had no name, phone or address.
+ *
+ * An order without a deliverable address is worse than no order, so the caller
+ * now aborts instead.
+ */
 async function ensureAddress(
   userId: string,
   address: SavedAddress
-): Promise<string | null> {
-  if (!supabase) return null;
+): Promise<{ id: string | null; error?: string }> {
+  if (!supabase) return { id: null, error: 'Backend not configured.' };
 
   const payload = {
     user_id: userId,
@@ -86,6 +97,10 @@ async function ensureAddress(
     area: address.fullAddress ?? address.street,
     landmark: address.landmark,
     city: address.city,
+    // `state` exists on the app's addresses table and is shown in the admin's
+    // order dialog. It was missing here, so every website order displayed a
+    // blank state line.
+    state: address.state ?? null,
     pincode: address.pincode
   };
 
@@ -97,9 +112,9 @@ async function ensureAddress(
 
   if (error) {
     console.error('[orders] address insert failed:', error.message);
-    return null;
+    return { id: null, error: error.message };
   }
-  return data.id as string;
+  return { id: data.id as string };
 }
 
 // ── Place order ─────────────────────────────────────────────────────────────
@@ -143,7 +158,35 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     return { ok: false, error: 'Please sign in to place an order.' };
   }
 
-  const addressId = await ensureAddress(user.id, input.shippingAddress);
+  // Save the delivery address FIRST and abort if it fails. Creating the order
+  // anyway would produce an undeliverable record with no name, phone or
+  // address — which is exactly what happened before this guard existed.
+  const addressResult = await ensureAddress(user.id, input.shippingAddress);
+  if (!addressResult.id) {
+    return {
+      ok: false,
+      error:
+        'Could not save your delivery address, so the order was not placed. ' +
+        'Please check the address details and try again.'
+    };
+  }
+  const addressId = addressResult.id;
+
+  // Keep the customer's profile name and phone current, so the admin's
+  // Customers screen and the order list show a real person rather than a blank.
+  await supabase
+    .from('profiles')
+    .upsert(
+      {
+        id: user.id,
+        full_name: input.shippingAddress.name,
+        phone_number: input.shippingAddress.phone
+      },
+      { onConflict: 'id' }
+    )
+    .then(({ error }) => {
+      if (error) console.warn('[orders] profile sync failed (non-fatal):', error.message);
+    });
 
   // 1. The order header.
   const { data: orderRow, error: orderError } = await supabase

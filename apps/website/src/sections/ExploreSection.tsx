@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSiteContent } from '../lib/hooks/useSiteContent';
 import { Search, Sparkles } from 'lucide-react';
 
 interface ExploreSectionProps {
@@ -11,20 +12,27 @@ interface ExploreSectionProps {
 // exists verbatim as the "Brand Story / SEO Trust Accordion" (infoBlocks)
 // elsewhere on the homepage, so it was removed from here to avoid showing
 // the same four questions twice on one page.
-const popularSearches = [
-  'Chicken Curry Cut',
-  'Boneless Chicken Breast',
-  'Country Chicken',
-  'Goat Mutton Curry Cut',
-  'Tiger Prawns',
-  'Seer Fish Steak',
-  'Farm Fresh Eggs',
-  'Chicken Biryani Kit',
-  'Tandoori Chicken Tikka',
-  'Mutton Seekh Kebab'
-];
+/** Editable from /admin → Sections → Popular searches. */
+const POPULAR_FALLBACK = {
+  heading: 'Popular right now',
+  items: [
+    { label: 'Chicken Curry Cut' },
+    { label: 'Boneless Chicken Breast' },
+    { label: 'Country Chicken' },
+    { label: 'Goat Mutton Curry Cut' },
+    { label: 'Tiger Prawns' },
+    { label: 'Seer Fish Steak' },
+    { label: 'Farm Fresh Eggs' },
+    { label: 'Chicken Biryani Kit' },
+    { label: 'Tandoori Chicken Tikka' },
+    { label: 'Mutton Seekh Kebab' }
+  ]
+};
 
 export const ExploreSection: React.FC<ExploreSectionProps> = ({ onNavigate }) => {
+  const popularBlock = useSiteContent('sections.popular_searches', POPULAR_FALLBACK);
+  const popularSearches = popularBlock.items.map((i) => i.label);
+
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="bg-neutral-50 border border-neutral-200 rounded-3xl p-6 sm:p-7">

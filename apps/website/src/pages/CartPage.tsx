@@ -360,23 +360,32 @@ export const CartPage: React.FC<CartPageProps> = ({
 
   return (
     <div className="min-h-screen bg-white text-[#08120B] pb-20">
-      {/* Top Header Breadcrumb */}
-      <div className="bg-emerald-50 border-b border-emerald-100 py-6 px-4 sm:px-6 lg:px-8">
+      {/* Page header — large icon tile beside the title, with a live item
+          count underneath. Matches the header treatment used across the IGO
+          group's other storefronts. */}
+      <div className="border-b border-neutral-100 py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <button
-              onClick={() => onNavigate('/search')}
-              className="text-xs text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1 mb-2 cursor-pointer transition"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" /> Continue Shopping
-            </button>
-            <h1 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight flex items-center gap-3">
-              <ShoppingBag className="w-7 h-7 text-[#0F7B3A]" />
-              Your Express Cold-Chain Cart
-            </h1>
-            <p className="text-xs text-neutral-600 mt-1">
-              0-4°C Vacuum-Chilled Packing • Antibiotic-Free Fresh Protein • 30-Min Express Dispatch
-            </p>
+          <div className="flex items-start gap-5">
+            <div className="hidden sm:flex w-16 h-16 rounded-2xl bg-[#0F7B3A] items-center justify-center shrink-0 shadow-lg shadow-emerald-900/15">
+              <ShoppingBag className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <button
+                onClick={() => onNavigate('/search')}
+                className="text-xs text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1 mb-2 cursor-pointer transition"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" /> Continue Shopping
+              </button>
+              <h1 className="text-4xl sm:text-5xl font-black text-[#08120B] tracking-tight leading-none">
+                Your Cart
+              </h1>
+              <p className="text-sm font-semibold text-neutral-600 mt-2.5 flex items-center gap-2">
+                <span
+                  className={`w-2 h-2 rounded-full ${cart.length > 0 ? 'bg-[#0F7B3A]' : 'bg-neutral-300'}`}
+                />
+                {cart.length} {cart.length === 1 ? 'item' : 'items'} ready for delivery
+              </p>
+            </div>
           </div>
 
           {cart.length > 0 && (
@@ -392,13 +401,26 @@ export const CartPage: React.FC<CartPageProps> = ({
 
       {cart.length === 0 ? (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-          <div className="bg-white border border-neutral-200 rounded-3xl p-12 text-center max-w-2xl mx-auto space-y-6 shadow-sm my-12">
-            <div className="w-24 h-24 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-600 shadow-inner">
-              <ShoppingBag className="w-12 h-12" />
+          {/* Empty state — a large dashed drop-zone rather than a solid card,
+              so an empty cart reads as "space waiting to be filled" instead of
+              an error. The + badge hints that adding is the next step. */}
+          <div className="relative border-2 border-dashed border-neutral-200 rounded-[2rem] px-6 py-16 sm:py-20 text-center max-w-3xl mx-auto space-y-7 my-10 overflow-hidden">
+            {/* Soft ambient shapes behind the icon for a bit of depth instead
+                of a flat empty card. */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-emerald-50/50 blur-2xl pointer-events-none" />
+            <div className="relative w-fit mx-auto">
+              <div className="w-28 h-28 rounded-3xl bg-emerald-50/70 flex items-center justify-center text-emerald-600/60">
+                <ShoppingBag className="w-12 h-12" strokeWidth={1.5} />
+              </div>
+              <div className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-white border border-neutral-200 shadow-sm flex items-center justify-center text-[#0F7B3A]">
+                <Plus className="w-5 h-5" strokeWidth={2.5} />
+              </div>
             </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-black text-[#08120B]">Your Cart is Currently Empty</h2>
-              <p className="text-xs text-neutral-500 max-w-md mx-auto">
+            <div className="space-y-3">
+              <h2 className="text-3xl sm:text-4xl font-black text-[#08120B] tracking-tight leading-tight max-w-md mx-auto">
+                Your cart is currently empty
+              </h2>
+              <p className="text-sm text-neutral-500 max-w-md mx-auto leading-relaxed">
                 Explore farm-fresh, 100% antibiotic-free chicken cuts, tender mutton, wild-caught seafood, and fresh farm eggs.
               </p>
             </div>

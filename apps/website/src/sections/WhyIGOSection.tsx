@@ -1,22 +1,38 @@
 import React from 'react';
 import { Check, X, ShieldCheck, Zap, Truck, Award } from 'lucide-react';
+import { useSiteContent } from '../lib/hooks/useSiteContent';
 
-const comparison = [
-  { feature: 'Traceability', igo: 'Full Farm-to-Table (QR Scan)', local: 'None / Word of mouth', competitor: 'Limited batch info' },
-  { feature: 'Freshness', igo: 'Never Frozen (0-4°C Always)', local: 'Room temp / Variable', competitor: 'Frozen for storage' },
-  { feature: 'Processing', igo: 'ISO 22000 Sterile Facility', local: 'Open air market', competitor: 'Standard warehouse' },
-  { feature: 'Delivery', igo: '30-90 Min Cold-Chain', local: 'No delivery', competitor: '3-4 hours / Dry bag' },
-  { feature: 'Antibiotics', igo: '100% Antibiotic-Free', local: 'Unknown', competitor: 'Selective' }
-];
+/**
+ * Editable from /admin → Sections → Comparison.
+ *
+ * This table used to be duplicated verbatim in TrustSection.tsx. Both now read
+ * the same `sections.comparison` block, so editing it once updates both places.
+ */
+export const COMPARISON_FALLBACK = {
+  eyebrow: 'Competitive Edge',
+  heading: 'Why Choose IGO Protein Cuts?',
+  subheading:
+    "We've set a new benchmark for quality in the meat industry. Compare us with the local market and see the difference transparency makes.",
+  columns: { feature: 'FEATURE', igo: 'IGO Standard', local: 'LOCAL MARKET', competitor: 'COMPETITORS' },
+  rows: [
+    { feature: 'Traceability', igo: 'Full Farm-to-Table (QR Scan)', local: 'None / Word of mouth', competitor: 'Limited batch info' },
+    { feature: 'Freshness', igo: 'Never Frozen (0-4°C Always)', local: 'Room temp / Variable', competitor: 'Frozen for storage' },
+    { feature: 'Processing', igo: 'ISO 22000 Sterile Facility', local: 'Open air market', competitor: 'Standard warehouse' },
+    { feature: 'Delivery', igo: '30-90 Min Cold-Chain', local: 'No delivery', competitor: '3-4 hours / Dry bag' },
+    { feature: 'Antibiotics', igo: '100% Antibiotic-Free', local: 'Unknown', competitor: 'Selective' }
+  ]
+};
 
 export const WhyIGOSection: React.FC = () => {
+  const block = useSiteContent('sections.comparison', COMPARISON_FALLBACK);
+  const comparison = block.rows;
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
       <div className="text-center max-w-2xl mx-auto space-y-2">
-        <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Competitive Edge</span>
-        <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">Why Choose IGO Protein Cuts?</h2>
+        <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{block.eyebrow}</span>
+        <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">{block.heading}</h2>
         <p className="text-xs sm:text-sm text-neutral-600">
-          We've set a new benchmark for quality in the meat industry. Compare us with the local market and see the difference transparency makes.
+          {block.subheading}
         </p>
       </div>
 

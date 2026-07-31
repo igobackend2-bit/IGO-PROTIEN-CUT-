@@ -51,12 +51,23 @@ export const ComboBanner: React.FC<ComboBannerProps> = ({ products, onSelectProd
 
           <div className="flex items-center gap-4 flex-wrap pt-1">
             {/* Discount price tag — same clean two-line style as the other banners */}
+            {/* The strikethrough and "N% Off" only appear when a list price is
+                actually set above the selling price. Without this guard every
+                product rendered "₹649 ₹649 0% Off", because the canonical
+                products table has no list-price column — see
+                0013_product_list_price.sql. */}
             <div className="bg-[#E0632B] text-white font-black px-4 py-2.5 rounded-xl shadow-lg leading-none">
               <div className="flex items-baseline gap-1.5">
                 <span className="text-xl">₹{combo.basePrice}</span>
-                <span className="text-xs text-white/70 line-through">₹{combo.originalPrice}</span>
+                {combo.discountPercentage > 0 && (
+                  <span className="text-xs text-white/70 line-through">₹{combo.originalPrice}</span>
+                )}
               </div>
-              <span className="block text-[9px] uppercase tracking-widest font-bold mt-1">{combo.discountPercentage}% Off</span>
+              {combo.discountPercentage > 0 && (
+                <span className="block text-[9px] uppercase tracking-widest font-bold mt-1">
+                  {combo.discountPercentage}% Off
+                </span>
+              )}
             </div>
 
             <button

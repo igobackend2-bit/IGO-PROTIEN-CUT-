@@ -1,30 +1,30 @@
 import React from 'react';
-import { Thermometer, Package, Scissors, Ban } from 'lucide-react';
+import { useSiteContent } from '../lib/hooks/useSiteContent';
+import { resolveIcon } from '../lib/iconMap';
 
-const pillars = [
-  {
-    icon: Thermometer,
-    title: '0–4°C Cold Chain',
-    desc: 'Temperature maintained from farm to your door'
-  },
-  {
-    icon: Package,
-    title: 'Vacuum Sealed',
-    desc: 'Hygienic air-tight packaging locks in freshness'
-  },
-  {
-    icon: Scissors,
-    title: 'Expert Butchers',
-    desc: 'Cuts by certified professionals, every order'
-  },
-  {
-    icon: Ban,
-    title: 'No Preservatives',
-    desc: 'Zero hormones, antibiotics, or additives ever'
-  }
-];
+/**
+ * Editable from /admin → Sections → Freshness Pillars.
+ * This is the fallback rendered if the content block is missing.
+ */
+const FALLBACK = {
+  eyebrow: 'OUR PROMISE',
+  heading: 'The Freshness Promise',
+  items: [
+    { icon: 'Thermometer', title: '0–4°C Cold Chain', text: 'Temperature maintained from farm to your door' },
+    { icon: 'Package', title: 'Vacuum Sealed', text: 'Hygienic air-tight packaging locks in freshness' },
+    { icon: 'Scissors', title: 'Expert Butchers', text: 'Cuts by certified professionals, every order' },
+    { icon: 'Ban', title: 'No Preservatives', text: 'Zero hormones, antibiotics, or additives ever' }
+  ]
+};
 
 export const FreshnessPromiseSection: React.FC = () => {
+  const block = useSiteContent('sections.freshness_pillars', FALLBACK);
+  const pillars = block.items.map((item) => ({
+    icon: resolveIcon(item.icon),
+    title: item.title,
+    desc: item.text
+  }));
+
   return (
     <section className="bg-black border-y border-emerald-900/60 py-14 relative overflow-hidden">
       <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{

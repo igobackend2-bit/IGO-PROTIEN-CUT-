@@ -54,6 +54,8 @@ import { OurFarmsSection } from '../sections/OurFarmsSection';
 import { Reveal } from '../components/Reveal';
 import { BrandPartnersSection } from '../sections/BrandPartnersSection';
 import { TestimonialsSection } from '../sections/TestimonialsSection';
+import { useSiteContent, renderToken } from '../lib/hooks/useSiteContent';
+import { resolveIcon } from '../lib/iconMap';
 
 // Small count-up stat used in the hero — animates from 0 to its target once
 // on mount, matching the "0 -> real number" counter pattern.
@@ -152,32 +154,40 @@ export const HomePage: React.FC<HomePageProps> = ({
   // Hero rotates through 3 brand themes — mirrors the "Total Traceability /
   // Heritage Farms / Cold-Chain Integrity" multi-story hero pattern, kept on
   // the site's established green/white/black palette.
-  const heroThemes = [
-    {
-      label: 'IGO ECOSYSTEM • FRESH CUT ON ORDER',
-      headlineTop: 'PURE FARM FRESH CUTS.',
-      headlineAccent: '30-MIN EXPRESS',
-      headlineBottom: 'COLD CHAIN.',
-      description:
-        "Experience India's finest antibiotic-free Chicken, pasture-fed Mutton, wild seafood, and gym protein plans. Hand-trimmed by master butchers, chilled at 0-4°C, and delivered to your kitchen in 30 minutes."
-    },
-    {
-      label: 'TOTAL TRACEABILITY',
-      headlineTop: 'SCAN. VERIFY.',
-      headlineAccent: 'TRUST EVERY',
-      headlineBottom: 'CUT YOU BUY.',
-      description:
-        'Every pack carries a batch ID you can trace back to the exact farm, cut date, and handler — full farm-to-table transparency, not just a promise.'
-    },
-    {
-      label: 'HERITAGE TAMIL FARMS',
-      headlineTop: 'FARM-FRESH PROTEINS,',
-      headlineAccent: 'TRACED',
-      headlineBottom: 'EVERY STEP.',
-      description:
-        'Never frozen. Always fresh. Always traced. Same-day delivery from heritage farms with 100% cold-chain integrity, hand-selected from certified partner farms.'
-    }
-  ];
+  // Editable from /admin → Homepage → Hero. The array below is the fallback:
+  // if the content block is missing, unpublished or the backend is unreachable,
+  // the hero renders exactly this. See src/lib/hooks/useSiteContent.ts.
+  const heroBlock = useSiteContent('home.hero', {
+    autoRotateMs: 6000,
+    themes: [
+      {
+        label: 'IGO ECOSYSTEM • FRESH CUT ON ORDER',
+        headlineTop: 'PURE FARM FRESH CUTS.',
+        headlineAccent: '30-MIN EXPRESS',
+        headlineBottom: 'COLD CHAIN.',
+        description:
+          "Experience India's finest antibiotic-free Chicken, pasture-fed Mutton, wild seafood, and gym protein plans. Hand-trimmed by master butchers, chilled at 0-4°C, and delivered to your kitchen in 30 minutes."
+      },
+      {
+        label: 'TOTAL TRACEABILITY',
+        headlineTop: 'SCAN. VERIFY.',
+        headlineAccent: 'TRUST EVERY',
+        headlineBottom: 'CUT YOU BUY.',
+        description:
+          'Every pack carries a batch ID you can trace back to the exact farm, cut date, and handler — full farm-to-table transparency, not just a promise.'
+      },
+      {
+        label: 'HERITAGE TAMIL FARMS',
+        headlineTop: 'FARM-FRESH PROTEINS,',
+        headlineAccent: 'TRACED',
+        headlineBottom: 'EVERY STEP.',
+        description:
+          'Never frozen. Always fresh. Always traced. Same-day delivery from heritage farms with 100% cold-chain integrity, hand-selected from certified partner farms.'
+      }
+    ]
+  });
+
+  const heroThemes = heroBlock.themes;
 
   useEffect(() => {
     const themeTimer = setInterval(() => {
@@ -190,11 +200,16 @@ export const HomePage: React.FC<HomePageProps> = ({
   // Background/visual-card photos synced to the same 3 rotating hero themes
   // above — each real photo pairs with its matching story (heritage farms,
   // cold-chain facility, traceable packaging).
-  const heroImages = [
-    { src: 'https://igo-protien-cut.vercel.app/images/narrative/farm.webp', alt: 'Heritage Tamil Farms', caption: 'High Meadows Farm', sub: 'Certified heritage pastures in the Nilgiris range.' },
-    { src: 'https://igo-protien-cut.vercel.app/images/narrative/facility.webp', alt: 'Cold-Chain Integrity', caption: 'IGO Cold-Chain Facility', sub: '0-4°C sterile processing, ISO 22000 certified.' },
-    { src: 'https://igo-protien-cut.vercel.app/images/narrative/packaging.webp', alt: 'Total Traceability', caption: 'Batch-Tracked Packaging', sub: 'Every pack carries a scannable farm-to-door QR code.' }
-  ];
+  // Editable from /admin → Homepage → Hero Images.
+  const heroImagesBlock = useSiteContent('home.hero_images', {
+    items: [
+      { src: 'https://igo-protien-cut.vercel.app/images/narrative/farm.webp', alt: 'Heritage Tamil Farms', caption: 'High Meadows Farm', sub: 'Certified heritage pastures in the Nilgiris range.' },
+      { src: 'https://igo-protien-cut.vercel.app/images/narrative/facility.webp', alt: 'Cold-Chain Integrity', caption: 'IGO Cold-Chain Facility', sub: '0-4°C sterile processing, ISO 22000 certified.' },
+      { src: 'https://igo-protien-cut.vercel.app/images/narrative/packaging.webp', alt: 'Total Traceability', caption: 'Batch-Tracked Packaging', sub: 'Every pack carries a scannable farm-to-door QR code.' }
+    ]
+  });
+
+  const heroImages = heroImagesBlock.items;
 
   const handleCheckPincode = (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,17 +221,35 @@ export const HomePage: React.FC<HomePageProps> = ({
   // Real thumbnails pulled directly from the live @igoproteincuts Instagram
   // grid (igoproteincuts, 115 followers / 1,488 posts at time of writing) —
   // replaces the earlier placeholder that was just reusing category photos.
-  const instagramPosts = [
-    { image: '/Images/instagram/post-1-shrimp.png', alt: 'Fresh tiger prawns — @igoproteincuts Instagram post' },
-    { image: '/Images/instagram/post-2-eggs-reel.png', alt: 'Farm-fresh eggs reel — @igoproteincuts Instagram post' },
-    // Text/contact-info graphic rather than a photo — object-cover was
-    // cropping the phone number illegible on both edges. Rendered with
-    // object-contain below so the full graphic shows instead of being cut.
-    { image: '/Images/instagram/post-3-order.png', alt: 'Order info post — @igoproteincuts Instagram post', fit: 'contain' as const },
-    { image: '/Images/instagram/post-4-eggs.png', alt: 'Farm-fresh eggs — @igoproteincuts Instagram post' },
-    { image: '/Images/instagram/post-5-wings.png', alt: 'Chicken wings — @igoproteincuts Instagram post' },
-    { image: '/Images/instagram/post-6-chocolate.png', alt: 'Kitchen prep reel — @igoproteincuts Instagram post' }
-  ];
+  // Editable from /admin → Homepage → Instagram.
+  //
+  // `fit: 'contain'` on an item renders it uncropped — needed for text or
+  // contact-info graphics, where object-cover slices the edges off.
+  const instagramBlock = useSiteContent('home.instagram', {
+    handle: '@igoproteincuts',
+    profileUrl: 'https://www.instagram.com/igoproteincuts/',
+    items: [
+      { image: '/Images/instagram/post-1-shrimp.png', alt: 'Fresh tiger prawns — @igoproteincuts Instagram post' },
+      { image: '/Images/instagram/post-2-eggs-reel.png', alt: 'Farm-fresh eggs reel — @igoproteincuts Instagram post' },
+      { image: '/Images/instagram/post-3-order.png', alt: 'Order info post — @igoproteincuts Instagram post', fit: 'contain' },
+      { image: '/Images/instagram/post-4-eggs.png', alt: 'Farm-fresh eggs — @igoproteincuts Instagram post' },
+      { image: '/Images/instagram/post-5-wings.png', alt: 'Chicken wings — @igoproteincuts Instagram post' },
+      { image: '/Images/instagram/post-6-chocolate.png', alt: 'Kitchen prep reel — @igoproteincuts Instagram post' }
+    ]
+  });
+
+  const instagramPosts = instagramBlock.items;
+
+  // Editable from /admin → Homepage → Stats.
+  // {{productCount}} in a value stays live from the catalog.
+  const statsBlock = useSiteContent('home.stats', {
+    heading: 'ONE ECOSYSTEM, FROM FARM TO FORK',
+    items: [
+      { value: '10,000+', label: 'HAPPY CUSTOMERS' },
+      { value: '0-4°C', label: 'CONTROLLED DELIVERY' },
+      { value: '{{productCount}}+', label: 'FRESH PRODUCTS' }
+    ]
+  });
 
   // Ambient backdrop photography for each subscription plan card — reuses
   // real product photography already shot for this site (no stock/Pinterest
@@ -240,7 +273,10 @@ export const HomePage: React.FC<HomePageProps> = ({
   // real, already-established fact/offer from elsewhere on this site
   // (Combo Offers "up to 20% off", Subscription "save up to ₹1,200/month",
   // and the "Free delivery above ₹499" promo tile) — nothing invented here.
-  const promoSlides = [
+  // Editable from /admin → Homepage → Promo Slides.
+  const promoBlock = useSiteContent('home.promo_slides', {
+    autoRotateMs: 4500,
+    items: [
     {
       eyebrow: 'Seasonal Pick',
       title: 'Monsoon Special:',
@@ -289,7 +325,81 @@ export const HomePage: React.FC<HomePageProps> = ({
       image: '/Images/banners/promo-free-delivery-banner.jpg',
       alt: 'Farm-fresh eggs — free delivery above ₹499'
     }
-  ];
+    ]
+  });
+
+  const promoSlides = promoBlock.items;
+
+  // Editable from /admin → Homepage → Ticker strip.
+  const tickerBlock = useSiteContent('home.ticker', {
+    items: [
+      { label: '30-Min Express Delivery' },
+      { label: '100% Antibiotic-Free' },
+      { label: '0-4°C Cold Chain' },
+      { label: 'Free Delivery Above ₹499' }
+    ]
+  });
+
+  // Rail + section headings — editable from /admin → Homepage.
+  const categoriesHeading = useSiteContent('home.section_categories', {
+    eyebrow: 'The IGO Farm Network',
+    heading: 'Farm to Fork, the IGO Way',
+    subheading:
+      "From fresh cuts to eggs, marinades, and pantry staples — everything here is sourced straight from IGO's own farms, never through a broker.",
+    badge: '30-Minute Express Delivery'
+  });
+
+  const topPicksHeading = useSiteContent('home.rail_top_picks', {
+    eyebrow: 'MOST POPULAR CUTS',
+    heading: 'Top Picks For You',
+    viewAllLabel: 'View All',
+    viewAllPath: '/search'
+  });
+
+  const freshStockHeading = useSiteContent('home.rail_fresh_stock', {
+    eyebrow: 'CUT FRESH THIS MORNING',
+    heading: "Today's Fresh Stock",
+    viewAllLabel: 'View All',
+    viewAllPath: '/search'
+  });
+
+  const valuePropsBlock = useSiteContent('home.value_props', {
+    items: [
+      { icon: 'Truck', title: 'Fast Delivery', text: 'Reliable cold-chain delivery in 30-90 minutes.' },
+      { icon: 'Award', title: 'Premium Quality', text: 'ISO 22000 & HACCP-certified standard.' },
+      { icon: 'Tag', title: 'Best Prices', text: 'Real bulk-order and subscription savings.' },
+      { icon: 'Leaf', title: 'Sustainable', text: "Sourced through IGO's own farm network." }
+    ]
+  });
+
+  const newsletterBlock = useSiteContent('home.newsletter', {
+    heading: 'Weekly Offers, Straight to Your Inbox',
+    body: 'Subscribe for early access to flash sales, seasonal specials, and new-cut launches.',
+    placeholder: 'your@email.com',
+    cta: 'Subscribe'
+  });
+
+  const chefHeading = useSiteContent('home.rail_chef_picks', {
+    eyebrow: 'HAND-PICKED BY OUR BUTCHERS',
+    heading: 'Chef Recommended Cuts',
+    viewAllLabel: 'View All',
+    viewAllPath: '/recipes'
+  });
+
+  // Bundle & Save banner — editable from /admin → Homepage → Bundle & Save
+  // banner. Fallback matches 0011_content_sections.sql exactly so nothing
+  // changes visually until an admin edits it.
+  const bundleBanner = useSiteContent('sections.bundle_banner', {
+    eyebrow: 'COMBO SAVINGS',
+    heading: 'Bundle & Save',
+    headingAccent: 'Up to 20% Off',
+    body: 'Curated combo packs — whole chicken, mutton curry cut, and farm eggs bundled together at a better price than buying separately.',
+    cta: 'SHOP COMBO PACKS',
+    path: '/category/combo-packs',
+    badge: '20% OFF',
+    image: '/Images/banners/combo-family-feast-banner.jpg'
+  });
+
   const [activePromoSlide, setActivePromoSlide] = useState(0);
   const [isPromoPaused, setIsPromoPaused] = useState(false);
   useEffect(() => {
@@ -306,33 +416,43 @@ export const HomePage: React.FC<HomePageProps> = ({
   // pulled out of this grid. Also fixed two image mismatches while here:
   // Ready to Cook was pointing at an unverified Unsplash stock photo, and
   // Combo Packs was accidentally showing the Country Chicken product photo.
-  const categoryCards = [
-    { title: 'Fresh Chicken', path: '/category/chicken', icon: Drumstick, count: '16 Cuts', image: '/Images/chicken-whole.png', badge: 'Bestseller' },
-    { title: 'Goat Mutton', path: '/category/mutton', icon: Beef, count: '12 Cuts', image: '/Images/Meat Images/Mutton/Mutton curry.jpg' },
-    { title: 'Premium Beef', path: '/category/beef', icon: Beef, count: '9 Cuts', image: '/Images/Meat Images/Beef/Ribeye Steak.jpg' },
-    { title: 'Fish', path: '/category/fish', icon: Fish, count: '16 Varieties', image: '/Images/seer-fish.png' },
-    { title: 'Sun-Dried Fish', path: '/category/dry-fish', icon: Sun, count: 'Karuvadu Picks', image: '/Images/Meat Images/Fish/Anchovy.jpg' },
-    { title: 'Farm Eggs', path: '/category/eggs', icon: Egg, count: '6 Varieties', image: '/Images/eggs.png' },
-    { title: 'Ready to Cook', path: '/category/ready-to-cook', icon: UtensilsCrossed, count: '5 Specials', image: '/Images/Meat Images/Chicken/Chicken Wings.jpg' },
-    {
-      title: 'Marinated Items',
-      path: '/search?q=Marinated',
-      icon: Flame,
-      count: `${products.filter((p) => /marinated/i.test(p.name)).length} Marinated Picks`,
-      image: '/Images/Meat Images/Chicken/Chicken Wings.jpg'
-    },
-    {
-      title: 'Premium Cuts',
-      path: '/search?q=Premium',
-      icon: Award,
-      count: `${products.filter((p) => /premium/i.test(p.name) || /premium/i.test(p.description)).length}+ Premium Picks`,
-      image: '/Images/Meat Images/Beef/Ribeye Steak.jpg'
-    },
-    { title: 'Frozen Food', path: '/category/frozen-food', icon: Snowflake, count: '4 Freezer Picks', image: '/Images/Meat Images/Fish/Salmon Fillet.jpg' },
-    { title: 'Biryani Kits', path: '/category/biryani', icon: ChefHat, count: '3 Kits', image: '/Images/mutton-curry.png', badge: 'NEW' },
-    { title: 'Cold Cuts', path: '/category/cold-cuts', icon: Sandwich, count: '4 Deli Picks', image: '/Images/Meat Images/Chicken/Chicken Breast Boneless.jpg' },
-    { title: 'Combo Packs', path: '/category/combo-packs', icon: Gift, count: '20% Off', image: '/Images/chicken-breast.png', badge: 'NEW' }
-  ];
+  // Editable from /admin → Homepage → Categories.
+  //
+  // Icons are stored as NAMES in the content block (jsonb can't hold a React
+  // component) and resolved through src/lib/iconMap.ts. Two counts used to be
+  // computed from the live catalog; they're now editable text, with
+  // {{marinatedCount}} / {{premiumCount}} available if you want them dynamic.
+  const categoriesBlock = useSiteContent('home.categories', {
+    items: [
+      { title: 'Fresh Chicken', path: '/category/chicken', icon: 'Drumstick', count: '16 Cuts', image: '/Images/chicken-whole.png', badge: 'Bestseller' },
+      { title: 'Goat Mutton', path: '/category/mutton', icon: 'Beef', count: '12 Cuts', image: '/Images/Meat Images/Mutton/Mutton curry.jpg' },
+      { title: 'Premium Beef', path: '/category/beef', icon: 'Beef', count: '9 Cuts', image: '/Images/Meat Images/Beef/Ribeye Steak.jpg' },
+      { title: 'Fish', path: '/category/fish', icon: 'Fish', count: '16 Varieties', image: '/Images/seer-fish.png' },
+      { title: 'Sun-Dried Fish', path: '/category/dry-fish', icon: 'Sun', count: 'Karuvadu Picks', image: '/Images/Meat Images/Fish/Anchovy.jpg' },
+      { title: 'Farm Eggs', path: '/category/eggs', icon: 'Egg', count: '6 Varieties', image: '/Images/eggs.png' },
+      { title: 'Ready to Cook', path: '/category/ready-to-cook', icon: 'UtensilsCrossed', count: '5 Specials', image: '/Images/Meat Images/Chicken/Chicken Wings.jpg' },
+      { title: 'Marinated Items', path: '/search?q=Marinated', icon: 'Flame', count: '{{marinatedCount}} Marinated Picks', image: '/Images/Meat Images/Chicken/Chicken Wings.jpg' },
+      { title: 'Premium Cuts', path: '/search?q=Premium', icon: 'Award', count: '{{premiumCount}}+ Premium Picks', image: '/Images/Meat Images/Beef/Ribeye Steak.jpg' },
+      { title: 'Frozen Food', path: '/category/frozen-food', icon: 'Snowflake', count: '4 Freezer Picks', image: '/Images/Meat Images/Fish/Salmon Fillet.jpg' },
+      { title: 'Biryani Kits', path: '/category/biryani', icon: 'ChefHat', count: '3 Kits', image: '/Images/mutton-curry.png', badge: 'NEW' },
+      { title: 'Cold Cuts', path: '/category/cold-cuts', icon: 'Sandwich', count: '4 Deli Picks', image: '/Images/Meat Images/Chicken/Chicken Breast Boneless.jpg' },
+      { title: 'Combo Packs', path: '/category/combo-packs', icon: 'Gift', count: '20% Off', image: '/Images/chicken-breast.png', badge: 'NEW' }
+    ]
+  });
+
+  const categoryTokens = {
+    productCount: products.length,
+    marinatedCount: products.filter((p) => /marinated/i.test(p.name)).length,
+    premiumCount: products.filter(
+      (p) => /premium/i.test(p.name) || /premium/i.test(p.description)
+    ).length
+  };
+
+  const categoryCards = categoriesBlock.items.map((item) => ({
+    ...item,
+    icon: resolveIcon(item.icon),
+    count: renderToken(item.count ?? '', categoryTokens)
+  }));
 
   const bestSellers = products.filter((p) => p.isBestSeller);
   const flashDeals = products.filter((p) => p.isFlashOffer || p.discountPercentage >= 14);
@@ -580,15 +700,15 @@ export const HomePage: React.FC<HomePageProps> = ({
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest">The IGO Farm Network</div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">Farm to Fork, the IGO Way</h2>
-            <p className="text-xs text-neutral-500 mt-1">From fresh cuts to eggs, marinades, and pantry staples — everything here is sourced straight from IGO's own farms, never through a broker.</p>
+            <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{categoriesHeading.eyebrow}</div>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">{categoriesHeading.heading}</h2>
+            <p className="text-xs text-neutral-500 mt-1">{categoriesHeading.subheading}</p>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-2 bg-emerald-50 border border-emerald-100 px-3.5 py-2 rounded-full shrink-0">
               <Bike className="w-4 h-4 text-emerald-600" />
-              <span className="text-xs font-bold text-emerald-700">30-Minute Express Delivery</span>
+              <span className="text-xs font-bold text-emerald-700">{categoriesHeading.badge}</span>
             </div>
             <button
               onClick={() => onNavigate('/category/chicken')}
@@ -648,20 +768,18 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center gap-10">
           <div>
             <h2 className="text-white font-black text-2xl sm:text-3xl tracking-tight leading-none">Why IGO?</h2>
-            <p className="text-white/70 text-xs font-bold mt-2 uppercase tracking-widest">One Ecosystem, From Farm to Fork</p>
+            <p className="text-white/70 text-xs font-bold mt-2 uppercase tracking-widest">{statsBlock.heading}</p>
           </div>
 
           <div className="flex items-center justify-center gap-6 sm:gap-10">
-            {[
-              { label: '10,000+', sub: 'Happy Customers' },
-              { label: '0-4°C', sub: 'Controlled Delivery' },
-              { label: `${products.length}+`, sub: 'Fresh Products' }
-            ].map((badge) => (
-              <div key={badge.sub} className="flex flex-col items-center gap-2 shrink-0">
+            {statsBlock.items.map((badge) => (
+              <div key={badge.label} className="flex flex-col items-center gap-2 shrink-0">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white border-4 border-white/25 flex flex-col items-center justify-center text-center shadow-md shrink-0">
-                  <span className="text-[#08120B] font-black text-sm sm:text-base leading-none">{badge.label}</span>
+                  <span className="text-[#08120B] font-black text-sm sm:text-base leading-none">
+                    {renderToken(badge.value, { productCount: products.length })}
+                  </span>
                 </div>
-                <span className="text-white/85 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest leading-tight text-center w-20 sm:w-24">{badge.sub}</span>
+                <span className="text-white/85 text-[9px] sm:text-[10px] font-bold uppercase tracking-widest leading-tight text-center w-20 sm:w-24">{badge.label}</span>
               </div>
             ))}
           </div>
@@ -669,32 +787,15 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div className="w-16 h-px bg-white/25" />
 
           <div className="flex flex-wrap items-start justify-center gap-x-8 gap-y-8 sm:gap-x-10">
-            {[
-              {
-                icon: Truck,
-                title: 'Fast Delivery',
-                body: 'Reliable cold-chain delivery in 30-90 minutes.',
-                highlight: true
-              },
-              {
-                icon: Award,
-                title: 'Premium Quality',
-                body: 'ISO 22000 & HACCP-certified standard.',
-                highlight: false
-              },
-              {
-                icon: Tag,
-                title: 'Best Prices',
-                body: 'Real bulk-order and subscription savings.',
-                highlight: false
-              },
-              {
-                icon: Leaf,
-                title: 'Sustainable',
-                body: "Sourced through IGO's own farm network.",
-                highlight: false
-              }
-            ].map((pillar) => (
+            {valuePropsBlock.items
+              .map((item, idx) => ({
+                icon: resolveIcon(item.icon),
+                title: item.title,
+                body: item.text,
+                // The first card carries the gold ring on the live page.
+                highlight: idx === 0
+              }))
+              .map((pillar) => (
               <div key={pillar.title} className="flex flex-col items-center gap-2.5 w-32 sm:w-36 shrink-0">
                 <div
                   className={`w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md shrink-0 ${
@@ -706,7 +807,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <h3 className="text-white font-black text-xs uppercase tracking-wider text-center leading-tight">{pillar.title}</h3>
                 <p className="text-white/70 text-[11px] leading-snug text-center">{pillar.body}</p>
               </div>
-            ))}
+              ))}
           </div>
         </div>
       </section>
@@ -720,15 +821,15 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1">
-              <Flame className="w-4 h-4 fill-emerald-600" /> MOST POPULAR CUTS
+              <Flame className="w-4 h-4 fill-emerald-600" /> {topPicksHeading.eyebrow}
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">Top Picks For You</h2>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">{topPicksHeading.heading}</h2>
           </div>
           <button
-            onClick={() => onNavigate('/search')}
+            onClick={() => onNavigate(topPicksHeading.viewAllPath || '/search')}
             className="text-xs font-bold text-neutral-500 hover:text-emerald-600 flex items-center gap-1 transition cursor-pointer shrink-0"
           >
-            View All <ChevronRight className="w-4 h-4" />
+            {topPicksHeading.viewAllLabel} <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
@@ -823,7 +924,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1">
                 <Clock3 className="w-3.5 h-3.5" /> CUT THIS MORNING
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">Today's Fresh Stock</h2>
+              <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">{freshStockHeading.heading}</h2>
             </div>
             <button
               onClick={() => onNavigate('/search')}
@@ -1043,6 +1144,45 @@ export const HomePage: React.FC<HomePageProps> = ({
           visitors see "how ordering works" earlier in the scroll, right
           alongside the deals that would prompt them to actually order. */}
       <Reveal><HowItWorksSection /></Reveal>
+      {/* Bundle & Save banner — editable from /admin → Homepage → Bundle &
+          Save banner (sections.bundle_banner). Was saving fine in the CMS
+          but never rendered anywhere on the live page — this is that block,
+          now actually wired up. */}
+      <Reveal>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative overflow-hidden rounded-3xl min-h-[220px] sm:min-h-[260px] flex items-center shadow-xl shadow-black/20">
+          <img
+            src={bundleBanner.image}
+            alt=""
+            referrerPolicy="no-referrer"
+            className="absolute inset-0 w-full h-full object-cover animate-kenburns"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#08120B]/92 via-[#08120B]/70 to-[#08120B]/20" />
+
+          <div className="relative z-10 p-8 py-10 pl-8 sm:pl-16 sm:pr-12 max-w-xl">
+            <span className="inline-block text-[10px] font-bold tracking-widest text-emerald-400 uppercase mb-2">
+              {bundleBanner.eyebrow}
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-white leading-[1.05] tracking-tight">
+              {bundleBanner.heading} <span className="text-emerald-400">{bundleBanner.headingAccent}</span>
+            </h2>
+            <p className="text-white/70 text-sm leading-relaxed max-w-md mt-3">{bundleBanner.body}</p>
+            <button
+              onClick={() => onNavigate(bundleBanner.path || '/category/combo-packs')}
+              className="mt-5 w-fit bg-white hover:bg-emerald-50 text-[#08120B] font-black px-6 py-3 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg flex items-center gap-2"
+            >
+              {bundleBanner.cta} <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {bundleBanner.badge && (
+            <div className="relative z-10 ml-auto mr-8 hidden sm:flex flex-col items-center justify-center bg-[#0F7B3A] rounded-2xl px-6 py-4 text-center shadow-lg">
+              <span className="text-lg font-black text-white leading-none">{bundleBanner.badge}</span>
+            </div>
+          )}
+        </div>
+      </section>
+      </Reveal>
       {/* PRODUCT #7 — Seasonal spotlight banner: full-bleed photo carousel
           (dark scrim, bold overlaid headline, angled price-tag badge,
           Order Now CTA, arrow nav + dot pagination) — rebuilt to match the
@@ -1059,19 +1199,15 @@ export const HomePage: React.FC<HomePageProps> = ({
           onMouseEnter={() => setIsPromoPaused(true)}
           onMouseLeave={() => setIsPromoPaused(false)}
         >
-          {/* Scrolling ticker */}
+          {/* Scrolling ticker — editable from /admin → Homepage → Ticker strip.
+              Duplicated twice so the marquee loops seamlessly. */}
           <div className="relative z-20 bg-[#08120B] border-b border-white/10 overflow-hidden py-1.5">
             <div className="flex w-max whitespace-nowrap animate-marquee">
               {[0, 1].map((dupIdx) => (
                 <div key={dupIdx} className="flex items-center shrink-0">
-                  {[
-                    '30-Min Express Delivery',
-                    '100% Antibiotic-Free',
-                    '0-4°C Cold Chain',
-                    'Free Delivery Above ₹499'
-                  ].map((item, idx) => (
+                  {tickerBlock.items.map((item, idx) => (
                     <span key={idx} className="text-emerald-400 text-[10px] font-bold uppercase tracking-wider px-6 flex items-center gap-6 shrink-0">
-                      {item} <span className="text-white/30">•</span>
+                      {item.label} <span className="text-white/30">•</span>
                     </span>
                   ))}
                 </div>
@@ -1285,9 +1421,9 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
                 <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1">
-                  <Award className="w-3.5 h-3.5" /> HAND-PICKED BY OUR BUTCHERS
+                  <Award className="w-3.5 h-3.5" /> {chefHeading.eyebrow}
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">Chef Recommended Cuts</h2>
+                <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">{chefHeading.heading}</h2>
               </div>
             </div>
 
@@ -1576,9 +1712,9 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-8 flex flex-col sm:flex-row items-center gap-6 justify-between">
           <div>
             <div className="flex items-center gap-2 text-emerald-700 font-bold text-sm mb-1">
-              <Send className="w-4 h-4" /> Weekly Offers, Straight to Your Inbox
+              <Send className="w-4 h-4" /> {newsletterBlock.heading}
             </div>
-            <p className="text-xs text-neutral-600">Subscribe for early access to flash sales, seasonal specials, and new-cut launches.</p>
+            <p className="text-xs text-neutral-600">{newsletterBlock.body}</p>
           </div>
           {newsletterSubmitted ? (
             <div className="bg-white border border-emerald-300 text-emerald-700 text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-2 shrink-0">

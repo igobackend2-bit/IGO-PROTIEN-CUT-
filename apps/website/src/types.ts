@@ -131,6 +131,7 @@ export interface SavedAddress {
   landmark: string;
   pincode: string;
   city: string;
+  state?: string;
   fullAddress?: string;
   isDefault?: boolean;
 }

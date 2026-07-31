@@ -1,35 +1,57 @@
 import React from 'react';
-import { ShieldCheck, Award, Globe, Sprout } from 'lucide-react';
+import { useSiteContent } from '../lib/hooks/useSiteContent';
+import { resolveIcon } from '../lib/iconMap';
 
-const journey = [
-  {
-    label: 'Heritage Farms',
-    caption: 'Nilgiris range, Tamil Nadu',
-    image: 'https://igo-protien-cut.vercel.app/images/narrative/farm.webp'
-  },
-  {
-    label: 'Sterile Processing',
-    caption: 'ISO 22000 dark stores, 0-4°C',
-    image: 'https://igo-protien-cut.vercel.app/images/narrative/facility.webp'
-  },
-  {
-    label: 'Batch-Tracked Packaging',
-    caption: 'Scannable farm-to-door QR code',
-    image: 'https://igo-protien-cut.vercel.app/images/narrative/packaging.webp'
-  }
-];
+/**
+ * Editable from /admin → Sections → Our Farms and → Certifications.
+ *
+ * The three narrative images currently point at igo-protien-cut.vercel.app, an
+ * external host. Upload them via /admin → Media and repoint these so the site
+ * doesn't depend on a domain you may retire.
+ */
+const FARMS_FALLBACK = {
+  eyebrow: 'FROM OUR NETWORK',
+  heading: 'Our Farms',
+  subheading:
+    'From heritage pastures to your kitchen — every stage of the journey, traced honestly.',
+  items: [
+    {
+      label: 'Heritage Farms',
+      caption: 'Nilgiris range, Tamil Nadu',
+      image: 'https://igo-protien-cut.vercel.app/images/narrative/farm.webp'
+    },
+    {
+      label: 'Sterile Processing',
+      caption: 'ISO 22000 dark stores, 0-4°C',
+      image: 'https://igo-protien-cut.vercel.app/images/narrative/facility.webp'
+    },
+    {
+      label: 'Batch-Tracked Packaging',
+      caption: 'Scannable farm-to-door QR code',
+      image: 'https://igo-protien-cut.vercel.app/images/narrative/packaging.webp'
+    }
+  ]
+};
 
-const certs = [
-  { name: 'ISO 22000', icon: ShieldCheck },
-  { name: 'HACCP', icon: Award },
-  { name: 'FSSAI Licensed', icon: Globe },
-  { name: '100% Halal', icon: Sprout }
-];
+const CERTS_FALLBACK = {
+  items: [
+    { name: 'ISO 22000', icon: 'ShieldCheck' },
+    { name: 'HACCP', icon: 'Award' },
+    { name: 'FSSAI Licensed', icon: 'Globe' },
+    { name: '100% Halal', icon: 'Sprout' }
+  ]
+};
 
 // "Our Farms" — real photography from the three-stage narrative sequence
 // already used elsewhere on the site (farm → facility → packaging), plus
 // the same certifications already listed on the About page. No new claims.
 export const OurFarmsSection: React.FC = () => {
+  const farmsBlock = useSiteContent('sections.our_farms', FARMS_FALLBACK);
+  const certsBlock = useSiteContent('sections.certifications', CERTS_FALLBACK);
+
+  const journey = farmsBlock.items;
+  const certs = certsBlock.items.map((c) => ({ name: c.name, icon: resolveIcon(c.icon) }));
+
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
       <div className="text-center max-w-2xl mx-auto space-y-2">

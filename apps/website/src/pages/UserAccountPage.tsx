@@ -22,7 +22,8 @@ import {
   Trash2,
   Shield,
   Phone,
-  Mail
+  Mail,
+  Pencil
 } from 'lucide-react';
 import { StoreService } from '../lib/storage';
 import { SupabaseService } from '../lib/supabaseClient';
@@ -33,6 +34,21 @@ interface UserAccountPageProps {
   onNavigate: (path: string) => void;
   onSelectOrderForTracking?: (order: Order) => void;
 }
+
+// Sidebar tab config — was referenced (ACCOUNT_TABS.map(...)) but never
+// actually defined anywhere in this file, so the account page's sidebar nav
+// would throw "Cannot read properties of undefined" and crash at runtime.
+// Order matches the 7 "TAB N" sections below (Orders, Subscriptions,
+// Rewards, Wallet, Referral, Coupons, Profile).
+const ACCOUNT_TABS = [
+  { id: 'orders', label: 'My Orders', icon: ShoppingBag },
+  { id: 'subscriptions', label: 'Subscriptions', icon: Repeat },
+  { id: 'rewards', label: 'Rewards & Tier', icon: Crown },
+  { id: 'wallet', label: 'Wallet', icon: Wallet },
+  { id: 'referral', label: 'Refer & Earn', icon: Gift },
+  { id: 'coupons', label: 'Coupons', icon: Tag },
+  { id: 'profile', label: 'Profile & Addresses', icon: User }
+];
 
 export const UserAccountPage: React.FC<UserAccountPageProps> = ({
   onNavigate,
@@ -104,6 +120,20 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
   const [newAddrStreet, setNewAddrStreet] = useState('');
   const [newAddrPincode, setNewAddrPincode] = useState('560038');
   const [newAddrCity, setNewAddrCity] = useState('Bengaluru');
+
+  // Edit Profile (name + phone — email stays read-only since it's tied to
+  // the login/auth identity, not something to silently change here)
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [editName, setEditName] = useState(userProfile.name);
+  const [editPhone, setEditPhone] = useState(userProfile.phone);
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    const updatedProfile = { ...userProfile, name: editName.trim() || userProfile.name, phone: editPhone.trim() };
+    setUserProfile(updatedProfile);
+    StoreService.saveUserProfile(updatedProfile);
+    setShowEditProfileModal(false);
+    showToast('Profile updated.');
+  };
 
   // Copied alert
   const [copiedCode, setCopiedCode] = useState(false);
@@ -182,95 +212,136 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-      {/* Account Top Summary Card */}
-      <div className="bg-[#08120B] border border-black rounded-3xl p-6 sm:p-8 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-2xl">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#0F7B3A] to-emerald-800 border-2 border-emerald-400 flex items-center justify-center font-black text-white text-2xl shadow-xl">
-            {userProfile.name.charAt(0)}
+      {/* Account Top Summary Card — lighter, cleaner treatment (plain white
+          card, big circular avatar, contact row, single Edit Profile action)
+          rather than the previous dark full-bleed panel. */}
+      <div className="bg-white border border-neutral-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center font-black text-[#0F7B3A] text-3xl shrink-0">
+              {userProfile.name.charAt(0)}
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-2xl font-black text-[#08120B]">{userProfile.name}</h1>
+                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase flex items-center gap-1">
+                  {/* Uses the tier computed from reward_transactions, not the
+                      cached profile default — otherwise this badge said "Gold"
+                      while the stat below it correctly said "Bronze". */}
+                  <Crown className="w-3 h-3" />{' '}
+                  {loyalty?.tierLabel ?? userProfile.membershipTier} Member
+                </span>
+              </div>
+              <div className="text-xs text-neutral-500 mt-1.5 flex items-center gap-3 flex-wrap">
+                <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5 text-emerald-600" /> {userProfile.email}</span>
+                <span className="text-neutral-300">•</span>
+                {userProfile.phone ? (
+                  <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5 text-emerald-600" /> {userProfile.phone}</span>
+                ) : (
+                  <button
+                    onClick={() => setShowEditProfileModal(true)}
+                    className="flex items-center gap-1 text-emerald-700 font-semibold hover:underline cursor-pointer"
+                  >
+                    <Phone className="w-3.5 h-3.5" /> Add phone number
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-black">{userProfile.name}</h1>
-              <span className="bg-[#0F7B3A] text-white text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase flex items-center gap-1">
-                <Crown className="w-3 h-3 fill-white" /> {userProfile.membershipTier} Member
-              </span>
-            </div>
-            <div className="text-xs text-neutral-300 mt-1 flex items-center gap-3">
-              <span className="flex items-center gap-1"><Mail className="w-3 h-3 text-emerald-400" /> {userProfile.email}</span>
-              <span>•</span>
-              <span className="flex items-center gap-1"><Phone className="w-3 h-3 text-emerald-400" /> {userProfile.phone}</span>
-            </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => {
+                setEditName(userProfile.name);
+                setEditPhone(userProfile.phone);
+                setShowEditProfileModal(true);
+              }}
+              className="flex items-center gap-2 bg-white border border-neutral-200 hover:border-emerald-400 hover:text-emerald-700 text-[#08120B] font-bold text-xs px-4 py-2.5 rounded-xl transition cursor-pointer"
+            >
+              <Pencil className="w-3.5 h-3.5" /> Edit Profile
+            </button>
+            <button
+              onClick={async () => {
+                await signOut();
+                StoreService.setLoggedIn(false);
+                onNavigate('/');
+              }}
+              className="text-xs text-neutral-400 hover:text-[#08120B] font-bold px-3 py-2.5 transition cursor-pointer"
+              title="Log Out"
+            >
+              Logout
+            </button>
           </div>
         </div>
 
-        {/* Quick Stats & Logout */}
-        <div className="flex items-center gap-4 bg-white/10 border border-white/20 p-4 rounded-2xl">
-          <div className="text-center px-2">
+        {/* Quick stats — kept, restyled as light chips instead of a dark panel */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-5 border-t border-neutral-100">
+          <div className="bg-neutral-50 border border-neutral-200 rounded-2xl px-4 py-3">
             {/* Points are summed from `reward_transactions` — the same ledger
                 the app reads — falling back to the cached profile value. */}
-            <div className="text-xs text-neutral-400 font-bold uppercase">Reward Points</div>
-            <div className="text-lg font-black text-white">
+            <div className="text-[10px] text-neutral-500 font-bold uppercase tracking-wide">Reward Points</div>
+            <div className="text-lg font-black text-[#08120B]">
               {loyalty?.points ?? userProfile.rewardPoints} pts
             </div>
           </div>
-          <div className="h-8 w-px bg-white/20" />
-          <div className="text-center px-2">
-            <div className="text-xs text-neutral-400 font-bold uppercase">Wallet Balance</div>
-            <div className="text-lg font-black text-emerald-400">₹{userProfile.walletBalance}</div>
+          <div className="bg-neutral-50 border border-neutral-200 rounded-2xl px-4 py-3">
+            <div className="text-[10px] text-neutral-500 font-bold uppercase tracking-wide">Wallet Balance</div>
+            <div className="text-lg font-black text-emerald-700">₹{userProfile.walletBalance}</div>
           </div>
           {loyalty && (
-            <>
-              <div className="h-8 w-px bg-white/20" />
-              <div className="text-center px-2">
-                {/* Tier ladder mirrors the app's Bronze/Silver/Gold/Platinum
-                    (lib/models/membership_tier.dart) so a customer sees the
-                    same status in the app and on the website. */}
-                <div className="text-xs text-neutral-400 font-bold uppercase">Membership</div>
-                <div className="text-lg font-black text-amber-400">{loyalty.tierLabel}</div>
-              </div>
-            </>
+            <div className="bg-neutral-50 border border-neutral-200 rounded-2xl px-4 py-3">
+              {/* Tier ladder mirrors the app's Bronze/Silver/Gold/Platinum
+                  (lib/models/membership_tier.dart) so a customer sees the
+                  same status in the app and on the website. */}
+              <div className="text-[10px] text-neutral-500 font-bold uppercase tracking-wide">Membership</div>
+              <div className="text-lg font-black text-amber-600">{loyalty.tierLabel}</div>
+            </div>
           )}
-          <div className="h-8 w-px bg-white/20" />
-          <button
-            onClick={async () => {
-              await signOut();
-              StoreService.setLoggedIn(false);
-              onNavigate('/');
-            }}
-            className="text-xs text-neutral-400 hover:text-white font-bold px-2 py-1 transition cursor-pointer"
-            title="Log Out"
-          >
-            Logout
-          </button>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar border-b border-neutral-200 pb-2 text-xs font-bold">
-        {[
-          { id: 'orders', label: 'My Orders', icon: ShoppingBag },
-          { id: 'subscriptions', label: 'Recurring Subscriptions', icon: Repeat },
-          { id: 'rewards', label: 'Rewards & Tier', icon: Crown },
-          { id: 'wallet', label: 'IGO Wallet', icon: Wallet },
-          { id: 'referral', label: 'Refer & Earn', icon: Gift },
-          { id: 'coupons', label: 'Coupons & Vouchers', icon: Tag },
-          { id: 'profile', label: 'Profile & Addresses', icon: User }
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`px-4 py-2.5 rounded-full transition cursor-pointer flex items-center gap-2 whitespace-nowrap ${
-                isActive ? 'bg-[#0F7B3A] text-white shadow-lg' : 'bg-white border border-neutral-200 text-neutral-500 hover:text-[#08120B]'
-              }`}
-            >
-              <Icon className="w-4 h-4" /> {tab.label}
-            </button>
-          );
-        })}
-      </div>
+      {/* Account navigation.
+          A vertical sidebar on desktop rather than a horizontal tab row: with
+          seven sections the row scrolled off-screen and the later tabs were
+          effectively hidden. On mobile it falls back to a scrolling row, where
+          vertical space is the scarcer resource. */}
+      <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
+        <nav className="lg:sticky lg:top-6 lg:self-start">
+          <div className="flex lg:flex-col gap-1.5 overflow-x-auto no-scrollbar lg:overflow-visible">
+            {ACCOUNT_TABS.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`group relative flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition cursor-pointer whitespace-nowrap lg:w-full ${
+                    isActive
+                      ? 'bg-emerald-50 text-[#0F7B3A]'
+                      : 'text-neutral-600 hover:bg-neutral-50 hover:text-[#08120B]'
+                  }`}
+                >
+                  {/* Green rail on the active item — the marker used across the
+                      IGO group's account screens. */}
+                  {isActive && (
+                    <span className="absolute left-0 top-2 bottom-2 w-1 rounded-full bg-[#0F7B3A] hidden lg:block" />
+                  )}
+                  <Icon
+                    className={`h-4.5 w-4.5 shrink-0 ${isActive ? 'text-[#0F7B3A]' : 'text-neutral-400'}`}
+                  />
+                  <span className="flex-1 text-left">{tab.label}</span>
+                  <ChevronRight
+                    className={`hidden h-4 w-4 shrink-0 lg:block ${
+                      isActive ? 'text-[#0F7B3A]' : 'text-neutral-300'
+                    }`}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+
+        <div className="min-w-0 space-y-10">
 
       {/* TAB 1: MY ORDERS */}
       {activeTab === 'orders' && (
@@ -417,7 +488,8 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
         <div className="space-y-6">
           <div className="bg-[#08120B] border border-black rounded-3xl p-8 space-y-4 text-white shadow-2xl">
             <div className="flex items-center gap-2 text-white text-xs font-bold uppercase tracking-wider">
-              <Crown className="w-4 h-4 fill-white" /> IGO {userProfile.membershipTier.toUpperCase()} MEMBER
+              <Crown className="w-4 h-4 fill-white" /> IGO{' '}
+              {(loyalty?.tierLabel ?? userProfile.membershipTier).toUpperCase()} MEMBER
             </div>
             <h2 className="text-2xl font-black text-white">Your Reward Ledger ({userProfile.rewardPoints} Points)</h2>
             <p className="text-xs text-neutral-300">Earn 10 points for every ₹100 spent. Redeem points directly at checkout for discounts.</p>
@@ -624,6 +696,56 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
         </div>
       )}
 
+      {/* Edit Profile Modal — email intentionally read-only here since it's
+          tied to the login identity, not something to silently change. */}
+      {showEditProfileModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-neutral-200 rounded-3xl max-w-sm w-full p-6 text-[#08120B] space-y-4 shadow-2xl">
+            <h3 className="text-lg font-bold">Edit Profile</h3>
+            <form onSubmit={handleSaveProfile} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-neutral-600 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#08120B] focus:outline-none focus:border-emerald-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-bold text-neutral-600 mb-1">Phone Number</label>
+                <input
+                  type="tel"
+                  placeholder="e.g. 98765 43210"
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#08120B] focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+              <div>
+                <label className="block font-bold text-neutral-600 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={userProfile.email}
+                  disabled
+                  title="Email is tied to your login and can't be changed here"
+                  className="w-full bg-neutral-50 border border-neutral-200 rounded-xl p-3 text-neutral-400 cursor-not-allowed"
+                />
+              </div>
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setShowEditProfileModal(false)} className="px-4 py-2 text-neutral-500 cursor-pointer">
+                  Cancel
+                </button>
+                <button type="submit" className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl uppercase cursor-pointer transition">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Add Address Modal */}
       {showAddAddressModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -807,6 +929,8 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
           </div>
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 };

@@ -10,13 +10,12 @@ import {
   RefreshCw,
   ShoppingBag,
   Star,
-  CheckCircle2,
   Flame,
   ArrowUpDown,
   ChevronRight
 } from 'lucide-react';
 import { Product, ProductCategory, ProductWeightOption } from '../types';
-import { ProductCard } from '../components/ProductCard';
+import { BrowseProductCard } from '../components/BrowseProductCard';
 
 interface SearchBrowsePageProps {
   products: Product[];
@@ -92,13 +91,18 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
     return Array.from(unique);
   }, [products, selectedCategory]);
 
-  // Unique pack sizes (weight option labels) available across the current catalog —
-  // mirrors BigBasket's "Pack Size" facet (250 g, 500 g, 1 kg, etc.)
+  // Unique pack sizes (weight option labels) available within the current
+  // category — mirrors BigBasket's "Pack Size" facet (250 g, 500 g, 1 kg,
+  // etc). Scoped to the selected category (same as subcategoriesInCategory)
+  // rather than the whole catalog — across every category the catalog has
+  // ~70 distinct labels, which blew this facet into a single-column list of
+  // dozens of chips instead of a handful of relevant sizes.
   const availablePackSizes = useMemo(() => {
+    const scoped = selectedCategory === 'all' ? products : products.filter((p) => p.category === selectedCategory);
     const unique = new Set<string>();
-    products.forEach((p) => p.weightOptions.forEach((w) => unique.add(w.label)));
-    return Array.from(unique);
-  }, [products]);
+    scoped.forEach((p) => p.weightOptions.forEach((w) => unique.add(w.label)));
+    return Array.from(unique).slice(0, 8);
+  }, [products, selectedCategory]);
 
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
@@ -171,68 +175,34 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
 
   const currentCategoryName = categories.find((c) => c.id === selectedCategory)?.name || 'Category';
 
-  // Shared filter controls, rendered both in the desktop sidebar and the mobile filter drawer
+  // Shared filter controls, rendered both in the desktop sidebar and the
+  // mobile filter drawer — trimmed down to just Category + Price Range, the
+  // two facets actually needed to browse a category. The other state
+  // (subcategory, discount, pack size, bone type, freshness, rating) is left
+  // in place further up so the underlying filtering logic doesn't change,
+  // it's just no longer exposed as extra sidebar controls.
   const filterControlsContent = (
     <>
-      {/* Categories Filter */}
-      <div className="space-y-2">
-        <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider block">Category</label>
-        <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar pr-1">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => handleSelectCategory(cat.id)}
-              className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center justify-between ${
-                selectedCategory === cat.id
-                  ? 'bg-[#0F7B3A] text-white shadow'
-                  : 'text-neutral-600 hover:bg-emerald-50 hover:text-[#08120B]'
-              }`}
-            >
-              <span>{cat.name}</span>
-              {selectedCategory === cat.id && <CheckCircle2 className="w-3.5 h-3.5" />}
-            </button>
-          ))}
-        </div>
+      {/* Categories */}
+      <div className="space-y-1">
+        {categories.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => handleSelectCategory(cat.id)}
+            className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
+              selectedCategory === cat.id
+                ? 'bg-[#0F7B3A] text-white shadow'
+                : 'text-neutral-600 hover:bg-emerald-50 hover:text-[#08120B]'
+            }`}
+          >
+            {cat.name}
+          </button>
+        ))}
       </div>
 
-      {/* Subcategory Filter (only when a specific category is active) */}
-      {selectedCategory !== 'all' && subcategoriesInCategory.length > 1 && (
-        <div className="space-y-2 pt-4 border-t border-neutral-200">
-          <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider block">Cut Type</label>
-          <div className="flex flex-wrap gap-1.5">
-            <button
-              onClick={() => setSelectedSubcategory('all')}
-              className={`px-3 py-1.5 rounded-xl border text-[11px] font-bold transition cursor-pointer ${
-                selectedSubcategory === 'all'
-                  ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
-                  : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B]'
-              }`}
-            >
-              All
-            </button>
-            {subcategoriesInCategory.map((sub) => (
-              <button
-                key={sub}
-                onClick={() => setSelectedSubcategory(sub)}
-                className={`px-3 py-1.5 rounded-xl border text-[11px] font-bold transition cursor-pointer ${
-                  selectedSubcategory === sub
-                    ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
-                    : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B]'
-                }`}
-              >
-                {sub}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Price Range Slider */}
-      <div className="space-y-2 pt-4 border-t border-neutral-200">
-        <div className="flex items-center justify-between text-xs">
-          <label className="font-bold text-neutral-500 uppercase tracking-wider">Max Price</label>
-          <span className="text-emerald-700 font-black">₹{maxPrice}</span>
-        </div>
+      {/* Price Range */}
+      <div className="space-y-2.5 rounded-2xl border border-neutral-200 p-4 mt-5">
+        <label className="text-xs font-bold text-[#08120B] uppercase tracking-wider block">Price Range</label>
         <input
           type="range"
           min={100}
@@ -242,134 +212,19 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
           onChange={(e) => setMaxPrice(Number(e.target.value))}
           className="w-full accent-emerald-500 cursor-pointer"
         />
-        <div className="flex justify-between text-[10px] text-neutral-400">
-          <span>₹100</span>
-          <span>₹1500</span>
+        <div className="flex items-center justify-between text-[11px]">
+          <span className="text-neutral-400">To</span>
+          <span className="font-black text-emerald-700">Up to ₹{maxPrice}</span>
         </div>
-      </div>
-
-      {/* Discount Buckets */}
-      <div className="space-y-2 pt-4 border-t border-neutral-200">
-        <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider block">Discount</label>
-        <div className="space-y-1.5 text-xs">
-          {[
-            { value: 0, label: 'Any Discount' },
-            { value: 5, label: '5% or more' },
-            { value: 10, label: '10% or more' },
-            { value: 15, label: '15% or more' },
-            { value: 25, label: '25% or more' }
-          ].map((d) => (
-            <button
-              key={d.value}
-              onClick={() => setMinDiscount(d.value)}
-              className={`w-full text-left px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition cursor-pointer ${
-                minDiscount === d.value
-                  ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
-                  : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B]'
-              }`}
-            >
-              {d.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Pack Size */}
-      {availablePackSizes.length > 1 && (
-        <div className="space-y-2 pt-4 border-t border-neutral-200">
-          <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider block">Pack Size</label>
-          <div className="flex flex-wrap gap-1.5">
-            <button
-              onClick={() => setSelectedPackSize('all')}
-              className={`px-3 py-1.5 rounded-xl border text-[11px] font-bold transition cursor-pointer ${
-                selectedPackSize === 'all'
-                  ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
-                  : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B]'
-              }`}
-            >
-              All
-            </button>
-            {availablePackSizes.map((size) => (
-              <button
-                key={size}
-                onClick={() => setSelectedPackSize(size)}
-                className={`px-3 py-1.5 rounded-xl border text-[11px] font-bold transition cursor-pointer ${
-                  selectedPackSize === size
-                    ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
-                    : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B]'
-                }`}
-              >
-                {size}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Bone & Cut Type */}
-      <div className="space-y-2 pt-4 border-t border-neutral-200">
-        <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider block">Bone & Prep Cut</label>
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          {['all', 'Boneless', 'With Bone', 'Cleaned & Gutted'].map((type) => (
-            <button
-              key={type}
-              onClick={() => setSelectedBoneType(type)}
-              className={`p-2 rounded-xl border text-[11px] font-bold transition cursor-pointer ${
-                selectedBoneType === type
-                  ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
-                  : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B]'
-              }`}
-            >
-              {type === 'all' ? 'All Cuts' : type}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Freshness Grade */}
-      <div className="space-y-2 pt-4 border-t border-neutral-200">
-        <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider block">Quality Grade</label>
-        <div className="space-y-1.5 text-xs">
-          {['all', '100% Antibiotic-Free', 'Fresh Water Catch', 'Deep Sea Fresh'].map((grade) => (
-            <button
-              key={grade}
-              onClick={() => setSelectedFreshness(grade)}
-              className={`w-full text-left px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition cursor-pointer ${
-                selectedFreshness === grade
-                  ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
-                  : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B]'
-              }`}
-            >
-              {grade === 'all' ? 'All Quality Standards' : grade}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Rating Filter */}
-      <div className="space-y-2 pt-4 border-t border-neutral-200">
-        <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider block">Minimum Rating</label>
-        <div className="flex items-center gap-2">
-          {[0, 4.0, 4.5, 4.8].map((star) => (
-            <button
-              key={star}
-              onClick={() => setMinRating(star)}
-              className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
-                minRating === star
-                  ? 'bg-[#08120B] border-[#08120B] text-white'
-                  : 'bg-white border-neutral-200 text-neutral-600'
-              }`}
-            >
-              {star === 0 ? 'Any' : `${star}★`}
-            </button>
-          ))}
-        </div>
+        <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider pt-1 border-t border-neutral-100">
+          {filteredProducts.length} products match
+        </p>
       </div>
     </>
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
       {/* Breadcrumb */}
       {selectedCategory !== 'all' && (
         <nav className="flex items-center gap-1.5 text-xs text-neutral-500 font-medium">
@@ -381,189 +236,16 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
         </nav>
       )}
 
-      {/* Header Title & Live Counter */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-neutral-200">
-        <div>
-          <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5" /> SMART PRODUCT DISCOVERY
-          </div>
-          <h1 className="text-3xl font-black text-[#08120B] tracking-tight mt-1">
-            {selectedCategory === 'all' ? 'Browse Pure Fresh Protein Catalog' : currentCategoryName}
-          </h1>
-          <p className="text-xs text-neutral-500 mt-1">
-            Showing {filteredProducts.length} verified 0-4°C fresh cuts available for 30-min express dispatch.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleSimulateReload}
-            className="p-2.5 rounded-xl bg-white border border-neutral-200 text-neutral-600 hover:text-[#08120B] hover:border-neutral-300 transition flex items-center gap-1.5 text-xs font-bold cursor-pointer shadow-sm"
-            title="Refresh Inventory"
-          >
-            <RefreshCw className={`w-4 h-4 text-emerald-600 ${isLoading ? 'animate-spin' : ''}`} />
-            <span>Refresh</span>
-          </button>
-
-          {/* Grid / List toggle */}
-          <div className="bg-white border border-neutral-200 rounded-xl p-1 flex items-center gap-1 shadow-sm">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition ${
-                viewMode === 'grid' ? 'bg-[#0F7B3A] text-white' : 'text-neutral-400 hover:text-[#08120B]'
-              }`}
-              title="Grid View"
-            >
-              <Grid className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition ${
-                viewMode === 'list' ? 'bg-[#0F7B3A] text-white' : 'text-neutral-400 hover:text-[#08120B]'
-              }`}
-              title="List View"
-            >
-              <ListIcon className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Subcategory Quick Filter Tabs */}
-      {selectedCategory !== 'all' && subcategoriesInCategory.length > 1 && (
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-          <button
-            onClick={() => setSelectedSubcategory('all')}
-            className={`shrink-0 px-4 py-2 rounded-full border text-xs font-bold transition cursor-pointer ${
-              selectedSubcategory === 'all'
-                ? 'bg-[#0F7B3A] border-emerald-500 text-white shadow'
-                : 'bg-white border-neutral-200 text-neutral-600 hover:border-emerald-400 hover:text-[#08120B]'
-            }`}
-          >
-            All
-          </button>
-          {subcategoriesInCategory.map((sub) => (
-            <button
-              key={sub}
-              onClick={() => setSelectedSubcategory(sub)}
-              className={`shrink-0 px-4 py-2 rounded-full border text-xs font-bold transition cursor-pointer whitespace-nowrap ${
-                selectedSubcategory === sub
-                  ? 'bg-[#0F7B3A] border-emerald-500 text-white shadow'
-                  : 'bg-white border-neutral-200 text-neutral-600 hover:border-emerald-400 hover:text-[#08120B]'
-              }`}
-            >
-              {sub}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Main Search Input & Type-Ahead */}
-      <div className="space-y-4">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search chicken breast, mutton curry cut, wild prawns, salmon, organic eggs..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white border-2 border-neutral-200 focus:border-emerald-500 rounded-2xl px-12 py-3.5 text-sm text-[#08120B] placeholder-neutral-400 focus:outline-none shadow-sm transition"
-          />
-          <Search className="w-5 h-5 text-emerald-600 absolute left-4 top-4" />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-4 top-3.5 p-1 rounded-full text-neutral-400 hover:text-[#08120B]"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-
-        {/* Quick Suggestion Chips */}
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="text-neutral-500 font-bold text-[11px] uppercase tracking-wider">Trending:</span>
-          {trendingSearches.map((term) => (
-            <button
-              key={term}
-              onClick={() => setSearchQuery(term)}
-              className="bg-white hover:bg-emerald-50 border border-neutral-200 hover:border-emerald-400 px-3 py-1 rounded-full text-neutral-600 font-medium transition cursor-pointer"
-            >
-              {term}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Active Filter Chips */}
-      {activeFilterCount > 0 && (
-        <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="font-bold text-emerald-700">Active Filters ({activeFilterCount}):</span>
-            {selectedCategory !== 'all' && (
-              <span className="bg-white border border-emerald-200 text-emerald-700 px-2.5 py-1 rounded-full flex items-center gap-1 font-semibold">
-                Category: {selectedCategory} <X className="w-3 h-3 cursor-pointer" onClick={() => handleSelectCategory('all')} />
-              </span>
-            )}
-            {selectedSubcategory !== 'all' && (
-              <span className="bg-white border border-emerald-200 text-emerald-700 px-2.5 py-1 rounded-full flex items-center gap-1 font-semibold">
-                Cut Type: {selectedSubcategory} <X className="w-3 h-3 cursor-pointer" onClick={() => setSelectedSubcategory('all')} />
-              </span>
-            )}
-            {selectedBoneType !== 'all' && (
-              <span className="bg-white border border-emerald-200 text-emerald-700 px-2.5 py-1 rounded-full flex items-center gap-1 font-semibold">
-                Cut: {selectedBoneType} <X className="w-3 h-3 cursor-pointer" onClick={() => setSelectedBoneType('all')} />
-              </span>
-            )}
-            {selectedFreshness !== 'all' && (
-              <span className="bg-white border border-emerald-200 text-emerald-700 px-2.5 py-1 rounded-full flex items-center gap-1 font-semibold">
-                {selectedFreshness} <X className="w-3 h-3 cursor-pointer" onClick={() => setSelectedFreshness('all')} />
-              </span>
-            )}
-            {minRating > 0 && (
-              <span className="bg-white border border-emerald-200 text-emerald-700 px-2.5 py-1 rounded-full flex items-center gap-1 font-semibold">
-                ★ {minRating}+ Stars <X className="w-3 h-3 cursor-pointer" onClick={() => setMinRating(0)} />
-              </span>
-            )}
-            {maxPrice < 1500 && (
-              <span className="bg-white border border-emerald-200 text-emerald-700 px-2.5 py-1 rounded-full flex items-center gap-1 font-semibold">
-                Under ₹{maxPrice} <X className="w-3 h-3 cursor-pointer" onClick={() => setMaxPrice(1500)} />
-              </span>
-            )}
-            {minDiscount > 0 && (
-              <span className="bg-white border border-emerald-200 text-emerald-700 px-2.5 py-1 rounded-full flex items-center gap-1 font-semibold">
-                {minDiscount}%+ OFF <X className="w-3 h-3 cursor-pointer" onClick={() => setMinDiscount(0)} />
-              </span>
-            )}
-            {selectedPackSize !== 'all' && (
-              <span className="bg-white border border-emerald-200 text-emerald-700 px-2.5 py-1 rounded-full flex items-center gap-1 font-semibold">
-                Pack: {selectedPackSize} <X className="w-3 h-3 cursor-pointer" onClick={() => setSelectedPackSize('all')} />
-              </span>
-            )}
-          </div>
-
-          <button
-            onClick={clearAllFilters}
-            className="text-xs text-emerald-700 hover:text-emerald-900 font-bold underline cursor-pointer"
-          >
-            Clear All Filters
-          </button>
-        </div>
-      )}
-
       {/* Content Layout: Left Sidebar Filters + Right Product Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Desktop Filters Sidebar */}
-        <aside className="hidden lg:block lg:col-span-3 bg-white border border-neutral-200 rounded-3xl p-6 space-y-6 sticky top-24 shadow-sm">
-          <div className="flex items-center justify-between pb-4 border-b border-neutral-200">
-            <h3 className="font-black text-[#08120B] text-base flex items-center gap-2">
-              <Filter className="w-4 h-4 text-emerald-600" /> Filter Cuts
+        <aside className="hidden lg:block lg:col-span-3 space-y-5 sticky top-24">
+          <div className="bg-white border border-neutral-200 rounded-2xl p-5">
+            <h3 className="font-black text-[#08120B] text-sm flex items-center gap-1.5 mb-3">
+              <Filter className="w-4 h-4 text-emerald-600" /> Categories
             </h3>
-            <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-              Live DB
-            </span>
+            {filterControlsContent}
           </div>
-
-          {filterControlsContent}
         </aside>
 
         {/* Right Main Product Area */}
@@ -656,17 +338,16 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
             <div
               className={
                 viewMode === 'grid'
-                  ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
-                  : 'space-y-4'
+                  ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5'
+                  : 'grid grid-cols-2 sm:grid-cols-3 gap-4'
               }
             >
               {filteredProducts.map((product) => (
-                <ProductCard
+                <BrowseProductCard
                   key={product.id}
                   product={product}
                   onSelectProduct={onSelectProduct}
                   onAddToCart={onAddToCart}
-                  onNavigate={onNavigate}
                 />
               ))}
             </div>

@@ -39,6 +39,10 @@ export interface SiteContentRow {
   payload: Record<string, unknown>;
   is_active: boolean;
   display_order: number;
+  /** Name shown in the admin sidebar — matches the heading on the live page. */
+  admin_label: string | null;
+  /** Which page this block belongs to, used to group the sidebar. */
+  admin_group: string | null;
 }
 
 export async function listSiteContent(): Promise<Result<SiteContentRow[]>> {
@@ -174,6 +178,83 @@ export interface SeoRow {
   seo_title: string | null;
   seo_description: string | null;
   product_name?: string;
+}
+
+// ── Merchandising: list price + homepage badges ─────────────────────────────
+
+export interface MerchRow {
+  product_id: string;
+  product_name: string;
+  /** Selling price from the canonical `products` table. Read-only here. */
+  price: number;
+  /** Website-owned list price. Null = no discount advertised. */
+  original_price: number | null;
+  is_best_seller: boolean;
+  is_today_fresh: boolean;
+  is_flash_offer: boolean;
+}
+
+/**
+ * Products joined to their website merchandising flags.
+ *
+ * `price` is owned by the Flutter admin and shown read-only. Everything else
+ * lives in igo_product_web_meta and drives which homepage rails a product
+ * appears in — Top Picks, Today's Fresh Stock, Flash Deals — plus the
+ * strikethrough price on combo banners.
+ */
+export async function listMerchandising(): Promise<Result<MerchRow[]>> {
+  if (!isSupabaseConfigured || !supabase) return noBackend();
+
+  const [productsRes, metaRes] = await Promise.all([
+    supabase.from('products').select('id, name, price').order('name'),
+    supabase
+      .from('igo_product_web_meta')
+      .select('product_id, original_price, is_best_seller, is_today_fresh, is_flash_offer')
+  ]);
+
+  if (productsRes.error) return { ok: false, error: productsRes.error.message };
+
+  const meta = new Map(
+    ((metaRes.data ?? []) as unknown as Record<string, any>[]).map((m) => [m.product_id, m])
+  );
+
+  const rows = ((productsRes.data ?? []) as unknown as Record<string, any>[]).map((p) => {
+    const m = meta.get(p.id);
+    return {
+      product_id: p.id,
+      product_name: p.name,
+      price: Number(p.price ?? 0),
+      original_price: m?.original_price != null ? Number(m.original_price) : null,
+      is_best_seller: m?.is_best_seller === true,
+      is_today_fresh: m?.is_today_fresh === true,
+      is_flash_offer: m?.is_flash_offer === true
+    };
+  });
+
+  return { ok: true, data: rows };
+}
+
+export async function saveMerchandising(row: {
+  product_id: string;
+  original_price: number | null;
+  is_best_seller: boolean;
+  is_today_fresh: boolean;
+  is_flash_offer: boolean;
+}): Promise<Result> {
+  if (!isSupabaseConfigured || !supabase) return noBackend();
+  const { error } = await supabase.from('igo_product_web_meta').upsert(
+    {
+      product_id: row.product_id,
+      original_price: row.original_price,
+      is_best_seller: row.is_best_seller,
+      is_today_fresh: row.is_today_fresh,
+      is_flash_offer: row.is_flash_offer,
+      updated_at: new Date().toISOString()
+    },
+    { onConflict: 'product_id' }
+  );
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
 }
 
 export async function listSeo(): Promise<Result<SeoRow[]>> {
