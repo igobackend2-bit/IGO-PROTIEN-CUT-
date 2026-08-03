@@ -64,7 +64,7 @@ export const PartnerRedirectModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn">
-      <div className="bg-white border-2 border-neutral-200 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl text-[#08120B]">
+      <div className="bg-white border-2 border-neutral-200 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl text-[#0A1F12]">
         {/* Header */}
         <div className="p-5 border-b border-neutral-200 bg-neutral-50 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -75,14 +75,14 @@ export const PartnerRedirectModal = ({
               <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full border ${storeBadgeColor}`}>
                 Partner Redirect • {targetStore}
               </span>
-              <h3 className="text-lg font-black text-[#08120B] mt-0.5">
+              <h3 className="text-lg font-black text-[#0A1F12] mt-0.5">
                 {isFarmer ? 'Fresh Produce & Vegetables' : 'Masalas, Spices & Groceries'}
               </h3>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white border border-neutral-200 text-neutral-500 hover:text-[#08120B] flex items-center justify-center transition cursor-pointer"
+            className="w-8 h-8 rounded-full bg-white border border-neutral-200 text-neutral-500 hover:text-[#0A1F12] flex items-center justify-center transition cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -98,11 +98,11 @@ export const PartnerRedirectModal = ({
               {storeUrl ? (
                 <>
                   The following required farm-fresh vegetables will be pre-filled for your cart on{' '}
-                  <strong className="text-[#08120B]">{targetStore}</strong> ({storeUrl}).
+                  <strong className="text-[#0A1F12]">{targetStore}</strong> ({storeUrl}).
                 </>
               ) : (
                 <>
-                  <strong className="text-[#08120B]">{targetStore}</strong> isn&rsquo;t live yet — you can still copy this
+                  <strong className="text-[#0A1F12]">{targetStore}</strong> isn&rsquo;t live yet — you can still copy this
                   checklist of authentic masalas &amp; spices to order elsewhere in the meantime.
                 </>
               )}
@@ -126,7 +126,7 @@ export const PartnerRedirectModal = ({
                     onClick={() => toggleItem(item.id)}
                     className={`p-3 rounded-2xl border flex items-center gap-3 cursor-pointer transition ${
                       isChecked
-                        ? 'bg-emerald-50 border-emerald-400 text-[#08120B]'
+                        ? 'bg-emerald-50 border-emerald-400 text-[#0A1F12]'
                         : 'bg-white border-neutral-200 text-neutral-500 hover:border-emerald-300'
                     }`}
                   >
@@ -136,7 +136,7 @@ export const PartnerRedirectModal = ({
                       {isChecked && <Check className="w-3.5 h-3.5" />}
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-[#08120B]">{item.name}</div>
+                      <div className="text-xs font-bold text-[#0A1F12]">{item.name}</div>
                       <div className="text-[10px] text-neutral-500">{item.quantity}</div>
                     </div>
                   </div>
@@ -162,7 +162,7 @@ export const PartnerRedirectModal = ({
         <div className="p-5 border-t border-neutral-200 bg-neutral-50 flex flex-col sm:flex-row gap-3">
           <button
             onClick={onClose}
-            className="flex-1 bg-white border border-neutral-200 text-neutral-600 hover:text-[#08120B] py-3 rounded-2xl text-xs font-bold transition cursor-pointer"
+            className="flex-1 bg-white border border-neutral-200 text-neutral-600 hover:text-[#0A1F12] py-3 rounded-2xl text-xs font-bold transition cursor-pointer"
           >
             Stay in Cart
           </button>

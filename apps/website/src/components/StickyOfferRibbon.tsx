@@ -36,7 +36,7 @@ export const StickyOfferRibbon: React.FC<StickyOfferRibbonProps> = ({ onNavigate
           onClick={() => setDismissed(true)}
           aria-label="Dismiss offer ribbon"
           title="Dismiss"
-          className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#08120B] border border-white/20 text-white/80 hover:text-white flex items-center justify-center shadow-sm cursor-pointer"
+          className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#0A1F12] border border-white/20 text-white/80 hover:text-white flex items-center justify-center shadow-sm cursor-pointer"
         >
           <X className="w-2.5 h-2.5" />
         </button>

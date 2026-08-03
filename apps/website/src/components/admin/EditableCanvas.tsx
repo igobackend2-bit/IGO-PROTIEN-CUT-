@@ -126,14 +126,14 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
       <div className="space-y-4">
         <div className="mx-auto max-w-2xl space-y-1.5 text-center">
           {T(['eyebrow'], p.eyebrow, 'block text-xs font-bold tracking-widest text-emerald-600 uppercase')}
-          {T(['heading'], p.heading, 'block text-2xl font-black tracking-tight text-[#08120B]')}
+          {T(['heading'], p.heading, 'block text-2xl font-black tracking-tight text-[#0A1F12]')}
           {T(['subheading'], p.subheading, 'block text-xs text-neutral-600', { multiline: true })}
         </div>
 
         <div className="overflow-hidden rounded-2xl">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-[#08120B]">
+              <tr className="bg-[#0A1F12]">
                 <th className="px-4 py-3 text-[9px] font-bold tracking-wider text-white/50 uppercase">
                   {T(['columns', 'feature'], cols.feature, '')}
                 </th>
@@ -162,7 +162,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
                       }}
                       onRemove={(idx) => onChange(['rows'], rows.filter((_, j) => j !== idx))}
                     />
-                    {T(['rows', i, 'feature'], r.feature, 'text-xs font-bold text-[#08120B]')}
+                    {T(['rows', i, 'feature'], r.feature, 'text-xs font-bold text-[#0A1F12]')}
                   </td>
                   <td className="bg-emerald-50/40 px-4 py-3">
                     <span className="flex items-start gap-1.5">
@@ -211,7 +211,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
               <Star className="h-3.5 w-3.5 fill-emerald-600 text-emerald-600" />
               {T(['eyebrow'], p.eyebrow, 'text-[11px] font-bold tracking-widest text-emerald-600 uppercase')}
             </span>
-            {T(['heading'], p.heading, 'block text-2xl font-black tracking-tight text-[#08120B]')}
+            {T(['heading'], p.heading, 'block text-2xl font-black tracking-tight text-[#0A1F12]')}
             {p.subheading !== undefined &&
               T(['subheading'], p.subheading, 'mt-1 block max-w-2xl text-xs text-neutral-600', { multiline: true })}
           </div>
@@ -264,7 +264,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
               <span className="h-px w-8 shrink-0 bg-[#D4AF37]" />
               {T(['themes', i, 'label'], theme.label, 'text-[#D4AF37] font-bold text-[10px] uppercase tracking-[0.2em]')}
             </div>
-            <h1 className="mb-3 text-3xl leading-[1.05] font-black tracking-tighter text-[#08120B]">
+            <h1 className="mb-3 text-3xl leading-[1.05] font-black tracking-tighter text-[#0A1F12]">
               {T(['themes', i, 'headlineTop'], theme.headlineTop, 'block')}
               {T(['themes', i, 'headlineAccent'], theme.headlineAccent, 'text-[#0F7B3A]')}{' '}
               {T(['themes', i, 'headlineBottom'], theme.headlineBottom, '')}
@@ -276,7 +276,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
                   <Star key={n} className="h-4 w-4 fill-[#0F7B3A] text-[#0F7B3A]" />
                 ))}
               </div>
-              <span className="text-sm font-bold text-[#08120B]">4.9</span>
+              <span className="text-sm font-bold text-[#0A1F12]">4.9</span>
               <span className="text-xs text-neutral-400">from 12,000+ verified reviews</span>
             </div>
           </EditableItem>
@@ -304,7 +304,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
               {Img(['items', i, 'src'], item.src, 'w-full h-full object-cover', item.alt)}
             </div>
             <div className="space-y-0.5 bg-white p-2.5 ring-1 ring-neutral-200">
-              {T(['items', i, 'caption'], item.caption, 'block text-[11px] font-black text-[#08120B] leading-tight')}
+              {T(['items', i, 'caption'], item.caption, 'block text-[11px] font-black text-[#0A1F12] leading-tight')}
               {T(['items', i, 'sub'], item.sub, 'block text-[9px] text-neutral-500 leading-snug', { multiline: true })}
             </div>
           </EditableItem>
@@ -321,7 +321,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
         {items.map((s, i) => (
           <EditableItem key={i} className="overflow-hidden rounded-2xl">
             <ItemControls index={i} total={items.length} onMove={moveItem} onRemove={removeItem} dark />
-            <div className="relative flex min-h-[150px] items-stretch bg-[#08120B]">
+            <div className="relative flex min-h-[150px] items-stretch bg-[#0A1F12]">
               <div className="absolute inset-0">
                 {Img(['items', i, 'image'], s.image, 'w-full h-full object-cover', s.alt)}
                 <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-r from-black/85 via-black/60 to-transparent" />
@@ -334,7 +334,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
                   {T(['items', i, 'titleAccent'], s.titleAccent, 'text-emerald-400')}
                 </p>
                 {T(['items', i, 'copy'], s.copy, 'mt-1.5 block text-[11px] leading-relaxed text-white/70', { multiline: true })}
-                <span className="mt-3 inline-flex w-fit items-center gap-1 rounded-full bg-white px-4 py-2 text-[11px] font-bold text-[#08120B]">
+                <span className="mt-3 inline-flex w-fit items-center gap-1 rounded-full bg-white px-4 py-2 text-[11px] font-bold text-[#0A1F12]">
                   {T(['items', i, 'cta'], s.cta, '')}
                   <ArrowRight className="h-3 w-3" />
                 </span>
@@ -374,7 +374,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
               )}
             </div>
             <div className="w-full text-center">
-              {T(['items', i, 'title'], cat.title, 'block text-[10px] font-bold text-[#08120B]')}
+              {T(['items', i, 'title'], cat.title, 'block text-[10px] font-bold text-[#0A1F12]')}
               {T(['items', i, 'count'], cat.count, 'block text-[8px] text-neutral-500')}
             </div>
           </EditableItem>
@@ -390,7 +390,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <Instagram className="h-4 w-4 text-[#0F7B3A]" />
-          {T(['handle'], p.handle, 'text-xs font-bold text-[#08120B]')}
+          {T(['handle'], p.handle, 'text-xs font-bold text-[#0A1F12]')}
         </div>
         <div className="grid grid-cols-6 gap-2">
           {items.map((post, i) => (
@@ -429,7 +429,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
             <EditableItem key={i} className="flex flex-col items-center gap-2">
               <ItemControls index={i} total={items.length} onMove={moveItem} onRemove={removeItem} />
               <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white/25 bg-white px-1.5">
-                {T(['items', i, 'value'], badge.value, 'text-center text-xs leading-none font-black text-[#08120B]')}
+                {T(['items', i, 'value'], badge.value, 'text-center text-xs leading-none font-black text-[#0A1F12]')}
               </div>
               {T(['items', i, 'label'], badge.label, 'block w-20 text-center text-[8px] leading-tight font-bold tracking-widest text-white/85 uppercase')}
             </EditableItem>
@@ -481,7 +481,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
                   />
                 </div>
                 <div className="relative z-20">
-                  {T(['items', i, 'title'], tile.title, `block text-sm font-black leading-tight ${light ? 'text-[#08120B]' : 'text-white'}`)}
+                  {T(['items', i, 'title'], tile.title, `block text-sm font-black leading-tight ${light ? 'text-[#0A1F12]' : 'text-white'}`)}
                   {T(['items', i, tile.subtitle !== undefined ? 'subtitle' : 'text'], tile.subtitle ?? tile.text, `mt-0.5 block text-[10px] ${light ? 'text-neutral-600' : 'text-white/70'}`, { multiline: true })}
                   {T(['items', i, 'cta'], tile.cta, `mt-2 block text-[9px] font-bold tracking-wider uppercase ${light ? 'text-[#0F7B3A]' : 'text-emerald-400'}`)}
                 </div>
@@ -509,7 +509,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
             {T(['headingAccent'], p.headingAccent, 'text-emerald-400')}
           </p>
           {T(['body'], p.body, 'mt-1.5 block text-[11px] leading-relaxed text-white/70', { multiline: true })}
-          <span className="mt-3 inline-block rounded-full bg-white px-4 py-2 text-[11px] font-bold text-[#08120B]">
+          <span className="mt-3 inline-block rounded-full bg-white px-4 py-2 text-[11px] font-bold text-[#0A1F12]">
             {T(['cta'], p.cta, '')}
           </span>
         </div>
@@ -524,7 +524,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
   if (blockKey === 'home.ticker') {
     return (
       <div className="space-y-3">
-        <div className="overflow-hidden rounded-t-2xl border-b border-white/10 bg-[#08120B] py-2">
+        <div className="overflow-hidden rounded-t-2xl border-b border-white/10 bg-[#0A1F12] py-2">
           <div className="flex flex-wrap items-center">
             {items.map((item, i) => (
               <EditableItem key={i} className="flex shrink-0 items-center gap-4 px-5 py-1">
@@ -548,7 +548,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
   if (blockKey === 'home.ticker') {
     return (
       <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-xl bg-[#08120B] px-5 py-3">
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-xl bg-[#0A1F12] px-5 py-3">
           {items.map((chip, i) => (
             <EditableItem key={i} className="flex items-center gap-6">
               <ItemControls index={i} total={items.length} onMove={moveItem} onRemove={removeItem} dark />
@@ -569,7 +569,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
   if (blockKey === 'sections.popular_searches') {
     return (
       <div className="space-y-3">
-        {T(['heading'], p.heading, 'block text-xs font-bold text-[#08120B]')}
+        {T(['heading'], p.heading, 'block text-xs font-bold text-[#0A1F12]')}
         <div className="flex flex-wrap items-center gap-2">
           {items.map((chip, i) => (
             <EditableItem key={i}>
@@ -589,7 +589,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
   // ── APP BANNER / NEWSLETTER ───────────────────────────────────────────────
   if (blockKey === 'home.app_banner' || blockKey === 'home.newsletter') {
     return (
-      <div className="relative flex items-center gap-4 overflow-hidden rounded-2xl bg-[#08120B] p-5">
+      <div className="relative flex items-center gap-4 overflow-hidden rounded-2xl bg-[#0A1F12] p-5">
         {p.image !== undefined && (
           <div className="absolute inset-0 opacity-25">
             {Img(['image'], p.image, 'w-full h-full object-cover')}
@@ -623,7 +623,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
   // ── SUBSCRIPTION PLANS — the dark green plan cards ────────────────────────
   if (blockKey === 'plans.subscriptions') {
     return (
-      <div className="space-y-5 rounded-2xl bg-[#0A2818] p-6">
+      <div className="space-y-5 rounded-2xl bg-[#0A1F12] p-6">
         <div className="space-y-1.5 text-center">
           {T(['eyebrow'], p.eyebrow, 'block text-[10px] font-bold tracking-widest text-emerald-400 uppercase')}
           {T(['heading'], p.heading, 'block text-2xl font-black tracking-tight text-white')}
@@ -633,11 +633,11 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
           {items.map((plan, i) => (
             <EditableItem
               key={i}
-              className="rounded-2xl border border-emerald-500/25 bg-[#08120B] p-4"
+              className="rounded-2xl border border-emerald-500/25 bg-[#0A1F12] p-4"
             >
               <ItemControls index={i} total={items.length} onMove={moveItem} onRemove={removeItem} dark />
               {plan.badge !== undefined && (
-                <span className="mb-2 inline-block rounded-full bg-[#D4AF37] px-2 py-0.5 text-[8px] font-black tracking-wide text-[#08120B] uppercase">
+                <span className="mb-2 inline-block rounded-full bg-[#D4AF37] px-2 py-0.5 text-[8px] font-black tracking-wide text-[#0A1F12] uppercase">
                   {T(['items', i, 'badge'], plan.badge, '', { placeholder: 'badge' })}
                 </span>
               )}
@@ -692,14 +692,14 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
         <div className="flex items-end justify-between">
           <div>
             {T(['eyebrow'], p.eyebrow, 'block text-[10px] font-bold tracking-widest text-emerald-600 uppercase')}
-            {T(['heading'], p.heading, 'block text-2xl font-black tracking-tight text-[#08120B]')}
+            {T(['heading'], p.heading, 'block text-2xl font-black tracking-tight text-[#0A1F12]')}
           </div>
           <span className="text-xs font-bold text-[#0F7B3A]">Explore All Recipes ›</span>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
           {items.map((r, i) => (
-            <EditableItem key={i} className="overflow-hidden rounded-2xl bg-[#08120B]">
+            <EditableItem key={i} className="overflow-hidden rounded-2xl bg-[#0A1F12]">
               <ItemControls index={i} total={items.length} onMove={moveItem} onRemove={removeItem} dark />
               <div className="relative aspect-4/3">
                 {Img(['items', i, 'image'], r.image, 'w-full h-full object-cover', r.title)}
@@ -738,7 +738,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
       <div className="space-y-5">
         <div>
           {T(['eyebrow'], p.eyebrow, 'block text-[10px] font-bold tracking-widest text-emerald-600 uppercase')}
-          {T(['heading'], p.heading, 'block text-2xl font-black tracking-tight text-[#08120B]')}
+          {T(['heading'], p.heading, 'block text-2xl font-black tracking-tight text-[#0A1F12]')}
         </div>
 
         <div className="grid grid-cols-3 gap-4">
@@ -752,7 +752,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
                 <span className="inline-block rounded-full bg-emerald-50 px-2 py-0.5 text-[8px] font-bold text-emerald-700 uppercase">
                   {T(['items', i, 'category'], g.category, '', { placeholder: 'category' })}
                 </span>
-                {T(['items', i, 'title'], g.title, 'block text-xs leading-tight font-bold text-[#08120B]')}
+                {T(['items', i, 'title'], g.title, 'block text-xs leading-tight font-bold text-[#0A1F12]')}
                 {T(['items', i, 'excerpt'], g.excerpt, 'block text-[10px] leading-snug text-neutral-500', { multiline: true })}
                 <p className="text-[9px] font-semibold text-[#0F7B3A]">
                   {T(['items', i, 'readTime'], g.readTime, '')} · Read More ›
@@ -770,7 +770,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
   if (blockKey.startsWith('plans.')) {
     return (
       <div className="space-y-3">
-        {T(['heading'], p.heading, 'block text-sm font-black text-[#08120B]')}
+        {T(['heading'], p.heading, 'block text-sm font-black text-[#0A1F12]')}
         <div className="grid grid-cols-3 gap-3">
           {items.map((item, i) => (
             <EditableItem key={i} className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
@@ -781,7 +781,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
                 </div>
               )}
               <div className="p-2.5">
-                {T(['items', i, 'title'], item.title, 'block text-[11px] font-bold leading-tight text-[#08120B]')}
+                {T(['items', i, 'title'], item.title, 'block text-[11px] font-bold leading-tight text-[#0A1F12]')}
                 {T(['items', i, item.tagline !== undefined ? 'tagline' : 'excerpt'], item.tagline ?? item.excerpt, 'mt-0.5 block text-[9px] text-neutral-500', { multiline: true })}
                 {item.pricePerMonth !== undefined && (
                   <p className="mt-1.5 text-xs font-black text-[#0F7B3A]">
@@ -806,7 +806,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
           <div className="h-28 bg-neutral-100">{Img(['heroImage'], p.heroImage, 'w-full h-full object-cover')}</div>
         )}
         <div className="space-y-3 p-4">
-          {T(['title'], p.title, 'block text-lg font-black text-[#08120B]')}
+          {T(['title'], p.title, 'block text-lg font-black text-[#0A1F12]')}
           {T(['intro'], p.intro, 'block text-[11px] leading-relaxed text-neutral-600', { multiline: true })}
           {sections.map((s, i) => (
             <EditableItem key={i} className="border-t border-neutral-100 pt-2.5">
@@ -820,7 +820,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
                 }}
                 onRemove={(idx) => onChange(['sections'], sections.filter((_, j) => j !== idx))}
               />
-              {T(['sections', i, 'heading'], s.heading, 'block text-[11px] font-bold text-[#08120B]')}
+              {T(['sections', i, 'heading'], s.heading, 'block text-[11px] font-bold text-[#0A1F12]')}
               {T(['sections', i, 'body'], s.body, 'mt-0.5 block text-[10px] leading-relaxed text-neutral-500', { multiline: true })}
             </EditableItem>
           ))}
@@ -859,7 +859,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
   if (blockKey === 'site.footer') {
     const columns: any[] = p.columns ?? [];
     return (
-      <div className="rounded-2xl bg-[#08120B] p-5 text-white">
+      <div className="rounded-2xl bg-[#0A1F12] p-5 text-white">
         {T(['tagline'], p.tagline, 'block max-w-sm text-[10px] leading-relaxed text-white/60', { multiline: true })}
         <div className="mt-4 grid grid-cols-4 gap-4">
           {columns.map((col, ci) => (
@@ -892,7 +892,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
       <div className="space-y-8">
         <div className="mx-auto max-w-2xl space-y-1.5 text-center">
           {T(['eyebrow'], p.eyebrow, 'block text-xs font-bold tracking-widest text-emerald-600 uppercase')}
-          {T(['heading'], p.heading, 'block text-2xl font-black tracking-tight text-[#08120B]')}
+          {T(['heading'], p.heading, 'block text-2xl font-black tracking-tight text-[#0A1F12]')}
         </div>
 
         <div className="relative grid grid-cols-3 gap-6">
@@ -908,7 +908,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
                     0{i + 1}
                   </div>
                 </div>
-                {T(['items', i, 'title'], step.title, 'mb-2 block text-base font-bold text-[#08120B]')}
+                {T(['items', i, 'title'], step.title, 'mb-2 block text-base font-bold text-[#0A1F12]')}
                 {T(['items', i, 'text'], step.text, 'mx-auto block max-w-xs text-xs leading-relaxed text-neutral-600', { multiline: true })}
               </EditableItem>
             );
@@ -925,7 +925,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
       <div className="space-y-5">
         <div className="mx-auto max-w-2xl space-y-1.5 text-center">
           {T(['eyebrow'], p.eyebrow, 'block text-xs font-bold tracking-widest text-emerald-600 uppercase')}
-          {T(['heading'], p.heading, 'block text-2xl font-black tracking-tight text-[#08120B]')}
+          {T(['heading'], p.heading, 'block text-2xl font-black tracking-tight text-[#0A1F12]')}
           {p.subheading !== undefined &&
             T(['subheading'], p.subheading, 'block text-xs text-neutral-600', { multiline: true })}
         </div>
@@ -938,7 +938,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
                 {Img(['items', i, 'image'], item.image, 'w-full h-full object-cover', item.label)}
               </div>
               <div className="space-y-0.5 p-3">
-                {T(['items', i, 'label'], item.label, 'block text-sm font-black text-[#08120B]')}
+                {T(['items', i, 'label'], item.label, 'block text-sm font-black text-[#0A1F12]')}
                 {T(['items', i, 'caption'], item.caption, 'block text-[11px] text-neutral-500', { multiline: true })}
               </div>
             </EditableItem>
@@ -955,7 +955,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
       <div className="space-y-5 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-6">
         <div className="max-w-2xl space-y-1.5">
           {T(['eyebrow'], p.eyebrow, 'block text-xs font-bold tracking-widest text-emerald-600 uppercase')}
-          {T(['heading'], p.heading, 'block text-2xl leading-tight font-black tracking-tight text-[#08120B]')}
+          {T(['heading'], p.heading, 'block text-2xl leading-tight font-black tracking-tight text-[#0A1F12]')}
         </div>
 
         <div className="grid grid-cols-4 gap-3">
@@ -970,7 +970,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
                 <div className="mx-auto mb-2.5 flex h-11 w-11 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600">
                   <Icon className="h-5 w-5" />
                 </div>
-                {T(['items', i, 'name'], c.name, 'block text-sm font-bold text-[#08120B]')}
+                {T(['items', i, 'name'], c.name, 'block text-sm font-bold text-[#0A1F12]')}
                 {T(['items', i, 'desc'], c.desc, 'mt-0.5 block text-[10px] leading-snug text-neutral-500', { multiline: true })}
                 {c.year !== undefined && (
                   <span className="mt-2 inline-block rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-700">
@@ -1025,7 +1025,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
       <div className="space-y-5">
         <div className="mx-auto max-w-xl space-y-1.5 text-center">
           {T(['eyebrow'], p.eyebrow, 'block text-xs font-bold tracking-widest text-emerald-600 uppercase')}
-          {T(['heading'], p.heading, 'block text-2xl font-black tracking-tight text-[#08120B]')}
+          {T(['heading'], p.heading, 'block text-2xl font-black tracking-tight text-[#0A1F12]')}
         </div>
 
         <div className="grid grid-cols-3 gap-4">
@@ -1040,7 +1040,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
                 <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50">
                   <Icon className="h-5 w-5 text-emerald-600" />
                 </div>
-                {T(['items', i, 'title'], item.title, 'block text-sm font-bold text-[#08120B]')}
+                {T(['items', i, 'title'], item.title, 'block text-sm font-bold text-[#0A1F12]')}
                 {T(['items', i, 'text'], item.text, 'mt-1.5 block text-[11px] leading-relaxed text-neutral-600', { multiline: true })}
               </EditableItem>
             );
@@ -1057,7 +1057,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
       <div className="space-y-3">
         {p.eyebrow !== undefined &&
           T(['eyebrow'], p.eyebrow, 'block text-[9px] font-bold tracking-widest text-emerald-600 uppercase')}
-        {p.heading !== undefined && T(['heading'], p.heading, 'block text-base font-black text-[#08120B]')}
+        {p.heading !== undefined && T(['heading'], p.heading, 'block text-base font-black text-[#0A1F12]')}
         <div className="grid grid-cols-2 gap-2.5">
           {items.map((item, i) => {
             const Icon = resolveIcon(item.icon);
@@ -1074,7 +1074,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  {T(['items', i, item.title !== undefined ? 'title' : item.name !== undefined ? 'name' : 'label'], item.title ?? item.name ?? item.label, 'block text-[11px] font-bold text-[#08120B]')}
+                  {T(['items', i, item.title !== undefined ? 'title' : item.name !== undefined ? 'name' : 'label'], item.title ?? item.name ?? item.label, 'block text-[11px] font-bold text-[#0A1F12]')}
                   {T(['items', i, item.text !== undefined ? 'text' : item.desc !== undefined ? 'desc' : 'caption'], item.text ?? item.desc ?? item.caption, 'block text-[9px] leading-snug text-neutral-500', { multiline: true })}
                 </div>
               </EditableItem>
@@ -1093,7 +1093,7 @@ export const EditableCanvas: React.FC<CanvasProps> = ({
         typeof v === 'string' ? (
           <div key={k}>
             <p className="mb-0.5 text-[9px] font-bold tracking-wider text-neutral-400 uppercase">{k}</p>
-            {T([k], v, 'block text-sm text-[#08120B]', { multiline: v.length > 60 })}
+            {T([k], v, 'block text-sm text-[#0A1F12]', { multiline: v.length > 60 })}
           </div>
         ) : null
       )}

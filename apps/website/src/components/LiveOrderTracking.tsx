@@ -52,7 +52,7 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
     return (
       <div className="max-w-2xl mx-auto py-12 px-4 text-center">
         <AlertCircle className="w-12 h-12 text-emerald-600 mx-auto mb-3" />
-        <h2 className="text-xl font-bold text-[#08120B]">Order Not Found</h2>
+        <h2 className="text-xl font-bold text-[#0A1F12]">Order Not Found</h2>
         <button onClick={onBack} className="mt-4 bg-[#0F7B3A] text-white px-4 py-2 rounded-xl text-xs font-bold">
           Back to Home
         </button>
@@ -73,7 +73,7 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 text-xs text-neutral-500 hover:text-[#08120B] transition cursor-pointer"
+          className="flex items-center gap-1.5 text-xs text-neutral-500 hover:text-[#0A1F12] transition cursor-pointer"
         >
           <ChevronLeft className="w-4 h-4" /> Back to Account / Orders
         </button>
@@ -90,14 +90,14 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-200 pb-4 mb-6">
           <div>
             <div className="text-xs text-neutral-500">Order Reference</div>
-            <h1 className="text-xl font-black text-[#08120B] tracking-tight">{order.orderNumber}</h1>
+            <h1 className="text-xl font-black text-[#0A1F12] tracking-tight">{order.orderNumber}</h1>
             <div className="text-xs text-neutral-500 mt-0.5">Placed on {new Date(order.createdAt).toLocaleTimeString()}</div>
           </div>
 
           {order.driverDetails?.otp && (
             <div className="bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-2xl text-right">
               <div className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider">Delivery OTP</div>
-              <div className="text-lg font-black text-[#08120B] tracking-widest">{order.driverDetails.otp}</div>
+              <div className="text-lg font-black text-[#0A1F12] tracking-widest">{order.driverDetails.otp}</div>
             </div>
           )}
         </div>
@@ -113,7 +113,7 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
                 key={s.stepNum}
                 className={`p-3 rounded-2xl border transition relative ${
                   isCurrent
-                    ? 'bg-emerald-50 border-emerald-500 text-[#08120B] shadow-md'
+                    ? 'bg-emerald-50 border-emerald-500 text-[#0A1F12] shadow-md'
                     : isDone
                     ? 'bg-white border-emerald-200 text-emerald-700'
                     : 'bg-neutral-50 border-neutral-200 text-neutral-400'
@@ -123,7 +123,7 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
                   <span className="text-[10px] font-black uppercase tracking-wider">Step {s.stepNum}</span>
                   {isDone ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <Clock className="w-4 h-4 text-neutral-400" />}
                 </div>
-                <h4 className="text-xs font-bold text-[#08120B] mb-0.5">{s.label}</h4>
+                <h4 className="text-xs font-bold text-[#0A1F12] mb-0.5">{s.label}</h4>
                 <p className="text-[10px] text-neutral-500 line-clamp-2">{s.desc}</p>
               </div>
             );
@@ -138,7 +138,7 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
                 <Truck className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-bold text-[#08120B] text-sm">{order.driverDetails.name}</h4>
+                <h4 className="font-bold text-[#0A1F12] text-sm">{order.driverDetails.name}</h4>
                 <div className="text-xs text-neutral-600">
                   {order.driverDetails.vehicleNo} • ⭐ {order.driverDetails.rating} Delivery Executive
                 </div>
@@ -159,7 +159,7 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
           live GPS map — the website has no real-time rider coordinates feed,
           so it deliberately doesn't claim live location or a specific ETA
           minute count (both were hard-coded/fake before this fix). */}
-      <div className="bg-[#08120B] border border-black rounded-3xl p-6 relative overflow-hidden h-64 flex flex-col justify-between shadow-2xl">
+      <div className="bg-[#0A1F12] rounded-3xl p-6 relative overflow-hidden h-64 flex flex-col justify-between shadow-lg shadow-emerald-950/20">
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]" />
 
         <div className="relative z-10 flex items-center justify-between">
@@ -205,7 +205,7 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
 
       {/* Ordered Items Summary */}
       <div className="bg-white border border-neutral-200 rounded-3xl p-6 shadow-sm">
-        <h3 className="font-bold text-[#08120B] text-sm mb-4">Items in this Order</h3>
+        <h3 className="font-bold text-[#0A1F12] text-sm mb-4">Items in this Order</h3>
         <div className="space-y-3">
           {order.items.map((item, idx) => (
             <div key={idx} className="flex items-center justify-between text-xs py-2 border-b border-neutral-100 last:border-0">
@@ -217,7 +217,7 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
                   className="w-10 h-10 rounded-lg object-cover"
                 />
                 <div>
-                  <div className="font-bold text-[#08120B]">{item.product.name}</div>
+                  <div className="font-bold text-[#0A1F12]">{item.product.name}</div>
                   <div className="text-[11px] text-neutral-500">{item.selectedWeight.label} × {item.quantity}</div>
                 </div>
               </div>

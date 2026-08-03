@@ -192,7 +192,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
             className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
               selectedCategory === cat.id
                 ? 'bg-[#0F7B3A] text-white shadow'
-                : 'text-neutral-600 hover:bg-emerald-50 hover:text-[#08120B]'
+                : 'text-neutral-600 hover:bg-emerald-50 hover:text-[#0A1F12]'
             }`}
           >
             {cat.name}
@@ -202,7 +202,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
 
       {/* Price Range */}
       <div className="space-y-2.5 rounded-2xl border border-neutral-200 p-4 mt-5">
-        <label className="text-xs font-bold text-[#08120B] uppercase tracking-wider block">Price Range</label>
+        <label className="text-xs font-bold text-[#0A1F12] uppercase tracking-wider block">Price Range</label>
         <input
           type="range"
           min={100}
@@ -232,7 +232,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
             Home
           </button>
           <ChevronRight className="w-3.5 h-3.5" />
-          <span className="text-[#08120B] font-bold">{currentCategoryName}</span>
+          <span className="text-[#0A1F12] font-bold">{currentCategoryName}</span>
         </nav>
       )}
 
@@ -241,7 +241,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
         {/* Left Desktop Filters Sidebar */}
         <aside className="hidden lg:block lg:col-span-3 space-y-5 sticky top-24">
           <div className="bg-white border border-neutral-200 rounded-2xl p-5">
-            <h3 className="font-black text-[#08120B] text-sm flex items-center gap-1.5 mb-3">
+            <h3 className="font-black text-[#0A1F12] text-sm flex items-center gap-1.5 mb-3">
               <Filter className="w-4 h-4 text-emerald-600" /> Categories
             </h3>
             {filterControlsContent}
@@ -253,13 +253,13 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
           {/* Top Sort Selector */}
           <div className="bg-white border border-neutral-200 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
             <div className="text-xs text-neutral-500 font-semibold">
-              Found <strong className="text-[#08120B] font-black">{filteredProducts.length}</strong> items matching your criteria
+              Found <strong className="text-[#0A1F12] font-black">{filteredProducts.length}</strong> items matching your criteria
             </div>
 
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowMobileFilters(true)}
-                className="lg:hidden flex items-center gap-1.5 bg-white border border-neutral-200 hover:border-emerald-400 rounded-xl px-3 py-1.5 text-xs font-bold text-[#08120B] transition cursor-pointer shadow-sm"
+                className="lg:hidden flex items-center gap-1.5 bg-white border border-neutral-200 hover:border-emerald-400 rounded-xl px-3 py-1.5 text-xs font-bold text-[#0A1F12] transition cursor-pointer shadow-sm"
               >
                 <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-600" />
                 Filters
@@ -276,7 +276,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
                 <select
                   value={sortBy}
                   onChange={(e: any) => setSortBy(e.target.value)}
-                  className="bg-white border border-neutral-200 text-[#08120B] rounded-xl px-3 py-1.5 focus:outline-none font-bold text-xs cursor-pointer"
+                  className="bg-white border border-neutral-200 text-[#0A1F12] rounded-xl px-3 py-1.5 focus:outline-none font-bold text-xs cursor-pointer"
                 >
                   <option value="featured">Featured Fresh Cuts</option>
                   <option value="newest">Newest Arrivals</option>
@@ -303,7 +303,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
             </div>
           ) : hasError ? (
             /* STATE 2: ERROR STATE + RETRY */
-            <div className="bg-[#08120B] border border-black rounded-3xl p-12 text-center space-y-4">
+            <div className="bg-[#0A1F12] rounded-3xl p-12 text-center space-y-4">
               <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto text-white">
                 <X className="w-8 h-8" />
               </div>
@@ -322,7 +322,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
             /* STATE 3: EMPTY STATE */
             <div className="bg-white border border-neutral-200 rounded-3xl p-12 text-center space-y-4 shadow-sm">
               <ShoppingBag className="w-16 h-16 mx-auto text-emerald-200" />
-              <h3 className="text-xl font-black text-[#08120B]">No Fresh Cuts Match Your Search</h3>
+              <h3 className="text-xl font-black text-[#0A1F12]">No Fresh Cuts Match Your Search</h3>
               <p className="text-xs text-neutral-500 max-w-md mx-auto">
                 We couldn't find any protein products matching your selected filters. Try broadening your criteria or reset filters.
               </p>
@@ -361,7 +361,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowMobileFilters(false)} />
           <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto bg-white rounded-t-3xl p-6 space-y-6 shadow-2xl">
             <div className="flex items-center justify-between pb-4 border-b border-neutral-200 sticky -top-6 bg-white pt-1 -mt-1">
-              <h3 className="font-black text-[#08120B] text-base flex items-center gap-2">
+              <h3 className="font-black text-[#0A1F12] text-base flex items-center gap-2">
                 <Filter className="w-4 h-4 text-emerald-600" /> Filter Cuts
               </h3>
               <button

@@ -41,7 +41,7 @@ export const HowItWorksSection: React.FC = () => {
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
       <div className="text-center max-w-2xl mx-auto space-y-2">
         <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{block.eyebrow}</span>
-        <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">{block.heading}</h2>
+        <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{block.heading}</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
@@ -57,7 +57,7 @@ export const HowItWorksSection: React.FC = () => {
                   0{step.id}
                 </div>
               </div>
-              <h3 className="text-base font-bold text-[#08120B] mb-2">{step.title}</h3>
+              <h3 className="text-base font-bold text-[#0A1F12] mb-2">{step.title}</h3>
               <p className="text-xs text-neutral-600 leading-relaxed max-w-xs mx-auto">{step.desc}</p>
             </div>
           );

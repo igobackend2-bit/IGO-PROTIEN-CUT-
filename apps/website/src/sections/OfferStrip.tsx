@@ -19,7 +19,7 @@ export const OfferStrip: React.FC<OfferStripProps> = ({ products, onNavigate }) 
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <button
         onClick={() => onNavigate('/search')}
-        className="w-full group flex items-center justify-between gap-4 bg-gradient-to-r from-[#123A5C] to-[#1D6FB0] rounded-2xl px-5 sm:px-7 py-4 cursor-pointer transition hover:shadow-lg hover:shadow-blue-950/20"
+        className="w-full group flex items-center justify-between gap-4 bg-gradient-to-r from-[#0A1F12] to-[#0F7B3A] rounded-2xl px-5 sm:px-7 py-4 cursor-pointer transition hover:shadow-lg hover:shadow-blue-950/20"
       >
         <div className="flex items-center gap-3.5 min-w-0">
           <div className="w-9 h-9 rounded-full bg-white/15 border border-white/20 flex items-center justify-center shrink-0">
@@ -34,7 +34,7 @@ export const OfferStrip: React.FC<OfferStripProps> = ({ products, onNavigate }) 
           </div>
         </div>
 
-        <span className="shrink-0 flex items-center gap-1.5 bg-white text-[#123A5C] font-black text-xs uppercase tracking-wider px-4 py-2 rounded-xl group-hover:bg-blue-50 transition">
+        <span className="shrink-0 flex items-center gap-1.5 bg-white text-[#0F7B3A] font-black text-xs uppercase tracking-wider px-4 py-2 rounded-xl group-hover:bg-blue-50 transition">
           Shop Now <ArrowRight className="w-3.5 h-3.5" />
         </span>
       </button>

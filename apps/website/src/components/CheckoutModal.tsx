@@ -185,14 +185,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-      <div className="bg-white border border-neutral-200 rounded-3xl max-w-2xl w-full text-[#08120B] overflow-hidden relative shadow-2xl my-auto">
+      <div className="bg-white border border-neutral-200 rounded-3xl max-w-2xl w-full text-[#0A1F12] overflow-hidden relative shadow-2xl my-auto">
         {/* Header */}
         <div className="p-4 border-b border-neutral-200 flex items-center justify-between bg-white">
           <div className="flex items-center gap-2">
             <Truck className="w-5 h-5 text-emerald-600 animate-pulse" />
-            <h2 className="text-base font-bold text-[#08120B]">Express Checkout • IGO Protein Cuts</h2>
+            <h2 className="text-base font-bold text-[#0A1F12]">Express Checkout • IGO Protein Cuts</h2>
           </div>
-          <button onClick={onClose} className="p-2 text-neutral-400 hover:text-[#08120B] transition cursor-pointer">
+          <button onClick={onClose} className="p-2 text-neutral-400 hover:text-[#0A1F12] transition cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -211,8 +211,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   onClick={() => setSelectedAddressId(addr.id)}
                   className={`p-3 rounded-2xl border cursor-pointer transition flex items-start gap-3 ${
                     selectedAddressId === addr.id
-                      ? 'bg-emerald-50 border-emerald-500 text-[#08120B]'
-                      : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B]'
+                      ? 'bg-emerald-50 border-emerald-500 text-[#0A1F12]'
+                      : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#0A1F12]'
                   }`}
                 >
                   <input
@@ -223,7 +223,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     className="mt-1 accent-emerald-500"
                   />
                   <div>
-                    <div className="text-xs font-bold text-[#08120B] flex items-center gap-2">
+                    <div className="text-xs font-bold text-[#0A1F12] flex items-center gap-2">
                       <span>{addr.name} ({addr.type})</span>
                       {addr.isDefault && <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] px-2 py-0.2 rounded">DEFAULT</span>}
                     </div>
@@ -251,8 +251,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   onClick={() => setSelectedSlot(slot.label)}
                   className={`p-3 rounded-xl border text-left text-xs transition cursor-pointer ${
                     selectedSlot === slot.label
-                      ? 'bg-emerald-50 border-emerald-500 text-[#08120B] font-bold'
-                      : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B]'
+                      ? 'bg-emerald-50 border-emerald-500 text-[#0A1F12] font-bold'
+                      : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#0A1F12]'
                   }`}
                 >
                   <div className="flex items-center gap-1.5">
@@ -285,8 +285,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     onClick={() => setPaymentMethod(method.id as any)}
                     className={`p-3 rounded-xl border text-left flex flex-col justify-between gap-2 transition cursor-pointer ${
                       paymentMethod === method.id
-                        ? 'bg-emerald-50 border-emerald-500 text-[#08120B] font-bold'
-                        : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B]'
+                        ? 'bg-emerald-50 border-emerald-500 text-[#0A1F12] font-bold'
+                        : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#0A1F12]'
                     }`}
                   >
                     <Icon className="w-5 h-5 text-emerald-600" />
@@ -304,7 +304,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   placeholder="username@upi"
                   value={upiId}
                   onChange={(e) => setUpiId(e.target.value)}
-                  className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-[#08120B] focus:outline-none"
+                  className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-[#0A1F12] focus:outline-none"
                 />
               </div>
             )}
@@ -318,7 +318,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   value={cardNumber}
                   onChange={(e) => setCardNumber(e.target.value)}
                   maxLength={19}
-                  className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-[#08120B] focus:outline-none"
+                  className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-[#0A1F12] focus:outline-none"
                 />
                 <div className="flex gap-2">
                   <input
@@ -327,7 +327,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     value={cardExpiry}
                     onChange={(e) => setCardExpiry(e.target.value)}
                     maxLength={5}
-                    className="w-1/2 bg-white border border-neutral-200 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-[#08120B] focus:outline-none"
+                    className="w-1/2 bg-white border border-neutral-200 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-[#0A1F12] focus:outline-none"
                   />
                   <input
                     type="password"
@@ -335,7 +335,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     value={cardCvv}
                     onChange={(e) => setCardCvv(e.target.value)}
                     maxLength={3}
-                    className="w-1/2 bg-white border border-neutral-200 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-[#08120B] focus:outline-none"
+                    className="w-1/2 bg-white border border-neutral-200 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-[#0A1F12] focus:outline-none"
                   />
                 </div>
               </div>
@@ -347,7 +347,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <select
                   value={selectedBank}
                   onChange={(e) => setSelectedBank(e.target.value)}
-                  className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-[#08120B] focus:outline-none"
+                  className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-lg px-3 py-2 text-xs text-[#0A1F12] focus:outline-none"
                 >
                   {['HDFC Bank', 'ICICI Bank', 'State Bank of India', 'Axis Bank', 'Kotak Mahindra Bank'].map((bank) => (
                     <option key={bank} value={bank}>{bank}</option>
@@ -363,7 +363,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             )}
 
             {paymentError && (
-              <div className="mt-3 bg-[#08120B] border border-black rounded-xl p-3 text-[11px] text-white">
+              <div className="mt-3 bg-[#0A1F12] border border-black rounded-xl p-3 text-[11px] text-white">
                 {paymentError}
               </div>
             )}

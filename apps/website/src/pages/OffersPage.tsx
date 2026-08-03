@@ -45,7 +45,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
       {/* Top Banner Header */}
-      <div className="bg-[#08120B] border border-black rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl">
+      <div className="bg-[#0A1F12] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg shadow-emerald-950/20">
         <div className="max-w-2xl space-y-4 relative z-10">
           <div className="inline-flex items-center gap-2 bg-[#0F7B3A] text-white px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider">
             <Flame className="w-4 h-4 fill-white" /> FESTIVAL & GYM PROTEIN DROPS
@@ -68,7 +68,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
             </div>
             <div>
               <div className="text-xs font-bold text-emerald-700 uppercase tracking-widest">LIMITED TIME DROPS</div>
-              <h2 className="text-2xl font-black text-[#08120B] tracking-tight">Flash Sale — Ends Soon!</h2>
+              <h2 className="text-2xl font-black text-[#0A1F12] tracking-tight">Flash Sale — Ends Soon!</h2>
             </div>
           </div>
 
@@ -76,7 +76,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
           <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-2xl">
             <Clock className="w-4 h-4 text-emerald-600" />
             <span className="text-xs text-neutral-500 font-bold uppercase">Ends in:</span>
-            <div className="font-mono font-black text-[#08120B] text-sm flex items-center gap-1">
+            <div className="font-mono font-black text-[#0A1F12] text-sm flex items-center gap-1">
               <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">{String(timeLeft.hours).padStart(2, '0')}h</span>:
               <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">{String(timeLeft.minutes).padStart(2, '0')}m</span>:
               <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">{String(timeLeft.seconds).padStart(2, '0')}s</span>
@@ -100,7 +100,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
               </div>
 
               <div>
-                <h3 className="font-bold text-[#08120B] text-sm group-hover:text-emerald-600 transition line-clamp-1">{p.name}</h3>
+                <h3 className="font-bold text-[#0A1F12] text-sm group-hover:text-emerald-600 transition line-clamp-1">{p.name}</h3>
                 <p className="text-xs text-neutral-500 mt-1 line-clamp-1">{p.shortDescription}</p>
 
                 {/* Stock remaining bar. Only claims a specific unit count when
@@ -123,7 +123,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
 
               <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
                 <div>
-                  <div className="text-base font-black text-[#08120B]">₹{p.basePrice}</div>
+                  <div className="text-base font-black text-[#0A1F12]">₹{p.basePrice}</div>
                   <div className="text-[10px] text-neutral-400 line-through">₹{p.originalPrice}</div>
                 </div>
                 <button
@@ -147,7 +147,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
           <div className="text-xs font-bold text-emerald-700 uppercase tracking-widest flex items-center gap-1">
             <Sparkles className="w-4 h-4" /> BUNDLE & SAVE
           </div>
-          <h2 className="text-2xl font-black text-[#08120B] tracking-tight">Curated High-Protein Combo Packs</h2>
+          <h2 className="text-2xl font-black text-[#0A1F12] tracking-tight">Curated High-Protein Combo Packs</h2>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -161,7 +161,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
                   <span className="bg-[#0F7B3A] text-white text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                     {combo.badge}
                   </span>
-                  <h3 className="text-xl font-bold text-[#08120B] mt-2">{combo.title}</h3>
+                  <h3 className="text-xl font-bold text-[#0A1F12] mt-2">{combo.title}</h3>
                   <p className="text-xs text-neutral-500 mt-1">{combo.tagline}</p>
                 </div>
 
@@ -181,7 +181,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
                       <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                       {it.productName} ({it.weightLabel})
                     </span>
-                    <span className="font-bold text-[#08120B]">x{it.qty}</span>
+                    <span className="font-bold text-[#0A1F12]">x{it.qty}</span>
                   </div>
                 ))}
               </div>

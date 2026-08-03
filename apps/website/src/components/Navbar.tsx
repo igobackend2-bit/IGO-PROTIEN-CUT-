@@ -7,25 +7,26 @@ import {
   Heart,
   User,
   MapPin,
-  Sparkles,
+  Globe,
   ChevronDown,
   Menu,
   X,
   Bell,
   Home,
-  LayoutGrid,
   Package,
   Percent,
   Briefcase,
   Gift,
-  Calculator,
-  PhoneCall,
   Truck,
   HelpCircle,
-  LocateFixed
+  LocateFixed,
+  Info,
+  Mail,
+  Newspaper
 } from 'lucide-react';
 import { StoreService } from '../lib/storage';
-import { SupabaseService } from '../lib/supabaseClient';
+import { fetchNotifications } from '../lib/api/notifications';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { Language, TRANSLATIONS } from '../lib/language';
 
 interface NavbarProps {
@@ -80,10 +81,6 @@ export const Navbar: React.FC<NavbarProps> = ({
       const wishlist = StoreService.getWishlist();
       setWishlistCount(wishlist.length);
 
-      const notifs = SupabaseService.getNotifications();
-      const unread = notifs.filter((n) => !n.isRead).length;
-      setUnreadNotifCount(unread);
-
       setUserProfile(StoreService.getUserProfile());
       setIsLoggedIn(StoreService.isLoggedIn());
     };
@@ -91,23 +88,52 @@ export const Navbar: React.FC<NavbarProps> = ({
     updateCounts();
     window.addEventListener('protein_cuts_cart_updated', updateCounts);
     window.addEventListener('protein_cuts_wishlist_updated', updateCounts);
-    window.addEventListener('protein_cuts_notifications_updated', updateCounts);
     window.addEventListener('protein_cuts_user_updated', updateCounts);
     // The custom events above only fire within the tab that made the change
     // — they never reach a second open tab of the site. The native
     // `storage` event DOES fire on every other same-origin tab whenever
     // localStorage changes, so without it the header badge count (cart/
-    // wishlist/notifications) goes stale in any tab other than the one you
-    // last acted in — e.g. the wishlist heart badge still says "2" in Tab A
-    // after you cleared it in Tab B, because Tab A never heard about it.
+    // wishlist) goes stale in any tab other than the one you last acted in —
+    // e.g. the wishlist heart badge still says "2" in Tab A after you
+    // cleared it in Tab B, because Tab A never heard about it.
     window.addEventListener('storage', updateCounts);
 
     return () => {
       window.removeEventListener('protein_cuts_cart_updated', updateCounts);
       window.removeEventListener('protein_cuts_wishlist_updated', updateCounts);
-      window.removeEventListener('protein_cuts_notifications_updated', updateCounts);
       window.removeEventListener('protein_cuts_user_updated', updateCounts);
       window.removeEventListener('storage', updateCounts);
+    };
+  }, []);
+
+  // Real notifications badge — reads the canonical `notifications` table
+  // (order-status triggers, restock alerts) instead of the old fake local
+  // SupabaseService store. Refetches on the same "just changed" custom event
+  // (fired by NotificationCenterModal after marking rows read) and also
+  // subscribes to realtime INSERTs so a new order-status notification bumps
+  // the badge live without a page refresh.
+  useEffect(() => {
+    let cancelled = false;
+    const refreshUnread = async () => {
+      const notifs = await fetchNotifications();
+      if (!cancelled) setUnreadNotifCount(notifs.filter((n) => !n.isRead).length);
+    };
+
+    refreshUnread();
+    window.addEventListener('protein_cuts_notifications_updated', refreshUnread);
+
+    let channel: ReturnType<NonNullable<typeof supabase>['channel']> | null = null;
+    if (isSupabaseConfigured && supabase) {
+      channel = supabase
+        .channel('navbar-notifications')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, refreshUnread)
+        .subscribe();
+    }
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('protein_cuts_notifications_updated', refreshUnread);
+      if (channel && supabase) supabase.removeChannel(channel);
     };
   }, []);
 
@@ -125,12 +151,12 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
-  // Real browser Geolocation API — actually requests the device's GPS/network
-  // location rather than faking a "detected" result. There's no geocoding
-  // service configured on this site (no Google Maps/Mapbox key in .env), so
-  // this deliberately doesn't invent a fake street address from the raw
-  // coordinates — it labels the location honestly as GPS coordinates rather
-  // than pretending to know the exact locality name.
+  // Real browser Geolocation API — requests the device's GPS/network
+  // location, then reverse-geocodes those coordinates into an actual
+  // locality/pincode name via OpenStreetMap's free Nominatim API (no key
+  // required, so no .env dependency). Falls back to showing the raw
+  // coordinates only if the reverse-geocode call itself fails, rather than
+  // ever presenting the customer with bare numbers when a name is available.
   const handleUseCurrentLocation = () => {
     if (!('geolocation' in navigator)) {
       setPincodeStatus('Live location isn\'t supported on this browser. Please enter your Pincode instead.');
@@ -139,10 +165,30 @@ export const Navbar: React.FC<NavbarProps> = ({
     setIsLocating(true);
     setPincodeStatus(null);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude.toFixed(4);
-        const lng = pos.coords.longitude.toFixed(4);
-        setSelectedPincode(`Current Location (${lat}, ${lng})`);
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=16&addressdetails=1`,
+            { headers: { Accept: 'application/json' } }
+          );
+          if (!res.ok) throw new Error('reverse geocode failed');
+          const data = await res.json();
+          const addr = data?.address ?? {};
+          const locality =
+            addr.suburb || addr.neighbourhood || addr.locality || addr.village ||
+            addr.town || addr.city_district || addr.city || 'Your Area';
+          const postcode = addr.postcode;
+
+          setSelectedPincode(postcode ? `${postcode} (${locality})` : locality);
+        } catch {
+          // Reverse-geocode call failed (offline/rate-limited) — fall back to
+          // raw coordinates rather than leaving the field blank.
+          setSelectedPincode(`Current Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+        }
+
         setPincodeStatus('Live location detected — 30-Minute Express Cold Chain Delivery Active in your zone!');
         setIsLocating(false);
         setTimeout(() => {
@@ -189,27 +235,29 @@ export const Navbar: React.FC<NavbarProps> = ({
     { name: lang === 'ta' ? 'கம்போஸ்' : 'Combos', path: '/category/combo-packs' }
   ];
 
-  // "FAQ" used to be a separate item here pointing at the exact same
-  // '/support' route as "Support" (SupportPage's first tab is literally the
-  // FAQ/knowledge base) — a genuine duplicate nav entry that just crowded
-  // the row for no reason. Merged into one "Support & FAQ" link.
+  // Ordered to match the standard professional nav pattern (browse → business
+  // → brand/content → self-serve help → direct contact last as the final
+  // CTA-style item): Home, Categories (primary row) → B2B → About → Blog →
+  // FAQ → Contact. FAQ sits right before Contact since that's the "check
+  // this before you reach out" step on most retail sites — it has no
+  // standalone page, so it points at `/support`, the real "Support & FAQ"
+  // page already reachable from the footer/account menu.
   const secondaryLinks = [
-    { name: lang === 'ta' ? 'ஆர்டர் ட்ராக்' : 'Track Order', path: '/account', icon: Truck },
-    { name: lang === 'ta' ? 'சந்தா' : 'Subscriptions', path: '/subscriptions', icon: Package },
-    { name: lang === 'ta' ? 'பரிசுகள்' : 'Gifting', path: '/gifts', icon: Gift },
-    { name: lang === 'ta' ? 'ஆஃபர்கள்' : 'Offers & Deals', path: '/offers', icon: Percent },
-    { name: lang === 'ta' ? 'மொத்த வர்த்தகம்' : 'B2B / Bulk', path: '/b2b', icon: Briefcase },
-    { name: lang === 'ta' ? 'உதவி & கேள்விகள்' : 'Support & FAQ', path: '/support', icon: HelpCircle }
+    { name: lang === 'ta' ? 'மொத்த வர்த்தகம்' : 'B2B', path: '/b2b', icon: Briefcase },
+    { name: lang === 'ta' ? 'எங்களை பற்றி' : 'About', path: '/about', icon: Info },
+    { name: lang === 'ta' ? 'வலைப்பதிவு' : 'Blog', path: '/blog', icon: Newspaper },
+    { name: lang === 'ta' ? 'கேள்விகள்' : 'FAQ', path: '/support', icon: HelpCircle },
+    { name: lang === 'ta' ? 'தொடர்பு' : 'Contact', path: '/contact', icon: Mail }
   ];
 
-  // Link styling for the dark sub-nav bar — a filled rounded-pill highlight
-  // for the active/hover state instead of the old bottom-border underline,
-  // matching the cleaner pill-nav pattern used by modern app headers.
+  // Link styling for the dark sub-nav bar — plain bold text with a bottom
+  // underline on the active/hover state, matching the clean text-only nav
+  // bar pattern requested (no icons, no pill backgrounds).
   const navLinkClassDark = (path: string) =>
-    `flex items-center gap-1.5 transition whitespace-nowrap px-3 py-1.5 rounded-full font-semibold cursor-pointer ${
+    `transition whitespace-nowrap px-4 py-2 font-bold text-sm cursor-pointer border-b-2 ${
       currentPath === path
-        ? 'bg-white/12 text-white font-bold'
-        : 'text-white/60 hover:text-white hover:bg-white/5'
+        ? 'text-white border-white'
+        : 'text-white/85 border-transparent hover:text-white hover:border-white/50'
     }`;
 
   const submitNavSearch = () => {
@@ -219,95 +267,105 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-xl border-b border-neutral-200 text-[#08120B] shadow-sm">
+    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-xl border-b border-neutral-200 text-[#0A1F12] shadow-sm">
       {/* Main Header Row — logo, delivery, search, and all quick actions live
           in a single clean row (matches the lean single-row pattern used by
           modern grocery/meat delivery apps rather than a stacked utility bar) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 lg:h-24 flex items-center justify-between gap-3 sm:gap-5">
         {/* Brand Logo — placeholder mark until the real logo file is provided */}
         <div className="flex items-center gap-4 shrink-0">
           <button
             onClick={() => onNavigate('/')}
             className="text-left flex items-center gap-2.5 group cursor-pointer focus:outline-none shrink-0"
           >
-            <img
-              src="/Images/protein-cuts-logo.jpg"
-              alt="Protein Cuts Logo"
-              className="h-14 w-auto object-contain group-hover:scale-105 transition duration-300 shrink-0"
-            />
+            {/* The logo file is a JPG with a wide white margin baked around
+                the mark (JPGs can't be transparent), and the header's
+                bg-white/95 + backdrop-blur wasn't flat enough for
+                mix-blend-multiply to fully cancel that white out. Cropping
+                it instead: the wrapper is fixed to the target visible size
+                with overflow-hidden, and the image inside is scaled up 55%
+                from its own center — which both zooms past most of the
+                white margin AND makes the visible mark bigger, in one move,
+                with no new image asset. */}
+            <div className="h-12 sm:h-14 lg:h-16 xl:h-[4.5rem] overflow-hidden flex items-center shrink-0">
+              <img
+                src="/Images/protein-cuts-logo.jpg"
+                alt="Protein Cuts Logo"
+                className="h-full w-auto object-contain mix-blend-multiply scale-[1.9] group-hover:scale-[2] transition duration-300"
+              />
+            </div>
           </button>
 
           {/* Delivery Pincode Selector */}
           <button
             onClick={() => setShowPincodeModal(true)}
-            className="hidden xl:flex items-center gap-2 bg-neutral-50 border border-neutral-200 hover:border-emerald-400 px-3.5 py-1.5 rounded-full text-xs text-neutral-600 transition cursor-pointer shadow-sm focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400 shrink-0"
+            className="hidden xl:flex items-center h-10 gap-2 bg-neutral-50 border border-neutral-300 hover:border-emerald-400 px-3.5 rounded-full text-xs text-neutral-600 transition cursor-pointer shadow-sm focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400 shrink-0 max-w-[190px]"
           >
             <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-            <div className="text-left">
-              <div className="text-[10px] text-emerald-700 uppercase font-bold">{t.deliverTo}</div>
-              <div className="font-bold text-[#08120B] truncate max-w-[120px]">{selectedPincode}</div>
+            <div className="text-left min-w-0">
+              <div className="text-[10px] text-emerald-700 uppercase font-bold leading-tight">{t.deliverTo}</div>
+              <div className="font-bold text-[#0A1F12] truncate max-w-[150px] leading-tight">{selectedPincode}</div>
             </div>
             <ChevronDown className="w-3 h-3 text-neutral-400 shrink-0" />
           </button>
         </div>
 
-        {/* AI & Voice Search Bar Trigger */}
-        <div className="flex-1 min-w-0 max-w-xs lg:max-w-sm xl:max-w-md hidden sm:flex items-center gap-2">
-          <div className="relative w-full min-w-0">
+        {/* Real search bar — same input + category dropdown + submit button
+            already used in the dark secondary row below (navSearchQuery /
+            submitNavSearch), now added here in the main header too, per
+            request. The AI-branded click-through trigger this replaced is
+            gone. Voice search stays, wasn't part of the earlier removal. */}
+        <div className="flex-1 min-w-[130px] sm:min-w-[160px] max-w-[180px] sm:max-w-[220px] md:max-w-xs hidden sm:flex items-center justify-center shrink">
+          {/* Mic now sits inside the pill as a trailing icon, matching the
+              reference layout, instead of as a separate button beside it.
+              Shrunk down to a compact size per request — smaller height and
+              a much tighter max-width than the full-size bar it used to be. */}
+          <div className="flex items-center h-11 bg-neutral-50 border border-neutral-300 hover:border-emerald-400 rounded-full overflow-hidden shadow-sm transition w-full min-w-0 focus-within:border-emerald-400">
+            <Search className="w-4 h-4 text-neutral-400 ml-3.5 shrink-0" />
+            <input
+              type="text"
+              value={navSearchQuery}
+              onChange={(e) => setNavSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submitNavSearch();
+              }}
+              placeholder={t.searchPlaceholder}
+              className="flex-1 min-w-0 bg-transparent px-2 py-2 text-xs text-[#0A1F12] placeholder-neutral-400 focus:outline-none"
+            />
             <button
-              onClick={onOpenAISearch}
-              className="w-full bg-neutral-50 border border-neutral-200 hover:border-emerald-400 px-4 py-2.5 rounded-full text-xs text-neutral-500 flex items-center justify-between shadow-sm transition cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400"
+              onClick={onOpenVoiceSearch}
+              title="Voice Search"
+              className="p-2 text-emerald-600 hover:text-emerald-700 transition cursor-pointer shrink-0"
             >
-              <div className="flex items-center gap-2 min-w-0">
-                <Search className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span className="truncate">{t.searchPlaceholder}</span>
-              </div>
-              <span className="hidden md:flex items-center gap-1 text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-bold shrink-0">
-                <Sparkles className="w-3 h-3 text-emerald-600" /> AI
-              </span>
+              <Mic className="w-4 h-4" />
+            </button>
+            <button
+              onClick={submitNavSearch}
+              aria-label="Search"
+              className="p-2.5 mr-1 my-1 rounded-full bg-[#0F7B3A] hover:bg-emerald-500 text-white transition cursor-pointer shrink-0"
+            >
+              <Search className="w-3.5 h-3.5" />
             </button>
           </div>
-          <button
-            onClick={onOpenVoiceSearch}
-            className="p-2.5 rounded-full bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-emerald-700 hover:border-emerald-400 transition cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400 shrink-0"
-            title="Voice Search"
-          >
-            <Mic className="w-4 h-4" />
-          </button>
         </div>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-2 md:gap-2.5 shrink-0">
-          {/* Protein Calculator — small icon button, no separate utility row needed */}
-          <button
-            onClick={onOpenCalculator}
-            className="hidden lg:flex p-2.5 rounded-full bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-emerald-700 hover:border-emerald-400 transition cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400"
-            title={t.proteinCalc}
-          >
-            <Calculator className="w-4 h-4" />
-          </button>
+        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-2.5 shrink-0">
+          {/* Protein Calculator and Call quick-dial buttons removed per request. */}
 
-          {/* Call — quick access, replaces the old dedicated utility bar */}
-          <a
-            href="tel:1800-446-446"
-            className="hidden lg:flex p-2.5 rounded-full bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-emerald-700 hover:border-emerald-400 transition"
-            title="Call 1800-446-446"
-          >
-            <PhoneCall className="w-4 h-4" />
-          </a>
-
-          {/* Language Toggle */}
+          {/* Language Toggle — globe icon added to match the reference layout */}
           <button
             onClick={onToggleLang}
-            className="hidden md:block px-2.5 py-2 rounded-full bg-neutral-50 border border-neutral-200 text-[11px] font-bold text-neutral-600 hover:text-emerald-700 hover:border-emerald-400 transition cursor-pointer"
+            className="hidden md:flex items-center h-10 gap-1.5 px-3 rounded-full bg-neutral-50 border border-neutral-300 shadow-sm text-[11px] font-bold text-neutral-600 hover:text-emerald-700 hover:border-emerald-400 transition cursor-pointer"
           >
+            <Globe className="w-3.5 h-3.5" />
             {lang === 'en' ? 'தமிழ்' : 'EN'}
           </button>
 
           {/* Notifications Button */}
           <button
             onClick={onOpenNotifications}
-            className="relative p-2.5 rounded-full bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-emerald-700 hover:border-emerald-400 transition cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400"
+            className="relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-neutral-50 border border-neutral-300 shadow-sm text-neutral-500 hover:text-emerald-700 hover:border-emerald-400 transition cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400"
             title="Notifications"
           >
             <Bell className="w-4 h-4 text-emerald-600" />
@@ -318,10 +376,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </button>
 
-          {/* Wishlist Button */}
+          {/* Wishlist Button — kept visible at every width (it's the only
+              way to reach wishlist on phones; MobileTabBar only covers
+              Home/Search/Voice/Cart/Account), just sized down to match the
+              other icon buttons on small screens. */}
           <button
             onClick={() => onNavigate('/wishlist')}
-            className="relative p-2.5 rounded-full bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-emerald-700 hover:border-emerald-400 transition cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400"
+            className="relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-neutral-50 border border-neutral-300 shadow-sm text-neutral-500 hover:text-emerald-700 hover:border-emerald-400 transition cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400"
             title="Wishlist"
           >
             <Heart className="w-4 h-4" />
@@ -335,14 +396,19 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Cart Button */}
           <button
             onClick={() => onNavigate('/cart')}
-            className="relative flex items-center gap-2 bg-[#0F7B3A] hover:bg-emerald-500 text-white px-3 xl:px-4 py-2 rounded-full text-xs font-bold shadow-md transition cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-300 shrink-0"
+            className="relative flex items-center h-9 sm:h-10 gap-1.5 sm:gap-2 bg-[#0F7B3A] hover:bg-emerald-500 text-white px-2.5 sm:px-3 xl:px-4 rounded-full text-xs font-bold shadow-md transition cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-300 shrink-0"
           >
             <ShoppingBag className="w-4 h-4" />
             <span className="hidden xl:inline">{t.cart}</span>
             <span className="bg-black/25 px-2 py-0.5 rounded-full text-[11px]">{cartCount}</span>
           </button>
 
-          {/* Account / Login / Profile */}
+          {/* Divider before the profile cluster, matching the reference layout */}
+          <span className="hidden xl:block w-px h-6 bg-neutral-200 mx-1 shrink-0" aria-hidden="true" />
+
+          {/* Account / Login / Profile — avatar circle + two-line label
+              ("MY PROFILE" caption + name) + chevron, matching the reference
+              layout instead of the previous single-line icon + name. */}
           <button
             onClick={() => {
               if (isLoggedIn) {
@@ -351,21 +417,29 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onOpenAuth();
               }
             }}
-            className="flex items-center gap-1.5 p-2.5 xl:px-3 xl:py-2 rounded-full bg-neutral-50 border border-neutral-200 text-neutral-600 hover:border-emerald-400 hover:text-emerald-700 transition cursor-pointer text-xs font-medium focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400 shrink-0"
+            className="flex items-center h-9 sm:h-10 gap-2 px-1 sm:px-1.5 xl:pr-3 rounded-full bg-neutral-50 border border-neutral-300 shadow-sm text-neutral-600 hover:border-emerald-400 hover:text-emerald-700 transition cursor-pointer text-xs font-medium focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400 shrink-0"
             title={isLoggedIn ? 'Go to Profile' : 'Login'}
           >
-            <User className="w-4 h-4 text-emerald-600" />
-            <span className="hidden xl:inline">
-              {isLoggedIn ? (userProfile.name ? userProfile.name.split(' ')[0] : 'Profile') : t.account}
+            <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">
+              {isLoggedIn && userProfile.name ? userProfile.name.trim().charAt(0).toUpperCase() : <User className="w-3.5 h-3.5" />}
             </span>
+            <span className="hidden xl:flex flex-col items-start leading-tight">
+              <span className="text-[9px] uppercase tracking-wide text-neutral-400 font-bold">
+                {isLoggedIn ? 'My Profile' : 'Welcome'}
+              </span>
+              <span className="text-[#0A1F12] font-bold">
+                {isLoggedIn ? (userProfile.name ? userProfile.name.split(' ')[0] : 'Profile') : t.account}
+              </span>
+            </span>
+            <ChevronDown className="hidden xl:block w-3 h-3 text-neutral-400 shrink-0" />
           </button>
 
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 text-neutral-500 hover:text-[#08120B] focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400 rounded-full"
+            className="lg:hidden p-1 sm:p-2 text-neutral-500 hover:text-[#0A1F12] focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400 rounded-full"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
           </button>
         </div>
       </div>
@@ -376,12 +450,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           Links are still our own real routes (Subscriptions, Gifting,
           Offers, B2B, Support all exist on this site) rather than swapped
           for pages we don't have. */}
-      <nav className="hidden lg:block bg-[#08120B] px-4 relative">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-6 text-xs font-medium py-2.5">
-          <div className="flex items-center gap-1 shrink-0">
+      <nav className="hidden lg:block bg-[#0F7B3A] border-b border-white/10 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.25)] relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center gap-6 text-xs font-medium py-3">
+          <div className="flex items-center gap-3 shrink-0">
             {primaryLinks.map((link) => (
               <button key={link.path} onClick={() => onNavigate(link.path)} className={navLinkClassDark(link.path)}>
-                <link.icon className="w-3.5 h-3.5" />
                 {link.name}
               </button>
             ))}
@@ -390,37 +463,46 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="relative">
               <button
                 onClick={() => setCategoriesMenuOpen((v) => !v)}
-                className={`flex items-center gap-1.5 transition whitespace-nowrap px-3 py-1.5 rounded-full font-semibold cursor-pointer ${
+                className={`flex items-center gap-1 transition whitespace-nowrap px-4 py-2 font-bold text-sm cursor-pointer border-b-2 ${
                   categoriesMenuOpen || categoryLinks.some((c) => c.path === currentPath)
-                    ? 'bg-white/12 text-white font-bold'
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    ? 'text-white border-white'
+                    : 'text-white/85 border-transparent hover:text-white hover:border-white/50'
                 }`}
               >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                {lang === 'ta' ? 'வகைகள்' : 'Categories'}
+                {lang === 'ta' ? 'வகைகள்' : 'Category'}
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${categoriesMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {categoriesMenuOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setCategoriesMenuOpen(false)} />
-                  <div className="absolute top-full left-0 mt-2 w-[420px] bg-white border border-neutral-200 rounded-2xl shadow-xl p-3 grid grid-cols-2 gap-1.5 z-50">
-                    {categoryLinks.map((link) => (
-                      <button
-                        key={link.path}
-                        onClick={() => {
-                          onNavigate(link.path);
-                          setCategoriesMenuOpen(false);
-                        }}
-                        className={`text-left px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                          currentPath === link.path
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : 'text-neutral-600 hover:bg-emerald-50 hover:text-emerald-700'
-                        }`}
-                      >
-                        {link.name}
-                      </button>
-                    ))}
+                  <div className="absolute top-full left-0 mt-2 w-[440px] bg-white border border-neutral-200 rounded-2xl shadow-xl overflow-hidden z-50">
+                    <div className="px-5 pt-4 pb-3 border-b border-neutral-100">
+                      <div className="text-sm font-black text-[#0A1F12]">Shop by Category</div>
+                      <div className="text-[11px] text-neutral-400">{categoryLinks.length} categories, fresh every day</div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1 p-3">
+                      {categoryLinks.map((link) => (
+                        <button
+                          key={link.path}
+                          onClick={() => {
+                            onNavigate(link.path);
+                            setCategoriesMenuOpen(false);
+                          }}
+                          className={`group flex items-center justify-between gap-2 text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                            currentPath === link.path
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : 'text-neutral-600 hover:bg-emerald-50 hover:text-emerald-700'
+                          }`}
+                        >
+                          <span className="flex items-center gap-2.5">
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${currentPath === link.path ? 'bg-emerald-600' : 'bg-neutral-300 group-hover:bg-emerald-500'} transition-colors`} />
+                            {link.name}
+                          </span>
+                          <ChevronDown className="w-3 h-3 -rotate-90 text-neutral-300 opacity-0 group-hover:opacity-100 group-hover:text-emerald-600 transition" />
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </>
               )}
@@ -430,49 +512,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {secondaryLinks.map((link) => (
               <button key={link.name} onClick={() => onNavigate(link.path)} className={navLinkClassDark(link.path)}>
-                <link.icon className="w-3.5 h-3.5" />
                 {link.name}
               </button>
             ))}
           </div>
-
-          {/* Embedded search + category selector, integrated directly into
-              the colored bar rather than as a separate row. */}
-          <div className="flex items-center bg-white rounded-full overflow-hidden shrink-0 shadow-sm w-full max-w-xs xl:max-w-sm">
-            <input
-              type="text"
-              value={navSearchQuery}
-              onChange={(e) => setNavSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') submitNavSearch();
-              }}
-              placeholder="Search for products"
-              className="flex-1 min-w-0 px-4 py-2 text-xs text-[#08120B] placeholder-neutral-400 focus:outline-none"
-            />
-            <select
-              onChange={(e) => {
-                if (e.target.value) onNavigate(e.target.value);
-                e.target.value = '';
-              }}
-              defaultValue=""
-              aria-label="Jump to category"
-              className="hidden xl:block text-[11px] font-semibold text-neutral-500 border-l border-neutral-200 px-2 py-2 bg-white focus:outline-none cursor-pointer max-w-[120px] shrink-0"
-            >
-              <option value="">All Categories</option>
-              {categoryLinks.map((link) => (
-                <option key={link.path} value={link.path}>
-                  {link.name}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={submitNavSearch}
-              aria-label="Search"
-              className="px-3.5 py-2.5 bg-[#0F7B3A] hover:bg-emerald-500 text-white transition cursor-pointer shrink-0"
-            >
-              <Search className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          {/* The search bar that used to be embedded here was a duplicate of
+              the one now in the main header above — removed rather than
+              kept as a second copy of the same input. This dark bar is just
+              the link row now, left-aligned. */}
         </div>
       </nav>
 
@@ -481,24 +528,16 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="lg:hidden bg-white border-b border-neutral-200 p-4 space-y-3">
           <div className="flex items-center gap-2 mb-3">
             <button
-              onClick={onOpenAISearch}
-              className="w-full bg-neutral-50 border border-neutral-200 px-4 py-2 rounded-lg text-xs text-neutral-500 flex items-center justify-between"
+              onClick={() => onNavigate('/search')}
+              className="w-full bg-neutral-50 border border-neutral-200 px-4 py-2 rounded-lg text-xs text-neutral-500 flex items-center gap-2"
             >
-              <div className="flex items-center gap-2">
-                <Search className="w-4 h-4 text-emerald-600" />
-                <span>AI Smart Search...</span>
-              </div>
-              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              <Search className="w-4 h-4 text-emerald-600" />
+              <span>{t.searchPlaceholder}</span>
             </button>
           </div>
 
-          <div className="flex items-center justify-between pb-2 border-b border-neutral-200">
-            <button
-              onClick={onOpenCalculator}
-              className="text-xs text-emerald-700 font-bold flex items-center gap-1"
-            >
-              <Calculator className="w-4 h-4" /> {t.proteinCalc}
-            </button>
+          {/* Protein Calculator quick-access removed per request. */}
+          <div className="flex items-center justify-end pb-2 border-b border-neutral-200">
             <button
               onClick={onToggleLang}
               className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded font-bold"
@@ -585,10 +624,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           flex/margin classes could never have fixed this). */}
       {showPincodeModal && createPortal(
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm overflow-y-auto p-4">
-          <div className="bg-white border border-neutral-200 rounded-2xl max-w-md w-full p-6 text-[#08120B] relative shadow-2xl mx-auto my-10 sm:my-16">
+          <div className="bg-white border border-neutral-200 rounded-2xl max-w-md w-full p-6 text-[#0A1F12] relative shadow-2xl mx-auto my-10 sm:my-16">
             <button
               onClick={() => setShowPincodeModal(false)}
-              className="absolute top-4 right-4 text-neutral-400 hover:text-[#08120B]"
+              className="absolute top-4 right-4 text-neutral-400 hover:text-[#0A1F12]"
             >
               <X className="w-5 h-5" />
             </button>
@@ -637,7 +676,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   placeholder="Enter your delivery Pincode, e.g. 560038"
                   value={inputPincode}
                   onChange={(e) => setInputPincode(e.target.value)}
-                  className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-xl pl-10 pr-9 py-3 text-sm text-[#08120B] focus:outline-none"
+                  className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-xl pl-10 pr-9 py-3 text-sm text-[#0A1F12] focus:outline-none"
                   maxLength={6}
                 />
                 {inputPincode && (
@@ -645,7 +684,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     type="button"
                     onClick={() => setInputPincode('')}
                     aria-label="Clear"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-[#08120B] cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-[#0A1F12] cursor-pointer"
                   >
                     <X className="w-4 h-4" />
                   </button>

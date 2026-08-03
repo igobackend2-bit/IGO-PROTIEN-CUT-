@@ -56,7 +56,7 @@ export const OurFarmsSection: React.FC = () => {
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
       <div className="text-center max-w-2xl mx-auto space-y-2">
         <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Transparency Builds Trust</span>
-        <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">Our Farms</h2>
+        <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">Our Farms</h2>
         <p className="text-xs sm:text-sm text-neutral-600">
           From heritage pastures to your kitchen — every stage of the journey, shown honestly.
         </p>
@@ -71,7 +71,7 @@ export const OurFarmsSection: React.FC = () => {
               referrerPolicy="no-referrer"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#08120B]/90 via-[#08120B]/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0A1F12]/90 via-[#0A1F12]/20 to-transparent" />
             <div className="absolute bottom-3 left-3 right-3">
               <h3 className="text-white font-black text-sm">{step.label}</h3>
               <p className="text-white/70 text-[11px]">{step.caption}</p>
@@ -89,7 +89,7 @@ export const OurFarmsSection: React.FC = () => {
               className="flex items-center gap-2.5 bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3 justify-center"
             >
               <Icon className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span className="text-xs font-black text-[#08120B]">{cert.name}</span>
+              <span className="text-xs font-black text-[#0A1F12]">{cert.name}</span>
             </div>
           );
         })}

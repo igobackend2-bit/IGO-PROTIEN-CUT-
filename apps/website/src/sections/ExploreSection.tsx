@@ -40,7 +40,7 @@ export const ExploreSection: React.FC<ExploreSectionProps> = ({ onNavigate }) =>
           <Sparkles className="w-4 h-4 text-emerald-600" />
           <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Trending Now</span>
         </div>
-        <h3 className="text-lg sm:text-xl font-black text-[#08120B] mb-4">Popular Searches</h3>
+        <h3 className="text-lg sm:text-xl font-black text-[#0A1F12] mb-4">Popular Searches</h3>
         <div className="flex flex-wrap gap-2">
           {popularSearches.map((term) => (
             <button

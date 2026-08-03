@@ -99,20 +99,17 @@ async function logHistory(subscriptionId: string, action: string): Promise<void>
   }
 }
 
-async function notify(userId: string, title: string, message: string, subscriptionId: string): Promise<void> {
-  if (!supabase) return;
-  try {
-    await supabase.from('notifications').insert({
-      user_id: userId,
-      type: 'subscription',
-      title,
-      message,
-      data: { subscription_id: subscriptionId }
-    });
-  } catch {
-    // Non-fatal — the underlying subscription action already succeeded.
-  }
-}
+// NOTE: there is deliberately no client-side `notify()` insert here. The
+// canonical `notifications` table (see supabase/migrations/phase11_notifications.sql
+// in the app repo) has NO insert policy for regular users — rows are only
+// ever created by SECURITY DEFINER triggers on `orders`/`products`, and its
+// `type` check constraint doesn't even include a 'subscription' value. An
+// earlier version of this file tried to insert notifications directly from
+// the browser on every subscription action; those inserts always failed
+// silently (caught and swallowed), so they were removed as dead code rather
+// than left in place. Subscription changes are otherwise fully real (rows in
+// `subscriptions`/`subscription_history`) — they just don't have a matching
+// notification type/generator yet, same as coupons/offers/referrals.
 
 export interface CreateSubscriptionInput {
   productId: string;
@@ -171,7 +168,6 @@ export async function createSubscription(input: CreateSubscriptionInput): Promis
 
   const id = String(row.id);
   await logHistory(id, 'created');
-  await notify(user.id, 'Subscription Created', 'Your subscription has been set up.', id);
   return { ok: true, id };
 }
 
@@ -179,8 +175,6 @@ async function setStatus(
   id: string,
   status: SubscriptionStatus,
   historyAction: string,
-  notifyTitle: string,
-  notifyMessage: string,
   extra?: Record<string, unknown>
 ): Promise<SubscriptionResult> {
   if (!isSupabaseConfigured || !supabase) return { ok: false, error: 'Backend not configured.' };
@@ -197,22 +191,21 @@ async function setStatus(
   if (error) return { ok: false, error: error.message };
 
   await logHistory(id, historyAction);
-  await notify(user.id, notifyTitle, notifyMessage, id);
   return { ok: true, id };
 }
 
 export async function pauseSubscription(id: string): Promise<SubscriptionResult> {
-  return setStatus(id, 'paused', 'paused', 'Subscription Paused', 'Your subscription has been paused.');
+  return setStatus(id, 'paused', 'paused');
 }
 
 export async function resumeSubscription(id: string, nextDelivery: Date): Promise<SubscriptionResult> {
-  return setStatus(id, 'active', 'resumed', 'Subscription Resumed', 'Your subscription is active again.', {
+  return setStatus(id, 'active', 'resumed', {
     next_delivery: dateString(nextDelivery)
   });
 }
 
 export async function cancelSubscription(id: string): Promise<SubscriptionResult> {
-  return setStatus(id, 'cancelled', 'cancelled', 'Subscription Cancelled', 'Your subscription has been cancelled.');
+  return setStatus(id, 'cancelled', 'cancelled');
 }
 
 /** Advances next_delivery by one cycle without changing status — "skip this one." */
@@ -233,7 +226,6 @@ export async function skipNextDelivery(sub: RemoteSubscription): Promise<Subscri
 
   if (error) return { ok: false, error: error.message };
   await logHistory(sub.id, 'skipped');
-  await notify(user.id, 'Delivery Skipped', 'Your next delivery has been skipped.', sub.id);
   return { ok: true, id: sub.id };
 }
 

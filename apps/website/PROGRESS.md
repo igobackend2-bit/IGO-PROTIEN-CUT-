@@ -7,6 +7,17 @@
 
 ---
 
+## Owner preferences — remember these, factor into future suggestions
+
+Standing decisions from the site owner, not just one-off fixes. Any future
+session/agent should read this before proposing new nav/header features.
+
+| Date | Preference |
+|---|---|
+| 1 Aug 2026 | Removed the AI Search feature, the header Calculator button, and the header Call button from the navbar (`src/components/Navbar.tsx`, desktop + mobile drawer) — owner said they don't want these. Don't re-add or re-suggest them without asking first. The underlying `AISearchModal` / `ProteinCalculatorModal` components and their wiring in `App.tsx` were left in place (unreachable, harmless) rather than deleted, in case they're wanted back later. |
+
+---
+
 ## Where things stand
 
 **The website is live and running off the database.**
@@ -55,7 +66,41 @@ removed — the Flutter admin owns those.
 | `0007_fix_website_image_urls.sql` | Rewrote images to igoproteincuts.com | ✅ run — **then reverted** |
 | `0008_website_admin_policies.sql` | Admin write policies on `igo_*` | ✅ run |
 | `0009_revert_image_urls.sql` | Undid 0007 (domain doesn't resolve) | ✅ run |
-| `0010_content_foundation.sql` | Media bucket + 9 content blocks | ⏳ **NOT RUN YET** |
+| `0010_content_foundation.sql` | Media bucket + 9 content blocks | ✅ run |
+| `0011_content_sections.sql` | 11 section blocks | ✅ run |
+| `0012_pages_and_seo.sql` | Plans, recipes, guides, pages, SEO | ✅ run |
+| `0013_product_list_price.sql` | Website-owned list price / merchandising badges | ✅ run |
+| `0014_admin_page_order.sql` | Admin block ordering + product-rail headings | ✅ run |
+| `0015_combo_and_flash_blocks.sql` | Combo Packs / Flash Deals headings | ✅ run |
+| `0016_ticker_strip.sql` / `0016_ticker_block.sql` | Homepage ticker strip content (duplicate pair, both ran — harmless, inserts are `on conflict do nothing`) | ✅ run |
+| `0017_review_moderation_policies.sql` | Admin approve/reject/delete + customer delete-own RLS policies on `product_reviews` (no schema change — `is_hidden` already existed) | ✅ run |
+| `0018_order_feedback.sql` | **NEW table** `igo_order_feedback` (website-owned) for post-delivery "how was your delivery" feedback + RLS | ✅ run |
+
+---
+
+## Post-delivery feedback form (added 3 Aug 2026)
+
+Two-part feedback, both reachable from a new "Rate Your Order" button on a
+**Delivered** order in the account page's My Orders tab (opens
+`OrderFeedbackModal.tsx`):
+1. **Per-product review** — reuses the existing `product_reviews` flow
+   (`reviews.ts` `submitReview`), same admin moderation queue at
+   `/admin` → Reviews, same "goes live on the product page once approved"
+   behaviour that already existed. No new table for this half.
+2. **Delivery experience** — new, in the brand-new `igo_order_feedback` table
+   (`orderFeedback.ts`), surfaced at `/admin` → Delivery Feedback (new tab,
+   `FeedbackTab` in `AdminDashboard.tsx`) with a "mark reviewed" action.
+
+**Flutter admin team**: `igo_order_feedback` lives in the same shared
+Supabase project — if you want a screen for it in the Flutter admin too, it's
+a plain table (`id, order_id, user_id, delivery_rating, comment, status,
+created_at`), readable with any Supabase client once `igo_is_active_admin()`
+recognizes the signed-in admin (same check the website's own admin already
+uses). No app-side schema change needed — this is a new table, not a change
+to `orders` or anything else you own.
+
+**Status:** migration run ✅ (3 Aug 2026). Code still needs to be pushed to
+GitHub (see DEPLOY.md) for this to appear on the live site.
 
 ---
 
@@ -98,18 +143,29 @@ Weight Options · Product SEO · Leads
 
 ## NEXT ACTION when resuming
 
-**Run these three migrations in the Supabase SQL editor, in order:**
+**All migrations 0010–0016 ran successfully on 3 Aug 2026** (confirmed via
+Supabase SQL editor — every insert returned "Success. No rows returned",
+which is expected for `on conflict do nothing` seed inserts).
 
-1. `0010_content_foundation.sql` — media bucket + 9 homepage blocks
-2. `0011_content_sections.sql` — 11 section blocks
-3. `0012_pages_and_seo.sql` — plans, recipes, guides, pages, SEO
+Remaining steps:
 
-Then sign into the website as an admin, open `/admin`, and the tabs populate.
-Until they run, `/admin` shows "No content blocks found" and **the site renders
-from the hardcoded fallbacks — nothing breaks.**
-
-After that: push to GitHub (`DEPLOY.md` has the commands) and Vercel
-auto-deploys.
+1. **Verify in the admin UI** — sign into the website as an admin, open
+   `/admin`, and confirm all the content tabs (Homepage, Sections, Plans &
+   Recipes, Pages & SEO, etc.) now show real rows instead of "No content
+   blocks found".
+2. **Spot-check the live site** — the homepage, subscriptions/recipes/guides
+   pages, and any static pages should look identical to before (these
+   migrations only seed data to match the existing hardcoded fallbacks) —
+   confirm nothing visually changed unexpectedly.
+3. **Still open, unrelated to 0010–0016:** the review-moderation feature
+   (`is_hidden` column + admin approve/reject/delete policies on
+   `product_reviews`) has no migration file in this repo — if that was set up
+   by hand in the SQL editor, double check it's actually live; the /admin
+   Reviews tab depends on it.
+4. **Still open:** add `https://<your-site>/**` under Supabase Auth → URL
+   Configuration → Redirect URLs, or the password-reset flow won't return a
+   working session.
+5. Push to GitHub (`DEPLOY.md` has the commands) and Vercel auto-deploys.
 
 Typecheck clean and build verified at last save.
 

@@ -100,7 +100,7 @@ export const TodaysDealsBanner: React.FC<TodaysDealsBannerProps> = ({ products, 
             }`}
           />
         ))}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#08120B]/95 via-[#08120B]/80 to-[#E0632B]/50" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0A1F12]/95 via-[#0A1F12]/80 to-[#E0632B]/50" />
 
         <div className="relative z-10 px-6 sm:pl-16 sm:pr-12 py-8 sm:py-10 w-full flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6">
           <div className="max-w-xl">
@@ -116,7 +116,7 @@ export const TodaysDealsBanner: React.FC<TodaysDealsBannerProps> = ({ products, 
             </p>
             <button
               onClick={() => onNavigate('/offers')}
-              className="bg-white hover:bg-orange-50 text-[#08120B] font-black px-7 py-3.5 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg flex items-center gap-2"
+              className="bg-white hover:bg-orange-50 text-[#0A1F12] font-black px-7 py-3.5 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg flex items-center gap-2"
             >
               {flashHeading.ctaLabel} <ArrowRight className="w-4 h-4" />
             </button>

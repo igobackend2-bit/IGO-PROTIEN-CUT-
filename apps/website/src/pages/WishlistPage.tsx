@@ -55,7 +55,7 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
           <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1.5">
             <Heart className="w-4 h-4 fill-emerald-500 text-emerald-500" /> Your Saved Cuts
           </div>
-          <h1 className="text-3xl font-black text-[#08120B] tracking-tight mt-1">My Wishlist</h1>
+          <h1 className="text-3xl font-black text-[#0A1F12] tracking-tight mt-1">My Wishlist</h1>
           <p className="text-xs text-neutral-500 mt-1">
             {wishlistProducts.length} item{wishlistProducts.length !== 1 ? 's' : ''} saved for later
           </p>
@@ -65,7 +65,7 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={handleClearAll}
-              className="px-4 py-2.5 rounded-xl border border-neutral-200 text-neutral-500 hover:text-[#08120B] hover:border-neutral-300 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
+              className="px-4 py-2.5 rounded-xl border border-neutral-200 text-neutral-500 hover:text-[#0A1F12] hover:border-neutral-300 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" /> Clear All
             </button>
@@ -91,7 +91,7 @@ export const WishlistPage: React.FC<WishlistPageProps> = ({
           <div className="w-16 h-16 rounded-3xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-500">
             <Heart className="w-8 h-8" />
           </div>
-          <h2 className="text-lg font-bold text-[#08120B]">Your wishlist is empty</h2>
+          <h2 className="text-lg font-bold text-[#0A1F12]">Your wishlist is empty</h2>
           <p className="text-xs text-neutral-500 max-w-sm mx-auto">
             Tap the heart icon on any product to save it here for later — perfect for planning next week's order.
           </p>

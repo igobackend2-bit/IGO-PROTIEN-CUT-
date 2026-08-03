@@ -385,6 +385,17 @@ export class StoreService {
     couponCode?: string | null
   ): Promise<{ ok: boolean; order?: Order; error?: string }> {
     if (!useRemoteCatalog) {
+      // Local/demo mode (VITE_CATALOG_SOURCE=local, or Supabase not
+      // configured) skips the real backend entirely — so unlike the remote
+      // path below, it has no RLS to fall back on for enforcing "only a
+      // signed-in customer can place an order". The cart page's own UI gate
+      // (CartPage.tsx goToStep) already checks this before a guest can even
+      // reach checkout, but that's a client-side check only; this repeats it
+      // here so the guarantee holds even if this function is ever called
+      // from anywhere that skips that UI gate.
+      if (!this.isLoggedIn()) {
+        return { ok: false, error: 'Please sign in to place an order.' };
+      }
       // Local/demo mode — keep the original optimistic behaviour.
       return { ok: true, order: this.placeOrder(newOrder) };
     }

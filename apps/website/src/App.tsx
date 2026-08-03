@@ -33,13 +33,14 @@ import { ContactPage } from './pages/ContactPage';
 import { PolicyPage } from './pages/PolicyPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { UserAccountPage } from './pages/UserAccountPage';
+import { BlogPage } from './pages/BlogPage';
 import { CartPage } from './pages/CartPage';
 import { AdminDashboard } from './pages/AdminDashboard';
 
 import { Product, ProductWeightOption, ProductCategory } from './types';
 import { StoreService } from './lib/storage';
 import { Language } from './lib/language';
-import { isActiveAdmin, onAuthStateChange, getCurrentUser } from './lib/api/auth';
+import { isActiveAdmin, onAuthStateChange, onPasswordRecovery, getCurrentUser } from './lib/api/auth';
 import { AdminLogin } from './components/admin/AdminLogin';
 
 export default function App() {
@@ -60,6 +61,11 @@ export default function App() {
   const [isAISearchOpen, setIsAISearchOpen] = useState(false);
   const [isVoiceSearchOpen, setIsVoiceSearchOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  // Normally the auth modal always opens on the login view. When the
+  // customer arrives via a Supabase password-reset email link, it needs to
+  // instead pop open straight into the "set a new password" view — see the
+  // onPasswordRecovery subscription below.
+  const [authInitialView, setAuthInitialView] = useState<'login' | 'reset'>('login');
   const [isEcosystemOpen, setIsEcosystemOpen] = useState(false);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -131,6 +137,19 @@ export default function App() {
     };
   }, []);
 
+  // Password-reset email links land here with a temporary recovery session
+  // already established (Supabase auto-detects it from the URL). Previously
+  // nothing listened for this, so the customer was just silently signed in
+  // with no chance to actually set a new password. Now it pops the auth
+  // modal open directly into that "set a new password" screen.
+  useEffect(() => {
+    const unsubscribe = onPasswordRecovery(() => {
+      setAuthInitialView('reset');
+      setIsAuthOpen(true);
+    });
+    return unsubscribe;
+  }, []);
+
   useEffect(() => {
     const handleProductsUpdate = () => {
       setProducts(StoreService.getProducts());
@@ -191,10 +210,22 @@ export default function App() {
     }
   };
 
-  const handleAddToCart = (product: Product, weight: ProductWeightOption, quantity: number) => {
+  const handleAddToCart = (
+    product: Product,
+    weight: ProductWeightOption,
+    quantity: number,
+    cutPreference?: string
+  ) => {
     const cart = StoreService.getCart();
+    // Cut preference is part of the match too — otherwise "Curry Cut" and
+    // "Boneless Cubes" of the same product/weight would silently merge into
+    // one line and the second choice would be lost, which is exactly the
+    // "preference isn't showing in the cart" symptom this was fixed for.
     const existingIdx = cart.findIndex(
-      (item) => item.product.id === product.id && item.selectedWeight.label === weight.label
+      (item) =>
+        item.product.id === product.id &&
+        item.selectedWeight.label === weight.label &&
+        (item.cutPreference ?? '') === (cutPreference ?? '')
     );
 
     if (existingIdx >= 0) {
@@ -203,7 +234,8 @@ export default function App() {
       cart.push({
         product,
         selectedWeight: weight,
-        quantity
+        quantity,
+        ...(cutPreference ? { cutPreference } : {})
       });
     }
 
@@ -337,6 +369,8 @@ export default function App() {
         return <RecipesPage products={products} onAddToCart={handleAddToCart} onNavigate={navigate} />;
       case '/about':
         return <AboutPage />;
+      case '/blog':
+        return <BlogPage />;
       case '/franchise':
         return <FranchisePage />;
       case '/b2b':
@@ -372,6 +406,9 @@ export default function App() {
             // This prop was never passed, so the "Track" button on each order
             // silently did nothing — the optional-call guard swallowed it.
             onSelectOrderForTracking={(order) => handleTrackOrder(order.id)}
+            // Lets `/account?tab=profile` (e.g. Cart's address "Edit" button)
+            // land directly on that tab instead of always defaulting to Orders.
+            initialTab={new URLSearchParams(currentQuery).get('tab') ?? undefined}
           />
         );
       case '/cart':
@@ -382,6 +419,10 @@ export default function App() {
             onAddToCart={handleAddToCart}
             onNavigate={navigate}
             onTrackOrder={handleTrackOrder}
+            onOpenAuth={() => {
+              setAuthInitialView('login');
+              setIsAuthOpen(true);
+            }}
           />
         );
       case '/':
@@ -407,7 +448,7 @@ export default function App() {
   if (currentPath === '/admin') {
     if (adminAccess === 'checking') {
       return (
-        <div className="flex min-h-screen items-center justify-center bg-[#08120B]">
+        <div className="flex min-h-screen items-center justify-center bg-[#0A1F12]">
           <p className="text-sm text-white/50">Checking access…</p>
         </div>
       );
@@ -424,7 +465,7 @@ export default function App() {
     }
 
     return (
-      <div className="min-h-screen bg-white font-sans text-[#08120B] antialiased">
+      <div className="min-h-screen bg-white font-sans text-[#0A1F12] antialiased">
         <AdminDashboard
           products={products}
           onNavigate={navigate}
@@ -435,11 +476,14 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-white font-sans text-[#08120B] antialiased selection:bg-[#0F7B3A] selection:text-white flex flex-col justify-between">
+    <div className="min-h-screen bg-white font-sans text-[#0A1F12] antialiased selection:bg-[#0F7B3A] selection:text-white flex flex-col justify-between">
       {/* Navbar */}
       <Navbar
         onOpenCart={() => setIsCartOpen(true)}
-        onOpenAuth={() => setIsAuthOpen(true)}
+        onOpenAuth={() => {
+          setAuthInitialView('login');
+          setIsAuthOpen(true);
+        }}
         onOpenAISearch={() => setIsAISearchOpen(true)}
         onOpenVoiceSearch={() => setIsVoiceSearchOpen(true)}
         onOpenEcosystem={() => setIsEcosystemOpen(true)}
@@ -454,12 +498,8 @@ export default function App() {
       {/* Main View Area */}
       <main className="flex-1 pb-16 lg:pb-0">{renderMainContent()}</main>
 
-      {/* Footer — hidden on individual recipe pages (/recipes/:id) and
-          product detail pages (/product/:id) per request; still shows on
-          the /recipes list, category/search pages, and everywhere else. */}
-      {!currentPath.startsWith('/recipes/') && !currentPath.startsWith('/product/') && currentPath !== '/cart' && (
-        <Footer onNavigate={navigate} />
-      )}
+      {/* Footer — shows on every page except the profile (/account), per request. */}
+      {currentPath !== '/account' && <Footer onNavigate={navigate} />}
 
       {/* Persistent floating contact + mobile bottom tab bar */}
       <FloatingContactWidget onNavigate={navigate} />
@@ -509,6 +549,7 @@ export default function App() {
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
         onNavigate={navigate}
+        initialView={authInitialView}
       />
 
       <IGOEcosystemModal

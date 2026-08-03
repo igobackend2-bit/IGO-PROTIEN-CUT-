@@ -159,7 +159,7 @@ export async function fetchProduct(productId: string): Promise<Product | null> {
       supabase.from('igo_product_web_meta').select('*').eq('product_id', productId).maybeSingle(),
       supabase
         .from('product_reviews')
-        .select('id, rating, comment, created_at')
+        .select('id, rating, comment, created_at, user_id')
         .eq('product_id', productId)
         .eq('is_hidden', false)
         .order('created_at', { ascending: false })
@@ -173,6 +173,7 @@ export async function fetchProduct(productId: string): Promise<Product | null> {
       rating: number;
       comment: string | null;
       created_at: string;
+      user_id: string | null;
     }[];
 
     const aggregate: ReviewAggregate | null =
@@ -206,7 +207,8 @@ export async function fetchProduct(productId: string): Promise<Product | null> {
       // `product_reviews` is protected by an enforce_verified_purchase_review
       // trigger in the app's phase12_reviews.sql, so every row that exists
       // IS a verified purchase.
-      verifiedPurchase: true
+      verifiedPurchase: true,
+      userId: r.user_id ?? undefined
     }));
 
     return product;

@@ -141,16 +141,16 @@ export const VoiceSearchModal: React.FC<VoiceSearchModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-white border border-neutral-200 rounded-3xl max-w-sm w-full text-[#08120B] p-6 relative shadow-2xl text-center">
-        <button onClick={onClose} className="absolute top-4 right-4 text-neutral-400 hover:text-[#08120B] cursor-pointer">
+      <div className="bg-white border border-neutral-200 rounded-3xl max-w-sm w-full text-[#0A1F12] p-6 relative shadow-2xl text-center">
+        <button onClick={onClose} className="absolute top-4 right-4 text-neutral-400 hover:text-[#0A1F12] cursor-pointer">
           <X className="w-5 h-5" />
         </button>
 
-        <h3 className="font-bold text-base text-[#08120B] mb-2">Voice Search</h3>
+        <h3 className="font-bold text-base text-[#0A1F12] mb-2">Voice Search</h3>
 
         {!isSupported ? (
           <div className="space-y-4">
-            <div className="flex items-center gap-2 justify-center text-[#08120B] text-xs bg-neutral-50 border border-neutral-200 rounded-xl p-3">
+            <div className="flex items-center gap-2 justify-center text-[#0A1F12] text-xs bg-neutral-50 border border-neutral-200 rounded-xl p-3">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>Voice search isn't supported in this browser. Type your search instead.</span>
             </div>
@@ -167,7 +167,7 @@ export const VoiceSearchModal: React.FC<VoiceSearchModalProps> = ({
                 placeholder="e.g. Boneless chicken breast"
                 value={manualQuery}
                 onChange={(e) => setManualQuery(e.target.value)}
-                className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs text-[#08120B] focus:outline-none"
+                className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs text-[#0A1F12] focus:outline-none"
               />
               <button
                 type="submit"
@@ -234,7 +234,7 @@ export const VoiceSearchModal: React.FC<VoiceSearchModalProps> = ({
             </button>
 
             {errorMsg && (
-              <div className="bg-[#08120B] border border-black rounded-xl p-2.5 mb-4 text-[11px] text-white">
+              <div className="bg-[#0A1F12] border border-black rounded-xl p-2.5 mb-4 text-[11px] text-white">
                 {errorMsg}
               </div>
             )}
@@ -266,7 +266,7 @@ export const VoiceSearchModal: React.FC<VoiceSearchModalProps> = ({
                 placeholder="Or type instead..."
                 value={manualQuery}
                 onChange={(e) => setManualQuery(e.target.value)}
-                className="flex-1 bg-white border border-neutral-200 focus:border-emerald-500 rounded-xl px-3 py-2 text-[11px] text-[#08120B] focus:outline-none"
+                className="flex-1 bg-white border border-neutral-200 focus:border-emerald-500 rounded-xl px-3 py-2 text-[11px] text-[#0A1F12] focus:outline-none"
               />
               <button
                 type="submit"

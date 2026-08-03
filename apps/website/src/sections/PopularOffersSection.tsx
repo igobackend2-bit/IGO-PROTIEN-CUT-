@@ -26,7 +26,7 @@ export const PopularOffersSection: React.FC<PopularOffersSectionProps> = ({ onNa
       <div className="flex items-center justify-between">
         <div>
           <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Save More</div>
-          <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">Popular Offers</h2>
+          <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">Popular Offers</h2>
         </div>
         <button
           onClick={() => onNavigate('/offers')}

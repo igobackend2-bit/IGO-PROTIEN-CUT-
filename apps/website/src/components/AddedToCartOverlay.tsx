@@ -39,7 +39,7 @@ export const AddedToCartOverlay: React.FC<AddedToCartOverlayProps> = ({ info, on
         </div>
 
         <div>
-          <h2 className="text-lg font-black text-[#08120B]">Added to Cart!</h2>
+          <h2 className="text-lg font-black text-[#0A1F12]">Added to Cart!</h2>
           <p className="text-xs text-neutral-500 mt-0.5">Fresh and on its way to checkout</p>
         </div>
 
@@ -51,7 +51,7 @@ export const AddedToCartOverlay: React.FC<AddedToCartOverlayProps> = ({ info, on
             className="w-12 h-12 rounded-xl object-cover shrink-0"
           />
           <div className="min-w-0">
-            <div className="text-xs font-bold text-[#08120B] line-clamp-1">{product.name}</div>
+            <div className="text-xs font-bold text-[#0A1F12] line-clamp-1">{product.name}</div>
             <div className="text-[11px] text-neutral-500">
               {weight.label} &middot; Qty {quantity}
             </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Star, Flame, RefreshCw, Check, Heart, Zap, Bell, Tag } from 'lucide-react';
 import { Product, ProductWeightOption } from '../types';
 import { StoreService } from '../lib/storage';
@@ -21,6 +21,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const [added, setAdded] = useState(false);
   const [notified, setNotified] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(() => StoreService.getWishlist().includes(product.id));
+
+  // If this same product also renders elsewhere on the page (e.g. a "You
+  // Might Also Like" rail on its own PDP, or repeated across homepage
+  // rails), toggling the heart in one spot left every other card showing
+  // the stale state until a remount — this keeps them all in sync, same
+  // event Navbar.tsx and WishlistPage.tsx already listen for.
+  useEffect(() => {
+    const sync = () => setIsWishlisted(StoreService.getWishlist().includes(product.id));
+    window.addEventListener('protein_cuts_wishlist_updated', sync);
+    return () => window.removeEventListener('protein_cuts_wishlist_updated', sync);
+  }, [product.id]);
 
   const currentWeight = product.weightOptions[selectedWeightIndex] || product.weightOptions[0];
   const isOutOfStock = product.stockStatus === 'Out of Stock';
@@ -83,7 +94,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 items-center z-10">
           {isOutOfStock ? (
-            <span className="bg-[#08120B] text-white font-extrabold text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow">
+            <span className="bg-[#0A1F12] text-white font-extrabold text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow">
               Out of Stock
             </span>
           ) : (
@@ -129,14 +140,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <span className="uppercase tracking-wider text-[10px] font-bold text-emerald-600">
               {product.subcategory} • {product.boneType}
             </span>
-            <div className="flex items-center gap-1 text-[#08120B] font-bold">
+            <div className="flex items-center gap-1 text-[#0A1F12] font-bold">
               <Star className="w-3.5 h-3.5 fill-emerald-600 text-emerald-600" />
               <span>{product.rating}</span>
               <span className="text-neutral-400 text-[10px]">({product.reviewCount})</span>
             </div>
           </div>
 
-          <h3 className="text-sm font-bold text-[#08120B] group-hover:text-emerald-600 transition line-clamp-1">
+          <h3 className="text-sm font-bold text-[#0A1F12] group-hover:text-emerald-600 transition line-clamp-1">
             {product.name}
           </h3>
 
@@ -148,7 +159,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Nutrition High Bar */}
         <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-2.5 py-1.5 flex items-center justify-between text-[11px]">
           <span className="text-neutral-600">Protein: <strong className="text-emerald-700">{product.nutrition.protein}</strong></span>
-          <span className="text-neutral-600">Prep: <strong className="text-[#08120B]">{product.prepTimeMinutes} mins</strong></span>
+          <span className="text-neutral-600">Prep: <strong className="text-[#0A1F12]">{product.prepTimeMinutes} mins</strong></span>
         </div>
 
         {/* Inline Coupon Call-out */}
@@ -176,7 +187,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 className={`py-1.5 px-2 rounded-lg text-[11px] font-medium border text-center transition ${
                   selectedWeightIndex === idx
                     ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-bold'
-                    : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B] hover:border-neutral-300'
+                    : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#0A1F12] hover:border-neutral-300'
                 }`}
               >
                 {opt.label.split(' ')[0]}
@@ -197,7 +208,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <div className="pt-2 border-t border-neutral-100 flex items-center justify-between gap-2">
           <div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-base font-black text-[#08120B]">₹{currentWeight.price}</span>
+              <span className="text-base font-black text-[#0A1F12]">₹{currentWeight.price}</span>
               {currentWeight.originalPrice > currentWeight.price && (
                 <span className="text-xs text-neutral-400 line-through">₹{currentWeight.originalPrice}</span>
               )}
@@ -211,7 +222,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-md ${
                 notified
                   ? 'bg-emerald-500 text-white'
-                  : 'bg-white border border-neutral-300 hover:border-emerald-400 text-[#08120B]'
+                  : 'bg-white border border-neutral-300 hover:border-emerald-400 text-[#0A1F12]'
               }`}
             >
               {notified ? (

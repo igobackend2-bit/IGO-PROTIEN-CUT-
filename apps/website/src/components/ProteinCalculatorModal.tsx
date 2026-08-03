@@ -39,10 +39,10 @@ export const ProteinCalculatorModal: React.FC<ProteinCalculatorModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-white border border-neutral-200 rounded-3xl max-w-xl w-full p-6 text-[#08120B] relative shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <div className="bg-white border border-neutral-200 rounded-3xl max-w-xl w-full p-6 text-[#0A1F12] relative shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto custom-scrollbar">
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-[#08120B] hover:border-emerald-300 transition cursor-pointer"
+          className="absolute top-5 right-5 p-2 rounded-full bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-[#0A1F12] hover:border-emerald-300 transition cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -52,7 +52,7 @@ export const ProteinCalculatorModal: React.FC<ProteinCalculatorModalProps> = ({
             <Dumbbell className="w-4 h-4 text-emerald-600" />
             NUTRITION & MACRO ASSISTANT
           </div>
-          <h2 className="text-2xl font-black text-[#08120B] tracking-tight">Daily Protein Intake Calculator</h2>
+          <h2 className="text-2xl font-black text-[#0A1F12] tracking-tight">Daily Protein Intake Calculator</h2>
           <p className="text-xs text-neutral-500">
             Find your precise daily protein requirement based on body weight, fitness goals, and training intensity.
           </p>
@@ -67,7 +67,7 @@ export const ProteinCalculatorModal: React.FC<ProteinCalculatorModalProps> = ({
               max={180}
               value={weightKg}
               onChange={(e) => setWeightKg(Number(e.target.value))}
-              className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-sm text-[#08120B] focus:outline-none font-bold"
+              className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-sm text-[#0A1F12] focus:outline-none font-bold"
             />
           </div>
 
@@ -86,7 +86,7 @@ export const ProteinCalculatorModal: React.FC<ProteinCalculatorModalProps> = ({
                   className={`p-2.5 rounded-xl text-xs font-bold border transition cursor-pointer ${
                     goal === g.id
                       ? 'bg-[#0F7B3A] border-emerald-400 text-white'
-                      : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:text-[#08120B]'
+                      : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:text-[#0A1F12]'
                   }`}
                 >
                   {g.label}
@@ -110,7 +110,7 @@ export const ProteinCalculatorModal: React.FC<ProteinCalculatorModalProps> = ({
                   className={`p-2.5 rounded-xl text-xs font-bold border transition cursor-pointer ${
                     activity === act.id
                       ? 'bg-[#0F7B3A] border-emerald-400 text-white'
-                      : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:text-[#08120B]'
+                      : 'bg-neutral-50 border-neutral-200 text-neutral-600 hover:text-[#0A1F12]'
                   }`}
                 >
                   {act.label}
@@ -132,13 +132,13 @@ export const ProteinCalculatorModal: React.FC<ProteinCalculatorModalProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-[11px] text-emerald-700 font-semibold uppercase tracking-wider">Your Recommended Daily Target</div>
-                <div className="text-3xl font-black text-[#08120B]">{calculatedTarget}g <span className="text-xs text-emerald-700 font-normal">Pure Protein / day</span></div>
+                <div className="text-3xl font-black text-[#0A1F12]">{calculatedTarget}g <span className="text-xs text-emerald-700 font-normal">Pure Protein / day</span></div>
               </div>
               <Sparkles className="w-8 h-8 text-emerald-600" />
             </div>
 
             <div className="text-xs text-neutral-600 leading-relaxed border-t border-emerald-200 pt-3 space-y-2">
-              <div className="font-bold text-[#08120B] flex items-center gap-1.5">
+              <div className="font-bold text-[#0A1F12] flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Suggested Daily Meat Intake:
               </div>
               <p className="text-xs text-neutral-600">
@@ -161,7 +161,7 @@ export const ProteinCalculatorModal: React.FC<ProteinCalculatorModalProps> = ({
                     <div className="flex items-center gap-3">
                       <img src={prod.image} alt={prod.name} referrerPolicy="no-referrer" className="w-9 h-9 rounded-lg object-cover" />
                       <div>
-                        <div className="text-xs font-bold text-[#08120B] line-clamp-1">{prod.name}</div>
+                        <div className="text-xs font-bold text-[#0A1F12] line-clamp-1">{prod.name}</div>
                         <div className="text-[10px] text-emerald-700 font-semibold">{prod.nutrition.protein} per serving</div>
                       </div>
                     </div>

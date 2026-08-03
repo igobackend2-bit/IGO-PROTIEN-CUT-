@@ -19,7 +19,7 @@ export const BrandPartnersSection: React.FC = () => {
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
       <div className="text-center max-w-xl mx-auto space-y-2">
         <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{block.eyebrow}</span>
-        <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">{block.heading}</h2>
+        <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{block.heading}</h2>
         <p className="text-xs text-neutral-600">{block.subheading}</p>
       </div>
 

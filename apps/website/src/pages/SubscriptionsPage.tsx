@@ -1,9 +1,21 @@
 import React, { useState } from 'react';
 import { Calendar, CheckCircle2, Sparkles, ArrowRight, Dumbbell, Users, Settings2, Minus, Plus, Trash2, Loader2 } from 'lucide-react';
 import { INITIAL_SUBSCRIPTION_PLANS } from '../data/mockData';
-import { Product } from '../types';
+import { Product, SubscriptionPlan } from '../types';
 import { StoreService } from '../lib/storage';
 import { createSubscription } from '../lib/api/subscriptions';
+import { useSiteContent } from '../lib/hooks/useSiteContent';
+
+// The fallback is exactly what this page rendered before it was wired to the
+// CMS — see the contract in useSiteContent.ts. Once an admin edits
+// `plans.subscriptions` in /admin, this block's `eyebrow`/`heading`/`items`
+// take over; until then, or if Supabase is unreachable, the page looks
+// identical to today.
+const SUBSCRIPTIONS_FALLBACK = {
+  eyebrow: 'RECURRING FRESH MEAT PASS',
+  heading: 'Protein Cuts Subscriptions',
+  items: INITIAL_SUBSCRIPTION_PLANS
+};
 
 // Maps each fixed plan to the customer segment it targets — surfaced as a
 // badge on the plan card, and used to steer daily buyers vs. gym users vs.
@@ -39,7 +51,11 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
   const userProfile = StoreService.getUserProfile();
   const defaultAddress = userProfile.savedAddresses.find((a) => a.isDefault) ?? userProfile.savedAddresses[0];
 
-  const selectedPlan = INITIAL_SUBSCRIPTION_PLANS.find((p) => p.id === selectedPlanId);
+  const subsBlock = useSiteContent('plans.subscriptions', SUBSCRIPTIONS_FALLBACK);
+  const plans: SubscriptionPlan[] =
+    Array.isArray(subsBlock.items) && subsBlock.items.length > 0 ? subsBlock.items : INITIAL_SUBSCRIPTION_PLANS;
+
+  const selectedPlan = plans.find((p) => p.id === selectedPlanId);
   const isCustomBuilder = selectedPlan?.category === 'Custom';
 
   const addToBox = (productId: string) => {
@@ -122,11 +138,11 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
       {/* Header */}
-      <div className="bg-[#08120B] border border-black rounded-3xl p-8 text-center max-w-3xl mx-auto space-y-3 text-white shadow-2xl">
+      <div className="bg-[#0A1F12] rounded-3xl p-8 text-center max-w-3xl mx-auto space-y-3 text-white shadow-lg shadow-emerald-950/20">
         <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest flex items-center justify-center gap-1">
-          <Sparkles className="w-4 h-4" /> RECURRING FRESH MEAT PASS
+          <Sparkles className="w-4 h-4" /> {subsBlock.eyebrow}
         </span>
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight">Protein Cuts Subscriptions</h1>
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight">{subsBlock.heading}</h1>
         <p className="text-xs sm:text-sm text-neutral-300">
           Automate your high-protein diet or weekly family meat supply. Enjoy guaranteed morning 6 AM slots, zero delivery fees, and up to 20% discount.
         </p>
@@ -134,7 +150,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
 
       {/* Plan Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {INITIAL_SUBSCRIPTION_PLANS.map((plan) => (
+        {plans.map((plan) => (
           <div
             key={plan.id}
             onClick={() => setSelectedPlanId(plan.id)}
@@ -146,7 +162,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
           >
             <div>
               <div className="flex justify-between items-start mb-2 gap-2">
-                <h3 className="text-lg font-bold text-[#08120B]">{plan.title}</h3>
+                <h3 className="text-lg font-bold text-[#0A1F12]">{plan.title}</h3>
                 {plan.badge && (
                   <span className="bg-[#0F7B3A] text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase shrink-0">
                     {plan.badge}
@@ -161,7 +177,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
               <p className="text-xs text-neutral-500">{plan.tagline}</p>
 
               <div className="my-4 pt-4 border-t border-neutral-200">
-                <div className="text-2xl font-black text-[#08120B]">
+                <div className="text-2xl font-black text-[#0A1F12]">
                   ₹{plan.pricePerMonth} <span className="text-xs text-neutral-500 font-normal">/ month</span>
                 </div>
                 <div className="text-xs text-emerald-700 font-bold">{plan.savings}</div>
@@ -178,7 +194,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
             </div>
 
             <div className="text-xs font-semibold text-neutral-500 border-t border-neutral-200 pt-3">
-              Target: <strong className="text-[#08120B]">{plan.recommendedFor}</strong>
+              Target: <strong className="text-[#0A1F12]">{plan.recommendedFor}</strong>
             </div>
           </div>
         ))}
@@ -188,7 +204,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
       {isCustomBuilder && (
         <div className="bg-white border-2 border-emerald-200 rounded-3xl p-6 max-w-4xl mx-auto space-y-6 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <h3 className="text-base font-bold text-[#08120B] flex items-center gap-2">
+            <h3 className="text-base font-bold text-[#0A1F12] flex items-center gap-2">
               <Settings2 className="w-5 h-5 text-emerald-600" /> Build Your Own Box
             </h3>
             <div className="flex items-center gap-1.5 bg-neutral-50 border border-neutral-200 rounded-xl p-1">
@@ -197,7 +213,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
                   key={f}
                   onClick={() => setBoxFrequency(f)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                    boxFrequency === f ? 'bg-[#0F7B3A] text-white' : 'text-neutral-500 hover:text-[#08120B]'
+                    boxFrequency === f ? 'bg-[#0F7B3A] text-white' : 'text-neutral-500 hover:text-[#0A1F12]'
                   }`}
                 >
                   {f}
@@ -215,14 +231,14 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
               return (
                 <div key={p.id} className="bg-neutral-50 border border-neutral-200 rounded-2xl p-2.5 space-y-2">
                   <img src={p.image} alt={p.name} referrerPolicy="no-referrer" className="w-full aspect-square rounded-xl object-cover" />
-                  <div className="text-[11px] font-bold text-[#08120B] line-clamp-2 leading-tight">{p.name}</div>
+                  <div className="text-[11px] font-bold text-[#0A1F12] line-clamp-2 leading-tight">{p.name}</div>
                   <div className="text-[10px] text-emerald-700 font-black">₹{p.weightOptions[0].price}</div>
                   {line ? (
                     <div className="flex items-center justify-between bg-white border border-neutral-200 rounded-lg p-1">
                       <button onClick={() => updateBoxQty(p.id, line.quantity - 1)} className="w-6 h-6 rounded-md bg-emerald-50 text-emerald-700 flex items-center justify-center">
                         <Minus className="w-3 h-3" />
                       </button>
-                      <span className="text-xs font-bold text-[#08120B]">{line.quantity}</span>
+                      <span className="text-xs font-bold text-[#0A1F12]">{line.quantity}</span>
                       <button onClick={() => updateBoxQty(p.id, line.quantity + 1)} className="w-6 h-6 rounded-md bg-emerald-50 text-emerald-700 flex items-center justify-center">
                         <Plus className="w-3 h-3" />
                       </button>
@@ -242,7 +258,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
 
           {boxLines.length > 0 && (
             <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 space-y-2">
-              <div className="text-xs font-bold text-[#08120B] uppercase tracking-wider">Your Box ({boxLines.reduce((a, l) => a + l.quantity, 0)} items)</div>
+              <div className="text-xs font-bold text-[#0A1F12] uppercase tracking-wider">Your Box ({boxLines.reduce((a, l) => a + l.quantity, 0)} items)</div>
               {boxLines.map((line) => {
                 const p = products.find((prod) => prod.id === line.productId);
                 if (!p) return null;
@@ -250,7 +266,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
                   <div key={line.productId} className="flex items-center justify-between text-xs">
                     <span className="text-neutral-700">{p.name} x{line.quantity}</span>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#08120B]">₹{p.weightOptions[0].price * line.quantity}</span>
+                      <span className="font-bold text-[#0A1F12]">₹{p.weightOptions[0].price * line.quantity}</span>
                       <button onClick={() => updateBoxQty(p.id, 0)} className="text-neutral-400 hover:text-red-500">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -271,7 +287,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
 
       {/* Customize Delivery Schedule */}
       <div className="bg-white border border-neutral-200 rounded-3xl p-6 max-w-2xl mx-auto space-y-6 shadow-sm">
-        <h3 className="text-base font-bold text-[#08120B] flex items-center gap-2">
+        <h3 className="text-base font-bold text-[#0A1F12] flex items-center gap-2">
           <Calendar className="w-5 h-5 text-emerald-600" /> Choose Preferred Weekly Delivery Days
         </h3>
 
@@ -286,7 +302,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
                 className={`flex-1 py-3 px-2 rounded-2xl text-xs font-bold border transition cursor-pointer ${
                   isSelected
                     ? 'bg-[#0F7B3A] border-emerald-500 text-white shadow-lg'
-                    : 'bg-neutral-50 border-neutral-200 text-neutral-500 hover:text-[#08120B]'
+                    : 'bg-neutral-50 border-neutral-200 text-neutral-500 hover:text-[#0A1F12]'
                 }`}
               >
                 {day}

@@ -2,6 +2,17 @@ import React, { useState } from 'react';
 import { ChefHat, ShoppingBag, X, Check, Flame, Beef, Clock3, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { Recipe, Product, ProductWeightOption } from '../types';
 import { INITIAL_RECIPES } from '../data/mockData';
+import { useSiteContent } from '../lib/hooks/useSiteContent';
+
+// Same fallback contract as SubscriptionsPage: this is exactly what the page
+// rendered before it was wired to the CMS. Editing `plans.recipes` in /admin
+// now overrides `items`/`eyebrow`/`heading`; if the block is missing or
+// Supabase is unreachable, the page is unchanged.
+const RECIPES_FALLBACK = {
+  eyebrow: 'MASTER CHEF RECIPE COLLECTION',
+  heading: 'Authentic Indian & World Meat Recipes',
+  items: INITIAL_RECIPES
+};
 
 interface RecipesPageProps {
   products: Product[];
@@ -17,6 +28,10 @@ interface RecipesPageProps {
 export const RecipesPage: React.FC<RecipesPageProps> = ({ products, onAddToCart, onNavigate, initialRecipeId }) => {
   const [added, setAdded] = useState(false);
 
+  const recipesBlock = useSiteContent('plans.recipes', RECIPES_FALLBACK);
+  const recipes: Recipe[] =
+    Array.isArray(recipesBlock.items) && recipesBlock.items.length > 0 ? recipesBlock.items : INITIAL_RECIPES;
+
   const handleBuyIngredients = (recipe: Recipe) => {
     const matchedProduct = products.find((p) => p.id === recipe.relatedProductId) || products[0];
     onAddToCart(matchedProduct, matchedProduct.weightOptions[0], 1);
@@ -28,7 +43,7 @@ export const RecipesPage: React.FC<RecipesPageProps> = ({ products, onAddToCart,
     if (onNavigate) onNavigate(`/recipes/${recipe.id}`);
   };
 
-  const activeRecipe = initialRecipeId ? INITIAL_RECIPES.find((r) => r.id === initialRecipeId) : null;
+  const activeRecipe = initialRecipeId ? recipes.find((r) => r.id === initialRecipeId) : null;
 
   // ---------------------------------------------------------------------
   // FULL PAGE — single recipe (/recipes/:id)
@@ -37,7 +52,7 @@ export const RecipesPage: React.FC<RecipesPageProps> = ({ products, onAddToCart,
     if (!activeRecipe) {
       return (
         <div className="max-w-2xl mx-auto px-4 py-20 text-center space-y-4">
-          <h1 className="text-xl font-bold text-[#08120B]">Recipe not found</h1>
+          <h1 className="text-xl font-bold text-[#0A1F12]">Recipe not found</h1>
           <button
             onClick={() => onNavigate && onNavigate('/recipes')}
             className="text-emerald-700 font-bold text-sm hover:underline cursor-pointer"
@@ -142,11 +157,11 @@ export const RecipesPage: React.FC<RecipesPageProps> = ({ products, onAddToCart,
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
       {/* Page Header */}
-      <div className="bg-[#08120B] border border-black rounded-3xl p-8 text-center max-w-3xl mx-auto space-y-2 text-white shadow-2xl">
+      <div className="bg-[#0A1F12] rounded-3xl p-8 text-center max-w-3xl mx-auto space-y-2 text-white shadow-lg shadow-emerald-950/20">
         <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest flex items-center justify-center gap-1">
-          <ChefHat className="w-4 h-4" /> MASTER CHEF RECIPE COLLECTION
+          <ChefHat className="w-4 h-4" /> {recipesBlock.eyebrow}
         </span>
-        <h1 className="text-3xl font-black tracking-tight">Authentic Indian & World Meat Recipes</h1>
+        <h1 className="text-3xl font-black tracking-tight">{recipesBlock.heading}</h1>
         <p className="text-xs text-neutral-300">
           Step-by-step cooking guides created by professional butchers and chefs. Buy exact portion cuts in 1-click.
         </p>
@@ -154,7 +169,7 @@ export const RecipesPage: React.FC<RecipesPageProps> = ({ products, onAddToCart,
 
       {/* Recipes Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {INITIAL_RECIPES.map((recipe) => (
+        {recipes.map((recipe) => (
           <div
             key={recipe.id}
             onClick={() => openRecipe(recipe)}
@@ -174,7 +189,7 @@ export const RecipesPage: React.FC<RecipesPageProps> = ({ products, onAddToCart,
               </div>
 
               <div className="p-5 space-y-3">
-                <h3 className="text-base font-bold text-[#08120B] group-hover:text-emerald-600 transition">
+                <h3 className="text-base font-bold text-[#0A1F12] group-hover:text-emerald-600 transition">
                   {recipe.title}
                 </h3>
 
@@ -197,7 +212,7 @@ export const RecipesPage: React.FC<RecipesPageProps> = ({ products, onAddToCart,
                   e.stopPropagation();
                   openRecipe(recipe);
                 }}
-                className="w-full bg-neutral-50 hover:bg-emerald-50 border border-neutral-200 hover:border-emerald-300 text-[#08120B] font-bold py-2.5 rounded-xl text-xs transition cursor-pointer"
+                className="w-full bg-neutral-50 hover:bg-emerald-50 border border-neutral-200 hover:border-emerald-300 text-[#0A1F12] font-bold py-2.5 rounded-xl text-xs transition cursor-pointer"
               >
                 View Step-by-Step Cooking Guide
               </button>

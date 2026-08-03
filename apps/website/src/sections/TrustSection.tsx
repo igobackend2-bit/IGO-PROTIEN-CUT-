@@ -51,7 +51,7 @@ export const TrustSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <div className="text-center max-w-2xl mx-auto space-y-2.5">
           <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Why Choose Us</span>
-          <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">Why Choose IGO Protein Cuts?</h2>
+          <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">Why Choose IGO Protein Cuts?</h2>
           <p className="text-xs sm:text-sm text-neutral-600">
             An objective, feature-by-feature comparison — not marketing copy. See exactly what "farm to table" means in practice.
           </p>
@@ -61,7 +61,7 @@ export const TrustSection: React.FC = () => {
         <div className="overflow-x-auto no-scrollbar rounded-3xl border border-neutral-200 shadow-lg shadow-emerald-950/5 bg-white">
           <table className="w-full border-collapse min-w-[640px] text-left">
             <thead>
-              <tr className="bg-[#08120B]">
+              <tr className="bg-[#0A1F12]">
                 <th className="py-5 px-6 text-white/50 font-bold uppercase text-[10px] tracking-wider">
                   {comparisonBlock.columns.feature}
                 </th>
@@ -91,7 +91,7 @@ export const TrustSection: React.FC = () => {
                     idx % 2 === 1 ? 'bg-neutral-50/50' : 'bg-white'
                   }`}
                 >
-                  <td className="py-5 px-6 font-bold text-[#08120B] text-xs">{row.feature}</td>
+                  <td className="py-5 px-6 font-bold text-[#0A1F12] text-xs">{row.feature}</td>
                   <td className="py-5 px-6 bg-emerald-50/50 border-x border-emerald-100/70">
                     <div className="flex items-center gap-2.5 text-emerald-800 font-bold text-xs">
                       <div className="w-6 h-6 rounded-full bg-[#0F7B3A] flex items-center justify-center shrink-0 shadow-sm shadow-emerald-900/30">
@@ -133,7 +133,7 @@ export const TrustSection: React.FC = () => {
                   <Icon className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div>
-                  <div className="text-xs font-black text-[#08120B] leading-tight">{cert.name}</div>
+                  <div className="text-xs font-black text-[#0A1F12] leading-tight">{cert.name}</div>
                   <div className="text-[10px] text-neutral-500 leading-tight mt-0.5">{cert.desc}</div>
                 </div>
               </div>

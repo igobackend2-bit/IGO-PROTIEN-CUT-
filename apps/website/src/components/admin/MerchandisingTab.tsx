@@ -89,7 +89,7 @@ export const MerchandisingTab: React.FC<MerchandisingTabProps> = ({ notify }) =>
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-lg font-black text-[#08120B]">Pricing badges & homepage placement</h2>
+        <h2 className="text-lg font-black text-[#0A1F12]">Pricing badges & homepage placement</h2>
         <p className="mt-1 max-w-3xl text-sm leading-relaxed text-neutral-600">
           Selling prices are set in the main admin dashboard and shown here read-only. What you
           control here is the struck-through &ldquo;was&rdquo; price and which homepage rails each
@@ -157,7 +157,7 @@ export const MerchandisingTab: React.FC<MerchandisingTabProps> = ({ notify }) =>
                   key={row.product_id}
                   className={`border-t border-neutral-100 ${dirty ? 'bg-amber-50/50' : ''}`}
                 >
-                  <td className="p-3 font-semibold text-[#08120B]">{row.product_name}</td>
+                  <td className="p-3 font-semibold text-[#0A1F12]">{row.product_name}</td>
                   <td className="p-3 text-neutral-500">₹{row.price}</td>
                   <td className="p-3">
                     <input
@@ -174,7 +174,7 @@ export const MerchandisingTab: React.FC<MerchandisingTabProps> = ({ notify }) =>
                   </td>
                   <td className="p-3">
                     {pct > 0 ? (
-                      <span className="rounded-full bg-[#D4AF37] px-2 py-0.5 text-[10px] font-black text-[#08120B]">
+                      <span className="rounded-full bg-[#D4AF37] px-2 py-0.5 text-[10px] font-black text-[#0A1F12]">
                         {pct}% OFF
                       </span>
                     ) : (

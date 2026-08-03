@@ -4,6 +4,7 @@ import { Product, ProductWeightOption } from '../types';
 import { StoreService } from '../lib/storage';
 import { Hero3DCanvas } from './Hero3DCanvas';
 import { FadeImage } from './FadeImage';
+import { getBulkLineTotal } from '../lib/pricing';
 
 interface ProductModalProps {
   product: Product;
@@ -39,11 +40,11 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-      <div className="bg-white border border-neutral-200 rounded-3xl max-w-4xl w-full text-[#08120B] overflow-hidden relative shadow-2xl my-auto">
+      <div className="bg-white border border-neutral-200 rounded-3xl max-w-4xl w-full text-[#0A1F12] overflow-hidden relative shadow-2xl my-auto">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-white/90 backdrop-blur-md text-neutral-600 hover:text-[#08120B] transition cursor-pointer shadow-sm"
+          className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-white/90 backdrop-blur-md text-neutral-600 hover:text-[#0A1F12] transition cursor-pointer shadow-sm"
         >
           <X className="w-5 h-5" />
         </button>
@@ -58,7 +59,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 transition cursor-pointer ${
                   activeTab === '360'
                     ? 'bg-[#0F7B3A] text-white'
-                    : 'bg-white border border-neutral-200 text-neutral-600 hover:text-[#08120B]'
+                    : 'bg-white border border-neutral-200 text-neutral-600 hover:text-[#0A1F12]'
                 }`}
               >
                 <RefreshCw className="w-3.5 h-3.5" /> 360° View
@@ -68,7 +69,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 transition cursor-pointer ${
                   activeTab === '3d'
                     ? 'bg-[#0F7B3A] text-white'
-                    : 'bg-white border border-neutral-200 text-neutral-600 hover:text-[#08120B]'
+                    : 'bg-white border border-neutral-200 text-neutral-600 hover:text-[#0A1F12]'
                 }`}
               >
                 <Box className="w-3.5 h-3.5" /> 3D Model
@@ -78,7 +79,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1 transition cursor-pointer ${
                   activeTab === 'nutrition'
                     ? 'bg-[#0F7B3A] text-white'
-                    : 'bg-white border border-neutral-200 text-neutral-600 hover:text-[#08120B]'
+                    : 'bg-white border border-neutral-200 text-neutral-600 hover:text-[#0A1F12]'
                 }`}
               >
                 <Info className="w-3.5 h-3.5" /> Nutrition
@@ -119,7 +120,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
             {activeTab === 'nutrition' && (
               <div className="relative aspect-square rounded-2xl overflow-hidden border border-neutral-200 bg-white p-6 flex flex-col justify-between">
                 <div>
-                  <h4 className="font-bold text-[#08120B] text-sm mb-3 flex items-center gap-2">
+                  <h4 className="font-bold text-[#0A1F12] text-sm mb-3 flex items-center gap-2">
                     <Info className="w-4 h-4 text-emerald-600" /> Nutritional Facts per 100g
                   </h4>
 
@@ -130,20 +131,20 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                     </div>
                     <div className="flex justify-between py-1.5 border-b border-neutral-100">
                       <span className="text-neutral-500">Total Calories</span>
-                      <strong className="text-[#08120B]">{product.nutrition.calories}</strong>
+                      <strong className="text-[#0A1F12]">{product.nutrition.calories}</strong>
                     </div>
                     <div className="flex justify-between py-1.5 border-b border-neutral-100">
                       <span className="text-neutral-500">Fat Content</span>
-                      <strong className="text-[#08120B]">{product.nutrition.fat}</strong>
+                      <strong className="text-[#0A1F12]">{product.nutrition.fat}</strong>
                     </div>
                     <div className="flex justify-between py-1.5 border-b border-neutral-100">
                       <span className="text-neutral-500">Carbohydrates</span>
-                      <strong className="text-[#08120B]">{product.nutrition.carbs}</strong>
+                      <strong className="text-[#0A1F12]">{product.nutrition.carbs}</strong>
                     </div>
                     {product.nutrition.iron && (
                       <div className="flex justify-between py-1.5">
                         <span className="text-neutral-500">Iron Density</span>
-                        <strong className="text-[#08120B]">{product.nutrition.iron}</strong>
+                        <strong className="text-[#0A1F12]">{product.nutrition.iron}</strong>
                       </div>
                     )}
                   </div>
@@ -189,10 +190,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 </button>
               </div>
 
-              <h2 className="text-xl font-bold text-[#08120B] mb-1">{product.name}</h2>
+              <h2 className="text-xl font-bold text-[#0A1F12] mb-1">{product.name}</h2>
 
               <div className="flex items-center gap-3 text-xs text-neutral-500 mb-3">
-                <div className="flex items-center gap-1 text-[#08120B] font-bold">
+                <div className="flex items-center gap-1 text-[#0A1F12] font-bold">
                   <Star className="w-4 h-4 fill-emerald-600 text-emerald-600" /> {product.rating}
                   <span className="text-neutral-400 font-normal">({product.reviewCount} reviews)</span>
                 </div>
@@ -244,8 +245,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                       onClick={() => setSelectedWeight(opt)}
                       className={`w-full p-3 rounded-xl border text-left flex items-center justify-between transition ${
                         selectedWeight.label === opt.label
-                          ? 'bg-emerald-50 border-emerald-500 text-[#08120B] font-bold'
-                          : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B]'
+                          ? 'bg-emerald-50 border-emerald-500 text-[#0A1F12] font-bold'
+                          : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#0A1F12]'
                       }`}
                     >
                       <div>
@@ -253,7 +254,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                         <div className="text-[10px] text-neutral-500">{opt.servings} {opt.pieces && `• ${opt.pieces}`}</div>
                       </div>
                       <div className="text-right">
-                        <div className="text-sm font-black text-[#08120B]">₹{opt.price}</div>
+                        <div className="text-sm font-black text-[#0A1F12]">₹{opt.price}</div>
                         {opt.originalPrice > opt.price && (
                           <div className="text-[10px] text-neutral-400 line-through">₹{opt.originalPrice}</div>
                         )}
@@ -268,7 +269,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 <div className="flex items-start gap-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                   <div>
-                    <strong className="text-[#08120B] block">Storage Instruction:</strong>
+                    <strong className="text-[#0A1F12] block">Storage Instruction:</strong>
                     <span className="text-neutral-600 text-[11px]">{product.storageInstructions}</span>
                   </div>
                 </div>
@@ -276,7 +277,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   <div className="flex items-start gap-2 pt-2 border-t border-neutral-200">
                     <Flame className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-[#08120B] block">Chef Recipe Pairing:</strong>
+                      <strong className="text-[#0A1F12] block">Chef Recipe Pairing:</strong>
                       <span className="text-neutral-600 text-[11px]">{product.recipePairing}</span>
                     </div>
                   </div>
@@ -289,14 +290,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               <div className="flex items-center bg-white border border-neutral-200 rounded-xl overflow-hidden">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-3 py-2 text-neutral-500 hover:text-[#08120B] transition font-bold"
+                  className="px-3 py-2 text-neutral-500 hover:text-[#0A1F12] transition font-bold"
                 >
                   -
                 </button>
-                <span className="px-3 py-2 text-xs font-bold text-[#08120B]">{quantity}</span>
+                <span className="px-3 py-2 text-xs font-bold text-[#0A1F12]">{quantity}</span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
-                  className="px-3 py-2 text-neutral-500 hover:text-[#08120B] transition font-bold"
+                  className="px-3 py-2 text-neutral-500 hover:text-[#0A1F12] transition font-bold"
                 >
                   +
                 </button>
@@ -316,7 +317,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                   </>
                 ) : (
                   <>
-                    <ShoppingBag className="w-4 h-4" /> Add to Cart • ₹{selectedWeight.price * quantity}
+                    <ShoppingBag className="w-4 h-4" /> Add to Cart • ₹{getBulkLineTotal(selectedWeight.price, quantity)}
                   </>
                 )}
               </button>

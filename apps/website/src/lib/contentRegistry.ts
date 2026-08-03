@@ -32,16 +32,36 @@ export const CONNECTED_BLOCKS = new Set<string>([
   'home.rail_flash_deals',
 
   // Sections
+  // NOTE: 'sections.freshness_pillars' (FreshnessPromiseSection),
+  // 'sections.popular_searches' (ExploreSection), and 'sections.bundle_banner'
+  // are deliberately NOT listed here — none of their components are actually
+  // imported by any real page (only by the admin's own preview code in
+  // EditableCanvas.tsx/SectionPreview.tsx, and ContentEditor.tsx already
+  // excludes the first two via its own HIDDEN_BLOCKS set). Listing them as
+  // "connected" would show admins a false "Live" badge for edits that change
+  // nothing on the actual site.
   'sections.comparison',
   'sections.certifications',
   'sections.how_it_works',
   'sections.our_farms',
-  'sections.freshness_pillars',
   'sections.trust_strip',
-  'sections.popular_searches',
   'sections.partners',
-  'sections.bundle_banner',
-  'sections.promo_tiles'
+  'sections.promo_tiles',
+
+  // Static pages — hero title/intro only (each page's deeper bespoke
+  // sections — founder message, certifications, job list, etc. — stay
+  // hardcoded; they don't match the generic heading/body list shape these
+  // blocks were seeded with, and forcing them in would mean redesigning
+  // the page, not just wiring content).
+  'pages.about',
+  'pages.b2b',
+  'pages.careers',
+  'pages.contact',
+
+  // Plans & Recipes
+  'plans.subscriptions',
+  'plans.recipes',
+  'plans.guides'
 
   // Site chrome
 ]);

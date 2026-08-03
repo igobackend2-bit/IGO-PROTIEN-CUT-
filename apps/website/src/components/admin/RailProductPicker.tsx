@@ -88,7 +88,7 @@ export const RailProductPicker: React.FC<RailProductPickerProps> = ({
         </div>
         <button
           onClick={() => setPickerOpen(true)}
-          className="flex items-center gap-1.5 rounded-full bg-[#0F7B3A] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#0c6630]"
+          className="flex items-center gap-1.5 rounded-full bg-[#0F7B3A] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#0B5C2A]"
         >
           <Plus className="h-3.5 w-3.5" />
           Add products
@@ -131,7 +131,7 @@ export const RailProductPicker: React.FC<RailProductPickerProps> = ({
           <div className="mt-12 flex max-h-[70vh] w-full max-w-lg flex-col rounded-2xl bg-white">
             <div className="flex items-center justify-between border-b border-neutral-100 p-4">
               <div>
-                <h3 className="font-bold text-[#08120B]">Add to {railName}</h3>
+                <h3 className="font-bold text-[#0A1F12]">Add to {railName}</h3>
                 <p className="text-[11px] text-neutral-500">Click a product to add it</p>
               </div>
               <button

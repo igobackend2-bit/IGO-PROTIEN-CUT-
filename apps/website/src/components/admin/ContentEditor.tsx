@@ -47,6 +47,30 @@ interface ContentEditorProps {
 
 type Payload = Record<string, unknown>;
 
+/**
+ * Blocks that exist in `igo_site_content` and have a working editor + admin
+ * preview, but whose section component is never imported by any real page
+ * (`HomePage.tsx` or otherwise) — only by the admin's own `SectionPreview`.
+ * They don't correspond to anything on the live website, so they're hidden
+ * from the admin block list entirely rather than left there to confuse
+ * editors into changing content nothing shows.
+ *
+ * `FreshnessPromiseSection` (sections.freshness_pillars) and `ExploreSection`
+ * (sections.popular_searches) — confirmed via
+ *   grep -rln "FreshnessPromiseSection\|ExploreSection" src | grep -v admin
+ * — are only referenced inside src/components/admin/, never in src/pages/ or
+ * any other section that a page renders.
+ */
+const HIDDEN_BLOCKS = new Set<string>([
+  'sections.freshness_pillars',
+  'sections.popular_searches',
+  // No real page imports the component this block would feed (only the
+  // admin's own EditableCanvas/SectionPreview templates reference it) — same
+  // "not actually wired up" gap as the two above, now also excluded from
+  // contentRegistry.ts's CONNECTED_BLOCKS to match.
+  'sections.bundle_banner'
+]);
+
 const IMAGE_FIELD = /image|src|photo|qr|logo|banner/i;
 const LONG_TEXT_FIELD = /description|copy|body|text|subheading|tagline|caption|excerpt|sub$/i;
 /** Fields that are structural rather than editorial — shown but de-emphasised. */
@@ -99,7 +123,9 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
       setBlocks([]);
       return;
     }
-    const filtered = (res.data ?? []).filter((b) => b.key.startsWith(keyPrefix));
+    const filtered = (res.data ?? []).filter(
+      (b) => b.key.startsWith(keyPrefix) && !HIDDEN_BLOCKS.has(b.key)
+    );
     setBlocks(filtered);
     setDrafts(Object.fromEntries(filtered.map((b) => [b.key, b.payload])));
     setSelectedKey((current) =>
@@ -203,7 +229,7 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
               />
               <button
                 onClick={() => setPickerFor(() => (url: string) => updateDraft(path, url))}
-                className="shrink-0 rounded-lg bg-[#0F7B3A] px-3 py-2.5 text-xs font-semibold text-white hover:bg-[#0c6630]"
+                className="shrink-0 rounded-lg bg-[#0F7B3A] px-3 py-2.5 text-xs font-semibold text-white hover:bg-[#0B5C2A]"
               >
                 Browse
               </button>
@@ -421,7 +447,7 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-black text-[#08120B]">{title}</h2>
+        <h2 className="text-lg font-black text-[#0A1F12]">{title}</h2>
         <p className="mt-1 max-w-3xl text-sm leading-relaxed text-neutral-600">{description}</p>
       </div>
 
@@ -481,7 +507,7 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
           <div className="min-w-0 space-y-4">
             <div className="sticky top-0 z-40 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
               <div className="min-w-0">
-                <p className="font-bold text-[#08120B]">{blockLabel(selected)}</p>
+                <p className="font-bold text-[#0A1F12]">{blockLabel(selected)}</p>
                 <p className="font-mono text-[11px] text-neutral-500">{selected.key}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -519,7 +545,7 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
                 <button
                   onClick={() => void save()}
                   disabled={saving || !isDirty}
-                  className="flex items-center gap-1.5 rounded-full bg-[#0F7B3A] px-4 py-1.5 text-xs font-bold text-white hover:bg-[#0c6630] disabled:opacity-40"
+                  className="flex items-center gap-1.5 rounded-full bg-[#0F7B3A] px-4 py-1.5 text-xs font-bold text-white hover:bg-[#0B5C2A] disabled:opacity-40"
                 >
                   <Save className="h-3.5 w-3.5" />
                   {saving ? 'Saving…' : isDirty ? 'Save changes' : 'Saved'}
@@ -588,7 +614,7 @@ export const ContentEditor: React.FC<ContentEditorProps> = ({
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4">
           <div className="mt-8 w-full max-w-4xl rounded-2xl bg-white p-5">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-bold text-[#08120B]">Choose an image</h3>
+              <h3 className="font-bold text-[#0A1F12]">Choose an image</h3>
               <button
                 onClick={() => setPickerFor(null)}
                 className="rounded-full p-1.5 text-neutral-500 hover:bg-neutral-100"

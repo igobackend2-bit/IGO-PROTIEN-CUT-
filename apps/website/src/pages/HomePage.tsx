@@ -87,7 +87,7 @@ const AnimatedStat: React.FC<{ target: number; suffix?: string; icon: React.Elem
         <Icon className="w-4 h-4 text-emerald-600" />
       </div>
       <div>
-        <div className="font-black text-lg leading-none text-[#08120B]">
+        <div className="font-black text-lg leading-none text-[#0A1F12]">
           {value.toLocaleString()}{suffix}
         </div>
         <div className="text-[11px] text-neutral-500 font-medium mt-0.5">{label}</div>
@@ -374,20 +374,6 @@ export const HomePage: React.FC<HomePageProps> = ({
     viewAllPath: '/recipes'
   });
 
-  // Bundle & Save banner — editable from /admin → Homepage → Bundle & Save
-  // banner. Fallback matches 0011_content_sections.sql exactly so nothing
-  // changes visually until an admin edits it.
-  const bundleBanner = useSiteContent('sections.bundle_banner', {
-    eyebrow: 'COMBO SAVINGS',
-    heading: 'Bundle & Save',
-    headingAccent: 'Up to 20% Off',
-    body: 'Curated combo packs — whole chicken, mutton curry cut, and farm eggs bundled together at a better price than buying separately.',
-    cta: 'SHOP COMBO PACKS',
-    path: '/category/combo-packs',
-    badge: '20% OFF',
-    image: '/Images/banners/combo-family-feast-banner.jpg'
-  });
-
   const [activePromoSlide, setActivePromoSlide] = useState(0);
   const [isPromoPaused, setIsPromoPaused] = useState(false);
   useEffect(() => {
@@ -506,8 +492,13 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-          {/* Left Text Column */}
-          <div>
+          {/* Left Text Column — `min-w-0` is required here: grid/flex items
+              default to `min-width: auto`, which lets an unbreakable-looking
+              content width (the big bold headline) force this column wider
+              than the viewport instead of wrapping, and the section's own
+              `overflow-hidden` then clips it instead of letting it wrap —
+              exactly the "text cut off on mobile" symptom. */}
+          <div className="min-w-0">
             <div className="mb-4 flex flex-wrap gap-2">
               <div className="inline-flex items-center gap-2 bg-[#0F7B3A]/10 border border-[#0F7B3A]/20 px-3.5 py-1.5 rounded-full">
                 <span className="w-2 h-2 rounded-full bg-[#0F7B3A] animate-pulse" />
@@ -531,7 +522,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-[#08120B] leading-[1.05] mb-4 tracking-tighter">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-[#0A1F12] leading-[1.05] mb-4 tracking-tighter">
                 {heroThemes[activeHeroTheme].headlineTop}
                 <br />
                 <span className="text-[#0F7B3A]">{heroThemes[activeHeroTheme].headlineAccent}</span>{' '}
@@ -550,7 +541,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <Star key={n} className="w-4 h-4 fill-[#0F7B3A] text-[#0F7B3A]" />
                 ))}
               </div>
-              <span className="font-bold text-[#08120B] text-sm">4.9</span>
+              <span className="font-bold text-[#0A1F12] text-sm">4.9</span>
               <span className="text-neutral-400 text-xs">from 12,000+ verified reviews</span>
             </div>
 
@@ -604,7 +595,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </button>
               <button
                 onClick={() => onNavigate('/b2b')}
-                className="bg-white/80 backdrop-blur-sm text-[#08120B] border-2 border-neutral-200 px-6 py-3.5 rounded-2xl font-bold hover:border-[#D4AF37] hover:text-[#D4AF37] transition-all active:scale-95 text-sm cursor-pointer"
+                className="bg-white/80 backdrop-blur-sm text-[#0A1F12] border-2 border-neutral-200 px-6 py-3.5 rounded-2xl font-bold hover:border-[#D4AF37] hover:text-[#D4AF37] transition-all active:scale-95 text-sm cursor-pointer"
               >
                 B2B Bulk Orders
               </button>
@@ -651,7 +642,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     </div>
                     <span className="font-bold text-[10px] uppercase tracking-widest text-neutral-400">Verified Origin</span>
                   </div>
-                  <p className="text-xs font-bold text-[#08120B] leading-tight">{heroImages[activeHeroTheme].caption}</p>
+                  <p className="text-xs font-bold text-[#0A1F12] leading-tight">{heroImages[activeHeroTheme].caption}</p>
                   <p className="text-[10px] text-neutral-500 mt-1 leading-relaxed">{heroImages[activeHeroTheme].sub}</p>
                 </div>
 
@@ -689,7 +680,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{categoriesHeading.eyebrow}</div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">{categoriesHeading.heading}</h2>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{categoriesHeading.heading}</h2>
             <p className="text-xs text-neutral-500 mt-1">{categoriesHeading.subheading}</p>
           </div>
 
@@ -737,7 +728,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </span>
                 )}
               </div>
-              <h3 className="text-xs sm:text-sm font-bold text-[#08120B] group-hover:text-emerald-600 transition text-center line-clamp-1">
+              <h3 className="text-xs sm:text-sm font-bold text-[#0A1F12] group-hover:text-emerald-600 transition text-center line-clamp-1">
                 {cat.title}
               </h3>
             </button>
@@ -763,7 +754,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             {statsBlock.items.map((badge) => (
               <div key={badge.label} className="flex flex-col items-center gap-2 shrink-0">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white border-4 border-white/25 flex flex-col items-center justify-center text-center shadow-md shrink-0">
-                  <span className="text-[#08120B] font-black text-sm sm:text-base leading-none">
+                  <span className="text-[#0A1F12] font-black text-sm sm:text-base leading-none">
                     {renderToken(badge.value, { productCount: products.length })}
                   </span>
                 </div>
@@ -811,7 +802,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1">
               <Flame className="w-4 h-4 fill-emerald-600" /> {topPicksHeading.eyebrow}
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">{topPicksHeading.heading}</h2>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{topPicksHeading.heading}</h2>
           </div>
           <button
             onClick={() => onNavigate(topPicksHeading.viewAllPath || '/search')}
@@ -845,7 +836,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                           e.stopPropagation();
                           onSelectProduct(product);
                         }}
-                        className="bg-white text-[#08120B] text-[10px] font-black px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg translate-y-2 group-hover/card:translate-y-0 transition cursor-pointer"
+                        className="bg-white text-[#0A1F12] text-[10px] font-black px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg translate-y-2 group-hover/card:translate-y-0 transition cursor-pointer"
                       >
                         <Eye className="w-3 h-3" /> QUICK VIEW
                       </span>
@@ -853,7 +844,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </div>
                   <div className="p-3 flex-1 flex flex-col justify-between space-y-2">
                     <div>
-                      <h3 className="text-xs font-bold text-[#08120B] line-clamp-2 leading-snug">{product.name}</h3>
+                      <h3 className="text-xs font-bold text-[#0A1F12] line-clamp-2 leading-snug">{product.name}</h3>
                       <p className="text-[10px] text-neutral-500 mt-1">{weight?.pieces || product.subcategory}</p>
                       <div className="flex items-center gap-1 text-[10px] text-neutral-500 mt-0.5">
                         <Weight className="w-3 h-3 text-emerald-600 shrink-0" />
@@ -862,7 +853,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     </div>
                     <div className="flex items-center justify-between pt-1 gap-1">
                       <div className="min-w-0">
-                        <span className="text-sm font-black text-[#08120B]">₹{weight?.price ?? product.basePrice}</span>
+                        <span className="text-sm font-black text-[#0A1F12]">₹{weight?.price ?? product.basePrice}</span>
                         {weight && weight.originalPrice > weight.price && (
                           <span className="text-[10px] text-neutral-400 line-through ml-1">₹{weight.originalPrice}</span>
                         )}
@@ -912,7 +903,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1">
                 <Clock3 className="w-3.5 h-3.5" /> CUT THIS MORNING
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">{freshStockHeading.heading}</h2>
+              <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{freshStockHeading.heading}</h2>
             </div>
             <button
               onClick={() => onNavigate('/search')}
@@ -942,14 +933,14 @@ export const HomePage: React.FC<HomePageProps> = ({
                           e.stopPropagation();
                           onSelectProduct(product);
                         }}
-                        className="bg-white text-[#08120B] text-[10px] font-black px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg translate-y-2 group-hover/card:translate-y-0 transition cursor-pointer"
+                        className="bg-white text-[#0A1F12] text-[10px] font-black px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg translate-y-2 group-hover/card:translate-y-0 transition cursor-pointer"
                       >
                         <Eye className="w-3 h-3" /> QUICK VIEW
                       </span>
                     </div>
                   </div>
                   <div className="p-2.5">
-                    <h3 className="text-[11px] font-bold text-[#08120B] line-clamp-2 leading-snug">{product.name}</h3>
+                    <h3 className="text-[11px] font-bold text-[#0A1F12] line-clamp-2 leading-snug">{product.name}</h3>
                     <div className="text-xs font-black text-emerald-700 mt-1">₹{product.basePrice}</div>
                   </div>
                 </div>
@@ -1029,7 +1020,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               referrerPolicy="no-referrer"
               className="absolute inset-0 w-full h-full object-cover animate-kenburns group-hover:scale-105 transition-transform duration-500"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#08120B]/94 via-[#08120B]/65 to-[#08120B]/25" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0A1F12]/94 via-[#0A1F12]/65 to-[#0A1F12]/25" />
 
             <div className="relative z-10 space-y-5">
               <div className="w-11 h-11 rounded-xl bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center backdrop-blur-sm">
@@ -1050,7 +1041,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
             <button
               onClick={() => onNavigate('/b2b')}
-              className="relative z-10 mt-6 w-fit bg-[#D4AF37] hover:bg-[#c4a12e] text-[#08120B] font-black px-6 py-3 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg flex items-center gap-2"
+              className="relative z-10 mt-6 w-fit bg-[#D4AF37] hover:bg-[#c4a12e] text-[#0A1F12] font-black px-6 py-3 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg flex items-center gap-2"
             >
               Request Wholesale Quote <Briefcase className="w-4 h-4" />
             </button>
@@ -1066,7 +1057,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div>
           <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Curated For You</div>
-          <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">Our Collections</h2>
+          <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">Our Collections</h2>
         </div>
 
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
@@ -1080,7 +1071,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 className={`shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full border text-xs font-bold transition cursor-pointer whitespace-nowrap ${
                   isActive
                     ? 'bg-[#0F7B3A] border-emerald-500 text-white shadow'
-                    : 'bg-white border-neutral-200 text-neutral-600 hover:border-emerald-400 hover:text-[#08120B]'
+                    : 'bg-white border-neutral-200 text-neutral-600 hover:border-emerald-400 hover:text-[#0A1F12]'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" /> {tab.label}
@@ -1110,7 +1101,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   )}
                 </div>
                 <div className="p-3 space-y-1">
-                  <h3 className="text-xs font-bold text-[#08120B] line-clamp-1">{product.name}</h3>
+                  <h3 className="text-xs font-bold text-[#0A1F12] line-clamp-1">{product.name}</h3>
                   <div className="flex items-center gap-1 text-[10px] text-neutral-500">
                     <Star className="w-3 h-3 fill-emerald-500 text-emerald-500" /> {product.rating} ({product.reviewCount})
                   </div>
@@ -1132,45 +1123,6 @@ export const HomePage: React.FC<HomePageProps> = ({
           visitors see "how ordering works" earlier in the scroll, right
           alongside the deals that would prompt them to actually order. */}
       <Reveal><HowItWorksSection /></Reveal>
-      {/* Bundle & Save banner — editable from /admin → Homepage → Bundle &
-          Save banner (sections.bundle_banner). Was saving fine in the CMS
-          but never rendered anywhere on the live page — this is that block,
-          now actually wired up. */}
-      <Reveal>
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-3xl min-h-[220px] sm:min-h-[260px] flex items-center shadow-xl shadow-black/20">
-          <img
-            src={bundleBanner.image}
-            alt=""
-            referrerPolicy="no-referrer"
-            className="absolute inset-0 w-full h-full object-cover animate-kenburns"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#08120B]/92 via-[#08120B]/70 to-[#08120B]/20" />
-
-          <div className="relative z-10 p-8 py-10 pl-8 sm:pl-16 sm:pr-12 max-w-xl">
-            <span className="inline-block text-[10px] font-bold tracking-widest text-emerald-400 uppercase mb-2">
-              {bundleBanner.eyebrow}
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white leading-[1.05] tracking-tight">
-              {bundleBanner.heading} <span className="text-emerald-400">{bundleBanner.headingAccent}</span>
-            </h2>
-            <p className="text-white/70 text-sm leading-relaxed max-w-md mt-3">{bundleBanner.body}</p>
-            <button
-              onClick={() => onNavigate(bundleBanner.path || '/category/combo-packs')}
-              className="mt-5 w-fit bg-white hover:bg-emerald-50 text-[#08120B] font-black px-6 py-3 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg flex items-center gap-2"
-            >
-              {bundleBanner.cta} <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          {bundleBanner.badge && (
-            <div className="relative z-10 ml-auto mr-8 hidden sm:flex flex-col items-center justify-center bg-[#0F7B3A] rounded-2xl px-6 py-4 text-center shadow-lg">
-              <span className="text-lg font-black text-white leading-none">{bundleBanner.badge}</span>
-            </div>
-          )}
-        </div>
-      </section>
-      </Reveal>
       {/* PRODUCT #7 — Seasonal spotlight banner: full-bleed photo carousel
           (dark scrim, bold overlaid headline, angled price-tag badge,
           Order Now CTA, arrow nav + dot pagination) — rebuilt to match the
@@ -1185,13 +1137,13 @@ export const HomePage: React.FC<HomePageProps> = ({
       <Reveal>
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
-          className="relative bg-[#08120B] rounded-3xl overflow-hidden shadow-xl shadow-black/20"
+          className="relative bg-[#0A1F12] rounded-3xl overflow-hidden shadow-xl shadow-black/20"
           onMouseEnter={() => setIsPromoPaused(true)}
           onMouseLeave={() => setIsPromoPaused(false)}
         >
           {/* Scrolling ticker — editable from /admin → Homepage → Ticker strip.
               Duplicated twice so the marquee loops seamlessly. */}
-          <div className="relative z-20 bg-[#08120B] border-b border-white/10 overflow-hidden py-1.5">
+          <div className="relative z-20 bg-[#0A1F12] border-b border-white/10 overflow-hidden py-1.5">
             <div className="flex w-max whitespace-nowrap animate-marquee">
               {[0, 1].map((dupIdx) => (
                 <div key={dupIdx} className="flex items-center shrink-0">
@@ -1217,7 +1169,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   referrerPolicy="no-referrer"
                   className={`absolute inset-0 w-full h-full object-cover ${idx === activePromoSlide ? 'animate-kenburns' : ''}`}
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#08120B]/95 via-[#08120B]/75 to-[#08120B]/15" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#0A1F12]/95 via-[#0A1F12]/75 to-[#0A1F12]/15" />
 
                 <div className="relative z-10 h-full flex flex-col justify-center gap-3 p-8 py-12 sm:pl-16 sm:pr-12 max-w-xl">
                   <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">{slide.eyebrow}</span>
@@ -1227,7 +1179,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <p className="text-white/75 text-sm sm:text-base font-medium max-w-sm">{slide.copy}</p>
                   <button
                     onClick={() => onNavigate(slide.path)}
-                    className="w-fit bg-white hover:bg-emerald-50 text-[#08120B] font-black px-6 py-3.5 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer mt-3 shadow-lg flex items-center gap-2"
+                    className="w-fit bg-white hover:bg-emerald-50 text-[#0A1F12] font-black px-6 py-3.5 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer mt-3 shadow-lg flex items-center gap-2"
                   >
                     {slide.cta} <ArrowRight className="w-4 h-4" />
                   </button>
@@ -1281,7 +1233,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           (instead of flat near-black) to read as its own distinct section
           rather than a repeat of the charcoal "Why IGO" pillar grid. */}
       <Reveal>
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#0A2818] to-[#08120B] py-16">
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#0A1F12] to-[#0A1F12] py-16">
         {/* Ambient texture — same subtle dot-grid used on the Freshness
             Promise section elsewhere in this codebase, swapped in after the
             colored glow blobs (emerald/gold blur circles) read as an odd
@@ -1313,7 +1265,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 return (
                 <div
                   key={plan.id}
-                  className="group snap-start shrink-0 w-72 sm:w-80 bg-[#0D2E1C] border border-white/10 hover:border-emerald-500/70 rounded-3xl flex flex-col overflow-hidden relative transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-emerald-950/50"
+                  className="group snap-start shrink-0 w-72 sm:w-80 bg-[#0A1F12] border border-white/10 hover:border-emerald-500/70 rounded-3xl flex flex-col overflow-hidden relative transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-emerald-950/50"
                 >
                   {/* Photo header band — real IGO photography, fully visible
                       (previous version buried it at 14% opacity behind a near
@@ -1328,7 +1280,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     {/* Single soft bottom-only fade so the photo reads clearly
                         instead of being darkened top and bottom at once —
                         just enough to blend into the panel below. */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0D2E1C] via-[#0D2E1C]/5 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0A1F12] via-[#0A1F12]/5 to-transparent" />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-transparent h-1/3" />
 
                     <div className="absolute top-3.5 left-3.5 w-9 h-9 rounded-xl bg-white/15 border border-white/25 backdrop-blur-sm flex items-center justify-center">
@@ -1380,8 +1332,8 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
 
             {/* Edge fades — signal there's more to scroll instead of an abrupt card cut */}
-            <div className="hidden sm:block absolute top-0 bottom-2 left-0 w-10 bg-gradient-to-r from-[#0A2818] to-transparent pointer-events-none" />
-            <div className="hidden sm:block absolute top-0 bottom-2 right-0 w-16 bg-gradient-to-l from-[#08120B] to-transparent pointer-events-none" />
+            <div className="hidden sm:block absolute top-0 bottom-2 left-0 w-10 bg-gradient-to-r from-[#0A1F12] to-transparent pointer-events-none" />
+            <div className="hidden sm:block absolute top-0 bottom-2 right-0 w-16 bg-gradient-to-l from-[#0A1F12] to-transparent pointer-events-none" />
 
             {/* Arrow navigation — desktop only, fades in on hover of the carousel */}
             <button
@@ -1413,7 +1365,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1">
                   <Award className="w-3.5 h-3.5" /> {chefHeading.eyebrow}
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">{chefHeading.heading}</h2>
+                <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{chefHeading.heading}</h2>
               </div>
             </div>
 
@@ -1426,12 +1378,12 @@ export const HomePage: React.FC<HomePageProps> = ({
                 >
                   <div className="relative aspect-4/3 bg-neutral-100 overflow-hidden">
                     <img src={product.image} alt={product.name} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
-                    <span className="absolute top-2 left-2 bg-[#08120B] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase flex items-center gap-1">
+                    <span className="absolute top-2 left-2 bg-[#0A1F12] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase flex items-center gap-1">
                       <ChefHat className="w-3 h-3" /> Chef's Pick
                     </span>
                   </div>
                   <div className="p-3 space-y-1 flex-1">
-                    <h3 className="text-xs font-bold text-[#08120B] line-clamp-1">{product.name}</h3>
+                    <h3 className="text-xs font-bold text-[#0A1F12] line-clamp-1">{product.name}</h3>
                     <p className="text-[10px] text-neutral-500 line-clamp-1">Best for: {product.recipePairing}</p>
                     <div className="text-sm font-black text-emerald-700 pt-1">₹{product.basePrice}</div>
                   </div>
@@ -1456,7 +1408,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1">
               <ChefHat className="w-4 h-4" /> CHEF INSPIRATIONS
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">Signature Meat Recipes</h2>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">Signature Meat Recipes</h2>
           </div>
           <button
             onClick={() => onNavigate('/recipes')}
@@ -1526,7 +1478,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     >
                       <img src={prod.image} alt={prod.name} referrerPolicy="no-referrer" className="w-10 h-10 rounded-lg object-cover" />
                       <div>
-                        <div className="text-xs font-bold text-[#08120B] line-clamp-1">{prod.name}</div>
+                        <div className="text-xs font-bold text-[#0A1F12] line-clamp-1">{prod.name}</div>
                         <div className="text-xs text-emerald-700 font-black">₹{prod.basePrice} <span className="text-[10px] text-neutral-400 line-through">₹{prod.originalPrice}</span></div>
                       </div>
                     </div>
@@ -1581,7 +1533,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           copy stays accurate rather than promising a separate native app. */}
       <Reveal>
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-[#08120B] rounded-3xl overflow-hidden grid grid-cols-1 lg:grid-cols-[0.9fr_1.3fr_0.8fr] items-stretch relative">
+        <div className="bg-[#0A1F12] rounded-3xl overflow-hidden grid grid-cols-1 lg:grid-cols-[0.9fr_1.3fr_0.8fr] items-stretch relative">
           <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
 
           {/* Real product photo */}
@@ -1592,7 +1544,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               referrerPolicy="no-referrer"
               className="w-full h-full object-cover opacity-90 animate-kenburns"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#08120B]/60 lg:to-[#08120B]" />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#0A1F12]/60 lg:to-[#0A1F12]" />
           </div>
 
           {/* Bold stacked copy — punchier multi-line treatment (matches the
@@ -1626,7 +1578,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 alt="Scan to open IGO Protein Cuts on your phone"
                 className="w-24 h-24 sm:w-28 sm:h-28 block"
               />
-              <p className="text-[9px] font-black text-[#08120B] text-center mt-1 uppercase tracking-wider">Scan Me</p>
+              <p className="text-[9px] font-black text-[#0A1F12] text-center mt-1 uppercase tracking-wider">Scan Me</p>
             </div>
             <div className="flex flex-col gap-2">
               {/* Greyed-out, clearly-labeled "coming soon" state — not
@@ -1657,7 +1609,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Instagram className="w-5 h-5 text-emerald-600" />
-            <h2 className="text-xl sm:text-2xl font-black text-[#08120B] tracking-tight">Follow @igoproteincuts</h2>
+            <h2 className="text-xl sm:text-2xl font-black text-[#0A1F12] tracking-tight">Follow @igoproteincuts</h2>
           </div>
           <a
             href="https://www.instagram.com/igoproteincuts"
@@ -1718,7 +1670,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 placeholder="you@example.com"
                 value={newsletterEmail}
                 onChange={(e) => setNewsletterEmail(e.target.value)}
-                className="flex-1 sm:w-64 bg-white border border-emerald-200 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs text-[#08120B] focus:outline-none"
+                className="flex-1 sm:w-64 bg-white border border-emerald-200 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs text-[#0A1F12] focus:outline-none"
               />
               <button
                 type="submit"

@@ -47,7 +47,7 @@ export const TestimonialsSection: React.FC = () => {
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
       <div className="text-center max-w-xl mx-auto space-y-2">
         <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Why Households Choose Us</span>
-        <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">Built Around Trust, Not Just Delivery</h2>
+        <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">Built Around Trust, Not Just Delivery</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -58,7 +58,7 @@ export const TestimonialsSection: React.FC = () => {
               <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 mb-4">
                 <Icon className="w-5 h-5" />
               </div>
-              <h3 className="text-sm font-black text-[#08120B] mb-2">{v.title}</h3>
+              <h3 className="text-sm font-black text-[#0A1F12] mb-2">{v.title}</h3>
               <p className="text-sm text-neutral-600 leading-relaxed">{v.body}</p>
             </div>
           );

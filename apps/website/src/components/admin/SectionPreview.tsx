@@ -78,7 +78,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
           </span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-black text-[#08120B] leading-[1.05] mb-4 tracking-tighter">
+        <h1 className="text-3xl sm:text-4xl font-black text-[#0A1F12] leading-[1.05] mb-4 tracking-tighter">
           {theme.headlineTop}
           <br />
           <span className="text-[#0F7B3A]">{theme.headlineAccent}</span> {theme.headlineBottom}
@@ -94,7 +94,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
               <Star key={n} className="w-4 h-4 fill-[#0F7B3A] text-[#0F7B3A]" />
             ))}
           </div>
-          <span className="font-bold text-[#08120B] text-sm">4.9</span>
+          <span className="font-bold text-[#0A1F12] text-sm">4.9</span>
           <span className="text-neutral-400 text-xs">from 12,000+ verified reviews</span>
         </div>
 
@@ -116,7 +116,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
           <div key={i} className="relative rounded-2xl overflow-hidden aspect-4/3 bg-neutral-100">
             <FadeImage src={item.src} alt={item.alt ?? ''} className="w-full h-full object-cover" />
             <div className="absolute bottom-2 left-2 right-2 rounded-lg bg-white/95 backdrop-blur px-2.5 py-2">
-              <p className="text-[10px] font-black text-[#08120B] leading-tight">{item.caption}</p>
+              <p className="text-[10px] font-black text-[#0A1F12] leading-tight">{item.caption}</p>
               <p className="text-[8px] text-neutral-500 leading-snug mt-0.5">{item.sub}</p>
             </div>
           </div>
@@ -154,7 +154,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
               )}
             </div>
             <div className="text-center">
-              <h3 className="text-[10px] font-bold text-[#08120B] line-clamp-1">{cat.title}</h3>
+              <h3 className="text-[10px] font-bold text-[#0A1F12] line-clamp-1">{cat.title}</h3>
               <p className="text-[8px] text-neutral-500 line-clamp-1">{cat.count}</p>
             </div>
           </div>
@@ -171,7 +171,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
         {items.map((s: Row, i: number) => (
           <div
             key={i}
-            className="relative rounded-2xl overflow-hidden bg-[#08120B] flex items-stretch min-h-[128px]"
+            className="relative rounded-2xl overflow-hidden bg-[#0A1F12] flex items-stretch min-h-[128px]"
           >
             <div className="absolute inset-0">
               <FadeImage src={s.image} alt={s.alt ?? ''} className="w-full h-full object-cover" />
@@ -185,7 +185,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
                 {s.title} <span className="text-emerald-400">{s.titleAccent}</span>
               </p>
               <p className="text-[10px] text-white/70 mt-1 line-clamp-2 leading-relaxed">{s.copy}</p>
-              <span className="mt-2.5 inline-flex w-fit items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[10px] font-bold text-[#08120B]">
+              <span className="mt-2.5 inline-flex w-fit items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[10px] font-bold text-[#0A1F12]">
                 {s.cta} <ArrowRight className="w-3 h-3" />
               </span>
             </div>
@@ -208,7 +208,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <Instagram className="w-4 h-4 text-[#0F7B3A]" />
-          <span className="text-xs font-bold text-[#08120B]">Follow {p.handle}</span>
+          <span className="text-xs font-bold text-[#0A1F12]">Follow {p.handle}</span>
         </div>
         <div className="grid grid-cols-6 gap-2">
           {(p.items ?? []).map((post: Row, i: number) => (
@@ -244,7 +244,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
           {(p.items ?? []).map((badge: Row, i: number) => (
             <div key={i} className="flex flex-col items-center gap-2 shrink-0">
               <div className="w-18 h-18 rounded-full bg-white border-4 border-white/25 flex items-center justify-center shadow-md px-2">
-                <span className="text-[#08120B] font-black text-xs text-center leading-none">
+                <span className="text-[#0A1F12] font-black text-xs text-center leading-none">
                   {badge.value}
                 </span>
               </div>
@@ -305,7 +305,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
                 </span>
               )}
               <p
-                className={`text-xs font-black leading-tight ${tile.theme === 'light' ? 'text-[#08120B]' : 'text-white'}`}
+                className={`text-xs font-black leading-tight ${tile.theme === 'light' ? 'text-[#0A1F12]' : 'text-white'}`}
               >
                 {tile.title}
               </p>
@@ -342,7 +342,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
             {p.heading} <span className="text-emerald-400">{p.headingAccent}</span>
           </p>
           <p className="mt-1.5 text-[10px] text-white/70 line-clamp-2 leading-relaxed">{p.body}</p>
-          <span className="mt-3 inline-block rounded-full bg-white px-4 py-1.5 text-[10px] font-bold text-[#08120B]">
+          <span className="mt-3 inline-block rounded-full bg-white px-4 py-1.5 text-[10px] font-bold text-[#0A1F12]">
             {p.cta}
           </span>
         </div>
@@ -359,7 +359,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
   if (blockKey === 'sections.popular_searches') {
     return (
       <div className="space-y-2.5">
-        <p className="text-xs font-bold text-[#08120B]">{p.heading}</p>
+        <p className="text-xs font-bold text-[#0A1F12]">{p.heading}</p>
         <div className="flex flex-wrap gap-2">
           {(p.items ?? []).map((chip: Row, i: number) => (
             <span
@@ -378,7 +378,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
   // ── APP BANNER / NEWSLETTER / TEXT BLOCKS ─────────────────────────────────
   if (blockKey === 'home.app_banner' || blockKey === 'home.newsletter') {
     return (
-      <div className="relative rounded-2xl overflow-hidden bg-[#08120B] p-5 flex items-center gap-4">
+      <div className="relative rounded-2xl overflow-hidden bg-[#0A1F12] p-5 flex items-center gap-4">
         {p.image && (
           <div className="absolute inset-0 opacity-25">
             <FadeImage src={p.image} alt="" className="w-full h-full object-cover" />
@@ -415,7 +415,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
   // ── FOOTER ────────────────────────────────────────────────────────────────
   if (blockKey === 'site.footer') {
     return (
-      <div className="rounded-2xl bg-[#08120B] p-5 text-white">
+      <div className="rounded-2xl bg-[#0A1F12] p-5 text-white">
         <p className="text-[10px] text-white/60 leading-relaxed max-w-sm">{p.tagline}</p>
         <div className="mt-4 grid grid-cols-4 gap-4">
           {(p.columns ?? []).map((col: Row, i: number) => (
@@ -450,7 +450,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
   if (blockKey.startsWith('plans.')) {
     return (
       <div className="space-y-3">
-        {p.heading && <p className="text-sm font-black text-[#08120B]">{p.heading}</p>}
+        {p.heading && <p className="text-sm font-black text-[#0A1F12]">{p.heading}</p>}
         <div className="grid grid-cols-3 gap-3">
           {(p.items ?? []).map((item: Row, i: number) => (
             <div key={i} className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
@@ -465,7 +465,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
                     {item.badge}
                   </span>
                 )}
-                <p className="text-[11px] font-bold text-[#08120B] leading-tight line-clamp-2">
+                <p className="text-[11px] font-bold text-[#0A1F12] leading-tight line-clamp-2">
                   {item.title}
                 </p>
                 <p className="mt-0.5 text-[9px] text-neutral-500 line-clamp-2">
@@ -502,11 +502,11 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
           </div>
         )}
         <div className="space-y-3 p-4">
-          <p className="text-lg font-black text-[#08120B]">{p.title}</p>
+          <p className="text-lg font-black text-[#0A1F12]">{p.title}</p>
           <p className="text-[11px] leading-relaxed text-neutral-600">{p.intro}</p>
           {(p.sections ?? []).map((s: Row, i: number) => (
             <div key={i} className="border-t border-neutral-100 pt-2.5">
-              <p className="text-[11px] font-bold text-[#08120B]">{s.heading}</p>
+              <p className="text-[11px] font-bold text-[#0A1F12]">{s.heading}</p>
               <p className="mt-0.5 text-[10px] leading-relaxed text-neutral-500 line-clamp-3">
                 {s.body}
               </p>
@@ -549,7 +549,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
         </p>
       )}
       {(p.heading || p.title) && (
-        <p className="mt-1 text-base font-black text-[#08120B]">{p.heading || p.title}</p>
+        <p className="mt-1 text-base font-black text-[#0A1F12]">{p.heading || p.title}</p>
       )}
       {(p.body || p.intro || p.subheading) && (
         <p className="mt-1.5 text-[11px] leading-relaxed text-neutral-600">
@@ -569,7 +569,7 @@ const HomepagePreview: React.FC<SectionPreviewProps> = ({ blockKey, payload }) =
                   <Icon className="h-4 w-4 text-emerald-600" />
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-[11px] font-bold text-[#08120B]">
+                  <p className="truncate text-[11px] font-bold text-[#0A1F12]">
                     {item.title || item.name || item.label}
                   </p>
                   <p className="line-clamp-2 text-[9px] text-neutral-500">

@@ -1,5 +1,6 @@
 import { supabase, isSupabaseConfigured } from '../supabase';
 import { CartItem, Order, OrderStatus, SavedAddress } from '../../types';
+import { getBulkUnitPrice } from '../pricing';
 
 /**
  * ORDERS — written to and read from the CANONICAL `orders` / `order_items` /
@@ -97,10 +98,16 @@ export async function ensureAddress(
     area: address.fullAddress ?? address.street,
     landmark: address.landmark,
     city: address.city,
-    // `state` exists on the app's addresses table and is shown in the admin's
-    // order dialog. It was missing here, so every website order displayed a
-    // blank state line.
-    state: address.state ?? null,
+    // `addresses.state` is NOT NULL on the app's shared table (confirmed by
+    // the actual Postgres error: 'null value in column "state" ... violates
+    // not-null constraint'). Nothing on the website ever collects a state —
+    // the "Add Address" form (UserAccountPage.tsx) has no field for it — so
+    // `address.state` is always undefined and every order was failing here.
+    // Falling back to Karnataka, matching this site's default city/pincode
+    // (Bengaluru / 560038), unblocks orders immediately without touching the
+    // address form or any other file. The real fix — actually collecting
+    // state per address — is a follow-up for whoever owns that form.
+    state: address.state ?? 'Karnataka',
     pincode: address.pincode
   };
 
@@ -163,11 +170,17 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   // address — which is exactly what happened before this guard existed.
   const addressResult = await ensureAddress(user.id, input.shippingAddress);
   if (!addressResult.id) {
+    // This message used to be fully generic, discarding whatever Postgres
+    // actually said (ensureAddress already captures it as addressResult.error
+    // and logs it to the console) — which made "still failing after adding
+    // an address" impossible to diagnose from the customer-facing message
+    // alone. Appending the real reason turns a dead end into an actionable
+    // one, without needing separate console access to see what broke.
     return {
       ok: false,
       error:
         'Could not save your delivery address, so the order was not placed. ' +
-        'Please check the address details and try again.'
+        (addressResult.error ? `Reason: ${addressResult.error}` : 'Please check the address details and try again.')
     };
   }
   const addressId = addressResult.id;
@@ -213,13 +226,17 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
 
   const orderId = orderRow.id as string;
 
-  // 2. Line items. Price stored is the per-unit price for the chosen weight,
-  //    matching what the app stores.
+  // 2. Line items. Price stored is the per-unit price actually charged for
+  //    the chosen weight — this must be the bulk-discounted unit price
+  //    (getBulkUnitPrice), not the raw catalog price. The order header's
+  //    totalAmount already reflects the bulk discount (see CartPage), so
+  //    storing the undiscounted price here made `quantity * price` on every
+  //    bulk-discounted line item fail to reconcile against the order total.
   const itemsPayload = input.items.map((item) => ({
     order_id: orderId,
     product_id: item.product.id,
     quantity: item.quantity,
-    price: item.selectedWeight.price
+    price: getBulkUnitPrice(item.selectedWeight.price, item.quantity)
   }));
 
   const { error: itemsError } = await supabase.from('order_items').insert(itemsPayload);

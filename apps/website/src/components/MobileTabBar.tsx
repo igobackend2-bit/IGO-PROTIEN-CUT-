@@ -41,7 +41,7 @@ export const MobileTabBar: React.FC<MobileTabBarProps> = ({ currentPath, onNavig
             key={tab.id}
             onClick={() => (tab.action ? tab.action() : onNavigate(tab.path!))}
             className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition cursor-pointer ${
-              isActive ? 'text-emerald-600' : 'text-neutral-400 hover:text-[#08120B]'
+              isActive ? 'text-emerald-600' : 'text-neutral-400 hover:text-[#0A1F12]'
             }`}
           >
             <Icon className="w-5 h-5" />

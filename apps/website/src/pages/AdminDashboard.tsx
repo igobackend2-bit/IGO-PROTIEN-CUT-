@@ -18,7 +18,10 @@ import {
   BookOpen,
   FileText,
   LogOut,
-  Tag
+  Tag,
+  Star,
+  ThumbsDown,
+  Truck
 } from 'lucide-react';
 import { signOut } from '../lib/api/auth';
 import { MediaLibrary } from '../components/admin/MediaLibrary';
@@ -39,10 +42,18 @@ import {
   setLeadStatus,
   deleteLead,
   leadsToCsv,
+  listAllReviews,
+  approveReview,
+  rejectReview,
+  deleteReview,
+  listAllOrderFeedback,
+  markFeedbackReviewed,
   SiteContentRow,
   VariantAdminRow,
   SeoRow,
-  LeadRow
+  LeadRow,
+  ReviewRow,
+  OrderFeedbackRow
 } from '../lib/api/websiteAdmin';
 
 /**
@@ -72,22 +83,27 @@ type Tab =
   | 'plans'
   | 'pages'
   | 'merch'
-  | 'media'
-  | 'banners'
-  | 'weights'
-  | 'seo'
+  | 'reviews'
+  | 'feedback'
   | 'leads';
 
+// 'weights' (Weight Options), 'seo' (Product SEO), 'media' (Media library)
+// and 'banners' (raw content-block editor) tabs removed per request — their
+// components stay defined below (harmless dead code) in case they're needed
+// again, but are no longer linked from the tab bar. Adding an extra promo
+// banner is still possible from the "Homepage" tab → Promo carousel →
+// "Add a slide" (that's the friendlier editor for the same underlying data
+// the removed Banners tab exposed raw). Adding an extra combo pack is real
+// catalog data (a product with category = combo-packs), so that still has to
+// be done in the main admin dashboard, not here.
 const TABS: { id: Tab; label: string; icon: typeof ImageIcon }[] = [
   { id: 'homepage', label: 'Homepage', icon: Home },
   { id: 'sections', label: 'Sections', icon: LayoutGrid },
   { id: 'plans', label: 'Plans & Recipes', icon: BookOpen },
   { id: 'pages', label: 'Pages & SEO', icon: FileText },
-  { id: 'media', label: 'Media', icon: FolderOpen },
-  { id: 'banners', label: 'Banners', icon: ImageIcon },
   { id: 'merch', label: 'Pricing & Badges', icon: Tag },
-  { id: 'weights', label: 'Weight Options', icon: Scale },
-  { id: 'seo', label: 'Product SEO', icon: Search },
+  { id: 'reviews', label: 'Reviews', icon: Star },
+  { id: 'feedback', label: 'Delivery Feedback', icon: Truck },
   { id: 'leads', label: 'Leads', icon: Users }
 ];
 
@@ -115,7 +131,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-black text-[#08120B]">Website Content</h1>
+          <h1 className="text-2xl font-black text-[#0A1F12]">Website Content</h1>
           <p className="text-sm text-neutral-600 mt-1 max-w-2xl">
             Banners, weight options, SEO and enquiries — the parts of the site the main admin
             dashboard doesn&apos;t cover.
@@ -149,7 +165,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             href={ADMIN_DASHBOARD_URL}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-2 rounded-full bg-[#0F7B3A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0c6630]"
+            className="flex items-center gap-2 rounded-full bg-[#0F7B3A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0B5C2A]"
           >
             Main admin dashboard
             <ExternalLink className="h-4 w-4" />
@@ -241,11 +257,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {activeTab === 'merch' && <MerchandisingTab notify={notify} />}
 
-      {activeTab === 'media' && <MediaLibrary notify={notify} />}
+      {activeTab === 'reviews' && <ReviewsTab notify={notify} />}
 
-      {activeTab === 'banners' && <BannersTab notify={notify} />}
-      {activeTab === 'weights' && <WeightsTab notify={notify} />}
-      {activeTab === 'seo' && <SeoTab notify={notify} productCount={products.length} />}
+      {activeTab === 'feedback' && <FeedbackTab notify={notify} />}
+
       {activeTab === 'leads' && <LeadsTab notify={notify} />}
 
       {toast && (
@@ -323,7 +338,7 @@ const BannersTab: React.FC<{ notify: Notify }> = ({ notify }) => {
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-neutral-200 p-5">
-        <h2 className="mb-4 font-bold text-[#08120B]">Add a banner</h2>
+        <h2 className="mb-4 font-bold text-[#0A1F12]">Add a banner</h2>
         <div className="grid gap-3 md:grid-cols-2">
           <input
             value={newKey}
@@ -600,7 +615,7 @@ const SeoTab: React.FC<{ notify: Notify; productCount: number }> = ({ notify }) 
           const draft = drafts[row.product_id] ?? {};
           return (
             <div key={row.product_id} className="rounded-xl border border-neutral-200 p-4">
-              <p className="mb-3 font-bold text-[#08120B]">{row.product_name}</p>
+              <p className="mb-3 font-bold text-[#0A1F12]">{row.product_name}</p>
               <div className="grid gap-3 md:grid-cols-3">
                 <input
                   value={draft.slug ?? row.slug ?? ''}
@@ -663,6 +678,230 @@ const SeoTab: React.FC<{ notify: Notify; productCount: number }> = ({ notify }) 
 };
 
 // ── Leads ───────────────────────────────────────────────────────────────────
+
+// ── Reviews ─────────────────────────────────────────────────────────────────
+
+const ReviewsTab: React.FC<{ notify: Notify }> = ({ notify }) => {
+  const [rows, setRows] = useState<ReviewRow[] | null>(null);
+
+  const load = useCallback(async () => {
+    const res = await listAllReviews();
+    if (!res.ok) {
+      notify(res.error ?? 'Could not load reviews.', 'err');
+      setRows([]);
+      return;
+    }
+    setRows(res.data ?? []);
+  }, [notify]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  if (rows === null) return <Loading />;
+  if (rows.length === 0) return <Empty>No reviews yet.</Empty>;
+
+  const pendingCount = rows.filter((r) => r.is_hidden).length;
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-neutral-600">
+        <strong>{rows.length}</strong> {rows.length === 1 ? 'review' : 'reviews'}
+        {pendingCount > 0 && (
+          <span className="ml-2 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold px-2.5 py-0.5">
+            {pendingCount} awaiting approval
+          </span>
+        )}
+      </p>
+
+      <div className="overflow-x-auto rounded-xl border border-neutral-200">
+        <table className="w-full text-sm">
+          <thead className="bg-neutral-50 text-left text-xs uppercase text-neutral-500">
+            <tr>
+              <th className="p-3">Received</th>
+              <th className="p-3">Product</th>
+              <th className="p-3">Rating</th>
+              <th className="p-3">Review</th>
+              <th className="p-3">Status</th>
+              <th className="p-3" />
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((review) => (
+              <tr key={review.id} className="border-t border-neutral-100 align-top">
+                <td className="p-3 whitespace-nowrap text-xs text-neutral-500">
+                  {new Date(review.created_at).toLocaleDateString('en-IN')}
+                </td>
+                <td className="p-3 font-semibold">{review.product_name ?? review.product_id}</td>
+                <td className="p-3 text-emerald-600 whitespace-nowrap">{'★'.repeat(review.rating)}</td>
+                <td className="p-3 max-w-sm text-xs text-neutral-700">{review.comment ?? '—'}</td>
+                <td className="p-3">
+                  {review.is_hidden ? (
+                    <span className="rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold px-2.5 py-0.5">
+                      Pending
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold px-2.5 py-0.5">
+                      Live
+                    </span>
+                  )}
+                </td>
+                <td className="p-3 text-right whitespace-nowrap">
+                  <div className="flex items-center justify-end gap-3">
+                    {review.is_hidden ? (
+                      <button
+                        onClick={async () => {
+                          const res = await approveReview(review.id);
+                          if (!res.ok) notify(res.error ?? 'Failed.', 'err');
+                          else {
+                            notify('Review approved — now live on the product page.');
+                            void load();
+                          }
+                        }}
+                        className="text-emerald-600 hover:text-emerald-700"
+                        title="Approve"
+                      >
+                        <Check className="h-4 w-4" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={async () => {
+                          const res = await rejectReview(review.id);
+                          if (!res.ok) notify(res.error ?? 'Failed.', 'err');
+                          else {
+                            notify('Review hidden from the product page.');
+                            void load();
+                          }
+                        }}
+                        className="text-neutral-400 hover:text-amber-600"
+                        title="Reject / hide"
+                      >
+                        <ThumbsDown className="h-4 w-4" />
+                      </button>
+                    )}
+                    <button
+                      onClick={async () => {
+                        if (!window.confirm('Delete this review permanently?')) return;
+                        const res = await deleteReview(review.id);
+                        if (!res.ok) notify(res.error ?? 'Failed.', 'err');
+                        else {
+                          notify('Review deleted.');
+                          void load();
+                        }
+                      }}
+                      className="text-neutral-400 hover:text-red-600"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+// ── Delivery / order feedback ────────────────────────────────────────────────
+//
+// `igo_order_feedback` is a brand-new website-owned table (0018_order_feedback.sql)
+// covering the delivery-experience half of the post-order feedback form —
+// product-quality feedback goes through the Reviews tab above (product_reviews).
+
+const FeedbackTab: React.FC<{ notify: Notify }> = ({ notify }) => {
+  const [rows, setRows] = useState<OrderFeedbackRow[] | null>(null);
+
+  const load = useCallback(async () => {
+    const res = await listAllOrderFeedback();
+    if (!res.ok) {
+      notify(res.error ?? 'Could not load delivery feedback.', 'err');
+      setRows([]);
+      return;
+    }
+    setRows(res.data ?? []);
+  }, [notify]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  if (rows === null) return <Loading />;
+  if (rows.length === 0) return <Empty>No delivery feedback yet.</Empty>;
+
+  const newCount = rows.filter((r) => r.status === 'new').length;
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-neutral-600">
+        <strong>{rows.length}</strong> {rows.length === 1 ? 'response' : 'responses'} about the delivery experience
+        {newCount > 0 && (
+          <span className="ml-2 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold px-2.5 py-0.5">
+            {newCount} new
+          </span>
+        )}
+      </p>
+
+      <div className="overflow-x-auto rounded-xl border border-neutral-200">
+        <table className="w-full text-sm">
+          <thead className="bg-neutral-50 text-left text-xs uppercase text-neutral-500">
+            <tr>
+              <th className="p-3">Received</th>
+              <th className="p-3">Order</th>
+              <th className="p-3">Rating</th>
+              <th className="p-3">Feedback</th>
+              <th className="p-3">Status</th>
+              <th className="p-3" />
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.id} className="border-t border-neutral-100 align-top">
+                <td className="p-3 whitespace-nowrap text-xs text-neutral-500">
+                  {new Date(row.created_at).toLocaleDateString('en-IN')}
+                </td>
+                <td className="p-3 font-mono text-xs">{row.order_id.slice(0, 8).toUpperCase()}</td>
+                <td className="p-3 text-emerald-600 whitespace-nowrap">{'★'.repeat(row.delivery_rating)}</td>
+                <td className="p-3 max-w-sm text-xs text-neutral-700">{row.comment ?? '—'}</td>
+                <td className="p-3">
+                  {row.status === 'new' ? (
+                    <span className="rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold px-2.5 py-0.5">
+                      New
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold px-2.5 py-0.5">
+                      Reviewed
+                    </span>
+                  )}
+                </td>
+                <td className="p-3 text-right whitespace-nowrap">
+                  {row.status === 'new' && (
+                    <button
+                      onClick={async () => {
+                        const res = await markFeedbackReviewed(row.id);
+                        if (!res.ok) notify(res.error ?? 'Failed.', 'err');
+                        else {
+                          notify('Marked as reviewed.');
+                          void load();
+                        }
+                      }}
+                      className="text-emerald-600 hover:text-emerald-700"
+                      title="Mark reviewed"
+                    >
+                      <Check className="h-4 w-4" />
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
 
 const LeadsTab: React.FC<{ notify: Notify }> = ({ notify }) => {
   const [rows, setRows] = useState<LeadRow[] | null>(null);

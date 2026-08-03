@@ -1,5 +1,6 @@
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '../supabase';
+import { submitLead } from './catalog';
 
 /**
  * REAL AUTHENTICATION — Supabase Auth, identical to the Flutter customer app
@@ -96,6 +97,23 @@ export function onAuthStateChange(callback: (session: Session | null) => void): 
   return () => data.subscription.unsubscribe();
 }
 
+/**
+ * Fires when the customer arrives via a Supabase password-reset email link.
+ * `detectSessionInUrl: true` (src/lib/supabase.ts) makes the client silently
+ * sign the customer in from the link's recovery tokens — with nothing
+ * listening for this event, that sign-in was the ONLY thing that happened;
+ * the customer landed on /account fully logged in and never got a chance to
+ * actually set a new password. This lets the caller pop the auth modal
+ * straight into its "set a new password" view when that happens.
+ */
+export function onPasswordRecovery(callback: () => void): () => void {
+  if (!isSupabaseConfigured || !supabase) return () => {};
+  const { data } = supabase.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') callback();
+  });
+  return () => data.subscription.unsubscribe();
+}
+
 // ── Sign up / in / out ──────────────────────────────────────────────────────
 
 /**
@@ -136,8 +154,25 @@ export async function signUp(
     }
   });
 
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    // Supabase's own wording varies by version ("User already registered",
+    // "A user with this email address has already been registered"), so
+    // match loosely rather than on one exact string.
+    if (/already regist|already exists/i.test(error.message)) {
+      return { ok: false, error: 'An account with this email already exists. Please sign in instead.' };
+    }
+    return { ok: false, error: error.message };
+  }
   if (!data.user) return { ok: false, error: 'Sign up failed. Please try again.' };
+
+  // With "leaked email protection" / anti-enumeration behavior enabled,
+  // Supabase doesn't return an error for a duplicate email at all — it
+  // returns a 200 with a user object whose `identities` array is empty
+  // instead of creating anything. Silently treating that as success would
+  // tell the customer they just made an account they already have.
+  if (Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    return { ok: false, error: 'An account with this email already exists. Please sign in instead.' };
+  }
 
   // Same pattern as the app's signUp(): resolve the code to a referrer id
   // BEFORE creating the profile row, so `referred_by` is set atomically with
@@ -150,6 +185,20 @@ export async function signUp(
     fullName,
     phoneNumber: phone ?? null,
     ...(referredBy ? { referredBy } : {})
+  });
+
+  // Surface every new website sign-up in /admin's Leads tab too, using the
+  // same `igo_leads` table and `submitLead` helper the B2B/franchise/contact
+  // forms already write through — no schema change, no new table, no other
+  // code touched. `lead_type: 'signup'` distinguishes these from franchise/
+  // b2b/corporate enquiries in the Leads list and CSV export. Best-effort:
+  // a failure here never blocks account creation.
+  void submitLead({
+    leadType: 'signup',
+    fullName,
+    email,
+    phone: phone ?? '',
+    message: 'New customer account created on the website.'
   });
 
   notifyAuthChanged();

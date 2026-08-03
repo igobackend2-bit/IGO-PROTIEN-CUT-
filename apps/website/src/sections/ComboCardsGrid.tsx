@@ -41,7 +41,7 @@ export const ComboCardsGrid: React.FC<ComboCardsGridProps> = ({ products, onSele
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
       <div>
         <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{comboHeading.eyebrow}</div>
-        <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">{comboHeading.heading}</h2>
+        <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{comboHeading.heading}</h2>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -80,7 +80,7 @@ export const ComboCardsGrid: React.FC<ComboCardsGridProps> = ({ products, onSele
                     )}
                   </div>
                   {!!combo.discountPercentage && (
-                    <span className="bg-[#D4AF37] text-[#08120B] text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                    <span className="bg-[#D4AF37] text-[#0A1F12] text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide">
                       {combo.discountPercentage}% Off
                     </span>
                   )}

@@ -27,7 +27,7 @@ export const FranchisePage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
       {/* Banner */}
-      <div className="bg-[#08120B] border border-black rounded-3xl p-8 sm:p-12 text-center max-w-4xl mx-auto space-y-3 text-white shadow-2xl">
+      <div className="bg-[#0A1F12] rounded-3xl p-8 sm:p-12 text-center max-w-4xl mx-auto space-y-3 text-white shadow-lg shadow-emerald-950/20">
         <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">IGO PARTNERSHIP OPPORTUNITY</span>
         <h1 className="text-3xl sm:text-4xl font-black tracking-tight">Own a Protein Cuts Dark Store Franchise</h1>
         <p className="text-xs sm:text-sm text-neutral-300">
@@ -38,13 +38,13 @@ export const FranchisePage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
         {/* Left Info */}
         <div className="space-y-6">
-          <h2 className="text-2xl font-black text-[#08120B]">Why Invest in IGO Protein Cuts?</h2>
+          <h2 className="text-2xl font-black text-[#0A1F12]">Why Invest in IGO Protein Cuts?</h2>
 
           <div className="space-y-4">
             <div className="bg-white border border-neutral-200 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
               <Building2 className="w-6 h-6 text-emerald-600 shrink-0 mt-1" />
               <div>
-                <h3 className="font-bold text-[#08120B] text-sm">Turnkey Dark Store Setup</h3>
+                <h3 className="font-bold text-[#0A1F12] text-sm">Turnkey Dark Store Setup</h3>
                 <p className="text-xs text-neutral-600">Complete chilling equipment, POS, master butcher training, and rider app integration provided.</p>
               </div>
             </div>
@@ -52,7 +52,7 @@ export const FranchisePage: React.FC = () => {
             <div className="bg-white border border-neutral-200 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
               <Wallet className="w-6 h-6 text-emerald-600 shrink-0 mt-1" />
               <div>
-                <h3 className="font-bold text-[#08120B] text-sm">High Profit Margin (22-28%)</h3>
+                <h3 className="font-bold text-[#0A1F12] text-sm">High Profit Margin (22-28%)</h3>
                 <p className="text-xs text-neutral-600">Low wastage model supported by AI demand forecasting and daily morning farm replenishment.</p>
               </div>
             </div>
@@ -60,7 +60,7 @@ export const FranchisePage: React.FC = () => {
             <div className="bg-white border border-neutral-200 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
               <ShieldAlert className="w-6 h-6 text-emerald-600 shrink-0 mt-1" />
               <div>
-                <h3 className="font-bold text-[#08120B] text-sm">Centralized Marketing & App Demands</h3>
+                <h3 className="font-bold text-[#0A1F12] text-sm">Centralized Marketing & App Demands</h3>
                 <p className="text-xs text-neutral-600">We drive 100% app order volumes directly to your pincode dark store.</p>
               </div>
             </div>
@@ -69,13 +69,13 @@ export const FranchisePage: React.FC = () => {
 
         {/* Right Form */}
         <div className="bg-white border border-neutral-200 rounded-3xl p-6 shadow-sm">
-          <h3 className="text-lg font-bold text-[#08120B] mb-2">Apply for Franchise Partnership</h3>
+          <h3 className="text-lg font-bold text-[#0A1F12] mb-2">Apply for Franchise Partnership</h3>
           <p className="text-xs text-neutral-500 mb-6">Fill the application below. Our IGO Business Development Director will connect in 24 hours.</p>
 
           {submitted ? (
             <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl text-center space-y-3">
               <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
-              <h4 className="font-bold text-[#08120B] text-base">Application Received!</h4>
+              <h4 className="font-bold text-[#0A1F12] text-base">Application Received!</h4>
               <p className="text-xs text-neutral-600">Your franchise lead reference has been recorded in the IGO Admin Portal.</p>
             </div>
           ) : (
@@ -88,7 +88,7 @@ export const FranchisePage: React.FC = () => {
                   placeholder="e.g. Rajesh Malhotra"
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#08120B] focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
@@ -101,7 +101,7 @@ export const FranchisePage: React.FC = () => {
                     placeholder="rajesh@company.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#08120B] focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
                   />
                 </div>
                 <div>
@@ -112,7 +112,7 @@ export const FranchisePage: React.FC = () => {
                     placeholder="+91 98200 11223"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#08120B] focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
                   />
                 </div>
               </div>
@@ -126,7 +126,7 @@ export const FranchisePage: React.FC = () => {
                     placeholder="e.g. Hyderabad"
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#08120B] focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
                   />
                 </div>
                 <div>
@@ -134,7 +134,7 @@ export const FranchisePage: React.FC = () => {
                   <select
                     value={formData.budget}
                     onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                    className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#08120B] focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
                   >
                     <option>₹15 Lakhs - ₹25 Lakhs</option>
                     <option>₹25 Lakhs - ₹35 Lakhs</option>
@@ -150,7 +150,7 @@ export const FranchisePage: React.FC = () => {
                   placeholder="e.g. Gachibowli Main Road"
                   value={formData.preferredLocation}
                   onChange={(e) => setFormData({ ...formData, preferredLocation: e.target.value })}
-                  className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#08120B] focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
                 />
               </div>
 

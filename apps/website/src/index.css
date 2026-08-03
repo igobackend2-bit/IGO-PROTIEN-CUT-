@@ -1,6 +1,21 @@
 @import "tailwindcss";
 
 @layer base {
+  /* Defensive guard against horizontal page overflow on mobile — we've hit
+     this twice now (the hero heading, and this categories grid): a flex/grid
+     child without `min-w-0` can force its unbreakable-looking content wider
+     than the viewport, and without this rule the browser just grows a
+     horizontal scrollbar and silently clips whatever's at the right edge of
+     every section below it, not just the one that caused it. `min-w-0`
+     fixes are still the correct fix at the source (see HomePage.tsx hero),
+     but this stops any future/undiscovered instance of the same mistake
+     from cutting content off site-wide instead of just wrapping it.
+     `100vw` is intentionally avoided on html/body (it doesn't shrink to
+     account for a scrollbar) — width stays the default 100%. */
+  html, body {
+    overflow-x: hidden;
+  }
+
   body {
     font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }

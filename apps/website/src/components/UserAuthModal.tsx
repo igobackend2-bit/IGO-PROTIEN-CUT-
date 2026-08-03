@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, ArrowRight, CheckCircle2, ShieldCheck, Star, Eye, EyeOff, KeyRound } from 'lucide-react';
 import { StoreService } from '../lib/storage';
 import { signIn, signUp, resetPassword, fetchProfile } from '../lib/api/auth';
+
+type AuthView = 'login' | 'signup' | 'forgot' | 'reset' | 'success';
 
 interface UserAuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigate: (path: string) => void;
+  /** Opens straight into a specific view — used to drop the customer into
+   * the "set a new password" screen when they arrive via a password-reset
+   * email link, instead of always starting at the login form. */
+  initialView?: AuthView;
 }
-
-type AuthView = 'login' | 'signup' | 'forgot' | 'reset' | 'success';
 
 // Full-screen split login page — real brand photography + bold headline on
 // the left, a proper email + password sign-in form on the right (with
@@ -23,9 +27,10 @@ type AuthView = 'login' | 'signup' | 'forgot' | 'reset' | 'success';
 export const UserAuthModal: React.FC<UserAuthModalProps> = ({
   isOpen,
   onClose,
-  onNavigate
+  onNavigate,
+  initialView = 'login'
 }) => {
-  const [view, setView] = useState<AuthView>('login');
+  const [view, setView] = useState<AuthView>(initialView);
   const [successAction, setSuccessAction] = useState<'login' | 'signup'>('login');
 
   const [name, setName] = useState('');
@@ -36,13 +41,18 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
 
   const [referralCode, setReferralCode] = useState('');
 
-  const [resetToken, setResetToken] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [devHint, setDevHint] = useState<string | null>(null);
 
   const [isSending, setIsSending] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [infoMsg, setInfoMsg] = useState<string | null>(null);
+
+  // Re-sync to `initialView` every time the modal is (re)opened, so the
+  // App-level "arrived via password reset link" case reliably lands on the
+  // reset screen even if this instance was previously left on another view.
+  useEffect(() => {
+    if (isOpen) setView(initialView);
+  }, [isOpen, initialView]);
 
   if (!isOpen) return null;
 
@@ -50,7 +60,6 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
     setView(next);
     setErrorMsg(null);
     setInfoMsg(null);
-    setDevHint(null);
   };
 
   /**
@@ -144,7 +153,6 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
     if (!email.trim()) return;
 
     setErrorMsg(null);
-    setDevHint(null);
     setIsSending(true);
 
     // Supabase emails a secure recovery link. There is no manually-entered
@@ -169,7 +177,7 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!resetToken.trim() || newPassword.length < 6) return;
+    if (newPassword.length < 6) return;
 
     setErrorMsg(null);
     setIsSending(true);
@@ -213,7 +221,7 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
           referrerPolicy="no-referrer"
           className="absolute inset-0 w-full h-full object-cover scale-105 blur-[2px] opacity-70"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-[#08120B]/55 via-[#0F2A18]/40 to-[#08120B]/60" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0A1F12]/55 via-[#0F2A18]/40 to-[#0A1F12]/60" />
       </div>
 
       <div className="relative z-10 min-h-screen grid grid-cols-1 lg:grid-cols-2 backdrop-blur-2xl bg-white/[0.06]">
@@ -225,11 +233,15 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
               referrerPolicy="no-referrer"
               className="absolute inset-0 w-full h-full object-cover opacity-30"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#08120B]/85 via-[#08120B]/30 to-[#08120B]/40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0A1F12]/85 via-[#0A1F12]/30 to-[#0A1F12]/40" />
 
             <button onClick={() => onNavigate('/')} className="relative z-10 flex items-center gap-2.5 cursor-pointer w-fit">
-              <div className="w-10 h-10 rounded-xl bg-[#0F7B3A]/90 backdrop-blur-sm border border-white/20 flex items-center justify-center font-black text-white text-sm shrink-0">
-                PC
+              <div className="w-10 h-10 rounded-xl bg-white/95 backdrop-blur-sm border border-white/20 flex items-center justify-center overflow-hidden shrink-0">
+                <img
+                  src="/Images/protein-cuts-logo.jpg"
+                  alt="Protein Cuts"
+                  className="h-full w-full object-contain mix-blend-multiply scale-[1.7]"
+                />
               </div>
               <span className="text-sm font-black text-white tracking-tight">PROTEIN CUTS</span>
             </button>
@@ -264,44 +276,16 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
           </div>
 
           {/* Right — glass form panel */}
-          <div className="relative flex items-start lg:items-center justify-center px-6 py-14 sm:p-10 lg:p-12 backdrop-blur-2xl bg-[#08120B]/35">
+          <div className="relative flex items-start lg:items-center justify-center px-6 py-14 sm:p-10 lg:p-12 backdrop-blur-2xl bg-[#0A1F12]/35">
             <button
               onClick={onClose}
-              className="absolute top-5 right-5 sm:top-8 sm:right-8 text-white/50 hover:text-white cursor-pointer p-1.5 rounded-lg hover:bg-white/10 transition z-10"
+              className="absolute top-5 right-6 sm:top-8 sm:right-10 text-white/50 hover:text-white cursor-pointer p-1.5 rounded-lg hover:bg-white/10 transition z-10 outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
               aria-label="Close"
             >
               <X className="w-6 h-6" />
             </button>
 
             <div className="relative z-10 w-full max-w-md">
-              {/* Wordmark */}
-              <div className="flex items-center gap-1 mb-8">
-                <span className="text-3xl font-black text-white tracking-tight">Sign</span>
-                <span className="text-3xl font-black text-white tracking-tight">i</span>
-                <span className="text-3xl font-black text-white bg-[#0F7B3A] w-8 h-8 rounded-lg flex items-center justify-center leading-none shadow-lg shadow-emerald-900/30">n</span>
-              </div>
-
-              {(view === 'login' || view === 'signup') && (
-                <div className="grid grid-cols-2 gap-2 bg-white/10 border border-white/15 backdrop-blur-sm rounded-2xl p-1.5 mb-8">
-                  <button
-                    onClick={() => switchView('login')}
-                    className={`py-2.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer ${
-                      view === 'login' ? 'bg-white text-[#08120B] shadow-sm' : 'text-white/60 hover:text-white'
-                    }`}
-                  >
-                    Existing Customer
-                  </button>
-                  <button
-                    onClick={() => switchView('signup')}
-                    className={`py-2.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer ${
-                      view === 'signup' ? 'bg-white text-[#08120B] shadow-sm' : 'text-white/60 hover:text-white'
-                    }`}
-                  >
-                    New Customer
-                  </button>
-                </div>
-              )}
-
               {infoMsg && view === 'login' && (
                 <div className="text-xs text-emerald-50 bg-emerald-500/15 border border-emerald-400/30 backdrop-blur-sm rounded-xl p-3.5 mb-5 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 shrink-0" /> {infoMsg}
@@ -462,7 +446,21 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
                     </div>
 
                     {errorMsg && (
-                      <div className="text-xs text-red-50 bg-red-500/15 border border-red-400/30 backdrop-blur-sm rounded-xl p-3.5">{errorMsg}</div>
+                      <div className="text-xs text-red-50 bg-red-500/15 border border-red-400/30 backdrop-blur-sm rounded-xl p-3.5">
+                        {errorMsg}
+                        {/already exists/i.test(errorMsg) && (
+                          <>
+                            {' '}
+                            <button
+                              type="button"
+                              onClick={() => switchView('login')}
+                              className="font-bold underline underline-offset-2 hover:text-white cursor-pointer"
+                            >
+                              Sign in now
+                            </button>
+                          </>
+                        )}
+                      </div>
                     )}
 
                     <button
@@ -495,7 +493,7 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
               {view === 'forgot' && (
                 <div>
                   <h2 className="text-2xl sm:text-3xl font-black text-white mb-1.5 tracking-tight">Reset Your Password</h2>
-                  <p className="text-sm text-white/60 mb-7">Enter your account email and we'll send you a reset code.</p>
+                  <p className="text-sm text-white/60 mb-7">Enter your account email and we'll send you a reset link.</p>
 
                   <form onSubmit={handleForgotPassword} className="space-y-5">
                     <div>
@@ -522,7 +520,7 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
                       {isSending ? (
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <>Send Reset Code <KeyRound className="w-4 h-4" /></>
+                        <>Send Reset Link <KeyRound className="w-4 h-4" /></>
                       )}
                     </button>
 
@@ -537,31 +535,19 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
                 </div>
               )}
 
-              {/* RESET PASSWORD */}
+              {/* RESET PASSWORD — reached only via a Supabase password-reset
+                  email link, which already signs the customer in with a
+                  temporary recovery session (see onPasswordRecovery in
+                  auth.ts). No code needs to be typed; updateUser() applies
+                  directly against that session. */}
               {view === 'reset' && (
                 <div>
-                  <h2 className="text-2xl sm:text-3xl font-black text-white mb-1.5 tracking-tight">Enter Reset Code</h2>
+                  <h2 className="text-2xl sm:text-3xl font-black text-white mb-1.5 tracking-tight">Set a New Password</h2>
                   <p className="text-sm text-white/60 mb-2">
-                    We sent a reset code for <strong className="text-white">{email}</strong>.
+                    You're verified — just choose a new password to finish resetting your account.
                   </p>
-                  {devHint && (
-                    <p className="text-xs text-white/90 bg-white/10 border border-white/20 backdrop-blur-sm rounded-xl p-3.5 mb-4 mt-4">
-                      No email provider configured yet — demo code for testing: <strong className="tracking-widest">{devHint}</strong>
-                    </p>
-                  )}
 
                   <form onSubmit={handleResetPassword} className="space-y-5 mt-6">
-                    <div>
-                      <label className="block text-sm font-bold text-white/90 mb-2">Reset Code</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. A1B2C3D4"
-                        value={resetToken}
-                        onChange={(e) => setResetToken(e.target.value)}
-                        className={`${inputClasses} text-center text-lg font-black tracking-widest uppercase`}
-                      />
-                    </div>
-
                     <div>
                       <label className="block text-sm font-bold text-white/90 mb-2">New Password</label>
                       <input

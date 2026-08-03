@@ -46,7 +46,7 @@ export const GiftingPage: React.FC<GiftingPageProps> = ({ products, onSelectProd
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
       {/* Hero */}
-      <div className="bg-[#08120B] border border-black rounded-3xl p-8 sm:p-12 text-center max-w-3xl mx-auto space-y-3 text-white shadow-2xl">
+      <div className="bg-[#0A1F12] rounded-3xl p-8 sm:p-12 text-center max-w-3xl mx-auto space-y-3 text-white shadow-lg shadow-emerald-950/20">
         <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest flex items-center justify-center gap-1.5">
           <Gift className="w-4 h-4" /> IGO GIFTING
         </span>
@@ -65,7 +65,7 @@ export const GiftingPage: React.FC<GiftingPageProps> = ({ products, onSelectProd
             className={`px-4 py-2 rounded-full text-xs font-bold border transition cursor-pointer flex items-center gap-1.5 ${
               selectedOccasion === occ
                 ? 'bg-[#0F7B3A] border-[#0F7B3A] text-white shadow'
-                : 'bg-white border-neutral-200 text-neutral-600 hover:border-emerald-400 hover:text-[#08120B]'
+                : 'bg-white border-neutral-200 text-neutral-600 hover:border-emerald-400 hover:text-[#0A1F12]'
             }`}
           >
             {occ === 'Corporate' && <Briefcase className="w-3.5 h-3.5" />}
@@ -94,7 +94,7 @@ export const GiftingPage: React.FC<GiftingPageProps> = ({ products, onSelectProd
       <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex items-start gap-3">
         <Briefcase className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
         <div>
-          <div className="text-sm font-bold text-[#08120B]">Bulk Corporate Gifting?</div>
+          <div className="text-sm font-bold text-[#0A1F12]">Bulk Corporate Gifting?</div>
           <p className="text-xs text-neutral-600 mt-1">
             Sending gift boxes to employees or clients at scale? Our{' '}
             <button onClick={() => onNavigate('/b2b')} className="font-bold text-emerald-700 underline cursor-pointer">
@@ -107,7 +107,7 @@ export const GiftingPage: React.FC<GiftingPageProps> = ({ products, onSelectProd
 
       {/* Personalized Gift Message */}
       <div className="max-w-xl mx-auto bg-white border border-neutral-200 rounded-3xl p-6 shadow-sm">
-        <h3 className="text-lg font-bold text-[#08120B] mb-1 flex items-center gap-2">
+        <h3 className="text-lg font-bold text-[#0A1F12] mb-1 flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-emerald-600" /> Add a Personalized Gift Note
         </h3>
         <p className="text-xs text-neutral-500 mb-5">
@@ -117,7 +117,7 @@ export const GiftingPage: React.FC<GiftingPageProps> = ({ products, onSelectProd
         {noteSaved ? (
           <div className="bg-emerald-50 border border-emerald-200 p-5 rounded-2xl text-center space-y-2">
             <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-            <p className="text-xs font-bold text-[#08120B]">Gift note saved! It'll show up in your cart.</p>
+            <p className="text-xs font-bold text-[#0A1F12]">Gift note saved! It'll show up in your cart.</p>
           </div>
         ) : (
           <form onSubmit={handleSaveNote} className="space-y-4 text-xs">
@@ -129,7 +129,7 @@ export const GiftingPage: React.FC<GiftingPageProps> = ({ products, onSelectProd
                 placeholder="e.g. Priya"
                 value={recipientName}
                 onChange={(e) => setRecipientName(e.target.value)}
-                className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#08120B] focus:outline-none focus:border-emerald-500"
+                className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
               />
             </div>
             <div>
@@ -140,7 +140,7 @@ export const GiftingPage: React.FC<GiftingPageProps> = ({ products, onSelectProd
                 placeholder="Wishing you a house full of good food and better memories!"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#08120B] focus:outline-none focus:border-emerald-500"
+                className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
               />
             </div>
             <button

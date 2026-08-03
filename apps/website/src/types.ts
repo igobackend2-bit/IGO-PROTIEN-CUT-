@@ -43,6 +43,10 @@ export interface ProductReview {
   comment: string;
   verifiedPurchase: boolean;
   userAvatar?: string;
+  // Present when the review was loaded for the signed-in customer's own PDP
+  // visit (fetchProduct includes it) — used to detect "is this my review?"
+  // without a second round trip.
+  userId?: string;
 }
 
 export interface Product {
@@ -177,8 +181,12 @@ export interface SubscriptionPlan {
   id: string;
   title: string;
   tagline: string;
-  category: 'Fitness' | 'Family' | 'Custom';
-  frequency: 'Daily' | 'Weekly' | 'Monthly';
+  // Widened from a literal union to `string`: the admin-editable
+  // `plans.subscriptions` content block (src/lib/hooks/useSiteContent.ts) can
+  // contain any category/frequency an admin types, and this type is shared by
+  // both the hardcoded fallback and the live CMS payload.
+  category: string;
+  frequency: string;
   itemsIncluded: string[];
   pricePerMonth: number;
   originalPrice: number;

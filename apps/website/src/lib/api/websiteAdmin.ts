@@ -347,6 +347,110 @@ export async function deleteLead(id: string): Promise<Result> {
   return { ok: true };
 }
 
+// ── Reviews ─────────────────────────────────────────────────────────────────
+//
+// `product_reviews` is an app-owned table (its verified-purchase trigger
+// lives in the Flutter app's phase12_reviews.sql), not one of the igo_*
+// tables this file otherwise manages — so unlike the four above, these calls
+// aren't guaranteed an admin RLS policy by anything in this repo's
+// migrations. They're written the same honest way as the rest of this file
+// regardless: attempt the write, surface whatever Postgres/RLS says back
+// through `Result.error` rather than assuming success.
+
+export interface ReviewRow {
+  id: string;
+  product_id: string;
+  product_name: string | null;
+  rating: number;
+  comment: string | null;
+  is_hidden: boolean;
+  created_at: string;
+}
+
+export async function listAllReviews(): Promise<Result<ReviewRow[]>> {
+  if (!isSupabaseConfigured || !supabase) return noBackend();
+  const { data, error } = await supabase
+    .from('product_reviews')
+    .select('id, product_id, rating, comment, is_hidden, created_at, products ( name )')
+    .order('created_at', { ascending: false });
+  if (error) return { ok: false, error: error.message };
+  const rows = (data ?? []) as unknown as Array<{
+    id: string;
+    product_id: string;
+    rating: number;
+    comment: string | null;
+    is_hidden: boolean;
+    created_at: string;
+    products: { name: string } | { name: string }[] | null;
+  }>;
+  return {
+    ok: true,
+    data: rows.map((r) => ({
+      id: r.id,
+      product_id: r.product_id,
+      product_name: Array.isArray(r.products) ? (r.products[0]?.name ?? null) : (r.products?.name ?? null),
+      rating: r.rating,
+      comment: r.comment,
+      is_hidden: r.is_hidden,
+      created_at: r.created_at
+    }))
+  };
+}
+
+/**
+ * IMPORTANT — Supabase RLS gotcha: an `update`/`delete` whose row is excluded
+ * by a row-level-security policy matches ZERO rows and still comes back with
+ * `error: null` — Postgres has nothing to complain about, it just filtered
+ * the row out before your statement ever touched it. Checking only `error`
+ * (as this file's Leads functions do, safely, because `igo_leads` has an
+ * explicit admin RLS policy from 0008_website_admin_policies.sql) would make
+ * a blocked Approve/Reject/Delete report success while changing nothing —
+ * exactly the "admin clicked Approve, review still doesn't show" symptom.
+ * `product_reviews` has no such guarantee here (see the file-level comment
+ * above), so these three ask Postgres to hand back the row it touched via
+ * `.select().single()` and treat "no row returned" as a real failure.
+ */
+async function mutateReviewRow(id: string, mutation: 'approve' | 'reject' | 'delete'): Promise<Result> {
+  if (!isSupabaseConfigured || !supabase) return noBackend();
+
+  const query =
+    mutation === 'delete'
+      ? supabase.from('product_reviews').delete().eq('id', id).select('id')
+      : supabase
+          .from('product_reviews')
+          .update({ is_hidden: mutation === 'reject' })
+          .eq('id', id)
+          .select('id');
+
+  const { data, error } = await query;
+  if (error) return { ok: false, error: error.message };
+  if (!data || data.length === 0) {
+    return {
+      ok: false,
+      error:
+        'Nothing was changed — your admin account may not have update/delete permission on ' +
+        'product_reviews (its RLS policies live in the app repo, not this website). Check with ' +
+        'whoever owns that table.'
+    };
+  }
+  return { ok: true };
+}
+
+/** Approve = make visible on the live product page. */
+export async function approveReview(id: string): Promise<Result> {
+  return mutateReviewRow(id, 'approve');
+}
+
+/** Reject = keep it hidden (undoes an accidental approve; never shows on site). */
+export async function rejectReview(id: string): Promise<Result> {
+  return mutateReviewRow(id, 'reject');
+}
+
+/** Admin hard-delete — for reviews that shouldn't exist at all (spam, abuse). */
+export async function deleteReview(id: string): Promise<Result> {
+  return mutateReviewRow(id, 'delete');
+}
+
 /** Leads as CSV, for the export button. */
 export function leadsToCsv(leads: LeadRow[]): string {
   const headers = [
@@ -381,4 +485,37 @@ export function leadsToCsv(leads: LeadRow[]): string {
       .join(',')
   );
   return [headers.join(','), ...rows].join('\n');
+}
+
+// ── Delivery / order feedback ────────────────────────────────────────────────
+//
+// `igo_order_feedback` is a brand-new website-owned table (see
+// 0018_order_feedback.sql) — unlike the Reviews section above, this one IS
+// guaranteed an admin RLS policy from this repo's own migration, so a plain
+// `if (error)` check is safe here (no silent zero-row update risk).
+
+export interface OrderFeedbackRow {
+  id: string;
+  order_id: string;
+  delivery_rating: number;
+  comment: string | null;
+  status: 'new' | 'reviewed';
+  created_at: string;
+}
+
+export async function listAllOrderFeedback(): Promise<Result<OrderFeedbackRow[]>> {
+  if (!isSupabaseConfigured || !supabase) return noBackend();
+  const { data, error } = await supabase
+    .from('igo_order_feedback')
+    .select('id, order_id, delivery_rating, comment, status, created_at')
+    .order('created_at', { ascending: false });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, data: (data ?? []) as unknown as OrderFeedbackRow[] };
+}
+
+export async function markFeedbackReviewed(id: string): Promise<Result> {
+  if (!isSupabaseConfigured || !supabase) return noBackend();
+  const { error } = await supabase.from('igo_order_feedback').update({ status: 'reviewed' }).eq('id', id);
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
 }

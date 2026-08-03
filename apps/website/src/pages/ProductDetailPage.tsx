@@ -34,7 +34,7 @@ import { FadeImage } from '../components/FadeImage';
 import { BULK_TIERS, getActiveBulkTier, getBulkUnitPrice, getBulkLineTotal } from '../lib/pricing';
 import { INITIAL_RECIPES } from '../data/mockData';
 import { fetchProduct } from '../lib/api/catalog';
-import { submitReview } from '../lib/api/reviews';
+import { submitReview, fetchMyReview, deleteMyReview, MyReview } from '../lib/api/reviews';
 
 const CUT_PREFERENCES_BY_CATEGORY: Record<string, string[]> = {
   chicken: ['Curry Cut', 'Boneless Cubes', 'Whole (Skinless)', 'Biryani Cut'],
@@ -102,7 +102,11 @@ interface FaqEntry {
 interface ProductDetailPageProps {
   product: Product;
   allProducts: Product[];
-  onAddToCart: (product: Product, weight: ProductWeightOption, quantity: number) => void;
+  // 4th param is optional so every other caller of the same shared
+  // App.tsx `handleAddToCart` (ProductCard, BrowseProductCard, category/search
+  // pages, etc.) keeps compiling unchanged — only this page ever has a
+  // "Preferred Cut Style" picker to pass through.
+  onAddToCart: (product: Product, weight: ProductWeightOption, quantity: number, cutPreference?: string) => void;
   onSelectProduct: (product: Product) => void;
   onNavigate: (path: string) => void;
 }
@@ -118,12 +122,31 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(product.image);
   const [isWishlisted, setIsWishlisted] = useState(() => StoreService.getWishlist().includes(product.id));
+
+  // Keeps the heart icon in sync when the same product's wishlist state is
+  // toggled elsewhere (a card in "You Might Also Like"/"Recently Viewed" on
+  // this same page, or a different tab) — also re-checks on product.id
+  // change since this page is reused for every product, not remounted.
+  useEffect(() => {
+    const sync = () => setIsWishlisted(StoreService.getWishlist().includes(product.id));
+    sync();
+    window.addEventListener('protein_cuts_wishlist_updated', sync);
+    return () => window.removeEventListener('protein_cuts_wishlist_updated', sync);
+  }, [product.id]);
+
   const [newReviewComment, setNewReviewComment] = useState('');
   const [newReviewRating, setNewReviewRating] = useState(5);
   const [reviewsList, setReviewsList] = useState(product.reviews || []);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [reviewSuccess, setReviewSuccess] = useState(false);
+  // The current customer's own review for this product (any product they've
+  // already reviewed), so the "Write a Verified Review" form doesn't invite a
+  // second submission. Reviews go through admin approval now (see
+  // reviews.ts submitReview), so this also tells them whether theirs is
+  // still pending or already live.
+  const [myReview, setMyReview] = useState<MyReview | null>(null);
+  const [isDeletingReview, setIsDeletingReview] = useState(false);
 
   const cutOptions = CUT_PREFERENCES_BY_CATEGORY[product.category] || [];
   const [selectedCut, setSelectedCut] = useState(cutOptions[0] || '');
@@ -241,11 +264,30 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
     // fetch pipeline uses, just scoped to one product.
     const fresh = await fetchProduct(product.id);
     if (fresh) setReviewsList(fresh.reviews);
+    // The just-submitted review is hidden until an admin approves it, so it
+    // won't appear in `fresh.reviews` above — re-read it separately to swap
+    // the form for the "pending approval" state immediately.
+    const mine = await fetchMyReview(product.id);
+    if (mine) setMyReview(mine);
 
     setNewReviewComment('');
     setNewReviewRating(5);
     setReviewSuccess(true);
     setIsSubmittingReview(false);
+  };
+
+  const handleDeleteMyReview = async () => {
+    if (!myReview || isDeletingReview) return;
+    setIsDeletingReview(true);
+    const result = await deleteMyReview(myReview.id);
+    if (result.ok) {
+      setMyReview(null);
+      setReviewsList((list) => list.filter((r) => r.id !== myReview.id));
+      setReviewSuccess(false);
+    } else {
+      setReviewError(result.error ?? 'Could not delete your review. Please try again.');
+    }
+    setIsDeletingReview(false);
   };
 
   // Real recently-viewed tracking — records this product view, then reads
@@ -261,8 +303,29 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   // page, the same way a submitted review refreshes them above.
   useEffect(() => {
     let cancelled = false;
+
+    // Reset every piece of review-form state up front — without this, a
+    // success/error banner, a half-typed comment, or a chosen star rating
+    // left over from the PREVIOUS product's form was staying visible for a
+    // beat (or longer, if the customer never touched the form) after
+    // navigating straight to a new product.
+    setReviewsList(product.reviews || []);
+    setNewReviewComment('');
+    setNewReviewRating(5);
+    setReviewError(null);
+    setReviewSuccess(false);
+    setIsSubmittingReview(false);
+    setMyReview(null);
+
     fetchProduct(product.id).then((fresh) => {
-      if (!cancelled && fresh && fresh.reviews.length > 0) setReviewsList(fresh.reviews);
+      // Always take the fresh read as the source of truth, including the
+      // empty-array case — previously this only overwrote when the new
+      // product had reviews, so a product with zero reviews kept showing
+      // the last-viewed product's review list.
+      if (!cancelled && fresh) setReviewsList(fresh.reviews);
+    });
+    fetchMyReview(product.id).then((mine) => {
+      if (!cancelled) setMyReview(mine);
     });
     return () => {
       cancelled = true;
@@ -283,7 +346,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
     selectedWeight.originalPrice + frequentlyBoughtWith.reduce((sum, p) => sum + p.weightOptions[0].originalPrice, 0);
 
   const handleAddBundle = () => {
-    onAddToCart(product, selectedWeight, 1);
+    onAddToCart(product, selectedWeight, 1, selectedCut || undefined);
     frequentlyBoughtWith.forEach((p) => onAddToCart(p, p.weightOptions[0], 1));
     setBundleAdded(true);
     setTimeout(() => setBundleAdded(false), 1800);
@@ -305,7 +368,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           {product.category}
         </button>
         <ChevronRight className="w-3.5 h-3.5" />
-        <span className="text-[#08120B] font-semibold truncate">{product.name}</span>
+        <span className="text-[#0A1F12] font-semibold truncate">{product.name}</span>
       </div>
 
       {/* Trust Badges Strip */}
@@ -319,7 +382,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           <div key={b.label} className="flex items-center gap-2 bg-emerald-50/60 border border-emerald-100 rounded-2xl px-3 py-2.5">
             <b.icon className="w-5 h-5 text-emerald-700 shrink-0" />
             <div>
-              <div className="text-[11px] font-bold text-[#08120B] leading-tight">{b.label}</div>
+              <div className="text-[11px] font-bold text-[#0A1F12] leading-tight">{b.label}</div>
               <div className="text-[10px] text-neutral-500 leading-tight">{b.sub}</div>
             </div>
           </div>
@@ -359,7 +422,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                   activeImage === product.image ? 'border-emerald-500' : 'border-neutral-200 opacity-60'
                 }`}
               >
-                <img src={product.image} alt="thumb" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                <FadeImage src={product.image} alt="thumb" className="w-full h-full object-cover" />
               </button>
               {product.galleryImages.map((img, idx) => (
                 <button
@@ -369,7 +432,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                     activeImage === img ? 'border-emerald-500' : 'border-neutral-200 opacity-60'
                   }`}
                 >
-                  <img src={img} alt="thumb" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                  <FadeImage src={img} alt="thumb" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -384,7 +447,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                 {product.boneType}
               </span>
               {reviewsList.length > 0 ? (
-                <div className="flex items-center gap-1 text-[#08120B] text-xs font-black">
+                <div className="flex items-center gap-1 text-[#0A1F12] text-xs font-black">
                   <Star className="w-4 h-4 fill-emerald-600 text-emerald-600" />
                   <span>{product.rating}</span>
                   <span className="text-neutral-500 font-normal">({reviewsList.length} reviews)</span>
@@ -397,7 +460,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               )}
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight leading-snug">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight leading-snug">
               {product.name}
             </h1>
             <p className="text-xs sm:text-sm text-neutral-600 mt-2 leading-relaxed">
@@ -421,7 +484,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                 </div>
                 <ul className="space-y-1.5">
                   {comboItems.map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-xs font-semibold text-[#08120B]">
+                    <li key={item} className="flex items-center gap-2 text-xs font-semibold text-[#0A1F12]">
                       <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> {item}
                     </li>
                   ))}
@@ -435,7 +498,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           <div className="bg-white border border-neutral-200 rounded-2xl p-4 sm:p-5 shadow-sm">
             <div className="flex items-center gap-1.5 mb-4">
               <ListChecks className="w-4 h-4 text-emerald-600" />
-              <span className="text-xs font-bold text-[#08120B] uppercase tracking-wider">Key Features</span>
+              <span className="text-xs font-bold text-[#0A1F12] uppercase tracking-wider">Key Features</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
               {keyFeatures.map((f) => {
@@ -447,7 +510,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                     </div>
                     <div className="min-w-0">
                       <div className="text-[10px] text-neutral-400 uppercase tracking-wider leading-tight">{f.label}</div>
-                      <div className="text-xs font-bold text-[#08120B] leading-tight mt-0.5 truncate">{f.value}</div>
+                      <div className="text-xs font-bold text-[#0A1F12] leading-tight mt-0.5 truncate">{f.value}</div>
                     </div>
                   </div>
                 );
@@ -484,7 +547,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                     )}
 
                     <div className="pr-6">
-                      <div className="text-sm font-black text-[#08120B]">{opt.label}</div>
+                      <div className="text-sm font-black text-[#0A1F12]">{opt.label}</div>
                       <div className="text-[11px] text-neutral-500 mt-1">{opt.servings} • {opt.pieces || 'Hand Trimmed'}</div>
                       {opt.netWeightGrams && (
                         <div className="text-[10px] text-neutral-400 mt-0.5">
@@ -573,7 +636,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           <div className="pt-4 border-t border-neutral-200 flex items-center justify-between gap-4">
             <div>
               <div className="text-xs text-neutral-500">Total Price</div>
-              <div className="text-2xl font-black text-[#08120B]">
+              <div className="text-2xl font-black text-[#0A1F12]">
                 ₹{bulkTotal}
                 <span className="text-xs text-neutral-400 font-normal ml-2">Incl. all taxes</span>
               </div>
@@ -591,7 +654,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                 >
                   -
                 </button>
-                <span className="px-3 font-bold text-sm text-[#08120B]">{quantity}</span>
+                <span className="px-3 font-bold text-sm text-[#0A1F12]">{quantity}</span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
                   className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 font-bold hover:bg-emerald-100 transition"
@@ -601,7 +664,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               </div>
 
               <button
-                onClick={() => onAddToCart(product, selectedWeight, quantity)}
+                onClick={() => onAddToCart(product, selectedWeight, quantity, selectedCut || undefined)}
                 className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-black px-6 py-3.5 rounded-2xl text-xs uppercase tracking-wider flex items-center gap-2 transition cursor-pointer shadow-xl shadow-emerald-900/20"
               >
                 <ShoppingBag className="w-4 h-4" /> Add to Cart
@@ -615,7 +678,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           a merchandising bundle rather than another plain white card, with
           each item on its own white card for clear separation. */}
       {frequentlyBoughtWith.length > 0 && (
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0F7B3A] to-[#08120B] p-6 sm:p-8 shadow-xl shadow-emerald-950/20">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0F7B3A] to-[#0A1F12] p-6 sm:p-8 shadow-xl shadow-emerald-950/20">
           <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{
             backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
             backgroundSize: '28px 28px'
@@ -637,13 +700,15 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                   )}
                   <div className="relative flex items-center gap-3 bg-white rounded-2xl p-3 w-full sm:w-auto shadow-md">
                     {idx === 0 && (
-                      <span className="absolute -top-2 -left-2 bg-[#D4AF37] text-[#08120B] text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide shadow">
+                      <span className="absolute -top-2 -left-2 bg-[#D4AF37] text-[#0A1F12] text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide shadow">
                         This Item
                       </span>
                     )}
-                    <img src={p.image} alt={p.name} referrerPolicy="no-referrer" className="w-14 h-14 rounded-xl object-cover shrink-0" />
+                    <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
+                      <FadeImage src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                    </div>
                     <div className="min-w-0">
-                      <div className="text-xs font-bold text-[#08120B] line-clamp-1">{p.name}</div>
+                      <div className="text-xs font-bold text-[#0A1F12] line-clamp-1">{p.name}</div>
                       <div className="text-xs text-emerald-700 font-black">
                         ₹{idx === 0 ? selectedWeight.price : p.weightOptions[0].price}
                       </div>
@@ -663,7 +728,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                 <button
                   onClick={handleAddBundle}
                   className={`mt-2.5 w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer shadow-lg ${
-                    bundleAdded ? 'bg-emerald-400 text-[#08120B]' : 'bg-white hover:bg-emerald-50 text-[#0F7B3A]'
+                    bundleAdded ? 'bg-emerald-400 text-[#0A1F12]' : 'bg-white hover:bg-emerald-50 text-[#0F7B3A]'
                   }`}
                 >
                   {bundleAdded ? 'Added All 3!' : 'Add All to Cart'}
@@ -679,7 +744,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
         {/* Nutrition Card — amber accent so it reads as its own topic, not
             a repeat of the green Key Features card above it. */}
         <div className="bg-white border border-neutral-200 border-t-4 border-t-orange-400 rounded-3xl p-6 space-y-4 shadow-sm">
-          <h3 className="text-base font-black text-[#08120B] uppercase tracking-wider flex items-center gap-2">
+          <h3 className="text-base font-black text-[#0A1F12] uppercase tracking-wider flex items-center gap-2">
             <span className="w-8 h-8 rounded-lg bg-orange-50 border border-orange-100 flex items-center justify-center shrink-0">
               <Flame className="w-4 h-4 text-orange-500" />
             </span>
@@ -691,15 +756,15 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               <div className="text-[10px] text-neutral-500 font-medium uppercase">Protein</div>
             </div>
             <div className="bg-neutral-50 border border-neutral-200 p-3 rounded-2xl">
-              <div className="text-lg font-black text-[#08120B]">{product.nutrition.calories}</div>
+              <div className="text-lg font-black text-[#0A1F12]">{product.nutrition.calories}</div>
               <div className="text-[10px] text-neutral-500 font-medium uppercase">Energy</div>
             </div>
             <div className="bg-neutral-50 border border-neutral-200 p-3 rounded-2xl">
-              <div className="text-lg font-black text-[#08120B]">{product.nutrition.fat}</div>
+              <div className="text-lg font-black text-[#0A1F12]">{product.nutrition.fat}</div>
               <div className="text-[10px] text-neutral-500 font-medium uppercase">Total Fat</div>
             </div>
             <div className="bg-neutral-50 border border-neutral-200 p-3 rounded-2xl">
-              <div className="text-lg font-black text-[#08120B]">{product.nutrition.carbs}</div>
+              <div className="text-lg font-black text-[#0A1F12]">{product.nutrition.carbs}</div>
               <div className="text-[10px] text-neutral-500 font-medium uppercase">Carbs</div>
             </div>
           </div>
@@ -708,17 +773,17 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
         {/* Storage Instructions Card — sky-blue accent (cold-chain/info cue),
             distinct from the amber Nutrition card beside it. */}
         <div className="bg-white border border-neutral-200 border-t-4 border-t-sky-400 rounded-3xl p-6 space-y-3 shadow-sm">
-          <h3 className="text-base font-black text-[#08120B] uppercase tracking-wider flex items-center gap-2">
+          <h3 className="text-base font-black text-[#0A1F12] uppercase tracking-wider flex items-center gap-2">
             <span className="w-8 h-8 rounded-lg bg-sky-50 border border-sky-100 flex items-center justify-center shrink-0">
               <Clock className="w-4 h-4 text-sky-500" />
             </span>
             Storage & Cooking Tips
           </h3>
           <p className="text-xs text-neutral-600 leading-relaxed">
-            <strong className="text-[#08120B]">Storage:</strong> {product.storageInstructions}
+            <strong className="text-[#0A1F12]">Storage:</strong> {product.storageInstructions}
           </p>
           <p className="text-xs text-neutral-600 leading-relaxed">
-            <strong className="text-[#08120B]">Chef Note:</strong> {product.recipePairing || 'Ideal for grilling, slow curry, or high-protein stir frying.'}
+            <strong className="text-[#0A1F12]">Chef Note:</strong> {product.recipePairing || 'Ideal for grilling, slow curry, or high-protein stir frying.'}
           </p>
         </div>
       </div>
@@ -729,7 +794,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
       <div className="bg-white border border-neutral-200 border-t-4 border-t-[#D4AF37] rounded-3xl p-8 space-y-6 shadow-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200">
           <div>
-            <h3 className="text-2xl font-black text-[#08120B] tracking-tight flex items-center gap-2">
+            <h3 className="text-2xl font-black text-[#0A1F12] tracking-tight flex items-center gap-2">
               <span className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
                 <Star className="w-4 h-4 text-[#D4AF37] fill-[#D4AF37]" />
               </span>
@@ -740,7 +805,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
           {reviewsList.length > 0 ? (
             <div className="flex items-center gap-3">
-              <div className="text-3xl font-black text-[#08120B]">{product.rating}</div>
+              <div className="text-3xl font-black text-[#0A1F12]">{product.rating}</div>
               <div>
                 <div className="flex text-emerald-600 text-xs">
                   {'★'.repeat(Math.floor(product.rating))}
@@ -755,45 +820,81 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           )}
         </div>
 
-        {/* Add Review Form */}
-        <form onSubmit={handleAddReview} className="bg-neutral-50 border border-neutral-200 p-4 rounded-2xl space-y-3">
-          <div className="text-xs font-bold text-[#08120B]">Write a Verified Review</div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-neutral-500">Rating:</span>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                onClick={() => setNewReviewRating(star)}
-                className={`text-lg transition ${star <= newReviewRating ? 'text-emerald-600' : 'text-neutral-300'}`}
-              >
-                ★
-              </button>
-            ))}
-          </div>
-          <textarea
-            placeholder="Share your experience regarding cut precision, freshness, and packaging..."
-            value={newReviewComment}
-            onChange={(e) => setNewReviewComment(e.target.value)}
-            className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-xs text-[#08120B] focus:outline-none focus:border-emerald-500"
-            rows={2}
-          />
-          {reviewError && (
-            <div className="bg-[#08120B] border border-black rounded-xl p-2.5 text-[11px] text-white">{reviewError}</div>
-          )}
-          {reviewSuccess && (
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 text-[11px] text-emerald-700 font-semibold">
-              Thanks — your review is live.
+        {/* Add Review Form — hidden once this customer already has a review
+            for this product, so they can't submit a second one. */}
+        {myReview ? (
+          <div className="bg-neutral-50 border border-neutral-200 p-4 rounded-2xl space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="text-xs font-bold text-[#0A1F12]">Your Review</div>
+              {myReview.isHidden ? (
+                <span className="bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                  Pending Approval
+                </span>
+              ) : (
+                <span className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> Live
+                </span>
+              )}
             </div>
-          )}
-          <button
-            type="submit"
-            disabled={isSubmittingReview}
-            className="bg-[#0F7B3A] hover:bg-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold px-4 py-2 rounded-xl text-xs uppercase"
-          >
-            {isSubmittingReview ? 'Submitting…' : 'Submit Review'}
-          </button>
-        </form>
+            <div className="text-emerald-600 text-xs">{'★'.repeat(myReview.rating)}</div>
+            <p className="text-xs text-neutral-600 leading-relaxed">{myReview.comment}</p>
+            {myReview.isHidden && (
+              <p className="text-[11px] text-neutral-500">
+                Our team reviews new submissions before they go live — thanks for your patience.
+              </p>
+            )}
+            {reviewError && (
+              <div className="bg-[#0A1F12] border border-black rounded-xl p-2.5 text-[11px] text-white">{reviewError}</div>
+            )}
+            <button
+              type="button"
+              onClick={handleDeleteMyReview}
+              disabled={isDeletingReview}
+              className="text-[11px] font-bold text-red-600 hover:text-red-700 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isDeletingReview ? 'Deleting…' : 'Delete my review'}
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleAddReview} className="bg-neutral-50 border border-neutral-200 p-4 rounded-2xl space-y-3">
+            <div className="text-xs font-bold text-[#0A1F12]">Write a Verified Review</div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-neutral-500">Rating:</span>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setNewReviewRating(star)}
+                  className={`text-lg transition ${star <= newReviewRating ? 'text-emerald-600' : 'text-neutral-300'}`}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+            <textarea
+              placeholder="Share your experience regarding cut precision, freshness, and packaging..."
+              value={newReviewComment}
+              onChange={(e) => setNewReviewComment(e.target.value)}
+              className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-xs text-[#0A1F12] focus:outline-none focus:border-emerald-500"
+              rows={2}
+            />
+            {reviewError && (
+              <div className="bg-[#0A1F12] border border-black rounded-xl p-2.5 text-[11px] text-white">{reviewError}</div>
+            )}
+            {reviewSuccess && (
+              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 text-[11px] text-emerald-700 font-semibold">
+                Thanks — your review is submitted and pending approval.
+              </div>
+            )}
+            <button
+              type="submit"
+              disabled={isSubmittingReview}
+              className="bg-[#0F7B3A] hover:bg-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold px-4 py-2 rounded-xl text-xs uppercase"
+            >
+              {isSubmittingReview ? 'Submitting…' : 'Submit Review'}
+            </button>
+          </form>
+        )}
 
         {/* Reviews List */}
         <div className="space-y-4">
@@ -801,7 +902,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             <div key={rev.id} className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-[#08120B]">{rev.userName}</span>
+                  <span className="font-bold text-[#0A1F12]">{rev.userName}</span>
                   {rev.verifiedPurchase && (
                     <span className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Verified Purchase
@@ -831,7 +932,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               <MessageCircleQuestion className="w-4 h-4 text-violet-500" />
             </span>
             <span className="text-left min-w-0">
-              <span className="block text-base sm:text-lg font-black text-[#08120B] tracking-tight">
+              <span className="block text-base sm:text-lg font-black text-[#0A1F12] tracking-tight">
                 Have a Question About This Product?
               </span>
               <span className="block text-xs text-neutral-500 mt-0.5">
@@ -871,7 +972,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           <div className="px-6 sm:px-8 pb-8 space-y-8 border-t border-neutral-100 pt-6">
             {/* Q&A Section */}
             <div className="space-y-6">
-              <h3 className="text-sm font-black text-[#08120B] uppercase tracking-wider">Questions &amp; Answers</h3>
+              <h3 className="text-sm font-black text-[#0A1F12] uppercase tracking-wider">Questions &amp; Answers</h3>
 
               <form onSubmit={handleAskQuestion} className="bg-neutral-50 border border-neutral-200 p-4 rounded-2xl flex items-center gap-3">
                 <input
@@ -880,7 +981,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                   placeholder="Ask about cut, freshness, sourcing, packaging..."
                   value={newQuestion}
                   onChange={(e) => setNewQuestion(e.target.value)}
-                  className="flex-1 bg-white border border-neutral-200 rounded-xl px-3 py-2.5 text-xs text-[#08120B] focus:outline-none focus:border-emerald-500"
+                  className="flex-1 bg-white border border-neutral-200 rounded-xl px-3 py-2.5 text-xs text-[#0A1F12] focus:outline-none focus:border-emerald-500"
                 />
                 <button
                   type="submit"
@@ -894,8 +995,8 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                 {qaList.map((qa) => (
                   <div key={qa.id} className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 space-y-2">
                     <div className="flex items-start gap-2 text-xs">
-                      <span className="bg-[#08120B] text-white font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px]">Q</span>
-                      <p className="text-[#08120B] font-semibold">{qa.question}</p>
+                      <span className="bg-[#0A1F12] text-white font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px]">Q</span>
+                      <p className="text-[#0A1F12] font-semibold">{qa.question}</p>
                     </div>
                     <div className="flex items-start gap-2 text-xs">
                       <span className="bg-emerald-600 text-white font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px]">A</span>
@@ -909,7 +1010,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
             {/* Product FAQ Accordion — dynamically generated per product */}
             <div className="space-y-4">
-              <h3 className="text-sm font-black text-[#08120B] uppercase tracking-wider">Frequently Asked Questions</h3>
+              <h3 className="text-sm font-black text-[#0A1F12] uppercase tracking-wider">Frequently Asked Questions</h3>
               <div className="divide-y divide-neutral-200 border-t border-neutral-200">
                 {productFaqs.map((faq, idx) => {
                   const isOpen = openFaqIndex === idx;
@@ -919,7 +1020,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                         onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
                         className="w-full flex items-center justify-between gap-3 py-4 text-left cursor-pointer"
                       >
-                        <span className="text-xs sm:text-sm font-bold text-[#08120B]">{faq.question}</span>
+                        <span className="text-xs sm:text-sm font-bold text-[#0A1F12]">{faq.question}</span>
                         <ChevronDown className={`w-4 h-4 text-emerald-600 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                       </button>
                       {isOpen && (
@@ -937,7 +1038,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
       {/* Recipes for This Cut */}
       {relatedRecipes.length > 0 && (
         <div>
-          <h3 className="text-xl font-black text-[#08120B] tracking-tight mb-6 flex items-center gap-2">
+          <h3 className="text-xl font-black text-[#0A1F12] tracking-tight mb-6 flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-emerald-600" /> Recipes for This Cut
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -948,10 +1049,10 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                 className="text-left bg-white border border-neutral-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition group"
               >
                 <div className="aspect-video bg-neutral-100 overflow-hidden">
-                  <img src={r.image} alt={r.title} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-105 transition" />
+                  <FadeImage src={r.image} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition" />
                 </div>
                 <div className="p-3.5 space-y-1.5">
-                  <div className="text-xs font-bold text-[#08120B] line-clamp-1">{r.title}</div>
+                  <div className="text-xs font-bold text-[#0A1F12] line-clamp-1">{r.title}</div>
                   <div className="flex items-center gap-3 text-[10px] text-neutral-500">
                     <span className="flex items-center gap-1"><Timer className="w-3 h-3 text-emerald-600" /> {r.prepTime}</span>
                     <span>{r.difficulty}</span>
@@ -967,7 +1068,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
       {/* You Might Also Like */}
       {relatedProducts.length > 0 && (
         <div>
-          <h3 className="text-xl font-black text-[#08120B] tracking-tight mb-6">You Might Also Like</h3>
+          <h3 className="text-xl font-black text-[#0A1F12] tracking-tight mb-6">You Might Also Like</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {relatedProducts.map((p) => (
               <BrowseProductCard key={p.id} product={p} onSelectProduct={onSelectProduct} onAddToCart={onAddToCart} />
@@ -979,7 +1080,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
       {/* Recently Viewed — real per-browser view history, not fabricated */}
       {recentlyViewedProducts.length > 0 && (
         <div>
-          <h3 className="text-xl font-black text-[#08120B] tracking-tight mb-6">Recently Viewed</h3>
+          <h3 className="text-xl font-black text-[#0A1F12] tracking-tight mb-6">Recently Viewed</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {recentlyViewedProducts.map((p) => (
               <BrowseProductCard key={p.id} product={p} onSelectProduct={onSelectProduct} onAddToCart={onAddToCart} />
@@ -992,10 +1093,13 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
       <div className="fixed bottom-16 left-0 right-0 z-30 bg-white border-t border-neutral-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] p-3 flex items-center justify-between gap-3 lg:hidden">
         <div>
           <div className="text-[10px] text-neutral-500">Total</div>
-          <div className="text-lg font-black text-[#08120B]">₹{selectedWeight.price * quantity}</div>
+          {/* Was showing the raw undiscounted price*quantity here while the
+              desktop total above correctly applies the bulk-tier discount —
+              two different totals for the same quantity on the same page. */}
+          <div className="text-lg font-black text-[#0A1F12]">₹{bulkTotal}</div>
         </div>
         <button
-          onClick={() => onAddToCart(product, selectedWeight, quantity)}
+          onClick={() => onAddToCart(product, selectedWeight, quantity, selectedCut || undefined)}
           className="flex-1 max-w-[220px] bg-[#0F7B3A] hover:bg-emerald-500 text-white font-black py-3 rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2"
         >
           <ShoppingBag className="w-4 h-4" /> Add to Cart

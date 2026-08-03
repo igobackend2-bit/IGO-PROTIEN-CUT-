@@ -5,7 +5,7 @@ export const PolicyPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 space-y-8">
       <div className="bg-white border border-neutral-200 rounded-3xl p-8 space-y-4 shadow-sm">
-        <h1 className="text-2xl font-black text-[#08120B] flex items-center gap-2">
+        <h1 className="text-2xl font-black text-[#0A1F12] flex items-center gap-2">
           <ShieldCheck className="w-6 h-6 text-emerald-600" /> IGO Protein Cuts Policies & Terms
         </h1>
 

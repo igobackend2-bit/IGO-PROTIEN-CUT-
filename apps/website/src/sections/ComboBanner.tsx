@@ -38,7 +38,7 @@ export const ComboBanner: React.FC<ComboBannerProps> = ({ products, onSelectProd
           referrerPolicy="no-referrer"
           className="absolute inset-0 w-full h-full object-cover animate-kenburns"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#08120B]/92 via-[#08120B]/70 to-[#08120B]/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0A1F12]/92 via-[#0A1F12]/70 to-[#0A1F12]/20" />
 
         <div className="relative z-10 h-full flex flex-col justify-center gap-4 p-8 py-10 pl-8 sm:pl-16 sm:pr-12 max-w-xl">
           <div className="inline-flex items-center gap-2 w-fit bg-white/10 border border-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
@@ -72,7 +72,7 @@ export const ComboBanner: React.FC<ComboBannerProps> = ({ products, onSelectProd
 
             <button
               onClick={() => onSelectProduct(combo)}
-              className="bg-white hover:bg-emerald-50 text-[#08120B] font-black px-6 py-3 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg flex items-center gap-2"
+              className="bg-white hover:bg-emerald-50 text-[#0A1F12] font-black px-6 py-3 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg flex items-center gap-2"
             >
               Order Now <ArrowRight className="w-4 h-4" />
             </button>

@@ -52,6 +52,12 @@ interface CartPageProps {
   onAddToCart: (product: Product, weight: ProductWeightOption, quantity: number) => void;
   onNavigate: (path: string) => void;
   onTrackOrder?: (orderId: string) => void;
+  // Opens the sign-in modal. Only a signed-in customer can actually place an
+  // order (orders.ts's placeOrder() rejects a guest at the database level),
+  // but that only ever surfaced as an error after the customer had already
+  // filled in their address and picked a payment method. This lets checkout
+  // catch it up front instead, right when they try to leave the cart step.
+  onOpenAuth?: () => void;
 }
 
 type CheckoutStep = 1 | 2 | 3 | 4;
@@ -68,7 +74,8 @@ export const CartPage: React.FC<CartPageProps> = ({
   onSelectProduct,
   onAddToCart,
   onNavigate,
-  onTrackOrder
+  onTrackOrder,
+  onOpenAuth
 }) => {
   const [cart, setCart] = useState<CartItem[]>(() => StoreService.getCart());
   const [giftNote, setGiftNote] = useState(() => StoreService.getGiftNote());
@@ -177,7 +184,12 @@ export const CartPage: React.FC<CartPageProps> = ({
       return;
     }
 
-    const subtotalForCoupon = cart.reduce((acc, item) => acc + item.selectedWeight.price * item.quantity, 0);
+    // Bulk-tier discount already lowers the real subtotal for qty >= 3, so
+    // "minimum order value" must be checked against that same discounted
+    // number the customer actually sees — not the pre-discount raw total,
+    // which would incorrectly demand a higher cart value than the coupon's
+    // own minimum actually requires.
+    const subtotalForCoupon = cart.reduce((acc, item) => acc + getBulkLineTotal(item.selectedWeight.price, item.quantity), 0);
     if (subtotalForCoupon < match.minOrderValue) {
       setCouponMessage(`Minimum order value ₹${match.minOrderValue} required for coupon ${match.code}.`);
       setAppliedDiscount(0);
@@ -207,7 +219,11 @@ export const CartPage: React.FC<CartPageProps> = ({
       return;
     }
 
-    const qualifyingSubtotal = qualifyingItems.reduce((acc, item) => acc + item.selectedWeight.price * item.quantity, 0);
+    // Same reasoning as subtotalForCoupon above — a percentage-off coupon
+    // must take its cut off the bulk-discounted line totals, not the raw
+    // undiscounted ones, or the coupon amount would be computed off a
+    // subtotal higher than what the customer is actually being charged.
+    const qualifyingSubtotal = qualifyingItems.reduce((acc, item) => acc + getBulkLineTotal(item.selectedWeight.price, item.quantity), 0);
     const discount =
       match.discountType === 'flat'
         ? Math.min(match.value, qualifyingSubtotal)
@@ -284,13 +300,25 @@ export const CartPage: React.FC<CartPageProps> = ({
 
   const goToStep = (target: CheckoutStep) => {
     if (target <= step || target === step + 1) {
+      // Only a signed-in customer can place an order — check that up front,
+      // the moment they try to leave the cart-review step, instead of
+      // letting them fill in a delivery address and choose a payment method
+      // first and only finding out at the very last "Place Order" click.
+      if (target >= 2 && !StoreService.isLoggedIn()) {
+        onOpenAuth?.();
+        return;
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setStep(target);
     }
   };
 
   const handlePlaceOrder = async () => {
-    if (!selectedAddress) return;
+    if (!selectedAddress) {
+      setPaymentError('Please add a delivery address before placing your order.');
+      setStep(2);
+      return;
+    }
     setPaymentError(null);
     setIsPlacing(true);
 
@@ -342,7 +370,39 @@ export const CartPage: React.FC<CartPageProps> = ({
 
     setPlacedOrder(result.order);
     setStep(4);
+    playOrderPlacedSound();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Order placement never had a confirmation sound at all — only the
+  // separate "add to cart" chime in App.tsx (playAddToCartSound) existed.
+  // Same technique (synthesized via Web Audio API, no asset to host), but a
+  // longer six-note ascending-then-resolving run (~2.4s total) so it reads as
+  // a proper little celebration jingle rather than the quick two/three-note
+  // blips used elsewhere (add-to-cart). Each note also rings a bit longer
+  // (0.5s sustain vs. the ~0.3s used for the shorter chimes).
+  const playOrderPlacedSound = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const notes = [523, 659, 784, 880, 988, 1318]; // C5–E5–G5–A5–B5–E6, a bright resolving run
+      notes.forEach((freq, i) => {
+        const start = ctx.currentTime + i * 0.32;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.22, start + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.5);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + 0.52);
+      });
+    } catch {
+      // Autoplay/audio restrictions — silently skip, the confirmation screen still shows.
+    }
   };
 
   const handleCopyOrderNumber = () => {
@@ -358,13 +418,21 @@ export const CartPage: React.FC<CartPageProps> = ({
   // ---------------------------------------------------------------------
   if (placedOrder) {
     return (
-      <div className="min-h-screen bg-white text-[#08120B] pb-20">
+      <div className="min-h-screen bg-white text-[#0A1F12] pb-20">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-16 text-center space-y-6">
+          {/* Brand logo — same asset/path as the header (Navbar.tsx) — above the
+              success icon, so this confirmation reads as unmistakably IGO's
+              own rather than a generic "success" screen. */}
+          <img
+            src="/Images/protein-cuts-logo.jpg"
+            alt="Protein Cuts Logo"
+            className="h-14 w-auto object-contain mx-auto"
+          />
           <div className="w-20 h-20 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-600 shadow-inner">
             <PartyPopper className="w-10 h-10" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-3xl font-black text-[#08120B]">Order Placed Successfully!</h1>
+            <h1 className="text-3xl font-black text-[#0A1F12]">Order Placed Successfully!</h1>
             <p className="text-sm text-neutral-500">
               Your cold-chain order is confirmed and being prepared by our master butchers.
             </p>
@@ -373,7 +441,7 @@ export const CartPage: React.FC<CartPageProps> = ({
           <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-6 flex items-center justify-between gap-4 max-w-md mx-auto">
             <div className="text-left">
               <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">Your Order Number</div>
-              <div className="text-2xl font-black text-[#08120B] font-mono tracking-wider">{placedOrder.orderNumber}</div>
+              <div className="text-2xl font-black text-[#0A1F12] font-mono tracking-wider">{placedOrder.orderNumber}</div>
             </div>
             <button
               onClick={handleCopyOrderNumber}
@@ -385,17 +453,21 @@ export const CartPage: React.FC<CartPageProps> = ({
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-3xl p-6 text-left space-y-3 shadow-sm">
-            <h3 className="font-bold text-[#08120B] text-sm border-b border-neutral-200 pb-3">Order Summary</h3>
+            <h3 className="font-bold text-[#0A1F12] text-sm border-b border-neutral-200 pb-3">Order Summary</h3>
             {placedOrder.items.map((item, idx) => (
               <div key={idx} className="flex items-center justify-between text-xs">
                 <span className="text-neutral-600">
                   {item.product.name} <span className="text-neutral-400">({item.selectedWeight.label} × {item.quantity})</span>
                 </span>
-                <span className="font-bold text-[#08120B]">₹{item.selectedWeight.price * item.quantity}</span>
+                {/* Was showing the raw undiscounted line price — for a bulk
+                    (qty >= 3) line the sum of these wouldn't add up to
+                    "Total Paid" just below, which already reflects the
+                    bulk-tier discount. */}
+                <span className="font-bold text-[#0A1F12]">₹{getBulkLineTotal(item.selectedWeight.price, item.quantity)}</span>
               </div>
             ))}
             <div className="border-t border-neutral-200 pt-3 flex justify-between items-baseline">
-              <span className="text-sm font-black text-[#08120B]">Total Paid</span>
+              <span className="text-sm font-black text-[#0A1F12]">Total Paid</span>
               <span className="text-xl font-black text-emerald-700">₹{placedOrder.totalAmount}</span>
             </div>
             <div className="text-[11px] text-neutral-500 flex items-center gap-1.5 pt-1">
@@ -426,7 +498,7 @@ export const CartPage: React.FC<CartPageProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#08120B] pb-20">
+    <div className="min-h-screen bg-white text-[#0A1F12] pb-20">
       {/* Page header — large icon tile beside the title, with a live item
           count underneath. Matches the header treatment used across the IGO
           group's other storefronts. */}
@@ -443,7 +515,7 @@ export const CartPage: React.FC<CartPageProps> = ({
               >
                 <ArrowLeft className="w-3.5 h-3.5" /> Continue Shopping
               </button>
-              <h1 className="text-4xl sm:text-5xl font-black text-[#08120B] tracking-tight leading-none">
+              <h1 className="text-4xl sm:text-5xl font-black text-[#0A1F12] tracking-tight leading-none">
                 Your Cart
               </h1>
               <p className="text-sm font-semibold text-neutral-600 mt-2.5 flex items-center gap-2">
@@ -458,7 +530,7 @@ export const CartPage: React.FC<CartPageProps> = ({
           {cart.length > 0 && (
             <button
               onClick={handleClearCart}
-              className="text-xs font-bold text-neutral-600 hover:text-[#08120B] bg-white border border-neutral-200 px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer transition shadow-sm w-fit"
+              className="text-xs font-bold text-neutral-600 hover:text-[#0A1F12] bg-white border border-neutral-200 px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer transition shadow-sm w-fit"
             >
               <Trash2 className="w-4 h-4" /> Clear Cart
             </button>
@@ -484,7 +556,7 @@ export const CartPage: React.FC<CartPageProps> = ({
               </div>
             </div>
             <div className="space-y-3">
-              <h2 className="text-3xl sm:text-4xl font-black text-[#08120B] tracking-tight leading-tight max-w-md mx-auto">
+              <h2 className="text-3xl sm:text-4xl font-black text-[#0A1F12] tracking-tight leading-tight max-w-md mx-auto">
                 Your cart is currently empty
               </h2>
               <p className="text-sm text-neutral-500 max-w-md mx-auto leading-relaxed">
@@ -530,7 +602,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                   </div>
                   <span
                     className={`text-[10px] font-bold text-center whitespace-nowrap ${
-                      step === s.id ? 'text-[#08120B]' : 'text-neutral-400'
+                      step === s.id ? 'text-[#0A1F12]' : 'text-neutral-400'
                     }`}
                   >
                     {s.label}
@@ -549,13 +621,13 @@ export const CartPage: React.FC<CartPageProps> = ({
               <div className="flex items-start gap-3">
                 <Gift className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
                 <div>
-                  <div className="text-xs font-bold text-[#08120B]">Gift note for {giftNote.recipientName}</div>
+                  <div className="text-xs font-bold text-[#0A1F12]">Gift note for {giftNote.recipientName}</div>
                   <p className="text-xs text-neutral-600 mt-1 italic">"{giftNote.message}"</p>
                 </div>
               </div>
               <button
                 onClick={() => StoreService.clearGiftNote()}
-                className="text-neutral-400 hover:text-[#08120B] shrink-0 cursor-pointer"
+                className="text-neutral-400 hover:text-[#0A1F12] shrink-0 cursor-pointer"
                 title="Remove gift note"
               >
                 <X className="w-4 h-4" />
@@ -600,7 +672,7 @@ export const CartPage: React.FC<CartPageProps> = ({
 
                   <div className="bg-white border border-neutral-200 rounded-3xl overflow-hidden shadow-sm">
                     <div className="p-4 border-b border-neutral-200 bg-neutral-50 flex items-center justify-between">
-                      <h3 className="font-bold text-[#08120B] text-sm">Itemized Cart ({cart.reduce((a, b) => a + b.quantity, 0)} Items)</h3>
+                      <h3 className="font-bold text-[#0A1F12] text-sm">Itemized Cart ({cart.reduce((a, b) => a + b.quantity, 0)} Items)</h3>
                       <span className="text-xs text-neutral-500">0-4°C Chilled Sealed</span>
                     </div>
 
@@ -610,7 +682,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                         const itemSavings = (originalUnit - item.selectedWeight.price) * item.quantity;
 
                         return (
-                          <div key={`${item.product.id}-${item.selectedWeight.label}`} className="pt-4 first:pt-0">
+                          <div key={`${item.product.id}-${item.selectedWeight.label}-${item.cutPreference ?? ''}-${idx}`} className="pt-4 first:pt-0">
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                               <div className="flex items-center gap-4 flex-1">
                                 <button onClick={() => onSelectProduct(item.product)} className="cursor-pointer shrink-0">
@@ -627,13 +699,18 @@ export const CartPage: React.FC<CartPageProps> = ({
                                   </span>
                                   <h4
                                     onClick={() => onSelectProduct(item.product)}
-                                    className="font-bold text-[#08120B] text-sm cursor-pointer hover:text-emerald-700 transition"
+                                    className="font-bold text-[#0A1F12] text-sm cursor-pointer hover:text-emerald-700 transition"
                                   >
                                     {item.product.name}
                                   </h4>
                                   <p className="text-xs text-neutral-600">
-                                    Pack Option: <strong className="text-[#08120B]">{item.selectedWeight.label}</strong> ({item.selectedWeight.servings || '2-3 Persons'})
+                                    Pack Option: <strong className="text-[#0A1F12]">{item.selectedWeight.label}</strong> ({item.selectedWeight.servings || '2-3 Persons'})
                                   </p>
+                                  {item.cutPreference && (
+                                    <p className="text-xs text-neutral-600">
+                                      Cut Style: <strong className="text-[#0A1F12]">{item.cutPreference}</strong>
+                                    </p>
+                                  )}
                                   <div className="flex items-center gap-2 text-xs">
                                     <span className="font-black text-emerald-700">₹{item.selectedWeight.price}</span>
                                     <span className="text-neutral-400 line-through">₹{originalUnit}</span>
@@ -654,7 +731,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                                   >
                                     <Minus className="w-3.5 h-3.5" />
                                   </button>
-                                  <span className="font-mono font-black text-[#08120B] text-sm w-6 text-center">{item.quantity}</span>
+                                  <span className="font-mono font-black text-[#0A1F12] text-sm w-6 text-center">{item.quantity}</span>
                                   <button
                                     onClick={() => updateQuantity(idx, item.quantity + 1)}
                                     className="w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm cursor-pointer transition"
@@ -674,7 +751,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                                   )}
                                   <button
                                     onClick={() => updateQuantity(idx, 0)}
-                                    className="text-[10px] text-neutral-500 hover:text-[#08120B] font-semibold flex items-center gap-1 justify-end mt-1 cursor-pointer transition"
+                                    className="text-[10px] text-neutral-500 hover:text-[#0A1F12] font-semibold flex items-center gap-1 justify-end mt-1 cursor-pointer transition"
                                   >
                                     <Trash2 className="w-3 h-3" /> Remove
                                   </button>
@@ -690,7 +767,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                   {recommendedCuts.length > 0 && (
                     <div className="bg-white border border-neutral-200 rounded-3xl p-6 space-y-4 shadow-sm">
                       <div>
-                        <h3 className="font-bold text-[#08120B] text-base flex items-center gap-2">
+                        <h3 className="font-bold text-[#0A1F12] text-base flex items-center gap-2">
                           <Sparkles className="w-4 h-4 text-emerald-600" /> Frequently Bought Together
                         </h3>
                         <p className="text-xs text-neutral-500">Complete your kitchen order with fresh protein additions.</p>
@@ -701,7 +778,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                           <div key={p.id} className="bg-neutral-50 border border-neutral-200 rounded-2xl p-3 flex items-center gap-3">
                             <img src={p.image} alt={p.name} className="w-16 h-16 rounded-xl object-cover shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <h4 className="text-xs font-bold text-[#08120B] truncate">{p.name}</h4>
+                              <h4 className="text-xs font-bold text-[#0A1F12] truncate">{p.name}</h4>
                               <div className="text-xs text-emerald-700 font-bold mt-0.5">₹{p.basePrice}</div>
                             </div>
                             <button
@@ -722,14 +799,14 @@ export const CartPage: React.FC<CartPageProps> = ({
               {step === 2 && (
                 <>
                   <div className="bg-white border border-neutral-200 rounded-3xl p-5 space-y-3 shadow-sm">
-                    <div className="flex items-center gap-2 font-bold text-[#08120B] text-sm border-b border-neutral-200 pb-3">
+                    <div className="flex items-center gap-2 font-bold text-[#0A1F12] text-sm border-b border-neutral-200 pb-3">
                       <span className="w-5 h-5 rounded-full bg-[#0F7B3A] text-white text-[10px] font-black flex items-center justify-center shrink-0">1</span>
                       <MapPin className="w-4 h-4 text-emerald-600" /> Deliver To
                     </div>
                     {addresses.length === 0 ? (
                       <div className="text-xs text-neutral-500 bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-center">
                         No saved address found.{' '}
-                        <button onClick={() => onNavigate('/account')} className="text-emerald-700 font-bold underline cursor-pointer">
+                        <button onClick={() => onNavigate('/account?tab=profile')} className="text-emerald-700 font-bold underline cursor-pointer">
                           Add one in your Profile
                         </button>{' '}
                         to continue.
@@ -747,7 +824,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-xs font-black text-[#08120B]">{selectedAddress.name}</span>
+                                <span className="text-xs font-black text-[#0A1F12]">{selectedAddress.name}</span>
                                 <span className="text-[9px] font-bold text-neutral-500 bg-white px-1.5 py-0.5 rounded uppercase">
                                   {selectedAddress.type}
                                 </span>
@@ -798,7 +875,7 @@ export const CartPage: React.FC<CartPageProps> = ({
 
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-xs font-black text-[#08120B]">{addr.name}</span>
+                                  <span className="text-xs font-black text-[#0A1F12]">{addr.name}</span>
                                   <span className="text-[9px] font-bold text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded uppercase">
                                     {addr.type}
                                   </span>
@@ -826,11 +903,13 @@ export const CartPage: React.FC<CartPageProps> = ({
                                 )}
                                 {/* Editing an address is managed on the Profile page (single
                                     source of truth for the saved-address list) — this jumps
-                                    straight there instead of duplicating an edit form here. */}
+                                    straight to the Profile & Addresses tab there instead of
+                                    landing on the default Orders tab and leaving the customer
+                                    to hunt for the address list themselves. */}
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    onNavigate('/account');
+                                    onNavigate('/account?tab=profile');
                                   }}
                                   className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 hover:text-emerald-900 cursor-pointer px-2 py-1 rounded-lg hover:bg-emerald-100/60 transition"
                                 >
@@ -841,7 +920,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                           );
                         })}
                         <button
-                          onClick={() => onNavigate('/account')}
+                          onClick={() => onNavigate('/account?tab=profile')}
                           className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 hover:text-emerald-900 cursor-pointer w-fit px-1 py-1"
                         >
                           <Plus className="w-3.5 h-3.5" /> Add a new address
@@ -852,7 +931,7 @@ export const CartPage: React.FC<CartPageProps> = ({
 
                   <div className="bg-white border border-neutral-200 rounded-3xl p-5 space-y-3 shadow-sm">
                     <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
-                      <div className="flex items-center gap-2 font-bold text-[#08120B] text-sm">
+                      <div className="flex items-center gap-2 font-bold text-[#0A1F12] text-sm">
                         <span className="w-5 h-5 rounded-full bg-[#0F7B3A] text-white text-[10px] font-black flex items-center justify-center shrink-0">2</span>
                         <Clock className="w-4 h-4 text-emerald-600" /> Select Delivery Time Slot
                       </div>
@@ -898,7 +977,7 @@ export const CartPage: React.FC<CartPageProps> = ({
 
                   <div className="bg-white border border-neutral-200 rounded-3xl p-5 space-y-4 shadow-sm">
                     <div className="flex items-center justify-between border-b border-neutral-200 pb-3">
-                      <div className="flex items-center gap-2 font-bold text-[#08120B] text-sm">
+                      <div className="flex items-center gap-2 font-bold text-[#0A1F12] text-sm">
                         <span className="w-5 h-5 rounded-full bg-[#0F7B3A] text-white text-[10px] font-black flex items-center justify-center shrink-0">3</span>
                         <CreditCard className="w-4 h-4 text-emerald-600" /> Select Payment Method
                       </div>
@@ -923,8 +1002,8 @@ export const CartPage: React.FC<CartPageProps> = ({
                             onClick={() => setPaymentMethod(method.id)}
                             className={`relative p-3 rounded-xl border text-left flex flex-col gap-2 transition cursor-pointer ${
                               isSelected
-                                ? 'bg-emerald-50 border-emerald-500 text-[#08120B] font-bold shadow-sm'
-                                : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B] hover:border-emerald-200'
+                                ? 'bg-emerald-50 border-emerald-500 text-[#0A1F12] font-bold shadow-sm'
+                                : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#0A1F12] hover:border-emerald-200'
                             }`}
                           >
                             {isSelected && (
@@ -950,10 +1029,6 @@ export const CartPage: React.FC<CartPageProps> = ({
                         Also redeem up to ₹{userProfile.IGOWalletBalance || 250} IGO Wallet credit on this order
                       </span>
                     </label>
-
-                    {paymentError && (
-                      <div className="bg-[#08120B] border border-black rounded-xl p-3 text-[11px] text-white">{paymentError}</div>
-                    )}
                   </div>
                 </>
               )}
@@ -967,7 +1042,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                         <ChefHat className="w-4.5 h-4.5" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-black text-[#08120B]">What are you planning to cook?</h3>
+                        <h3 className="text-lg font-black text-[#0A1F12]">What are you planning to cook?</h3>
                         <p className="text-xs text-neutral-500 mt-0.5">
                           Pick a cooking style and we'll match fresh vegetables and masalas to go with your order.
                         </p>
@@ -985,7 +1060,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                             activeGlobalCookingType === type
                               ? 'bg-[#0F7B3A] text-white shadow'
-                              : 'text-neutral-500 hover:text-[#08120B]'
+                              : 'text-neutral-500 hover:text-[#0A1F12]'
                           }`}
                         >
                           {type}
@@ -1003,7 +1078,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                             <div className="flex items-center gap-3 min-w-0">
                               <img src={item.product.image} alt={item.product.name} className="w-11 h-11 rounded-xl object-cover shrink-0" />
                               <div className="min-w-0">
-                                <div className="text-xs font-bold text-[#08120B] truncate">{item.product.name}</div>
+                                <div className="text-xs font-bold text-[#0A1F12] truncate">{item.product.name}</div>
                                 <div className="text-[10px] text-neutral-500">Cooking as: <strong className="text-emerald-700">{itemCookingType}</strong></div>
                               </div>
                             </div>
@@ -1036,7 +1111,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                       <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-4 space-y-4 flex flex-col justify-between">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
-                            <div className="flex items-center gap-2 font-black text-[#08120B] text-sm">
+                            <div className="flex items-center gap-2 font-black text-[#0A1F12] text-sm">
                               <Leaf className="w-4 h-4 text-emerald-600" /> Fresh Vegetables & Herbs
                             </div>
                             <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
@@ -1045,15 +1120,12 @@ export const CartPage: React.FC<CartPageProps> = ({
                           </div>
                           <div className="space-y-2">
                             {activeRecipe.vegetables.map((v) => (
-                              <div key={v.id} className="bg-white border border-neutral-200 p-2.5 rounded-xl flex items-center justify-between gap-3 text-xs">
-                                <div className="flex items-center gap-2.5">
-                                  <Leaf className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                  <div>
-                                    <div className="font-bold text-[#08120B]">{v.name}</div>
-                                    <div className="text-[10px] text-neutral-500">{v.quantity}</div>
-                                  </div>
+                              <div key={v.id} className="bg-white border border-neutral-200 p-2.5 rounded-xl flex items-center gap-2.5 text-xs">
+                                <Leaf className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                <div>
+                                  <div className="font-bold text-[#0A1F12]">{v.name}</div>
+                                  <div className="text-[10px] text-neutral-500">{v.quantity}</div>
                                 </div>
-                                <div className="text-xs font-black text-emerald-700">₹{v.estimatedPrice}</div>
                               </div>
                             ))}
                           </div>
@@ -1073,7 +1145,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                       <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-4 space-y-4 flex flex-col justify-between">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
-                            <div className="flex items-center gap-2 font-black text-[#08120B] text-sm">
+                            <div className="flex items-center gap-2 font-black text-[#0A1F12] text-sm">
                               <Flame className="w-4 h-4 text-emerald-600" /> Masalas, Spices & Groceries
                             </div>
                             <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
@@ -1082,15 +1154,12 @@ export const CartPage: React.FC<CartPageProps> = ({
                           </div>
                           <div className="space-y-2">
                             {activeRecipe.masalasAndSpices.map((m) => (
-                              <div key={m.id} className="bg-white border border-neutral-200 p-2.5 rounded-xl flex items-center justify-between gap-3 text-xs">
-                                <div className="flex items-center gap-2.5">
-                                  <Flame className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                                  <div>
-                                    <div className="font-bold text-[#08120B]">{m.name}</div>
-                                    <div className="text-[10px] text-neutral-500">{m.quantity}</div>
-                                  </div>
+                              <div key={m.id} className="bg-white border border-neutral-200 p-2.5 rounded-xl flex items-center gap-2.5 text-xs">
+                                <Flame className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                <div>
+                                  <div className="font-bold text-[#0A1F12]">{m.name}</div>
+                                  <div className="text-[10px] text-neutral-500">{m.quantity}</div>
                                 </div>
-                                <div className="text-xs font-black text-emerald-700">₹{m.estimatedPrice}</div>
                               </div>
                             ))}
                           </div>
@@ -1112,12 +1181,12 @@ export const CartPage: React.FC<CartPageProps> = ({
             {/* Right Column: sticky running summary + step navigation */}
             <div className="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-24 lg:self-start">
               <div className="bg-white border border-neutral-200 rounded-3xl p-6 space-y-4 shadow-sm">
-                <h3 className="font-bold text-[#08120B] text-base border-b border-neutral-200 pb-3">Order Summary</h3>
+                <h3 className="font-bold text-[#0A1F12] text-base border-b border-neutral-200 pb-3">Order Summary</h3>
 
                 <div className="space-y-2.5 text-xs">
                   <div className="flex justify-between text-neutral-600">
                     <span>Items Total</span>
-                    <span className="font-bold text-[#08120B]">₹{subtotal}</span>
+                    <span className="font-bold text-[#0A1F12]">₹{subtotal}</span>
                   </div>
 
                   {bulkDiscountTotal > 0 && (
@@ -1137,13 +1206,13 @@ export const CartPage: React.FC<CartPageProps> = ({
                     {deliveryFee === 0 ? (
                       <span className="font-bold text-emerald-700 uppercase text-[10px]">FREE</span>
                     ) : (
-                      <span className="font-bold text-[#08120B]">₹{deliveryFee}</span>
+                      <span className="font-bold text-[#0A1F12]">₹{deliveryFee}</span>
                     )}
                   </div>
 
                   <div className="flex justify-between text-neutral-600">
                     <span>Taxes & GST</span>
-                    <span className="font-bold text-[#08120B]">₹{tax}</span>
+                    <span className="font-bold text-[#0A1F12]">₹{tax}</span>
                   </div>
 
                   {appliedDiscount > 0 && (
@@ -1175,7 +1244,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                           setAppliedCouponName(null);
                           setCouponMessage(null);
                         }}
-                        className="text-[10px] font-bold text-neutral-500 hover:text-[#08120B] cursor-pointer uppercase"
+                        className="text-[10px] font-bold text-neutral-500 hover:text-[#0A1F12] cursor-pointer uppercase"
                       >
                         Remove
                       </button>
@@ -1192,12 +1261,12 @@ export const CartPage: React.FC<CartPageProps> = ({
                             onChange={(e) => setCouponCode(e.target.value)}
                             onFocus={() => setShowCouponDropdown(true)}
                             onBlur={() => setTimeout(() => setShowCouponDropdown(false), 150)}
-                            className="w-full bg-white border border-neutral-200 focus:border-emerald-500 text-[#08120B] font-bold text-[11px] pl-8 pr-3 py-2 rounded-lg focus:outline-none uppercase placeholder:normal-case placeholder:font-normal placeholder:text-neutral-400"
+                            className="w-full bg-white border border-neutral-200 focus:border-emerald-500 text-[#0A1F12] font-bold text-[11px] pl-8 pr-3 py-2 rounded-lg focus:outline-none uppercase placeholder:normal-case placeholder:font-normal placeholder:text-neutral-400"
                           />
                         </div>
                         <button
                           onClick={() => handleApplyCoupon()}
-                          className="bg-neutral-100 hover:bg-[#0F7B3A] hover:text-white text-[#08120B] font-bold text-[10px] px-3 py-2 rounded-lg uppercase tracking-wider cursor-pointer transition shrink-0"
+                          className="bg-neutral-100 hover:bg-[#0F7B3A] hover:text-white text-[#0A1F12] font-bold text-[10px] px-3 py-2 rounded-lg uppercase tracking-wider cursor-pointer transition shrink-0"
                         >
                           Apply
                         </button>
@@ -1244,9 +1313,22 @@ export const CartPage: React.FC<CartPageProps> = ({
                     </div>
                   )}
 
+                  {/* Was only rendered inside the step===2 payment block above,
+                      so a failure from handlePlaceOrder() — fired from the
+                      step===3 button — set paymentError but nothing ever
+                      showed: the customer just saw the spinner stop and
+                      nothing happen, indistinguishable from the order simply
+                      not placing. This sits next to the Place Order button
+                      itself, visible on whichever step the failure occurs. */}
+                  {paymentError && (
+                    <div className="bg-[#0A1F12] border border-black rounded-xl p-3 text-[11px] text-white">
+                      {paymentError}
+                    </div>
+                  )}
+
                   <div className="border-t border-neutral-200 pt-3 flex justify-between items-baseline">
                     <div>
-                      <div className="text-sm font-black text-[#08120B]">Grand Payable Total</div>
+                      <div className="text-sm font-black text-[#0A1F12]">Grand Payable Total</div>
                       <div className="text-[10px] text-neutral-500">Includes all applicable Taxes & GST</div>
                     </div>
                     <div className="text-2xl font-black text-emerald-700">₹{grandTotal}</div>
@@ -1258,7 +1340,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                   {step > 1 && (
                     <button
                       onClick={() => goToStep((step - 1) as CheckoutStep)}
-                      className="px-4 py-3.5 rounded-2xl border border-neutral-200 text-neutral-600 hover:text-[#08120B] hover:border-neutral-300 transition cursor-pointer"
+                      className="px-4 py-3.5 rounded-2xl border border-neutral-200 text-neutral-600 hover:text-[#0A1F12] hover:border-neutral-300 transition cursor-pointer"
                     >
                       <ArrowLeft className="w-4 h-4" />
                     </button>
@@ -1317,21 +1399,21 @@ export const CartPage: React.FC<CartPageProps> = ({
         if (!recipe) return null;
         return (
           <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white border border-neutral-200 rounded-3xl max-w-lg w-full max-h-[85vh] overflow-y-auto custom-scrollbar text-[#08120B] relative shadow-2xl">
+            <div className="bg-white border border-neutral-200 rounded-3xl max-w-lg w-full max-h-[85vh] overflow-y-auto custom-scrollbar text-[#0A1F12] relative shadow-2xl">
               <button
                 onClick={() => setViewingRecipeFor(null)}
-                className="absolute top-4 right-4 text-neutral-400 hover:text-[#08120B] bg-white rounded-full p-1 cursor-pointer z-10"
+                className="absolute top-4 right-4 text-neutral-400 hover:text-[#0A1F12] bg-white rounded-full p-1 cursor-pointer z-10"
               >
                 <X className="w-5 h-5" />
               </button>
               <img src={recipe.image} alt={recipe.title} referrerPolicy="no-referrer" className="w-full h-44 object-cover rounded-t-3xl" />
               <div className="p-6 space-y-4">
                 <div>
-                  <h2 className="text-xl font-bold text-[#08120B]">{recipe.title}</h2>
+                  <h2 className="text-xl font-bold text-[#0A1F12]">{recipe.title}</h2>
                   <div className="flex items-center gap-3 text-xs text-neutral-500 mt-1">
-                    <span>Difficulty: <strong className="text-[#08120B]">{recipe.difficulty}</strong></span>
+                    <span>Difficulty: <strong className="text-[#0A1F12]">{recipe.difficulty}</strong></span>
                     <span>Protein: <strong className="text-emerald-700">{recipe.protein}</strong></span>
-                    <span>Prep + Cook: <strong className="text-[#08120B]">{recipe.prepTime} + {recipe.cookTime}</strong></span>
+                    <span>Prep + Cook: <strong className="text-[#0A1F12]">{recipe.prepTime} + {recipe.cookTime}</strong></span>
                   </div>
                 </div>
                 <div>

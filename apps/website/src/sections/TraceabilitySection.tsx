@@ -60,7 +60,7 @@ export const TraceabilitySection: React.FC = () => {
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
       <div className="text-center max-w-2xl mx-auto space-y-2">
         <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Trust Your Protein</span>
-        <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">
           Know Your Source. Trust Your Cut.
         </h2>
         <p className="text-xs sm:text-sm text-neutral-600">
@@ -69,7 +69,7 @@ export const TraceabilitySection: React.FC = () => {
       </div>
 
       {/* Batch ID Lookup Panel */}
-      <div className="bg-[#08120B] rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+      <div className="bg-[#0A1F12] rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-72 h-72 bg-emerald-600/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="relative z-10 max-w-xl mx-auto text-center space-y-5">
           <div className="inline-flex items-center gap-2 bg-emerald-950 border border-emerald-800 px-3 py-1 rounded-full text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
@@ -82,7 +82,7 @@ export const TraceabilitySection: React.FC = () => {
               value={batchId}
               onChange={(e) => setBatchId(e.target.value)}
               placeholder="Enter Batch ID (e.g., IGO-9421) to verify..."
-              className="w-full bg-white border border-neutral-200 rounded-2xl px-4 py-3 text-sm text-[#08120B] focus:outline-none focus:border-emerald-500"
+              className="w-full bg-white border border-neutral-200 rounded-2xl px-4 py-3 text-sm text-[#0A1F12] focus:outline-none focus:border-emerald-500"
             />
             <button
               type="submit"
@@ -130,7 +130,7 @@ export const TraceabilitySection: React.FC = () => {
             <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
               <f.icon className="w-5 h-5" />
             </div>
-            <h4 className="font-bold text-[#08120B] text-sm">{f.title}</h4>
+            <h4 className="font-bold text-[#0A1F12] text-sm">{f.title}</h4>
             <p className="text-xs text-neutral-500 leading-relaxed">{f.desc}</p>
             <button className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 cursor-pointer">
               {f.cta} <ArrowRight className="w-3 h-3" />

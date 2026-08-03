@@ -71,7 +71,7 @@ export const EditableText: React.FC<EditableTextProps> = ({
       }}
       className={`${className} editable-text cursor-text rounded-sm outline-none transition
         hover:bg-[#0F7B3A]/10 hover:ring-1 hover:ring-[#0F7B3A]/30
-        focus:bg-white/95 focus:text-[#08120B] focus:ring-2 focus:ring-[#0F7B3A]
+        focus:bg-white/95 focus:text-[#0A1F12] focus:ring-2 focus:ring-[#0F7B3A]
         empty:before:text-current empty:before:opacity-40 empty:before:content-[attr(data-placeholder)]`}
     />
   );
@@ -117,7 +117,7 @@ export const EditableImage: React.FC<{
       onClick={() => onPick(onChange)}
       className="absolute inset-0 z-20 flex items-center justify-center bg-black/0 opacity-0 transition group-hover/img:bg-black/50 group-hover/img:opacity-100"
     >
-      <span className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-[#08120B] shadow">
+      <span className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-[#0A1F12] shadow">
         <ImagePlus className="h-3.5 w-3.5" />
         Change image
       </span>

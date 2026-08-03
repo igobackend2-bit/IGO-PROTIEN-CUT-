@@ -59,7 +59,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
       <div className="bg-emerald-50 border border-emerald-100 rounded-3xl p-8 relative overflow-hidden">
         <div className="max-w-xl space-y-2 relative z-10">
           <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">IGO PROTEIN CUTS</span>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#08120B]">{currentInfo.title}</h1>
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#0A1F12]">{currentInfo.title}</h1>
           <p className="text-xs sm:text-sm text-neutral-600">{currentInfo.desc}</p>
         </div>
       </div>
@@ -76,7 +76,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
               className={`px-3 py-1.5 rounded-xl border font-semibold transition cursor-pointer ${
                 boneFilter === type
                   ? 'bg-[#0F7B3A] border-emerald-500 text-white'
-                  : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B] hover:border-neutral-300'
+                  : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#0A1F12] hover:border-neutral-300'
               }`}
             >
               {type}
@@ -90,7 +90,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="bg-white border border-neutral-200 rounded-xl px-3 py-1.5 text-xs text-[#08120B] focus:outline-none focus:border-emerald-500"
+            className="bg-white border border-neutral-200 rounded-xl px-3 py-1.5 text-xs text-[#0A1F12] focus:outline-none focus:border-emerald-500"
           >
             <option value="recommended">Recommended</option>
             <option value="price-low">Price: Low to High</option>
@@ -103,7 +103,7 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
       {/* Product Grid */}
       {filteredProducts.length === 0 ? (
         <div className="text-center py-16 bg-white border border-neutral-200 rounded-3xl text-neutral-500 space-y-2 shadow-sm">
-          <h3 className="text-lg font-bold text-[#08120B]">No cuts match your current filter</h3>
+          <h3 className="text-lg font-bold text-[#0A1F12]">No cuts match your current filter</h3>
           <p className="text-xs">Try switching cut preferences or browsing all categories.</p>
         </div>
       ) : (

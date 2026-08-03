@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Heart, Check } from 'lucide-react';
 import { Product, ProductWeightOption } from '../types';
 import { StoreService } from '../lib/storage';
@@ -25,6 +25,14 @@ export const BrowseProductCard: React.FC<BrowseProductCardProps> = ({
 }) => {
   const [added, setAdded] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(() => StoreService.getWishlist().includes(product.id));
+
+  // Keeps this card's heart icon in sync if the same product's wishlist
+  // state is toggled from a different card/page showing it at the same time.
+  useEffect(() => {
+    const sync = () => setIsWishlisted(StoreService.getWishlist().includes(product.id));
+    window.addEventListener('protein_cuts_wishlist_updated', sync);
+    return () => window.removeEventListener('protein_cuts_wishlist_updated', sync);
+  }, [product.id]);
 
   const defaultWeight = product.weightOptions[0];
   const isOutOfStock = product.stockStatus === 'Out of Stock';
@@ -65,7 +73,7 @@ export const BrowseProductCard: React.FC<BrowseProductCardProps> = ({
 
         {isOutOfStock && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="bg-white text-[#08120B] text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow -rotate-6 border border-neutral-200">
+            <span className="bg-white text-[#0A1F12] text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow -rotate-6 border border-neutral-200">
               Sold Out
             </span>
           </div>
@@ -76,12 +84,12 @@ export const BrowseProductCard: React.FC<BrowseProductCardProps> = ({
       <div className="p-3 space-y-1.5">
         <div className="flex items-center justify-between">
           <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">{product.subcategory}</span>
-          <span className="flex items-center gap-0.5 text-[10px] font-bold text-[#08120B]">
+          <span className="flex items-center gap-0.5 text-[10px] font-bold text-[#0A1F12]">
             ★ {product.rating}
           </span>
         </div>
 
-        <h3 className="text-sm font-bold text-[#08120B] line-clamp-1">{product.name}</h3>
+        <h3 className="text-sm font-bold text-[#0A1F12] line-clamp-1">{product.name}</h3>
         <p className="text-xs text-neutral-500">{defaultWeight?.label}</p>
 
         <div className="flex items-center justify-between gap-2 pt-1">

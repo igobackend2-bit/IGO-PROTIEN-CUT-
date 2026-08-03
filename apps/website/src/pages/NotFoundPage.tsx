@@ -13,7 +13,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({ onNavigate }) => {
     <div className="max-w-2xl mx-auto px-4 py-20 text-center space-y-6">
       <div className="text-7xl font-black text-emerald-100">404</div>
       <div className="space-y-2">
-        <h1 className="text-2xl font-black text-[#08120B]">Page Not Found</h1>
+        <h1 className="text-2xl font-black text-[#0A1F12]">Page Not Found</h1>
         <p className="text-sm text-neutral-500">
           The page you're looking for doesn't exist or may have moved. Let's get you back on track.
         </p>
@@ -27,7 +27,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({ onNavigate }) => {
         </button>
         <button
           onClick={() => onNavigate('/search')}
-          className="bg-white hover:bg-neutral-50 text-[#08120B] font-bold px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 border border-neutral-200"
+          className="bg-white hover:bg-neutral-50 text-[#0A1F12] font-bold px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-2 border border-neutral-200"
         >
           <Search className="w-4 h-4" /> Browse Products
         </button>

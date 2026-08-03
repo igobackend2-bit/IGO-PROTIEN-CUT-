@@ -7,7 +7,7 @@ import { Thermometer, ShieldCheck, Leaf } from 'lucide-react';
 export const QualityBanner: React.FC = () => {
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="bg-[#08120B] rounded-3xl overflow-hidden grid grid-cols-1 md:grid-cols-2 items-center shadow-xl shadow-black/20">
+      <div className="bg-[#0A1F12] rounded-3xl overflow-hidden grid grid-cols-1 md:grid-cols-2 items-center shadow-xl shadow-black/20">
         <div className="p-8 sm:p-12 space-y-5">
           <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Quality Assurance</span>
           <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight">
@@ -40,7 +40,7 @@ export const QualityBanner: React.FC = () => {
             alt="Premium quality-checked ribeye steak"
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#08120B]/50 via-transparent to-transparent md:bg-gradient-to-r md:from-[#08120B]/30 md:via-transparent md:to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0A1F12]/50 via-transparent to-transparent md:bg-gradient-to-r md:from-[#0A1F12]/30 md:via-transparent md:to-transparent" />
         </div>
       </div>
     </section>

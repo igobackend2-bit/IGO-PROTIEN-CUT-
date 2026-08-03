@@ -133,7 +133,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
       {/* Header Banner */}
-      <div className="bg-[#08120B] border border-black rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-[#0A1F12] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg shadow-emerald-950/20 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-2">
           <div className="text-xs font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1">
             <Sparkles className="w-3.5 h-3.5" /> 24/7 FRESH QUALITY HELPDESK
@@ -161,7 +161,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
         <button
           onClick={() => setActiveTab('faqs')}
           className={`px-5 py-2.5 rounded-full transition cursor-pointer flex items-center gap-2 ${
-            activeTab === 'faqs' ? 'bg-[#0F7B3A] text-white shadow-lg' : 'bg-white border border-neutral-200 text-neutral-500 hover:text-[#08120B]'
+            activeTab === 'faqs' ? 'bg-[#0F7B3A] text-white shadow-lg' : 'bg-white border border-neutral-200 text-neutral-500 hover:text-[#0A1F12]'
           }`}
         >
           <HelpCircle className="w-4 h-4" /> FAQs & Knowledge Base
@@ -170,7 +170,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
         <button
           onClick={() => setActiveTab('tickets')}
           className={`px-5 py-2.5 rounded-full transition cursor-pointer flex items-center gap-2 relative ${
-            activeTab === 'tickets' ? 'bg-[#0F7B3A] text-white shadow-lg' : 'bg-white border border-neutral-200 text-neutral-500 hover:text-[#08120B]'
+            activeTab === 'tickets' ? 'bg-[#0F7B3A] text-white shadow-lg' : 'bg-white border border-neutral-200 text-neutral-500 hover:text-[#0A1F12]'
           }`}
         >
           <MessageSquare className="w-4 h-4" /> Live Support Chat & Tickets ({tickets.length})
@@ -179,7 +179,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
         <button
           onClick={() => setActiveTab('return')}
           className={`px-5 py-2.5 rounded-full transition cursor-pointer flex items-center gap-2 ${
-            activeTab === 'return' ? 'bg-[#0F7B3A] text-white shadow-lg' : 'bg-white border border-neutral-200 text-neutral-500 hover:text-[#08120B]'
+            activeTab === 'return' ? 'bg-[#0F7B3A] text-white shadow-lg' : 'bg-white border border-neutral-200 text-neutral-500 hover:text-[#0A1F12]'
           }`}
         >
           <RotateCcw className="w-4 h-4" /> Freshness Guarantee & Returns
@@ -196,7 +196,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
               placeholder="Search FAQs e.g., cold chain temperature, antibiotic testing, refund timeline..."
               value={faqSearch}
               onChange={(e) => setFaqSearch(e.target.value)}
-              className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-2xl px-12 py-3.5 text-xs text-[#08120B] focus:outline-none shadow-sm"
+              className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-2xl px-12 py-3.5 text-xs text-[#0A1F12] focus:outline-none shadow-sm"
             />
             <Search className="w-4 h-4 text-emerald-600 absolute left-4 top-4" />
           </div>
@@ -210,7 +210,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                 className={`px-4 py-2 rounded-xl border transition cursor-pointer whitespace-nowrap font-bold ${
                   faqCategory === cat
                     ? 'bg-emerald-50 border-emerald-400 text-emerald-700'
-                    : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#08120B]'
+                    : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#0A1F12]'
                 }`}
               >
                 {cat}
@@ -229,7 +229,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                 >
                   <button
                     onClick={() => setExpandedFaqId(isExpanded ? null : faq.id)}
-                    className="w-full p-4 text-left flex items-center justify-between text-xs font-bold text-[#08120B] hover:text-emerald-600 transition cursor-pointer"
+                    className="w-full p-4 text-left flex items-center justify-between text-xs font-bold text-[#0A1F12] hover:text-emerald-600 transition cursor-pointer"
                   >
                     <span className="flex items-center gap-2">
                       <HelpCircle className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -251,7 +251,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                         </button>
                         <button
                           onClick={() => handleVoteFAQ(faq.id, false)}
-                          className="flex items-center gap-1 hover:text-[#08120B] font-bold"
+                          className="flex items-center gap-1 hover:text-[#0A1F12] font-bold"
                         >
                           <ThumbsDown className="w-3.5 h-3.5" /> No ({faq.unhelpfulVotes})
                         </button>
@@ -271,7 +271,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
           {/* Left Tickets List */}
           <div className="lg:col-span-5 bg-white border border-neutral-200 rounded-3xl p-6 space-y-4 shadow-sm">
             <div className="flex items-center justify-between pb-4 border-b border-neutral-200">
-              <h3 className="font-bold text-[#08120B] text-sm">Your Support Tickets</h3>
+              <h3 className="font-bold text-[#0A1F12] text-sm">Your Support Tickets</h3>
               <button
                 onClick={() => setShowCreateTicketModal(true)}
                 className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1"
@@ -297,13 +297,13 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                       className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                         t.status === 'Resolved'
                           ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          : 'bg-[#08120B] text-white border border-black'
+                          : 'bg-[#0A1F12] text-white border border-black'
                       }`}
                     >
                       {t.status}
                     </span>
                   </div>
-                  <div className="font-bold text-[#08120B] truncate">{t.subject}</div>
+                  <div className="font-bold text-[#0A1F12] truncate">{t.subject}</div>
                   <div className="text-[10px] text-neutral-500 mt-1">{t.category} • {t.priority} Priority</div>
                 </div>
               ))}
@@ -318,7 +318,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                 <div className="pb-4 border-b border-neutral-200 flex items-center justify-between">
                   <div>
                     <div className="text-xs font-bold text-emerald-700">{activeTicket.ticketNumber}</div>
-                    <h3 className="text-base font-bold text-[#08120B]">{activeTicket.subject}</h3>
+                    <h3 className="text-base font-bold text-[#0A1F12]">{activeTicket.subject}</h3>
                   </div>
                   <span className="text-xs text-neutral-500 font-mono">{activeTicket.priority} Priority</span>
                 </div>
@@ -356,7 +356,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                     placeholder="Type your message to our support executive..."
                     value={chatMessageInput}
                     onChange={(e) => setChatMessageInput(e.target.value)}
-                    className="flex-1 bg-white border border-neutral-200 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs text-[#08120B] focus:outline-none"
+                    className="flex-1 bg-white border border-neutral-200 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs text-[#0A1F12] focus:outline-none"
                   />
                   <button
                     type="submit"
@@ -369,7 +369,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center text-neutral-500 space-y-2">
                 <MessageSquare className="w-12 h-12 text-emerald-200" />
-                <div className="text-sm font-bold text-[#08120B]">Select a Ticket to View Chat History</div>
+                <div className="text-sm font-bold text-[#0A1F12]">Select a Ticket to View Chat History</div>
                 <p className="text-xs max-w-xs">Click any ticket on the left or create a new inquiry ticket.</p>
               </div>
             )}
@@ -381,7 +381,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
       {activeTab === 'return' && (
         <div className="bg-white border border-neutral-200 rounded-3xl p-8 max-w-2xl mx-auto space-y-6 shadow-sm">
           <div className="space-y-1">
-            <h3 className="text-xl font-bold text-[#08120B]">100% Quality & Freshness Guarantee Refund Claim</h3>
+            <h3 className="text-xl font-bold text-[#0A1F12]">100% Quality & Freshness Guarantee Refund Claim</h3>
             <p className="text-xs text-neutral-500">
               If your meat or seafood arrives outside the 0-4°C safety range or fails cut quality, request an immediate replacement or store credit refund.
             </p>
@@ -400,7 +400,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
               <select
                 value={returnOrderId}
                 onChange={(e) => setReturnOrderId(e.target.value)}
-                className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#08120B] focus:outline-none focus:border-emerald-500"
+                className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
                 required
               >
                 <option value="">-- Choose Recent Order --</option>
@@ -417,7 +417,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
               <select
                 value={returnReason}
                 onChange={(e) => setReturnReason(e.target.value)}
-                className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#08120B] focus:outline-none focus:border-emerald-500"
+                className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
               >
                 <option>Temperature deviation (Above 4°C)</option>
                 <option>Pack seal damaged in transit</option>
@@ -432,7 +432,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                 placeholder="Explain the condition upon delivery..."
                 value={returnComments}
                 onChange={(e) => setReturnComments(e.target.value)}
-                className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#08120B] focus:outline-none focus:border-emerald-500"
+                className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
                 rows={3}
               />
             </div>
@@ -450,7 +450,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
       {/* Create Ticket Modal */}
       {showCreateTicketModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-neutral-200 rounded-3xl max-w-lg w-full p-6 text-[#08120B] space-y-4 shadow-2xl">
+          <div className="bg-white border border-neutral-200 rounded-3xl max-w-lg w-full p-6 text-[#0A1F12] space-y-4 shadow-2xl">
             <h3 className="text-lg font-bold">Lodge Support Ticket</h3>
             <form onSubmit={handleCreateTicketSubmit} className="space-y-4 text-xs">
               <div>
@@ -460,7 +460,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                   placeholder="e.g. Delivery slot delay or product inquiry"
                   value={newTicketSubject}
                   onChange={(e) => setNewTicketSubject(e.target.value)}
-                  className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#08120B] focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
                   required
                 />
               </div>
@@ -470,7 +470,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                 <select
                   value={newTicketCategory}
                   onChange={(e: any) => setNewTicketCategory(e.target.value)}
-                  className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#08120B] focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
                 >
                   <option value="Quality Concern">Quality Concern</option>
                   <option value="Delivery Delay">Delivery Delay</option>
@@ -486,7 +486,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                   placeholder="Describe your issue..."
                   value={newTicketMessage}
                   onChange={(e) => setNewTicketMessage(e.target.value)}
-                  className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#08120B] focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
                   rows={4}
                   required
                 />
@@ -496,7 +496,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                 <button
                   type="button"
                   onClick={() => setShowCreateTicketModal(false)}
-                  className="px-4 py-2 rounded-xl text-neutral-500 hover:text-[#08120B]"
+                  className="px-4 py-2 rounded-xl text-neutral-500 hover:text-[#0A1F12]"
                 >
                   Cancel
                 </button>

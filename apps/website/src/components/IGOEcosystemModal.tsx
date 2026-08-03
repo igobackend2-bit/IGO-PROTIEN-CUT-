@@ -55,10 +55,10 @@ export const IGOEcosystemModal: React.FC<IGOEcosystemModalProps> = ({ isOpen, on
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-white border border-neutral-200 rounded-3xl max-w-2xl w-full p-6 text-[#08120B] relative shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <div className="bg-white border border-neutral-200 rounded-3xl max-w-2xl w-full p-6 text-[#0A1F12] relative shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto custom-scrollbar">
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-[#08120B] hover:border-emerald-300 transition cursor-pointer"
+          className="absolute top-5 right-5 p-2 rounded-full bg-neutral-50 border border-neutral-200 text-neutral-500 hover:text-[#0A1F12] hover:border-emerald-300 transition cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -68,7 +68,7 @@ export const IGOEcosystemModal: React.FC<IGOEcosystemModalProps> = ({ isOpen, on
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
             IGO GROUPS ECOSYSTEM
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-[#08120B] tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">
             The Integrated IGO Agriculture & Protein Ecosystem
           </h2>
           <p className="text-xs text-neutral-600 leading-relaxed">
@@ -87,7 +87,7 @@ export const IGOEcosystemModal: React.FC<IGOEcosystemModalProps> = ({ isOpen, on
               </div>
               <div className="space-y-1 flex-1">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-[#08120B] text-sm">{div.name}</h3>
+                  <h3 className="font-bold text-[#0A1F12] text-sm">{div.name}</h3>
                   <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">
                     {div.badge}
                   </span>

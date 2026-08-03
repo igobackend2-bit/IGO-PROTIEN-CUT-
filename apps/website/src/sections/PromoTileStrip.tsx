@@ -46,7 +46,7 @@ export const PromoTileStrip: React.FC<PromoTileStripProps> = ({ onNavigate }) =>
       path: item.path,
       image: item.image,
       bg: light ? 'bg-neutral-50 border border-neutral-200' : 'bg-[#0F7B3A]',
-      text: light ? 'text-[#08120B]' : 'text-white'
+      text: light ? 'text-[#0A1F12]' : 'text-white'
     };
   });
 
