@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Flame, Sparkles, Tag, ShoppingBag, Clock, CheckCircle2, ArrowRight } from 'lucide-react';
 import { Product, ProductWeightOption, ComboPack } from '../types';
 import { SupabaseService } from '../lib/supabaseClient';
+import { fetchComboPacks, ComboPackRow } from '../lib/api/catalog';
+import { toWebsiteComboPack } from '../lib/adapters/productAdapter';
 
 interface OffersPageProps {
   products: Product[];
@@ -17,7 +19,41 @@ export const OffersPage: React.FC<OffersPageProps> = ({
   onNavigate
 }) => {
   const [timeLeft, setTimeLeft] = useState({ hours: 4, minutes: 28, seconds: 42 });
-  const [combos] = useState<ComboPack[]>(() => SupabaseService.getComboPacks());
+  // Starts from the old hardcoded mock (SupabaseService.getComboPacks(),
+  // despite its name, never actually queried Supabase) so something renders
+  // immediately, then gets replaced with real combo_packs/combo_pack_items
+  // rows adapted against the live catalog. Previously this page never fetched
+  // real combos at all, so "Add Entire Combo To Cart" pointed at mock product
+  // ids that don't exist in the live, Supabase-backed catalog and silently
+  // added nothing.
+  const [combos, setCombos] = useState<ComboPack[]>(() => SupabaseService.getComboPacks());
+  const [comboRows, setComboRows] = useState<ComboPackRow[] | null>(null);
+  const [comboToast, setComboToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchComboPacks()
+      .then((rows) => {
+        if (!cancelled) setComboRows(rows);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Re-adapt whenever the live catalog updates too (hydrateCatalog() in
+  // App.tsx upgrades `products` from the initial cached copy shortly after
+  // first paint), so a combo item isn't stuck unresolved just because this
+  // ran before the real catalog arrived.
+  useEffect(() => {
+    if (!comboRows || products.length === 0) return;
+    const adapted = comboRows
+      .filter((row) => row.active)
+      .map((row) => toWebsiteComboPack(row, products))
+      .filter((c): c is ComboPack => c !== null);
+    setCombos(adapted);
+  }, [comboRows, products]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -34,16 +70,31 @@ export const OffersPage: React.FC<OffersPageProps> = ({
   const flashSaleProducts = products.filter((p) => p.isFlashOffer || p.discountPercentage >= 14);
 
   const handleAddComboToCart = (combo: ComboPack) => {
+    let addedCount = 0;
     combo.items.forEach((item) => {
       const p = products.find((prod) => prod.id === item.productId);
       if (p) {
         onAddToCart(p, p.weightOptions[0], item.qty);
+        addedCount += 1;
       }
     });
+    // Defensive: toWebsiteComboPack() already resolves every item against
+    // this same `products` list, so this should never fire — but if the
+    // catalog changes between render and click (a product goes out of the
+    // catalog entirely), surface that instead of silently adding nothing.
+    if (addedCount === 0) {
+      setComboToast("Sorry, this combo isn't available right now.");
+      setTimeout(() => setComboToast(null), 2500);
+    }
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+      {comboToast && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-[#0A1F12] text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-lg">
+          {comboToast}
+        </div>
+      )}
       {/* Top Banner Header */}
       <div className="bg-[#0A1F12] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg shadow-emerald-950/20">
         <div className="max-w-2xl space-y-4 relative z-10">

@@ -77,9 +77,21 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
     }, 600);
   };
 
+  // Previously this only updated local state, so the URL never changed when
+  // switching categories from the sidebar. That left the browser's Back
+  // button pointing at whatever category the page originally loaded with —
+  // e.g. open /category/chicken, switch to Mutton via the sidebar, view a
+  // product, then hit Back and land on Fresh Chicken again instead of
+  // Mutton, because Mutton was never actually pushed as its own history
+  // entry. Routing through onNavigate (App.tsx's navigate()) makes each
+  // category switch a real, back-button-able URL — mirrors exactly what
+  // clicking a category card elsewhere on the site already does.
   const handleSelectCategory = (catId: string) => {
-    setSelectedCategory(catId);
-    setSelectedSubcategory('all');
+    if (catId === 'all') {
+      onNavigate('/search');
+    } else {
+      onNavigate(`/category/${catId}`);
+    }
   };
 
   // Unique subcategories available within the currently selected category (e.g. Wings, Boneless, Drumsticks under Chicken)

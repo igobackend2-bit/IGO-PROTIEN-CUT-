@@ -444,6 +444,74 @@ export function toWebsiteProduct(
   };
 }
 
+/**
+ * Translates a raw `combo_packs` row (admin-owned, read via fetchComboPacks
+ * in lib/api/catalog.ts) into the richer `ComboPack` shape OffersPage.tsx
+ * renders — the same role this file already plays for `products`.
+ *
+ * Previously OffersPage never went through anything like this: getComboPacks()
+ * just returned the old hardcoded INITIAL_COMBO_PACKS mock data, whose combo
+ * items pointed at mock product ids ('chk-01', 'mut-01'...) that don't exist
+ * in the live, Supabase-backed catalog. "Add Entire Combo To Cart" silently
+ * did nothing because `products.find(p => p.id === item.productId)` never
+ * matched anything.
+ *
+ * combo_packs itself carries no price fields (no original/combo price,
+ * badge or tagline columns) — the combo's price is derived here from the sum
+ * of its real, live product prices and the row's `discount` percentage, so
+ * it always reflects whatever the admin has the underlying products priced
+ * at right now.
+ *
+ * Returns null if none of the combo's items resolve against the live catalog
+ * (e.g. a product referenced by the combo was deleted) — callers should skip
+ * a combo pack that can't actually be fulfilled, rather than show a broken
+ * "Add to Cart" that silently does nothing.
+ */
+export function toWebsiteComboPack(
+  row: import('../api/catalog').ComboPackRow,
+  products: Product[]
+): import('../../types').ComboPack | null {
+  const items = row.combo_pack_items
+    .map((item) => {
+      const product = products.find((p) => p.id === item.product_id);
+      if (!product) return null;
+      const weight = product.weightOptions[0];
+      return {
+        productId: product.id,
+        productName: product.name,
+        weightLabel: weight?.label ?? '',
+        qty: Math.max(1, Number(item.quantity ?? 1)),
+        unitPrice: weight?.price ?? product.basePrice
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+
+  if (items.length === 0) return null;
+
+  const originalPrice = Math.round(items.reduce((sum, it) => sum + it.unitPrice * it.qty, 0));
+  const discountPct = Math.max(0, Math.min(90, Number(row.discount ?? 0)));
+  const comboPrice = Math.round(originalPrice * (1 - discountPct / 100));
+  const savingsAmount = Math.max(0, originalPrice - comboPrice);
+  const firstItemImage = products.find((p) => p.id === items[0].productId)?.image;
+
+  return {
+    id: row.id,
+    title: row.title,
+    tagline: row.description ?? `${items.length} hand-picked cuts in one bundle`,
+    badge: discountPct > 0 ? `SAVE ${discountPct}%` : 'BUNDLE DEAL',
+    originalPrice,
+    comboPrice,
+    savings: savingsAmount > 0 ? `Save ₹${savingsAmount} instantly` : 'Bundled price',
+    image: row.banner_image_url ?? firstItemImage ?? PLACEHOLDER_IMAGE,
+    items: items.map(({ productId, productName, weightLabel, qty }) => ({
+      productId,
+      productName,
+      weightLabel,
+      qty
+    }))
+  };
+}
+
 /** Convenience: the extra free-text fields the PDP renders as lists. */
 export function extractProductLists(row: ProductRow) {
   return {

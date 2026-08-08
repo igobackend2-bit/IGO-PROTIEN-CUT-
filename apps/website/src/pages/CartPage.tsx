@@ -37,7 +37,8 @@ import {
   Home,
   Briefcase,
   Phone,
-  Search
+  Search,
+  XCircle
 } from 'lucide-react';
 import { CartItem, Product, ProductWeightOption, CookingType, RequiredIngredient, Order, SavedAddress, Coupon } from '../types';
 import { StoreService } from '../lib/storage';
@@ -45,6 +46,7 @@ import { COOKING_RECIPE_MAP } from '../data/cookingIngredientsData';
 import { INITIAL_RECIPES } from '../data/mockData';
 import { PartnerRedirectModal } from '../components/PartnerRedirectModal';
 import { getActiveBulkTier, getBulkLineTotal } from '../lib/pricing';
+import confetti from 'canvas-confetti';
 
 interface CartPageProps {
   products: Product[];
@@ -371,6 +373,11 @@ export const CartPage: React.FC<CartPageProps> = ({
     setPlacedOrder(result.order);
     setStep(4);
     playOrderPlacedSound();
+    // The success screen only ever showed a static PartyPopper icon — the
+    // canvas-confetti celebration animation existed in CheckoutModal.tsx, a
+    // component that isn't actually used anywhere (App.tsx never renders
+    // it), so this, the real checkout flow, never fired it.
+    confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -1258,7 +1265,10 @@ export const CartPage: React.FC<CartPageProps> = ({
                             type="text"
                             placeholder="Search offers or enter a code"
                             value={couponCode}
-                            onChange={(e) => setCouponCode(e.target.value)}
+                            onChange={(e) => {
+                              setCouponCode(e.target.value);
+                              setCouponMessage(null);
+                            }}
                             onFocus={() => setShowCouponDropdown(true)}
                             onBlur={() => setTimeout(() => setShowCouponDropdown(false), 150)}
                             className="w-full bg-white border border-neutral-200 focus:border-emerald-500 text-[#0A1F12] font-bold text-[11px] pl-8 pr-3 py-2 rounded-lg focus:outline-none uppercase placeholder:normal-case placeholder:font-normal placeholder:text-neutral-400"
@@ -1304,6 +1314,22 @@ export const CartPage: React.FC<CartPageProps> = ({
                             ))}
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {/* handleApplyCoupon() already computed this — success or
+                      failure — but it was never actually rendered anywhere,
+                      so an invalid/expired code (or one that doesn't apply to
+                      this cart) failed completely silently: the "Total
+                      Savings" banner below still showed a number (from free
+                      delivery/catalog savings, unrelated to the coupon), so
+                      it looked like something happened when the code itself
+                      was simply rejected. Only shown for a failed attempt —
+                      a successful apply already has its own "X applied" chip
+                      above. */}
+                  {couponMessage && appliedDiscount === 0 && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 text-[11px] font-bold rounded-xl px-3 py-2 flex items-center gap-1.5">
+                      <XCircle className="w-3.5 h-3.5 shrink-0" /> {couponMessage}
                     </div>
                   )}
 

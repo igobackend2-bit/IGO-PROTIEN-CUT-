@@ -79,6 +79,12 @@ export default function App() {
   // Distinguishes "nobody is signed in" from "a customer is signed in but
   // isn't staff" — the login screen wording differs between the two.
   const [hasSession, setHasSession] = useState(false);
+  // True once the first real Supabase session check has resolved. Used to
+  // gate the /account route: without this, a signed-out visitor would see
+  // hasSession=false for one render on every page load (even if they really
+  // are logged in) before the async check resolves, which would incorrectly
+  // flash a "please sign in" prompt for real customers too.
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   // Sync Products from storage
   const refreshProducts = () => {
@@ -117,6 +123,7 @@ export default function App() {
         .then(([allowed, user]) => {
           if (cancelled) return;
           setHasSession(Boolean(user));
+          setSessionChecked(true);
           setAdminAccess(allowed ? 'allowed' : 'denied');
           // Pull the real wishlist down from Supabase whenever a session
           // appears (sign-in, or already signed in on page load) — no-ops
@@ -124,7 +131,10 @@ export default function App() {
           if (user) StoreService.hydrateWishlist().catch(() => {});
         })
         .catch(() => {
-          if (!cancelled) setAdminAccess('denied');
+          if (!cancelled) {
+            setAdminAccess('denied');
+            setSessionChecked(true);
+          }
         });
     };
 
@@ -398,8 +408,40 @@ export default function App() {
       case '/contact':
         return <ContactPage onNavigate={navigate} />;
       case '/policy':
-        return <PolicyPage />;
-      case '/account':
+        return <PolicyPage section={new URLSearchParams(currentQuery).get('section') ?? undefined} />;
+      case '/account': {
+        // Previously this route rendered UserAccountPage unconditionally, so
+        // a signed-out visitor who typed /account (or clicked the header
+        // greeting before logging in) saw a fully-populated account page —
+        // fake wallet balance, reward points, a saved address and a working
+        // "Logout" button — because the page's own profile state fell back
+        // to a hardcoded mock persona rather than checking whether anyone
+        // was actually signed in. Now the route itself requires a real
+        // Supabase session before it will render any account content.
+        if (!sessionChecked) {
+          // Avoid flashing the sign-in prompt at a real, logged-in customer
+          // for the one render before the async session check resolves.
+          return <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24" />;
+        }
+        if (!hasSession) {
+          return (
+            <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center space-y-4">
+              <h1 className="text-2xl font-black text-[#0A1F12]">Sign in to view your account</h1>
+              <p className="text-sm text-neutral-500">
+                Your orders, wallet, reward points and saved addresses are only visible once you're signed in.
+              </p>
+              <button
+                onClick={() => {
+                  setAuthInitialView('login');
+                  setIsAuthOpen(true);
+                }}
+                className="inline-flex items-center gap-2 bg-[#0F7B3A] hover:bg-emerald-600 text-white font-bold px-6 py-3 rounded-2xl text-sm transition cursor-pointer"
+              >
+                Sign In
+              </button>
+            </div>
+          );
+        }
         return (
           <UserAccountPage
             onNavigate={navigate}
@@ -411,6 +453,7 @@ export default function App() {
             initialTab={new URLSearchParams(currentQuery).get('tab') ?? undefined}
           />
         );
+      }
       case '/cart':
         return (
           <CartPage

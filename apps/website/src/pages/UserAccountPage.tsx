@@ -562,6 +562,11 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
               onClick={async () => {
                 await signOut();
                 StoreService.setLoggedIn(false);
+                // Wipe the cached profile (name, wallet, saved addresses) so
+                // the next visitor on this device — or this same person if
+                // they browse on while signed out — never sees the previous
+                // customer's data.
+                StoreService.clearUserProfile();
                 onNavigate('/');
               }}
               className="text-xs text-neutral-400 hover:text-[#0A1F12] font-bold px-3 py-2.5 transition cursor-pointer"

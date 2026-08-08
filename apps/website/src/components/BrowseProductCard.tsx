@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Check } from 'lucide-react';
+import { Heart, Check, Minus, Plus } from 'lucide-react';
 import { Product, ProductWeightOption } from '../types';
 import { StoreService } from '../lib/storage';
 import { FadeImage } from './FadeImage';
@@ -25,6 +25,11 @@ export const BrowseProductCard: React.FC<BrowseProductCardProps> = ({
 }) => {
   const [added, setAdded] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(() => StoreService.getWishlist().includes(product.id));
+  // Previously Add just flashed to "Added" for ~1.2s and reverted to a plain
+  // Add button, with nothing on the card ever showing how many of this item
+  // were actually sitting in the cart. Now the card reads the real cart
+  // quantity and swaps to a +/- stepper once it's above zero.
+  const [cartQty, setCartQty] = useState(() => StoreService.getCartQuantity(product.id));
 
   // Keeps this card's heart icon in sync if the same product's wishlist
   // state is toggled from a different card/page showing it at the same time.
@@ -32,6 +37,13 @@ export const BrowseProductCard: React.FC<BrowseProductCardProps> = ({
     const sync = () => setIsWishlisted(StoreService.getWishlist().includes(product.id));
     window.addEventListener('protein_cuts_wishlist_updated', sync);
     return () => window.removeEventListener('protein_cuts_wishlist_updated', sync);
+  }, [product.id]);
+
+  useEffect(() => {
+    const sync = () => setCartQty(StoreService.getCartQuantity(product.id));
+    sync();
+    window.addEventListener('protein_cuts_cart_updated', sync);
+    return () => window.removeEventListener('protein_cuts_cart_updated', sync);
   }, [product.id]);
 
   const defaultWeight = product.weightOptions[0];
@@ -49,6 +61,11 @@ export const BrowseProductCard: React.FC<BrowseProductCardProps> = ({
     onAddToCart(product, defaultWeight, 1);
     setAdded(true);
     setTimeout(() => setAdded(false), 1200);
+  };
+
+  const handleStepperChange = (e: React.MouseEvent, delta: number) => {
+    e.stopPropagation();
+    StoreService.adjustCartQuantity(product.id, defaultWeight.label, delta);
   };
 
   return (
@@ -103,19 +120,42 @@ export const BrowseProductCard: React.FC<BrowseProductCardProps> = ({
           </div>
         </div>
 
-        <button
-          onClick={handleAdd}
-          disabled={isOutOfStock}
-          className={`w-full mt-1 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wide transition cursor-pointer flex items-center justify-center gap-1.5 ${
-            isOutOfStock
-              ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
-              : added
-                ? 'bg-emerald-500 text-white'
-                : 'bg-[#0F7B3A] hover:bg-emerald-500 text-white'
-          }`}
-        >
-          {isOutOfStock ? 'Sold Out' : added ? (<><Check className="w-3.5 h-3.5" /> Added</>) : 'Add to Basket'}
-        </button>
+        {!isOutOfStock && cartQty > 0 ? (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full mt-1 flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl overflow-hidden"
+          >
+            <button
+              onClick={(e) => handleStepperChange(e, -1)}
+              aria-label="Decrease quantity"
+              className="w-8 h-8 flex items-center justify-center text-emerald-700 hover:bg-emerald-100 transition cursor-pointer"
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </button>
+            <span className="text-xs font-black text-[#0A1F12]">{cartQty} in cart</span>
+            <button
+              onClick={(e) => handleStepperChange(e, 1)}
+              aria-label="Increase quantity"
+              className="w-8 h-8 flex items-center justify-center text-emerald-700 hover:bg-emerald-100 transition cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleAdd}
+            disabled={isOutOfStock}
+            className={`w-full mt-1 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wide transition cursor-pointer flex items-center justify-center gap-1.5 ${
+              isOutOfStock
+                ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
+                : added
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-[#0F7B3A] hover:bg-emerald-500 text-white'
+            }`}
+          >
+            {isOutOfStock ? 'Sold Out' : added ? (<><Check className="w-3.5 h-3.5" /> Added</>) : 'Add to Basket'}
+          </button>
+        )}
       </div>
     </div>
   );

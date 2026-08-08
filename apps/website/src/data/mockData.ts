@@ -2592,6 +2592,37 @@ export const DEFAULT_USER_PROFILE: UserProfile = {
   ]
 };
 
+// A genuinely-empty profile shape — used as the fallback when nobody is
+// signed in. Previously `StoreService.getUserProfile()` fell back to
+// DEFAULT_USER_PROFILE above (a fully fleshed-out fake persona: a name,
+// email, phone number, wallet balance, reward points and a saved home
+// address) and silently wrote it to localStorage the first time ANY
+// component read the profile — including on a page load where nobody had
+// ever logged in. That made a signed-out visitor's account page look
+// identical to a real, logged-in customer's. This shape has no name, no
+// contact details, a zero balance and no saved addresses, so there is
+// nothing to show until a real Supabase session provides real data.
+export const GUEST_USER_PROFILE: UserProfile = {
+  id: '',
+  name: '',
+  email: '',
+  phone: '',
+  membershipTier: 'Gold',
+  IGOWalletBalance: 0,
+  walletBalance: 0,
+  rewardPoints: 0,
+  referralCode: '',
+  avatarUrl: undefined,
+  notificationPreferences: {
+    email: true,
+    sms: true,
+    whatsapp: true,
+    push: true
+  },
+  addresses: [],
+  savedAddresses: []
+};
+
 export const INITIAL_NOTIFICATIONS = [
   {
     id: 'notif-1',

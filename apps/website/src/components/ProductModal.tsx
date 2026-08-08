@@ -26,8 +26,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [cutStyle, setCutStyle] = useState<string>('Curry Cut');
 
   const images = product.galleryImages.length > 0 ? product.galleryImages : [product.image];
+  // Previously missing entirely — this modal let a Sold Out product be added
+  // to the cart because it never checked stockStatus at all (ProductCard.tsx
+  // and BrowseProductCard.tsx, which open this same modal via Quick View,
+  // both already guard on this).
+  const isOutOfStock = product.stockStatus === 'Out of Stock';
 
   const handleAddToCart = () => {
+    if (isOutOfStock) return;
     onAddToCart(product, selectedWeight, quantity);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
@@ -178,9 +184,15 @@ export const ProductModal: React.FC<ProductModalProps> = ({
           <div className="p-6 flex flex-col justify-between space-y-4">
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                  {product.freshnessGrade}
-                </span>
+                {isOutOfStock ? (
+                  <span className="bg-[#0A1F12] text-white border border-[#0A1F12] px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    Out of Stock
+                  </span>
+                ) : (
+                  <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                    {product.freshnessGrade}
+                  </span>
+                )}
                 <button
                   onClick={handleToggleWishlist}
                   className="flex items-center gap-1 text-xs text-neutral-500 hover:text-emerald-600 transition"
@@ -287,9 +299,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
             {/* Quantity Selector & Add to Cart Button */}
             <div className="pt-4 border-t border-neutral-200 flex items-center gap-4">
-              <div className="flex items-center bg-white border border-neutral-200 rounded-xl overflow-hidden">
+              <div className={`flex items-center bg-white border border-neutral-200 rounded-xl overflow-hidden ${isOutOfStock ? 'opacity-40 pointer-events-none' : ''}`}>
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={isOutOfStock}
                   className="px-3 py-2 text-neutral-500 hover:text-[#0A1F12] transition font-bold"
                 >
                   -
@@ -297,6 +310,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 <span className="px-3 py-2 text-xs font-bold text-[#0A1F12]">{quantity}</span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
+                  disabled={isOutOfStock}
                   className="px-3 py-2 text-neutral-500 hover:text-[#0A1F12] transition font-bold"
                 >
                   +
@@ -305,13 +319,18 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
               <button
                 onClick={handleAddToCart}
-                className={`flex-1 py-3 px-6 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer shadow-lg ${
-                  added
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-[#0F7B3A] hover:bg-emerald-500 text-white shadow-emerald-900/20'
+                disabled={isOutOfStock}
+                className={`flex-1 py-3 px-6 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition shadow-lg ${
+                  isOutOfStock
+                    ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed shadow-none'
+                    : added
+                      ? 'bg-emerald-500 text-white cursor-pointer'
+                      : 'bg-[#0F7B3A] hover:bg-emerald-500 text-white shadow-emerald-900/20 cursor-pointer'
                 }`}
               >
-                {added ? (
+                {isOutOfStock ? (
+                  'Sold Out'
+                ) : added ? (
                   <>
                     <Check className="w-4 h-4" /> Added to Cart!
                   </>

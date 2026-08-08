@@ -28,6 +28,33 @@ export const B2BPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  // Previously the only check here was "is businessName/phone non-empty" —
+  // any string passed, so the form happily accepted things like "fjhgjh" as
+  // a business name, an 18-digit string as a phone number, or digits typed
+  // into the City field. This validates real formats before anything is
+  // sent to the leads table.
+  const validate = (): string | null => {
+    if (formData.businessName.trim().length < 2) {
+      return 'Please enter a valid business name.';
+    }
+    const digitsOnlyPhone = formData.phone.replace(/[^0-9]/g, '');
+    // Indian mobile numbers: 10 digits, optionally prefixed with a 91
+    // country code (so "+91 98200 11223" and "9820011223" both pass).
+    const localPhone = digitsOnlyPhone.length === 12 && digitsOnlyPhone.startsWith('91')
+      ? digitsOnlyPhone.slice(2)
+      : digitsOnlyPhone;
+    if (!/^[6-9][0-9]{9}$/.test(localPhone)) {
+      return 'Please enter a valid 10-digit Indian mobile number.';
+    }
+    if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      return 'Please enter a valid email address.';
+    }
+    if (!/[a-zA-Z]/.test(formData.city.trim()) || formData.city.trim().length < 2) {
+      return 'Please enter a valid city name.';
+    }
+    return null;
+  };
+
   // Previously this only flipped local `submitted` state to true — nothing
   // was ever saved anywhere, so every "Inquiry Received!" the customer saw
   // was fake and the admin's Leads tab stayed empty forever regardless of
@@ -36,6 +63,12 @@ export const B2BPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.businessName || !formData.phone) return;
+
+    const validationError = validate();
+    if (validationError) {
+      setSubmitError(validationError);
+      return;
+    }
 
     setSubmitError(null);
     setIsSubmitting(true);
@@ -135,6 +168,7 @@ export const B2BPage: React.FC = () => {
                 <input
                   type="text"
                   required
+                  maxLength={100}
                   placeholder="e.g. Spice Route Kitchen"
                   value={formData.businessName}
                   onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
@@ -158,6 +192,7 @@ export const B2BPage: React.FC = () => {
                   <input
                     type="tel"
                     required
+                    maxLength={17}
                     placeholder="+91 98200 11223"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -207,6 +242,7 @@ export const B2BPage: React.FC = () => {
                 <input
                   type="text"
                   required
+                  maxLength={60}
                   placeholder="e.g. Bengaluru"
                   value={formData.city}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}

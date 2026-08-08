@@ -28,6 +28,7 @@ import { StoreService } from '../lib/storage';
 import { fetchNotifications } from '../lib/api/notifications';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { Language, TRANSLATIONS } from '../lib/language';
+import { isPincodeServiceable, isValidPincodeFormat } from '../lib/serviceability';
 
 interface NavbarProps {
   onOpenCart: () => void;
@@ -139,7 +140,13 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const handleVerifyPincode = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputPincode.trim().length === 6) {
+    if (!isValidPincodeFormat(inputPincode)) {
+      setPincodeStatus('Please enter a valid 6-digit Pincode.');
+      return;
+    }
+    // Real check against the serviceable-pincode list (src/lib/serviceability.ts)
+    // — previously any 6-digit string was accepted as deliverable.
+    if (isPincodeServiceable(inputPincode)) {
       setSelectedPincode(`${inputPincode} (Express Available)`);
       setPincodeStatus('30-Minute Express Cold Chain Delivery Active in your zone!');
       setTimeout(() => {
@@ -147,7 +154,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         setPincodeStatus(null);
       }, 1500);
     } else {
-      setPincodeStatus('Please enter a valid 6-digit Pincode.');
+      setPincodeStatus("Sorry, we don't deliver to this Pincode yet. We currently serve Bengaluru only.");
     }
   };
 

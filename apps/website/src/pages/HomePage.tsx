@@ -30,6 +30,7 @@ import {
   Clock3,
   Snowflake,
   MapPin,
+  XCircle,
   Sandwich,
   ShieldCheck,
   Truck,
@@ -56,6 +57,7 @@ import { BrandPartnersSection } from '../sections/BrandPartnersSection';
 import { TestimonialsSection } from '../sections/TestimonialsSection';
 import { useSiteContent, renderToken } from '../lib/hooks/useSiteContent';
 import { resolveIcon } from '../lib/iconMap';
+import { isPincodeServiceable } from '../lib/serviceability';
 
 // Small count-up stat used in the hero — animates from 0 to its target once
 // on mount, matching the "0 -> real number" counter pattern.
@@ -114,7 +116,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubmitted, setNewsletterSubmitted] = useState(false);
   const [pincode, setPincode] = useState('');
-  const [pincodeStatus, setPincodeStatus] = useState<'idle' | 'checking' | 'available'>('idle');
+  const [pincodeStatus, setPincodeStatus] = useState<'idle' | 'checking' | 'available' | 'unavailable'>('idle');
 
   // Refs + helper for the arrow-button carousel navigation on the
   // horizontal product strips (Today's Fresh Stock, Top Picks, Chef
@@ -215,7 +217,12 @@ export const HomePage: React.FC<HomePageProps> = ({
     e.preventDefault();
     if (!pincode.trim()) return;
     setPincodeStatus('checking');
-    setTimeout(() => setPincodeStatus('available'), 700);
+    // Real check against the serviceable-pincode list (src/lib/serviceability.ts)
+    // instead of always reporting "available" — previously this ignored the
+    // entered pincode entirely and just waited 700ms before saying yes.
+    setTimeout(() => {
+      setPincodeStatus(isPincodeServiceable(pincode) ? 'available' : 'unavailable');
+    }, 700);
   };
 
   // Real thumbnails pulled directly from the live @igoproteincuts Instagram
@@ -576,6 +583,11 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <CheckCircle2 className="w-3.5 h-3.5" /> Great news — we deliver to {pincode}!
                 </p>
               )}
+              {pincodeStatus === 'unavailable' && (
+                <p className="text-xs text-red-600 font-semibold mt-2 flex items-center gap-1">
+                  <XCircle className="w-3.5 h-3.5" /> Sorry, we don't deliver to {pincode} yet. We currently serve Bengaluru only.
+                </p>
+              )}
             </form>
 
             {/* Live Stat Counters */}
@@ -634,25 +646,50 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </div>
                 ))}
 
-                {/* Verified Origin Badge */}
-                <div className="absolute -top-4 -right-4 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white/60 max-w-[200px]">
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <div className="p-2 bg-[#0F7B3A]/10 rounded-xl">
-                      <ShieldCheck className="w-4 h-4 text-[#0F7B3A]" />
-                    </div>
-                    <span className="font-bold text-[10px] uppercase tracking-widest text-neutral-400">Verified Origin</span>
-                  </div>
-                  <p className="text-xs font-bold text-[#0A1F12] leading-tight">{heroImages[activeHeroTheme].caption}</p>
-                  <p className="text-[10px] text-neutral-500 mt-1 leading-relaxed">{heroImages[activeHeroTheme].sub}</p>
-                </div>
+                {/* Prev/Next arrows — previously only the dot indicators
+                    below could change the photo; there was no explicit
+                    forward/back control. */}
+                <button
+                  onClick={() => setActiveHeroTheme((activeHeroTheme - 1 + heroImages.length) % heroImages.length)}
+                  aria-label="Previous photo"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white/80 hover:bg-white backdrop-blur-md flex items-center justify-center text-[#0A1F12] shadow-md transition cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setActiveHeroTheme((activeHeroTheme + 1) % heroImages.length)}
+                  aria-label="Next photo"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white/80 hover:bg-white backdrop-blur-md flex items-center justify-center text-[#0A1F12] shadow-md transition cursor-pointer"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
 
-                {/* Delivery Time Badge */}
-                <div className="absolute -bottom-4 -left-4 bg-[#0F7B3A] text-white px-4 py-3 rounded-2xl shadow-lg shadow-emerald-900/30 flex items-center gap-2.5">
-                  <Truck className="w-5 h-5" />
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Delivery Time</p>
-                    <p className="font-black text-sm">30 Minutes</p>
+              {/* Verified Origin Badge — previously placed *inside* the
+                  overflow-hidden image card above with a negative offset
+                  meant to make it "float" outside the card's corner. The
+                  overflow-hidden on the parent clipped it instead, cutting
+                  the badge off and running it into the caption text
+                  underneath on narrower widths. Moving it here, as a sibling
+                  of the image card rather than a child, keeps the same
+                  floating-corner look without being clipped. */}
+              <div className="absolute -top-4 -right-4 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white/60 max-w-[200px] z-10">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="p-2 bg-[#0F7B3A]/10 rounded-xl">
+                    <ShieldCheck className="w-4 h-4 text-[#0F7B3A]" />
                   </div>
+                  <span className="font-bold text-[10px] uppercase tracking-widest text-neutral-400">Verified Origin</span>
+                </div>
+                <p className="text-xs font-bold text-[#0A1F12] leading-tight">{heroImages[activeHeroTheme].caption}</p>
+                <p className="text-[10px] text-neutral-500 mt-1 leading-relaxed">{heroImages[activeHeroTheme].sub}</p>
+              </div>
+
+              {/* Delivery Time Badge — same fix as Verified Origin above. */}
+              <div className="absolute -bottom-4 -left-4 bg-[#0F7B3A] text-white px-4 py-3 rounded-2xl shadow-lg shadow-emerald-900/30 flex items-center gap-2.5 z-10">
+                <Truck className="w-5 h-5" />
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Delivery Time</p>
+                  <p className="font-black text-sm">30 Minutes</p>
                 </div>
               </div>
 
@@ -816,6 +853,10 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div ref={topPicksScrollRef} className="flex items-stretch gap-4 overflow-x-auto no-scrollbar pb-2 -mx-1 px-1 scroll-smooth">
             {bestSellers.map((product) => {
               const weight = product.weightOptions[0];
+              // Previously this rail's "Add" button skipped the stock check
+              // that ProductCard.tsx/BrowseProductCard.tsx already enforce,
+              // so a Sold Out product could still be added from here.
+              const isOutOfStock = product.stockStatus === 'Out of Stock';
               return (
                 <div
                   key={product.id}
@@ -823,8 +864,12 @@ export const HomePage: React.FC<HomePageProps> = ({
                   className="group/card relative shrink-0 w-40 sm:w-48 bg-white border border-neutral-200 hover:border-emerald-400 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col hover:-translate-y-1"
                 >
                   <div className="relative aspect-square bg-neutral-100 overflow-hidden">
-                    <img src={product.image} alt={product.name} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover/card:scale-110 transition duration-500" />
-                    {product.discountPercentage > 0 && (
+                    <img src={product.image} alt={product.name} referrerPolicy="no-referrer" className={`w-full h-full object-cover group-hover/card:scale-110 transition duration-500 ${isOutOfStock ? 'grayscale opacity-70' : ''}`} />
+                    {isOutOfStock ? (
+                      <span className="absolute top-2 left-2 bg-[#0A1F12] text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+                        Out of Stock
+                      </span>
+                    ) : product.discountPercentage > 0 && (
                       <span className="absolute top-2 left-2 bg-[#0F7B3A] text-white text-[10px] font-black px-2 py-0.5 rounded-full">
                         {product.discountPercentage}% OFF
                       </span>
@@ -861,11 +906,17 @@ export const HomePage: React.FC<HomePageProps> = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
+                          if (isOutOfStock) return;
                           onAddToCart(product, weight, 1);
                         }}
-                        className="bg-[#0F7B3A] hover:bg-emerald-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full transition cursor-pointer shrink-0"
+                        disabled={isOutOfStock}
+                        className={`text-[10px] font-bold px-3 py-1.5 rounded-full transition shrink-0 ${
+                          isOutOfStock
+                            ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
+                            : 'bg-[#0F7B3A] hover:bg-emerald-500 text-white cursor-pointer'
+                        }`}
                       >
-                        Add
+                        {isOutOfStock ? 'Sold Out' : 'Add'}
                       </button>
                     </div>
                   </div>

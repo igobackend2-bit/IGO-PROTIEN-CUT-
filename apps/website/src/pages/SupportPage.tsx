@@ -423,6 +423,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                 <option>Pack seal damaged in transit</option>
                 <option>Cut precision issue (Not matching boneless/pieces)</option>
                 <option>Weight discrepancy</option>
+                <option>Other</option>
               </select>
             </div>
 

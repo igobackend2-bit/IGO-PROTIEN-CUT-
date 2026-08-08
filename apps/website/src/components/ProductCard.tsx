@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Star, Flame, RefreshCw, Check, Heart, Zap, Bell, Tag } from 'lucide-react';
+import { ShoppingBag, Star, Flame, RefreshCw, Check, Heart, Zap, Bell, Tag, Minus, Plus } from 'lucide-react';
 import { Product, ProductWeightOption } from '../types';
 import { StoreService } from '../lib/storage';
 import { FadeImage } from './FadeImage';
@@ -36,6 +36,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const currentWeight = product.weightOptions[selectedWeightIndex] || product.weightOptions[0];
   const isOutOfStock = product.stockStatus === 'Out of Stock';
 
+  // Previously Add just flashed to "Added!" for ~1.2s and reverted to a
+  // plain Add button, with nothing on the card showing how many of the
+  // selected weight were actually already in the cart.
+  const [cartQty, setCartQty] = useState(() => StoreService.getCartQuantityForWeight(product.id, currentWeight.label));
+
+  useEffect(() => {
+    const sync = () => setCartQty(StoreService.getCartQuantityForWeight(product.id, currentWeight.label));
+    sync();
+    window.addEventListener('protein_cuts_cart_updated', sync);
+    return () => window.removeEventListener('protein_cuts_cart_updated', sync);
+  }, [product.id, currentWeight.label]);
+
   // Inline coupon call-out (FreshToHome/ZappFresh pattern: "Use CODE" shown
   // directly on the product card, not just buried in the cart).
   const bestCoupon = StoreService.getCoupons()
@@ -51,6 +63,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     onAddToCart(product, currentWeight, 1);
     setAdded(true);
     setTimeout(() => setAdded(false), 1200);
+  };
+
+  const handleStepperChange = (e: React.MouseEvent, delta: number) => {
+    e.stopPropagation();
+    StoreService.adjustCartQuantity(product.id, currentWeight.label, delta);
   };
 
   const handleBuyNow = (e: React.MouseEvent) => {
@@ -245,24 +262,47 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   Buy Now
                 </button>
               )}
-              <button
-                onClick={handleAdd}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-md ${
-                  added
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-[#0F7B3A] hover:bg-emerald-500 text-white'
-                }`}
-              >
-                {added ? (
-                  <>
-                    <Check className="w-3.5 h-3.5" /> Added!
-                  </>
-                ) : (
-                  <>
-                    <ShoppingBag className="w-3.5 h-3.5" /> Add
-                  </>
-                )}
-              </button>
+              {cartQty > 0 ? (
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 rounded-xl px-1 py-1"
+                >
+                  <button
+                    onClick={(e) => handleStepperChange(e, -1)}
+                    aria-label="Decrease quantity"
+                    className="w-6 h-6 flex items-center justify-center text-emerald-700 hover:bg-emerald-100 rounded-lg transition cursor-pointer"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="text-xs font-black text-[#0A1F12] min-w-[1ch] text-center">{cartQty}</span>
+                  <button
+                    onClick={(e) => handleStepperChange(e, 1)}
+                    aria-label="Increase quantity"
+                    className="w-6 h-6 flex items-center justify-center text-emerald-700 hover:bg-emerald-100 rounded-lg transition cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleAdd}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-md ${
+                    added
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-[#0F7B3A] hover:bg-emerald-500 text-white'
+                  }`}
+                >
+                  {added ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" /> Added!
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingBag className="w-3.5 h-3.5" /> Add
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           )}
         </div>

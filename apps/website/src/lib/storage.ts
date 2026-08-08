@@ -1,5 +1,5 @@
 import { Product, Order, FranchiseLead, Coupon, UserProfile, CartItem } from '../types';
-import { INITIAL_PRODUCTS, INITIAL_COUPONS, DEFAULT_USER_PROFILE } from '../data/mockData';
+import { INITIAL_PRODUCTS, INITIAL_COUPONS, DEFAULT_USER_PROFILE, GUEST_USER_PROFILE } from '../data/mockData';
 import { fetchCatalog, fetchCoupons, submitLead } from './api/catalog';
 import {
   fetchMyOrders,
@@ -565,6 +565,50 @@ export class StoreService {
     window.dispatchEvent(new Event('protein_cuts_cart_updated'));
   }
 
+  // Sums quantity across every cart line for a product (it can appear more
+  // than once with different weight/cut-preference selections). Used by the
+  // product cards to show a live +/- stepper instead of the previous
+  // behaviour of just flashing "Added" for ~1.2s and reverting to a plain
+  // Add button with no indication of how many were actually in the cart.
+  static getCartQuantity(productId: string): number {
+    return this.getCart()
+      .filter((item) => item.product.id === productId)
+      .reduce((sum, item) => sum + item.quantity, 0);
+  }
+
+  // Same as getCartQuantity, but scoped to one weight variant — used by
+  // ProductCard.tsx, whose stepper needs to reflect the quantity of
+  // whichever weight option is currently selected, not the product's total
+  // across every variant (a customer with 2x 500g in cart who then selects
+  // the 1kg option shouldn't see a stepper claiming 2x 1kg is in cart).
+  static getCartQuantityForWeight(productId: string, weightLabel: string): number {
+    return this.getCart()
+      .filter((item) => item.product.id === productId && item.selectedWeight.label === weightLabel)
+      .reduce((sum, item) => sum + item.quantity, 0);
+  }
+
+  // Adjusts the specific product+weight cart line by delta, removing it if
+  // that hits zero — used by the card stepper's +/- buttons, which only ever
+  // deal with the one weight variant a card's "Add" button used. Falls back
+  // to the first line for that product if no line matches the exact weight
+  // (defensive — shouldn't normally happen).
+  static adjustCartQuantity(productId: string, weightLabel: string, delta: number): CartItem[] {
+    const cart = this.getCart();
+    const targetIdx = (() => {
+      const exact = cart.findIndex((item) => item.product.id === productId && item.selectedWeight.label === weightLabel);
+      if (exact >= 0) return exact;
+      return cart.findIndex((item) => item.product.id === productId);
+    })();
+
+    if (targetIdx < 0) return cart;
+
+    const updated = cart
+      .map((item, idx) => (idx === targetIdx ? { ...item, quantity: item.quantity + delta } : item))
+      .filter((item) => item.quantity > 0);
+    this.saveCart(updated);
+    return updated;
+  }
+
   // GIFT NOTE — an optional personalized message attached to the current
   // cart when a gift box is added from the Gifting page. Cleared once the
   // cart itself is emptied (see CartPage) so stale notes don't linger.
@@ -702,6 +746,15 @@ export class StoreService {
     window.dispatchEvent(new Event('protein_cuts_user_updated'));
   }
 
+  // Previously this fell back to DEFAULT_USER_PROFILE — a fully-populated
+  // fake persona (name, email, phone, wallet balance, reward points, a saved
+  // home address) — and PERSISTED it to localStorage the moment anything
+  // called this, regardless of whether anyone was actually signed in. That
+  // made a signed-out visitor's cart/account/checkout look identical to a
+  // real logged-in customer's. Now it only ever returns cached data that was
+  // genuinely written by a real sign-in (see UserAuthModal's completeLogin,
+  // which calls saveUserProfile with data from the real `profiles` table) or
+  // by the customer's own local edits — never a seeded fake identity.
   static getUserProfile(): UserProfile {
     try {
       const data = localStorage.getItem(USER_KEY);
@@ -709,8 +762,14 @@ export class StoreService {
     } catch {
       // fallback
     }
-    localStorage.setItem(USER_KEY, JSON.stringify(DEFAULT_USER_PROFILE));
-    return DEFAULT_USER_PROFILE;
+    return { ...GUEST_USER_PROFILE };
+  }
+
+  // Called on sign-out so the next visitor on this device never sees the
+  // previous customer's cached name, wallet balance or saved addresses.
+  static clearUserProfile(): void {
+    localStorage.removeItem(USER_KEY);
+    window.dispatchEvent(new Event('protein_cuts_user_updated'));
   }
 
   static assignDeliveryPartner(orderId: string, partnerName: string): Order[] {

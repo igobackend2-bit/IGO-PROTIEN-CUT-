@@ -609,20 +609,27 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               Buy More, Save More (Gym & Bulk Buyers)
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {/* Previously these were plain, non-interactive <div>s — the
+                  active tier only ever updated as a side-effect of the
+                  quantity stepper below, so a customer couldn't tap "10+
+                  units" to jump straight to that quantity. Now each tile
+                  sets the quantity to that tier's minimum directly. */}
               {BULK_TIERS.map((tier) => (
-                <div
+                <button
                   key={tier.label}
-                  className={`rounded-xl border p-2 text-center transition ${
+                  type="button"
+                  onClick={() => setQuantity(tier.minQty)}
+                  className={`rounded-xl border p-2 text-center transition cursor-pointer ${
                     activeBulkTier.label === tier.label
                       ? 'bg-[#0F7B3A] border-[#0F7B3A] text-white'
-                      : 'bg-white border-neutral-200 text-neutral-500'
+                      : 'bg-white border-neutral-200 text-neutral-500 hover:border-emerald-400 hover:text-[#0A1F12]'
                   }`}
                 >
                   <div className="text-[10px] font-bold uppercase">{tier.label}</div>
                   <div className="text-xs font-black mt-0.5">
                     {tier.discountPct > 0 ? `${tier.discountPct}% OFF` : 'Base Price'}
                   </div>
-                </div>
+                </button>
               ))}
             </div>
             {bulkSavings > 0 && (

@@ -73,10 +73,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">Customer Care</h4>
             <ul className="space-y-2.5 text-sm">
               {[
-                { label: 'Terms And Condition', path: '/policy' },
-                { label: 'Privacy Policy', path: '/policy' },
-                { label: 'Shipping Policy', path: '/policy' },
-                { label: 'Return Policy', path: '/policy' },
+                // Previously all four policy links pointed at the exact same
+                // /policy URL, so they all opened the same undifferentiated
+                // page — now each deep-links its own section (see
+                // PolicyPage.tsx's `section` prop) and scrolls straight to it.
+                { label: 'Terms & Conditions', path: '/policy?section=terms' },
+                { label: 'Privacy Policy', path: '/policy?section=privacy' },
+                { label: 'Shipping Policy', path: '/policy?section=shipping' },
+                { label: 'Return Policy', path: '/policy?section=returns' },
                 { label: 'Contact us', path: '/contact' }
               ].map((link) => (
                 <li key={link.label}>

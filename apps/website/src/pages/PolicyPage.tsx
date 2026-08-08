@@ -1,7 +1,36 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ShieldCheck } from 'lucide-react';
 
-export const PolicyPage: React.FC = () => {
+interface PolicyPageProps {
+  // Deep-links a specific policy section (Footer.tsx passes e.g.
+  // /policy?section=shipping). Previously every footer policy link —
+  // Terms, Privacy, Shipping, Return — pointed at the exact same /policy
+  // URL with no way to tell which one was clicked, so all four always
+  // opened the same undifferentiated page from the top.
+  section?: string;
+}
+
+const SECTION_IDS: Record<string, string> = {
+  shipping: 'shipping-policy',
+  returns: 'return-policy',
+  privacy: 'privacy-policy',
+  terms: 'terms-of-use'
+};
+
+export const PolicyPage: React.FC<PolicyPageProps> = ({ section }) => {
+  const highlightId = section ? SECTION_IDS[section] : undefined;
+
+  useEffect(() => {
+    if (!highlightId) return;
+    const el = document.getElementById(highlightId);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [highlightId]);
+
+  const sectionClass = (id: string) =>
+    `space-y-2 scroll-mt-24 rounded-2xl transition-colors ${
+      highlightId === id ? 'bg-emerald-50 border border-emerald-200 p-4 -m-4' : ''
+    }`;
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 space-y-8">
       <div className="bg-white border border-neutral-200 rounded-3xl p-8 space-y-4 shadow-sm">
@@ -10,29 +39,29 @@ export const PolicyPage: React.FC = () => {
         </h1>
 
         <div className="space-y-6 text-xs text-neutral-600 leading-relaxed">
-          <section className="space-y-2">
-            <h2 className="text-sm font-bold uppercase text-emerald-700">1. Cold Chain & Delivery Policy</h2>
+          <section id="shipping-policy" className={sectionClass('shipping-policy')}>
+            <h2 className="text-sm font-bold uppercase text-emerald-700">1. Cold Chain & Delivery (Shipping) Policy</h2>
             <p>
               Protein Cuts guarantees 30-minute express delivery in insulated cold bags. Freshness is strictly maintained at 0°C to 4°C. If any product is delivered above 8°C, we provide 100% instant refund or replacement.
             </p>
           </section>
 
-          <section className="space-y-2">
-            <h2 className="text-sm font-bold uppercase text-emerald-700">2. Refund & Return Guarantee</h2>
+          <section id="return-policy" className={sectionClass('return-policy')}>
+            <h2 className="text-sm font-bold uppercase text-emerald-700">2. Refund & Return Policy</h2>
             <p>
               Due to food safety standards, raw meat products cannot be physically returned once accepted at doorstep. However, if you inspect any quality or freshness discrepancy upon receipt, notify our customer care team within 2 hours for instant refund to your IGO Wallet.
             </p>
           </section>
 
-          <section className="space-y-2">
-            <h2 className="text-sm font-bold uppercase text-emerald-700">3. Privacy & Data Security</h2>
+          <section id="privacy-policy" className={sectionClass('privacy-policy')}>
+            <h2 className="text-sm font-bold uppercase text-emerald-700">3. Privacy Policy & Data Security</h2>
             <p>
               Your contact details, delivery addresses, and payment information are encrypted under SSL 256-bit protocol and never shared with third parties outside order fulfillment.
             </p>
           </section>
 
-          <section className="space-y-2">
-            <h2 className="text-sm font-bold uppercase text-emerald-700">4. Terms of Use</h2>
+          <section id="terms-of-use" className={sectionClass('terms-of-use')}>
+            <h2 className="text-sm font-bold uppercase text-emerald-700">4. Terms & Conditions</h2>
             <p>
               By placing an order on Protein Cuts, you confirm the delivery details provided are accurate and that you (or an authorized adult) will be available to receive the order. Prices, discounts, and product availability are subject to change without prior notice and may vary by delivery pincode.
             </p>
