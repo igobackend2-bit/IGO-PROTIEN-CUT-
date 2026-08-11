@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShieldCheck, Award, Clock, CheckCircle2, Truck } from 'lucide-react';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
+import { FadeImage } from '../components/FadeImage';
 
 export const AboutPage: React.FC = () => {
   // Only the hero title/intro are admin-editable here (via /admin → Pages &
@@ -62,10 +63,13 @@ export const AboutPage: React.FC = () => {
         </div>
 
         <div className="relative rounded-3xl overflow-hidden shadow-xl shadow-black/20 min-h-[320px]">
-          <img
-            src="https://igo-protien-cut.vercel.app/images/narrative/facility.webp"
+          {/* Was pointed at igo-protien-cut.vercel.app, an old, unrelated
+              Vercel project that's since been redeployed with a different
+              site — the URL now 404s. Recovered the original photo from an
+              old deployment of that same project and re-hosted it locally. */}
+          <FadeImage
+            src="/Images/narrative/facility.jpg"
             alt="IGO cold-chain facility — batch-tracked processing"
-            referrerPolicy="no-referrer"
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0A1F12]/85 via-[#0A1F12]/10 to-transparent" />

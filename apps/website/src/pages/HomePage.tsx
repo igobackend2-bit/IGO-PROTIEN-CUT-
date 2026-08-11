@@ -58,6 +58,7 @@ import { TestimonialsSection } from '../sections/TestimonialsSection';
 import { useSiteContent, renderToken } from '../lib/hooks/useSiteContent';
 import { resolveIcon } from '../lib/iconMap';
 import { isPincodeServiceable } from '../lib/serviceability';
+import { FadeImage } from '../components/FadeImage';
 
 // Small count-up stat used in the hero — animates from 0 to its target once
 // on mount, matching the "0 -> real number" counter pattern.
@@ -203,11 +204,19 @@ export const HomePage: React.FC<HomePageProps> = ({
   // above — each real photo pairs with its matching story (heritage farms,
   // cold-chain facility, traceable packaging).
   // Editable from /admin → Homepage → Hero Images.
+  //
+  // These used to point at igo-protien-cut.vercel.app — an old, unrelated
+  // Vercel project that has since been redeployed with a completely
+  // different site, so that URL now 404s and every one of these images broke
+  // across the whole site (hero, About page, sign-in modal, Our Farms
+  // section). The original photos were recovered from an old deployment of
+  // that same project and re-hosted locally under /Images/narrative so
+  // nothing here depends on an external host again.
   const heroImagesBlock = useSiteContent('home.hero_images', {
     items: [
-      { src: 'https://igo-protien-cut.vercel.app/images/narrative/farm.webp', alt: 'Heritage Tamil Farms', caption: 'High Meadows Farm', sub: 'Certified heritage pastures in the Nilgiris range.' },
-      { src: 'https://igo-protien-cut.vercel.app/images/narrative/facility.webp', alt: 'Cold-Chain Integrity', caption: 'IGO Cold-Chain Facility', sub: '0-4°C sterile processing, ISO 22000 certified.' },
-      { src: 'https://igo-protien-cut.vercel.app/images/narrative/packaging.webp', alt: 'Total Traceability', caption: 'Batch-Tracked Packaging', sub: 'Every pack carries a scannable farm-to-door QR code.' }
+      { src: '/Images/narrative/farm.jpg', alt: 'Heritage Tamil Farms', caption: 'High Meadows Farm', sub: 'Certified heritage pastures in the Nilgiris range.' },
+      { src: '/Images/narrative/facility.jpg', alt: 'Cold-Chain Integrity', caption: 'IGO Cold-Chain Facility', sub: '0-4°C sterile processing, ISO 22000 certified.' },
+      { src: '/Images/narrative/packaging.jpg', alt: 'Total Traceability', caption: 'Batch-Tracked Packaging', sub: 'Insulated cold-chain bags, sealed at the point of pack.' }
     ]
   });
 
@@ -637,7 +646,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     key={img.src}
                     className={`absolute inset-0 transition-opacity duration-700 ${idx === activeHeroTheme ? 'opacity-100' : 'opacity-0'}`}
                   >
-                    <img src={img.src} alt={img.alt} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                    <FadeImage src={img.src} alt={img.alt} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                     <div className="absolute bottom-5 left-5 right-5">
                       <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">{img.alt}</span>

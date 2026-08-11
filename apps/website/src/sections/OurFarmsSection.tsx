@@ -1,13 +1,17 @@
 import React from 'react';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
 import { resolveIcon } from '../lib/iconMap';
+import { FadeImage } from '../components/FadeImage';
 
 /**
  * Editable from /admin → Sections → Our Farms and → Certifications.
  *
- * The three narrative images currently point at igo-protien-cut.vercel.app, an
- * external host. Upload them via /admin → Media and repoint these so the site
- * doesn't depend on a domain you may retire.
+ * The three narrative images used to point at igo-protien-cut.vercel.app — an
+ * old, unrelated Vercel deployment that has since been overwritten with an
+ * entirely different site, so that URL now 404s and the images broke
+ * site-wide. The original photos were recovered from an old deployment of
+ * that same project and re-hosted locally under /Images/narrative so nothing
+ * here depends on an external host again.
  */
 const FARMS_FALLBACK = {
   eyebrow: 'FROM OUR NETWORK',
@@ -18,17 +22,17 @@ const FARMS_FALLBACK = {
     {
       label: 'Heritage Farms',
       caption: 'Nilgiris range, Tamil Nadu',
-      image: 'https://igo-protien-cut.vercel.app/images/narrative/farm.webp'
+      image: '/Images/narrative/farm.jpg'
     },
     {
       label: 'Sterile Processing',
       caption: 'ISO 22000 dark stores, 0-4°C',
-      image: 'https://igo-protien-cut.vercel.app/images/narrative/facility.webp'
+      image: '/Images/narrative/facility.jpg'
     },
     {
       label: 'Batch-Tracked Packaging',
-      caption: 'Scannable farm-to-door QR code',
-      image: 'https://igo-protien-cut.vercel.app/images/narrative/packaging.webp'
+      caption: 'Insulated cold-chain delivery bags',
+      image: '/Images/narrative/packaging.jpg'
     }
   ]
 };
@@ -65,10 +69,9 @@ export const OurFarmsSection: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {journey.map((step) => (
           <div key={step.label} className="relative rounded-2xl overflow-hidden aspect-4/3 group">
-            <img
+            <FadeImage
               src={step.image}
               alt={step.label}
-              referrerPolicy="no-referrer"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0A1F12]/90 via-[#0A1F12]/20 to-transparent" />

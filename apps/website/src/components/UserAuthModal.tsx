@@ -216,7 +216,7 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
       {/* Ambient blurred brand photo behind the whole glass card */}
       <div className="fixed inset-0">
         <img
-          src="https://igo-protien-cut.vercel.app/images/narrative/facility.webp"
+          src="/Images/banners/b2b-facility-banner.jpg"
           alt=""
           referrerPolicy="no-referrer"
           className="absolute inset-0 w-full h-full object-cover scale-105 blur-[2px] opacity-70"
@@ -228,7 +228,7 @@ export const UserAuthModal: React.FC<UserAuthModalProps> = ({
           {/* Left — glass panel over brand photography */}
           <div className="hidden lg:flex relative flex-col justify-between p-10 xl:p-14 border-r border-white/10 bg-white/[0.03] overflow-hidden">
             <img
-              src="https://igo-protien-cut.vercel.app/images/narrative/facility.webp"
+              src="/Images/banners/b2b-facility-banner.jpg"
               alt="IGO Protein Cuts cold-chain facility"
               referrerPolicy="no-referrer"
               className="absolute inset-0 w-full h-full object-cover opacity-30"
