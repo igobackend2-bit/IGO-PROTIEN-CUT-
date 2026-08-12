@@ -75,12 +75,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               {[
                 // Previously all four policy links pointed at the exact same
                 // /policy URL, so they all opened the same undifferentiated
-                // page — now each deep-links its own section (see
-                // PolicyPage.tsx's `section` prop) and scrolls straight to it.
-                { label: t('termsConditions'), path: '/policy?section=terms' },
-                { label: t('privacyPolicy'), path: '/policy?section=privacy' },
-                { label: t('shippingPolicy'), path: '/policy?section=shipping' },
-                { label: t('returnPolicy'), path: '/policy?section=returns' },
+                // page. Now each has its own dedicated page/URL (see the
+                // /shipping-policy, /refund-policy, /privacy-policy,
+                // /terms-conditions routes in App.tsx + PolicyPage.tsx's
+                // `only` prop).
+                { label: t('termsConditions'), path: '/terms-conditions' },
+                { label: t('privacyPolicy'), path: '/privacy-policy' },
+                { label: t('shippingPolicy'), path: '/shipping-policy' },
+                { label: t('returnPolicy'), path: '/refund-policy' },
                 { label: t('contactUs'), path: '/contact' }
               ].map((link) => (
                 <li key={link.label}>

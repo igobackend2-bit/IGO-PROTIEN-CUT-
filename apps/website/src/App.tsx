@@ -409,6 +409,17 @@ export default function App() {
         return <ContactPage onNavigate={navigate} />;
       case '/policy':
         return <PolicyPage section={new URLSearchParams(currentQuery).get('section') ?? undefined} />;
+      // Dedicated single-policy pages — previously every policy link landed
+      // on the same combined /policy page. These give each one its own real
+      // URL, matching how most e-commerce sites structure Privacy/Terms/etc.
+      case '/shipping-policy':
+        return <PolicyPage only="shipping-policy" onNavigate={navigate} />;
+      case '/refund-policy':
+        return <PolicyPage only="return-policy" onNavigate={navigate} />;
+      case '/privacy-policy':
+        return <PolicyPage only="privacy-policy" onNavigate={navigate} />;
+      case '/terms-conditions':
+        return <PolicyPage only="terms-of-use" onNavigate={navigate} />;
       case '/account': {
         // Previously this route rendered UserAccountPage unconditionally, so
         // a signed-out visitor who typed /account (or clicked the header

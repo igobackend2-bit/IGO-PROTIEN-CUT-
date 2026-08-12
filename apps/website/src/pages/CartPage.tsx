@@ -32,7 +32,6 @@ import {
   BookOpen,
   Copy,
   Truck,
-  PartyPopper,
   Pencil,
   Home,
   Briefcase,
@@ -47,6 +46,7 @@ import { INITIAL_RECIPES } from '../data/mockData';
 import { PartnerRedirectModal } from '../components/PartnerRedirectModal';
 import { getActiveBulkTier, getBulkLineTotal } from '../lib/pricing';
 import confetti from 'canvas-confetti';
+import { useLang } from '../lib/language';
 
 interface CartPageProps {
   products: Product[];
@@ -64,11 +64,14 @@ interface CartPageProps {
 
 type CheckoutStep = 1 | 2 | 3 | 4;
 
+// label is a translation key, resolved via t() at render time (this is a
+// module-level constant, outside the component, so it can't call the
+// useLang() hook directly).
 const STEP_LABELS: { id: CheckoutStep; label: string }[] = [
-  { id: 1, label: 'Your Cart' },
-  { id: 2, label: 'Delivery & Payment' },
-  { id: 3, label: 'Cooking Plan' },
-  { id: 4, label: 'Confirmed' }
+  { id: 1, label: 'stepYourCart' },
+  { id: 2, label: 'stepDeliveryPayment' },
+  { id: 3, label: 'stepCookingPlan' },
+  { id: 4, label: 'stepConfirmed' }
 ];
 
 export const CartPage: React.FC<CartPageProps> = ({
@@ -79,6 +82,7 @@ export const CartPage: React.FC<CartPageProps> = ({
   onTrackOrder,
   onOpenAuth
 }) => {
+  const { t } = useLang();
   const [cart, setCart] = useState<CartItem[]>(() => StoreService.getCart());
   const [giftNote, setGiftNote] = useState(() => StoreService.getGiftNote());
   const [userProfile, setUserProfile] = useState(() => StoreService.getUserProfile());
@@ -434,27 +438,30 @@ export const CartPage: React.FC<CartPageProps> = ({
     return (
       <div className="min-h-screen bg-white text-[#0A1F12] pb-20">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-16 text-center space-y-6">
-          {/* Brand logo — same asset/path as the header (Navbar.tsx) — above the
-              success icon, so this confirmation reads as unmistakably IGO's
-              own rather than a generic "success" screen. */}
-          <img
-            src="/Images/protein-cuts-logo.jpg"
-            alt="Protein Cuts Logo"
-            className="h-14 w-auto object-contain mx-auto"
-          />
-          <div className="w-20 h-20 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-600 shadow-inner">
-            <PartyPopper className="w-10 h-10" />
+          {/* Brand logo is now the single hero visual on this screen — was
+              previously a small logo stacked above a separate generic
+              party-popper icon circle, which read as two disconnected
+              graphics rather than one clean "success" moment. The falling
+              confetti animation (canvas-confetti, fired in
+              handlePlaceOrder) is unaffected — this only removes the static
+              icon circle. */}
+          <div className="w-24 h-24 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto shadow-inner p-4">
+            <img
+              src="/Images/protein-cuts-logo.jpg"
+              alt="Protein Cuts Logo"
+              className="w-full h-full object-contain"
+            />
           </div>
           <div className="space-y-2">
-            <h1 className="text-3xl font-black text-[#0A1F12]">Order Placed Successfully!</h1>
+            <h1 className="text-3xl font-black text-[#0A1F12]">{t('orderPlacedTitle')}</h1>
             <p className="text-sm text-neutral-500">
-              Your cold-chain order is confirmed and being prepared by our master butchers.
+              {t('orderPlacedSub')}
             </p>
           </div>
 
           <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-6 flex items-center justify-between gap-4 max-w-md mx-auto">
             <div className="text-left">
-              <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">Your Order Number</div>
+              <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">{t('yourOrderNumber')}</div>
               <div className="text-2xl font-black text-[#0A1F12] font-mono tracking-wider">{placedOrder.orderNumber}</div>
             </div>
             <button
@@ -467,7 +474,7 @@ export const CartPage: React.FC<CartPageProps> = ({
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-3xl p-6 text-left space-y-3 shadow-sm">
-            <h3 className="font-bold text-[#0A1F12] text-sm border-b border-neutral-200 pb-3">Order Summary</h3>
+            <h3 className="font-bold text-[#0A1F12] text-sm border-b border-neutral-200 pb-3">{t('orderSummary')}</h3>
             {placedOrder.items.map((item, idx) => (
               <div key={idx} className="flex items-center justify-between text-xs">
                 <span className="text-neutral-600">
@@ -481,11 +488,11 @@ export const CartPage: React.FC<CartPageProps> = ({
               </div>
             ))}
             <div className="border-t border-neutral-200 pt-3 flex justify-between items-baseline">
-              <span className="text-sm font-black text-[#0A1F12]">Total Paid</span>
+              <span className="text-sm font-black text-[#0A1F12]">{t('totalPaid')}</span>
               <span className="text-xl font-black text-emerald-700">₹{placedOrder.totalAmount}</span>
             </div>
             <div className="text-[11px] text-neutral-500 flex items-center gap-1.5 pt-1">
-              <Clock className="w-3.5 h-3.5 text-emerald-600" /> Delivery slot: {placedOrder.deliverySlot}
+              <Clock className="w-3.5 h-3.5 text-emerald-600" /> {t('deliverySlotLabel')}: {placedOrder.deliverySlot}
             </div>
           </div>
 
@@ -494,17 +501,17 @@ export const CartPage: React.FC<CartPageProps> = ({
               onClick={() => onTrackOrder && onTrackOrder(placedOrder.id)}
               className="w-full sm:w-auto bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold px-6 py-3.5 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2"
             >
-              <Truck className="w-4 h-4" /> Track This Order
+              <Truck className="w-4 h-4" /> {t('trackThisOrder')}
             </button>
             <button
               onClick={() => onNavigate('/account')}
               className="w-full sm:w-auto bg-white hover:bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold px-6 py-3.5 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer"
             >
-              View in My Orders
+              {t('viewInMyOrders')}
             </button>
           </div>
           <p className="text-[11px] text-neutral-400 pt-1">
-            This order is now saved to your account and will always be visible under My Orders in your Profile.
+            {t('orderSavedNote')}
           </p>
         </div>
       </div>
@@ -527,16 +534,16 @@ export const CartPage: React.FC<CartPageProps> = ({
                 onClick={() => onNavigate('/search')}
                 className="text-xs text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1 mb-2 cursor-pointer transition"
               >
-                <ArrowLeft className="w-3.5 h-3.5" /> Continue Shopping
+                <ArrowLeft className="w-3.5 h-3.5" /> {t('continueShopping')}
               </button>
               <h1 className="text-4xl sm:text-5xl font-black text-[#0A1F12] tracking-tight leading-none">
-                Your Cart
+                {t('yourCartTitle')}
               </h1>
               <p className="text-sm font-semibold text-neutral-600 mt-2.5 flex items-center gap-2">
                 <span
                   className={`w-2 h-2 rounded-full ${cart.length > 0 ? 'bg-[#0F7B3A]' : 'bg-neutral-300'}`}
                 />
-                {cart.length} {cart.length === 1 ? 'item' : 'items'} ready for delivery
+                {cart.length} {cart.length === 1 ? 'item' : 'items'} {t('itemsReady')}
               </p>
             </div>
           </div>
@@ -546,7 +553,7 @@ export const CartPage: React.FC<CartPageProps> = ({
               onClick={handleClearCart}
               className="text-xs font-bold text-neutral-600 hover:text-[#0A1F12] bg-white border border-neutral-200 px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer transition shadow-sm w-fit"
             >
-              <Trash2 className="w-4 h-4" /> Clear Cart
+              <Trash2 className="w-4 h-4" /> {t('clearCart')}
             </button>
           )}
         </div>
@@ -571,10 +578,10 @@ export const CartPage: React.FC<CartPageProps> = ({
             </div>
             <div className="space-y-3">
               <h2 className="text-3xl sm:text-4xl font-black text-[#0A1F12] tracking-tight leading-tight max-w-md mx-auto">
-                Your cart is currently empty
+                {t('emptyCartTitle')}
               </h2>
               <p className="text-sm text-neutral-500 max-w-md mx-auto leading-relaxed">
-                Explore farm-fresh, 100% antibiotic-free chicken cuts, tender mutton, wild-caught seafood, and fresh farm eggs.
+                {t('emptyCartSub')}
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
@@ -582,13 +589,13 @@ export const CartPage: React.FC<CartPageProps> = ({
                 onClick={() => onNavigate('/category/chicken')}
                 className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-2xl text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-900/20 cursor-pointer"
               >
-                Shop Fresh Chicken
+                {t('shopFreshChicken')}
               </button>
               <button
                 onClick={() => onNavigate('/offers')}
                 className="bg-white hover:bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold px-6 py-3 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer"
               >
-                View Hot Offers
+                {t('viewHotOffers')}
               </button>
             </div>
           </div>
@@ -619,7 +626,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                       step === s.id ? 'text-[#0A1F12]' : 'text-neutral-400'
                     }`}
                   >
-                    {s.label}
+                    {t(s.label)}
                   </span>
                 </button>
                 {idx < STEP_LABELS.length - 1 && (

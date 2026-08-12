@@ -67,7 +67,14 @@ export const OffersPage: React.FC<OffersPageProps> = ({
     return () => clearInterval(timer);
   }, []);
 
-  const flashSaleProducts = products.filter((p) => p.isFlashOffer || p.discountPercentage >= 14);
+  // Previously any product flagged isFlashOffer showed up here even when its
+  // catalog data had no real markdown (originalPrice === basePrice,
+  // discountPercentage 0) — customers saw a "0% OFF" badge and identical
+  // "was"/"now" prices, which reads as broken rather than as a deal. Now a
+  // product only appears here if there's an actual price cut to show.
+  const flashSaleProducts = products.filter(
+    (p) => (p.isFlashOffer || p.discountPercentage >= 14) && p.originalPrice > p.basePrice
+  );
 
   const handleAddComboToCart = (combo: ComboPack) => {
     let addedCount = 0;

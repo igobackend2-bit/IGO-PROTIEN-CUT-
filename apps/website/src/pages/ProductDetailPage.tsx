@@ -380,7 +380,12 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
     .filter((p): p is Product => Boolean(p))
     .slice(0, 4);
 
-  const relatedProducts = allProducts.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
+  // Recommending an item the customer can't actually buy defeats the point
+  // of "You Might Also Like" — excludes out-of-stock products instead of
+  // showing them with a disabled Sold Out state.
+  const relatedProducts = allProducts
+    .filter((p) => p.category === product.category && p.id !== product.id && p.stockStatus !== 'Out of Stock')
+    .slice(0, 4);
   const frequentlyBoughtWith = allProducts.filter((p) => p.id !== product.id && p.category !== product.category).slice(0, 2);
   const bundleTotal =
     selectedWeight.price + frequentlyBoughtWith.reduce((sum, p) => sum + p.weightOptions[0].price, 0);

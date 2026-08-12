@@ -205,13 +205,34 @@ export const Navbar: React.FC<NavbarProps> = ({
       },
       (err) => {
         setIsLocating(false);
-        setPincodeStatus(
-          err.code === err.PERMISSION_DENIED
-            ? 'Location access was denied. Please allow location access or enter your Pincode manually.'
-            : 'Could not detect your live location. Please enter your Pincode instead.'
-        );
+        // Once a browser has denied a site's location permission, no
+        // website JavaScript can silently re-grant or re-prompt for it —
+        // that's a browser security restriction, not something this site
+        // can bypass. The most useful thing to do here is tell the
+        // customer exactly which browser control re-enables it, rather
+        // than a flat "denied" message with no next step.
+        if (err.code === err.PERMISSION_DENIED) {
+          setPincodeStatus(
+            "Location access is blocked for this site. Tap the lock/info icon next to the address bar, turn Location on, then tap \"Use My Current Location\" again — or just enter your Pincode below."
+          );
+        } else if (err.code === err.TIMEOUT) {
+          // With enableHighAccuracy previously forced on, laptops/desktops
+          // with no GPS chip (relying on slower WiFi-based positioning)
+          // routinely blew past a 10s timeout and silently failed — this
+          // read to the customer as "location isn't capturing" with no
+          // explanation. Give an actionable retry message instead.
+          setPincodeStatus('Location is taking too long to detect. Please try again, or enter your Pincode below.');
+        } else {
+          setPincodeStatus('Could not detect your live location. Please enter your Pincode instead.');
+        }
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      // High accuracy forces GPS-chip-grade positioning, which desktops and
+      // many laptops don't have — they'd just time out waiting for a fix
+      // that can never arrive. Network/WiFi-based positioning (accuracy
+      // off) is plenty precise for a delivery-zone lookup and returns far
+      // more reliably. Longer timeout + maximumAge also let a cached recent
+      // fix satisfy the request instantly instead of re-polling every time.
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
     );
   };
 

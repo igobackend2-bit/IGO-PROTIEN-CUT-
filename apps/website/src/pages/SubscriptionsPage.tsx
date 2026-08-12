@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, CheckCircle2, Sparkles, ArrowRight, Dumbbell, Users, Settings2, Minus, Plus, Trash2, Loader2 } from 'lucide-react';
 import { INITIAL_SUBSCRIPTION_PLANS } from '../data/mockData';
 import { Product, SubscriptionPlan } from '../types';
@@ -40,6 +40,31 @@ interface BoxLine {
 // canonical `subscriptions.weekdays` column (and the Flutter app) use.
 const DAY_TO_ISO: Record<string, number> = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7 };
 
+// The two fixed plans (Daily Fitness, Weekly Family) describe their contents
+// as plain strings ("500g Boneless Chicken Breast") with no product id —
+// that's why they used to dead-end at "not available for instant
+// self-checkout". These keyword sets resolve each described item to a real
+// catalog product (by name, case-insensitive substring match), so the plan
+// can be subscribed through the exact same real per-product flow the Custom
+// box builder already uses below. The Custom-category plans (Monthly Elite,
+// BBQ & Grill) aren't listed here on purpose — they already work via the
+// manual box builder.
+const FIXED_PLAN_ITEMS: Record<string, { keywords: string[] }[]> = {
+  'plan-01': [
+    { keywords: ['chicken', 'breast'] }, // 500g Boneless Chicken Breast
+    { keywords: ['organic', 'egg'] } // 6 Organic Eggs
+  ],
+  'plan-02': [
+    { keywords: ['chicken', 'curry'] }, // 1kg Curry Cut Chicken
+    { keywords: ['mutton', 'curry'] }, // 500g Mutton Cut
+    { keywords: ['seer'] }, // 500g Seer Fish Steaks
+    { keywords: ['white', 'egg'] } // 30 Eggs Tray
+  ]
+};
+
+const matchProductByKeywords = (keywords: string[], products: Product[]): Product | undefined =>
+  products.find((p) => keywords.every((k) => p.name.toLowerCase().includes(k)));
+
 export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products = [], onNavigate }) => {
   const [selectedPlanId, setSelectedPlanId] = useState<string>('plan-01');
   const [selectedDays, setSelectedDays] = useState<string[]>(['Mon', 'Wed', 'Fri']);
@@ -57,6 +82,27 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
 
   const selectedPlan = plans.find((p) => p.id === selectedPlanId);
   const isCustomBuilder = selectedPlan?.category === 'Custom';
+
+  // Auto-fill the box with real matched products whenever a fixed plan is
+  // selected, so the customer never has to build it manually — Custom plans
+  // keep starting empty since those are meant to be hand-picked.
+  useEffect(() => {
+    const plan = plans.find((p) => p.id === selectedPlanId);
+    if (!plan) return;
+    setSubscribed(false);
+    setSubmitError(null);
+    if (plan.category === 'Custom') {
+      setBoxLines([]);
+      return;
+    }
+    const itemDefs = FIXED_PLAN_ITEMS[plan.id];
+    const matched = (itemDefs ?? [])
+      .map((def) => matchProductByKeywords(def.keywords, products))
+      .filter((p): p is Product => !!p)
+      .map((p) => ({ productId: p.id, quantity: 1 }));
+    setBoxLines(matched);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPlanId, products.length]);
 
   const addToBox = (productId: string) => {
     setBoxLines((prev) => {
@@ -89,11 +135,9 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
 
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  // Real persistence only exists for the Custom box builder — its lines are
-  // tied to actual product ids. The fixed Fitness/Family plans (`itemsIncluded`
-  // are plain description strings, not real product ids) have no safe way to
-  // map onto the `subscriptions.product_id` FK, so we don't fake success for
-  // them; see the button below for the honest message shown instead.
+  // Every plan — Custom (hand-picked) or fixed (auto-matched above) —
+  // ultimately submits as one real per-product subscription per box line, so
+  // this one handler covers both instead of only the Custom builder.
   const handleConfirmCustomBox = async () => {
     setSubmitError(null);
     if (!StoreService.isLoggedIn()) {
@@ -256,32 +300,72 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
             })}
           </div>
 
-          {boxLines.length > 0 && (
-            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 space-y-2">
-              <div className="text-xs font-bold text-[#0A1F12] uppercase tracking-wider">Your Box ({boxLines.reduce((a, l) => a + l.quantity, 0)} items)</div>
-              {boxLines.map((line) => {
-                const p = products.find((prod) => prod.id === line.productId);
-                if (!p) return null;
-                return (
-                  <div key={line.productId} className="flex items-center justify-between text-xs">
-                    <span className="text-neutral-700">{p.name} x{line.quantity}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#0A1F12]">₹{p.weightOptions[0].price * line.quantity}</span>
-                      <button onClick={() => updateBoxQty(p.id, 0)} className="text-neutral-400 hover:text-red-500">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-              <div className="flex items-center justify-between pt-2 border-t border-emerald-200">
-                <span className="text-xs font-bold text-neutral-600">Box Total ({boxFrequency}, 15% off)</span>
-                <span className="text-lg font-black text-emerald-700">
-                  ₹{boxDiscountedTotal} <span className="text-xs text-neutral-400 line-through font-normal">₹{boxTotal}</span>
-                </span>
+        </div>
+      )}
+
+      {/* Plan Includes — for fixed (non-Custom) plans, the box above is
+          already auto-populated with real matched products, so show what
+          got matched instead of the full pick-anything grid. */}
+      {!isCustomBuilder && boxLines.length > 0 && (
+        <div className="bg-white border-2 border-emerald-200 rounded-3xl p-6 max-w-4xl mx-auto space-y-3 shadow-sm">
+          <h3 className="text-base font-bold text-[#0A1F12] flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600" /> This Plan Includes
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {boxLines.map((line) => {
+              const p = products.find((prod) => prod.id === line.productId);
+              if (!p) return null;
+              return (
+                <div key={line.productId} className="bg-neutral-50 border border-neutral-200 rounded-2xl p-2.5 space-y-1">
+                  <img src={p.image} alt={p.name} referrerPolicy="no-referrer" className="w-full aspect-square rounded-xl object-cover" />
+                  <div className="text-[11px] font-bold text-[#0A1F12] line-clamp-2 leading-tight">{p.name}</div>
+                  <div className="text-[10px] text-emerald-700 font-black">₹{p.weightOptions[0].price}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Box summary — shared by the manual Custom builder and the
+          auto-matched fixed plans; both submit through the same real
+          per-product subscription flow. Custom boxes get the advertised 15%
+          multi-item discount; fixed plans show their real per-delivery total
+          as-is, since that discount claim was never part of those plans. */}
+      {boxLines.length > 0 && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 max-w-4xl mx-auto space-y-2">
+          <div className="text-xs font-bold text-[#0A1F12] uppercase tracking-wider">
+            {isCustomBuilder ? 'Your Box' : 'Plan Total'} ({boxLines.reduce((a, l) => a + l.quantity, 0)} items)
+          </div>
+          {boxLines.map((line) => {
+            const p = products.find((prod) => prod.id === line.productId);
+            if (!p) return null;
+            return (
+              <div key={line.productId} className="flex items-center justify-between text-xs">
+                <span className="text-neutral-700">{p.name} x{line.quantity}</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-[#0A1F12]">₹{p.weightOptions[0].price * line.quantity}</span>
+                  {isCustomBuilder && (
+                    <button onClick={() => updateBoxQty(p.id, 0)} className="text-neutral-400 hover:text-red-500">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })}
+          <div className="flex items-center justify-between pt-2 border-t border-emerald-200">
+            <span className="text-xs font-bold text-neutral-600">
+              {isCustomBuilder ? `Box Total (${boxFrequency}, 15% off)` : 'Per-Delivery Total'}
+            </span>
+            {isCustomBuilder ? (
+              <span className="text-lg font-black text-emerald-700">
+                ₹{boxDiscountedTotal} <span className="text-xs text-neutral-400 line-through font-normal">₹{boxTotal}</span>
+              </span>
+            ) : (
+              <span className="text-lg font-black text-emerald-700">₹{boxTotal}</span>
+            )}
+          </div>
         </div>
       )}
 
@@ -319,7 +403,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
               {new Date(Date.now() + 86400000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}.
             </div>
           </div>
-        ) : isCustomBuilder ? (
+        ) : boxLines.length > 0 ? (
           <>
             {submitError && (
               <div className="bg-red-50 border border-red-200 text-red-700 text-xs font-semibold rounded-xl px-3 py-2">
@@ -328,7 +412,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
             )}
             <button
               onClick={handleConfirmCustomBox}
-              disabled={isSubmitting || boxLines.length === 0}
+              disabled={isSubmitting}
               className="w-full bg-[#0F7B3A] hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-3.5 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer shadow-lg shadow-emerald-900/20"
             >
               {isSubmitting ? (
@@ -337,19 +421,18 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
                 </>
               ) : (
                 <>
-                  Confirm & Start Subscription <ArrowRight className="w-4 h-4" />
+                  {isCustomBuilder ? 'Confirm & Start Subscription' : 'Activate Plan & Start Subscription'} <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
-            {boxLines.length === 0 && (
-              <p className="text-[11px] text-neutral-400 text-center">Add at least one item to your box above.</p>
-            )}
           </>
+        ) : isCustomBuilder ? (
+          <p className="text-[11px] text-neutral-400 text-center">Add at least one item to your box above.</p>
         ) : (
           <div className="space-y-2">
             <div className="bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl px-3 py-2.5 text-center">
-              This fixed plan isn't available for instant self-checkout yet — use{' '}
-              <strong>Build Your Own Box</strong> above (the Custom plan) to start a real subscription now, or reach our
+              We couldn't match this plan to items currently in stock — use{' '}
+              <strong>Build Your Own Box</strong> (the Custom plan above) to start a real subscription now, or reach our
               team via Support to set this plan up for you.
             </div>
           </div>
