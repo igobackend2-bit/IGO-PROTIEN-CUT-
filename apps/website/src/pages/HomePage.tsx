@@ -26,7 +26,6 @@ import {
   Instagram,
   Apple,
   Play,
-  Send,
   Clock3,
   Snowflake,
   MapPin,
@@ -117,8 +116,6 @@ export const HomePage: React.FC<HomePageProps> = ({
 }) => {
   const [activeHeroTheme, setActiveHeroTheme] = useState(0);
   const [activeCollection, setActiveCollection] = useState<'premium' | 'organic' | 'farm-fresh' | 'seafood'>('premium');
-  const [newsletterEmail, setNewsletterEmail] = useState('');
-  const [newsletterSubmitted, setNewsletterSubmitted] = useState(false);
   const [pincode, setPincode] = useState('');
   const [pincodeStatus, setPincodeStatus] = useState<'idle' | 'checking' | 'available' | 'unavailable'>('idle');
 
@@ -391,13 +388,6 @@ export const HomePage: React.FC<HomePageProps> = ({
     ]
   });
 
-  const newsletterBlock = useSiteContent('home.newsletter', {
-    heading: 'Weekly Offers, Straight to Your Inbox',
-    body: 'Subscribe for early access to flash sales, seasonal specials, and new-cut launches.',
-    placeholder: 'your@email.com',
-    cta: 'Subscribe'
-  });
-
   const chefHeading = useSiteContent('home.rail_chef_picks', {
     eyebrow: 'HAND-PICKED BY OUR BUTCHERS',
     heading: 'Chef Recommended Cuts',
@@ -482,14 +472,6 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   // Chef Recommended — products with a curated recipe pairing
   const chefRecommended = products.filter((p) => !!p.recipePairing).slice(0, 4);
-
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newsletterEmail.trim()) return;
-    setNewsletterSubmitted(true);
-    setNewsletterEmail('');
-    setTimeout(() => setNewsletterSubmitted(false), 3500);
-  };
 
   // ---------------------------------------------------------------------
   // Section order below is deliberately alternating: one "About IGO / Trust"
@@ -1758,41 +1740,12 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* ============ 13. OUR FARMS ============ */}
       <Reveal><OurFarmsSection /></Reveal>
 
-      {/* ============ 14. NEWSLETTER ============ */}
-      <Reveal>
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-8 flex flex-col sm:flex-row items-center gap-6 justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-emerald-700 font-bold text-sm mb-1">
-              <Send className="w-4 h-4" /> {newsletterBlock.heading}
-            </div>
-            <p className="text-xs text-neutral-600">{newsletterBlock.body}</p>
-          </div>
-          {newsletterSubmitted ? (
-            <div className="bg-white border border-emerald-300 text-emerald-700 text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-2 shrink-0">
-              <CheckCircle2 className="w-4 h-4" /> You're subscribed! Watch your inbox for this week's offers.
-            </div>
-          ) : (
-            <form onSubmit={handleNewsletterSubmit} className="flex gap-2 w-full sm:w-auto shrink-0">
-              <input
-                type="email"
-                required
-                placeholder="you@example.com"
-                value={newsletterEmail}
-                onChange={(e) => setNewsletterEmail(e.target.value)}
-                className="flex-1 sm:w-64 bg-white border border-emerald-200 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs text-[#0A1F12] focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer shrink-0"
-              >
-                Subscribe
-              </button>
-            </form>
-          )}
-        </div>
-      </section>
-      </Reveal>
+      {/* Section 14 (homepage newsletter banner) removed — it duplicated the
+          footer's newsletter form, which already renders on every page
+          including this one, so a customer saw two separate "subscribe"
+          forms in the same view. Customer feedback flagged this as
+          unnecessary; the footer form is now the single newsletter entry
+          point site-wide. */}
 
     </div>
   );

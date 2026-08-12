@@ -210,6 +210,11 @@ export interface Recipe {
   ingredients: string[];
   steps: string[];
   relatedProductId?: string;
+  // Matched against the product's subcategory/name (e.g. "liver", "offal")
+  // so a cut-specific recipe like liver fry only surfaces for liver products
+  // instead of the whole category's generic recipe. See relatedRecipes in
+  // ProductDetailPage.tsx.
+  cutKeywords?: string[];
 }
 
 export interface BlogPost {

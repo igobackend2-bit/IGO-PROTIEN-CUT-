@@ -238,11 +238,25 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   };
 
   // Recipes tied to this product — exact relatedProductId match first, then
-  // any recipe in the same category, mirroring Blinkit's "[Cut] recipes for
-  // you" strip on the PDP.
+  // a cutKeywords match against this product's subcategory/name (so a liver
+  // product gets a liver recipe rather than the whole category's one generic
+  // recipe — previously every chicken product from breast to liver showed
+  // the same "Chettinad Pepper Chicken" curry, which is actively wrong for
+  // an organ meat that cooks completely differently), then any recipe in the
+  // same category that ISN'T cut-specific (so a liver/offal recipe doesn't
+  // leak into a boneless breast product's suggestions either).
+  const productText = `${product.subcategory ?? ''} ${product.name}`.toLowerCase();
   const relatedRecipes = [
     ...INITIAL_RECIPES.filter((r) => r.relatedProductId === product.id),
-    ...INITIAL_RECIPES.filter((r) => r.relatedProductId !== product.id && r.category === product.category)
+    ...INITIAL_RECIPES.filter(
+      (r) =>
+        r.relatedProductId !== product.id &&
+        r.category === product.category &&
+        r.cutKeywords?.some((kw) => productText.includes(kw.toLowerCase()))
+    ),
+    ...INITIAL_RECIPES.filter(
+      (r) => r.relatedProductId !== product.id && r.category === product.category && !r.cutKeywords?.length
+    )
   ].slice(0, 3);
 
   const [qaList, setQaList] = useState<QAEntry[]>([

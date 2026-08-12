@@ -50,6 +50,17 @@ export const BrowseProductCard: React.FC<BrowseProductCardProps> = ({
 
   const defaultWeight = product.weightOptions[0];
   const isOutOfStock = product.stockStatus === 'Out of Stock';
+  const isLowStock = product.stockStatus === 'Limited Stock';
+  // Same single top-left status pill as ProductCard.tsx, added here too so
+  // both card styles used across the site agree on what "fresh"/"low stock"
+  // looks like instead of only one of them showing it.
+  const statusBadge = isLowStock
+    ? { label: 'LOW STOCK', className: 'bg-amber-500 text-white' }
+    : product.isTodayFresh
+    ? { label: 'FRESH TODAY', className: 'bg-emerald-600 text-white' }
+    : product.isBestSeller
+    ? { label: 'BEST SELLER', className: 'bg-white text-[#0A1F12]' }
+    : null;
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -82,6 +93,14 @@ export const BrowseProductCard: React.FC<BrowseProductCardProps> = ({
           alt={product.name}
           className={`w-full h-full object-cover group-hover:scale-105 transition duration-500 ${isOutOfStock ? 'grayscale opacity-70' : ''}`}
         />
+
+        {statusBadge && !isOutOfStock && (
+          <span
+            className={`absolute top-2.5 left-2.5 z-10 font-extrabold text-[9px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow ${statusBadge.className}`}
+          >
+            {statusBadge.label}
+          </span>
+        )}
 
         <button
           onClick={handleWishlist}

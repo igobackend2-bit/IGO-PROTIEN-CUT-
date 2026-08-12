@@ -284,6 +284,12 @@ export const Navbar: React.FC<NavbarProps> = ({
     // find it. It's a real standalone page (OffersPage.tsx), so it belongs
     // in the nav like every other section.
     { name: lang === 'ta' ? 'சலுகைகள்' : 'Offers', path: '/offers', icon: Percent },
+    // Was only reachable from a homepage rail and the checkout's "activate
+    // subscription" flow — never had its own nav entry despite being a real,
+    // dedicated page (SubscriptionsPage.tsx). Customer feedback flagged this
+    // as a suggestion; adding a genuine nav link is the minimal way to
+    // satisfy it without restructuring the page itself.
+    { name: lang === 'ta' ? 'சந்தா' : 'Subscriptions', path: '/subscriptions', icon: Package },
     { name: lang === 'ta' ? 'மொத்த வர்த்தகம்' : 'B2B', path: '/b2b', icon: Briefcase },
     { name: lang === 'ta' ? 'எங்களை பற்றி' : 'About', path: '/about', icon: Info },
     { name: lang === 'ta' ? 'வலைப்பதிவு' : 'Blog', path: '/blog', icon: Newspaper },

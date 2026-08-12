@@ -2507,6 +2507,442 @@ export const INITIAL_RECIPES: Recipe[] = [
       'Serve hot with onion rings and lemon slice.'
     ],
     relatedProductId: 'fsh-01'
+  },
+  // Previously any chicken/mutton product without an exact mock-id match
+  // (which is every real product, since live catalog ids are Supabase UUIDs,
+  // never the mock 'chk-01' style ids) fell back to whichever single recipe
+  // existed for that category — so a liver product showed a whole-cut curry
+  // recipe like Chettinad Pepper Chicken, which isn't how liver is cooked.
+  // These cutKeywords-tagged recipes are matched by subcategory/name in
+  // ProductDetailPage.tsx before the generic category fallback runs.
+  {
+    id: 'rec-04',
+    title: 'Chicken Liver Pepper Fry',
+    category: 'chicken',
+    prepTime: '10 mins',
+    cookTime: '15 mins',
+    servings: 3,
+    difficulty: 'Easy',
+    calories: '210 kcal',
+    protein: '26g',
+    image: '/Images/Meat Images/Chicken/Chicken Liver.jpg',
+    ingredients: [
+      '500g Fresh Chicken Liver, cleaned',
+      '1 tbsp Crushed Black Pepper',
+      '2 Onions, sliced',
+      'Curry Leaves & Ginger Garlic Paste',
+      '1 tsp Turmeric, Salt to taste'
+    ],
+    steps: [
+      'Rinse chicken liver well and pat dry. Toss with turmeric and salt.',
+      'Heat oil in a pan, add curry leaves and sliced onions, sauté until golden.',
+      'Add ginger garlic paste, cook 1 minute, then add the liver pieces.',
+      'Cook on medium-high heat for 8-10 minutes, stirring often — liver cooks fast and turns rubbery if overdone.',
+      'Finish with crushed black pepper, toss well, and serve hot.'
+    ],
+    cutKeywords: ['liver']
+  },
+  {
+    id: 'rec-05',
+    title: 'Mutton Liver Masala',
+    category: 'mutton',
+    prepTime: '15 mins',
+    cookTime: '20 mins',
+    servings: 3,
+    difficulty: 'Medium',
+    calories: '260 kcal',
+    protein: '28g',
+    image: '/Images/Meat Images/Mutton/Mutton Liver.jpg',
+    ingredients: [
+      '500g Fresh Goat Liver, cleaned and sliced',
+      '2 Onions & 2 Tomatoes, chopped',
+      '1.5 tbsp Red Chilli Powder',
+      'Ginger Garlic Paste',
+      'Garam Masala & Coriander Leaves'
+    ],
+    steps: [
+      'Soak liver slices in salted water for 10 minutes, then drain.',
+      'Sauté onions until golden, add ginger garlic paste and tomatoes, cook until soft.',
+      'Add chilli powder and liver pieces, cook on medium heat for 12-15 minutes.',
+      'Finish with garam masala and fresh coriander before serving.'
+    ],
+    cutKeywords: ['liver']
+  },
+  // Auditing every category/subcategory against the 5 recipes above turned
+  // up two more real mismatches beyond liver: (1) beef had ZERO recipes at
+  // all — every beef product (cubes, curry cut, shank, steak, mince, liver)
+  // showed no "Recipes for This Cut" section whatsoever; (2) crab and prawns
+  // (fish category) were falling back to "Crispy Vanjaram Tawa Fry", a
+  // pan-fried FISH STEAK recipe — crab needs shell-on curry cooking and
+  // prawns cook in a couple of minutes, neither works like frying a steak.
+  {
+    id: 'rec-06',
+    title: 'Coastal Beef Fry',
+    category: 'beef',
+    prepTime: '15 mins',
+    cookTime: '30 mins',
+    servings: 4,
+    difficulty: 'Medium',
+    calories: '310 kcal',
+    protein: '32g',
+    image: '/Images/Meat Images/Beef/Beef Curry Cut.jpg',
+    ingredients: [
+      '500g Beef Cubes or Curry Cut',
+      '2 Onions, sliced thin',
+      '1.5 tbsp Beef Masala / Coriander-Chilli Powder',
+      'Curry Leaves, Ginger Garlic Paste',
+      'Coconut Oil'
+    ],
+    steps: [
+      'Pressure cook beef with turmeric and salt until tender, about 15-20 minutes.',
+      'In coconut oil, sauté onions and curry leaves until deep golden.',
+      'Add ginger garlic paste and beef masala, cook until fragrant.',
+      'Add the cooked beef, toss on high heat until the masala coats each piece and lightly browns.',
+      'Finish with a final tempering of curry leaves and serve hot.'
+    ]
+  },
+  {
+    id: 'rec-07',
+    title: 'Beef Liver Fry',
+    category: 'beef',
+    prepTime: '10 mins',
+    cookTime: '15 mins',
+    servings: 3,
+    difficulty: 'Easy',
+    calories: '220 kcal',
+    protein: '27g',
+    image: '/Images/Meat Images/Beef/Beef Liver.webp',
+    ingredients: [
+      '500g Beef Liver, cleaned and sliced',
+      '2 Onions, sliced',
+      '1 tbsp Chilli Powder & Turmeric',
+      'Ginger Garlic Paste',
+      'Curry Leaves'
+    ],
+    steps: [
+      'Soak liver slices in salted water for 10 minutes, then drain well.',
+      'Sauté onions and curry leaves in oil until golden, add ginger garlic paste.',
+      'Add liver pieces with chilli powder and turmeric, cook on medium-high heat for 10-12 minutes — don’t overcook or it turns rubbery.',
+      'Toss well and serve hot with onions.'
+    ],
+    cutKeywords: ['liver']
+  },
+  {
+    id: 'rec-08',
+    title: 'Pepper Crab Masala',
+    category: 'fish',
+    prepTime: '15 mins',
+    cookTime: '20 mins',
+    servings: 3,
+    difficulty: 'Medium',
+    calories: '190 kcal',
+    protein: '24g',
+    image: '/Images/Meat Images/Fish/Crab.jpg',
+    ingredients: [
+      '1kg Fresh Crab, cleaned and cracked',
+      '2 tbsp Crushed Black Pepper',
+      '2 Onions & 2 Tomatoes, chopped',
+      'Ginger Garlic Paste & Curry Leaves',
+      'Coconut Oil'
+    ],
+    steps: [
+      'Clean and crack the crab claws lightly so the masala can penetrate.',
+      'Sauté onions in coconut oil until soft, add ginger garlic paste and tomatoes, cook down.',
+      'Add crushed pepper and a splash of water, bring to a simmer.',
+      'Add crab pieces, cover and cook for 12-15 minutes, tossing occasionally, until the shell turns bright red.',
+      'Garnish with curry leaves and serve immediately while hot.'
+    ],
+    cutKeywords: ['crab']
+  },
+  {
+    id: 'rec-09',
+    title: 'Garlic Butter Prawns Fry',
+    category: 'fish',
+    prepTime: '10 mins',
+    cookTime: '8 mins',
+    servings: 3,
+    difficulty: 'Easy',
+    calories: '175 kcal',
+    protein: '22g',
+    image: '/Images/Meat Images/Fish/Prawns.jpg',
+    ingredients: [
+      '500g Fresh Prawns, deveined',
+      '1 tbsp Butter + 1 tbsp Oil',
+      '4-5 Garlic Cloves, minced',
+      '1 tsp Chilli Flakes & Lemon Juice',
+      'Salt to taste'
+    ],
+    steps: [
+      'Pat prawns dry and season lightly with salt.',
+      'Heat butter and oil together, add minced garlic and sauté until fragrant (don’t let it brown).',
+      'Add prawns and cook on high heat for 2-3 minutes per side only — prawns overcook fast and turn rubbery.',
+      'Toss with chilli flakes and a squeeze of lemon juice, serve immediately.'
+    ],
+    cutKeywords: ['prawn']
+  },
+  {
+    id: 'rec-10',
+    title: 'Chicken Keema Masala',
+    category: 'chicken',
+    prepTime: '10 mins',
+    cookTime: '20 mins',
+    servings: 4,
+    difficulty: 'Easy',
+    calories: '260 kcal',
+    protein: '28g',
+    image: '/Images/Meat Images/Chicken/Chicken Mince.jpg',
+    ingredients: [
+      '500g Chicken Mince (Keema)',
+      '2 Onions, finely chopped',
+      '2 Tomatoes, pureed',
+      'Ginger Garlic Paste & Garam Masala',
+      'Green Peas (optional)'
+    ],
+    steps: [
+      'Sauté onions until golden, add ginger garlic paste and cook until raw smell disappears.',
+      'Add tomato puree and cook until oil separates.',
+      'Add chicken mince, breaking up lumps as it cooks, for 10-12 minutes.',
+      'Stir in garam masala and peas if using, simmer 5 more minutes, and garnish with coriander.'
+    ],
+    cutKeywords: ['mince', 'keema']
+  },
+  {
+    id: 'rec-11',
+    title: 'Mutton Keema Masala',
+    category: 'mutton',
+    prepTime: '10 mins',
+    cookTime: '25 mins',
+    servings: 4,
+    difficulty: 'Medium',
+    calories: '300 kcal',
+    protein: '30g',
+    image: '/Images/Meat Images/Mutton/Mutton Mince.jpg',
+    ingredients: [
+      '500g Mutton Mince (Keema)',
+      '2 Onions, finely chopped',
+      '2 Tomatoes, pureed',
+      'Ginger Garlic Paste & Whole Spices',
+      'Garam Masala & Coriander Leaves'
+    ],
+    steps: [
+      'Temper whole spices in oil, add onions and cook until golden brown.',
+      'Add ginger garlic paste and tomato puree, cook until the oil separates.',
+      'Add mutton mince, breaking up lumps, and cook covered on low heat for 15-18 minutes until tender.',
+      'Finish with garam masala and fresh coriander.'
+    ],
+    cutKeywords: ['mince', 'keema']
+  },
+  // Closing the remaining softer mismatches — cuts that were technically
+  // showing an edible recipe (same broad category) but not one that matches
+  // how that specific cut is actually cooked: fried/grilled items were
+  // showing curry recipes, a soup cut was showing a fry-pan recipe, and two
+  // delicate seafood items were showing a firm-fish steak recipe.
+  {
+    id: 'rec-12',
+    title: 'Crispy Fried Chicken Wings',
+    category: 'chicken',
+    prepTime: '15 mins',
+    cookTime: '20 mins',
+    servings: 3,
+    difficulty: 'Easy',
+    calories: '290 kcal',
+    protein: '24g',
+    image: '/Images/Meat Images/Chicken/Chicken Wings.jpg',
+    ingredients: [
+      '500g Chicken Wings',
+      '1 tbsp Ginger Garlic Paste',
+      '1 tsp Chilli Powder & Turmeric',
+      '2 tbsp Corn Flour + 1 tbsp Rice Flour',
+      'Oil for deep frying'
+    ],
+    steps: [
+      'Marinate wings with ginger garlic paste, chilli powder, turmeric and salt for 20 minutes.',
+      'Coat marinated wings in corn flour and rice flour just before frying.',
+      'Deep fry in hot oil for 8-10 minutes until golden and cooked through.',
+      'Toss in your favourite sauce (pepper, chilli-garlic, or plain salt) and serve hot.'
+    ],
+    cutKeywords: ['wings']
+  },
+  {
+    id: 'rec-13',
+    title: 'Chicken Lollipop Fry',
+    category: 'chicken',
+    prepTime: '20 mins',
+    cookTime: '15 mins',
+    servings: 3,
+    difficulty: 'Medium',
+    calories: '270 kcal',
+    protein: '23g',
+    image: '/Images/Meat Images/Chicken/Chicken Wings.jpg',
+    ingredients: [
+      '500g Chicken Lollipop Cuts',
+      '1 tbsp Ginger Garlic Paste',
+      '1 tsp Red Chilli Powder & 1/2 tsp Pepper',
+      '2 tbsp Corn Flour',
+      'Oil for deep frying'
+    ],
+    steps: [
+      'Marinate lollipops with ginger garlic paste, chilli powder, pepper and salt for at least 30 minutes.',
+      'Dust with corn flour just before frying.',
+      'Deep fry in batches for 8-10 minutes until golden and cooked through to the bone.',
+      'Toss in a quick garlic-chilli glaze if desired, and serve hot with onion rings.'
+    ],
+    cutKeywords: ['lollipop']
+  },
+  {
+    id: 'rec-14',
+    title: 'Pepper Fried Quail',
+    category: 'chicken',
+    prepTime: '15 mins',
+    cookTime: '20 mins',
+    servings: 2,
+    difficulty: 'Medium',
+    calories: '250 kcal',
+    protein: '22g',
+    image: '/Images/quail.png',
+    ingredients: [
+      '2 Whole Cleaned Quail',
+      '1 tbsp Crushed Black Pepper',
+      'Ginger Garlic Paste & Curry Leaves',
+      '1/2 tsp Turmeric',
+      'Oil for shallow frying'
+    ],
+    steps: [
+      'Marinate whole quail with ginger garlic paste, turmeric, pepper and salt for 20 minutes.',
+      'Shallow fry on medium heat, turning often, for 15-18 minutes until fully cooked and browned — quail is small and cooks faster than chicken pieces, so watch closely.',
+      'Toss with curry leaves and extra crushed pepper before serving.'
+    ],
+    cutKeywords: ['quail']
+  },
+  {
+    id: 'rec-15',
+    title: 'Grilled Mutton Chops',
+    category: 'mutton',
+    prepTime: '20 mins',
+    cookTime: '20 mins',
+    servings: 3,
+    difficulty: 'Medium',
+    calories: '340 kcal',
+    protein: '30g',
+    image: '/Images/Meat Images/Mutton/Mutton Chops.jpg',
+    ingredients: [
+      '500g Mutton Chops',
+      '2 tbsp Curd',
+      '1 tbsp Ginger Garlic Paste',
+      '1 tsp Chilli Powder & Garam Masala',
+      'Lemon Juice & Oil'
+    ],
+    steps: [
+      'Marinate chops with curd, ginger garlic paste, chilli powder, garam masala, lemon juice and salt for at least 1 hour.',
+      'Heat a grill pan or tawa with a little oil until very hot.',
+      'Sear chops 4-5 minutes per side until a deep crust forms and the centre is cooked through.',
+      'Rest for 5 minutes before serving with grilled onions.'
+    ],
+    cutKeywords: ['chops']
+  },
+  {
+    id: 'rec-16',
+    title: 'Smoky Mutton Ribs Roast',
+    category: 'mutton',
+    prepTime: '20 mins',
+    cookTime: '40 mins',
+    servings: 4,
+    difficulty: 'Chef Special',
+    calories: '380 kcal',
+    protein: '32g',
+    image: '/Images/Meat Images/Mutton/Mutton Ribs.webp',
+    ingredients: [
+      '600g Mutton Ribs',
+      '2 tbsp Ginger Garlic Paste',
+      '1.5 tbsp Chilli Powder & Roasted Cumin',
+      'Curd Marinade',
+      'Oil'
+    ],
+    steps: [
+      'Marinate ribs with curd, ginger garlic paste, chilli powder and roasted cumin for at least 2 hours, ideally overnight.',
+      'Pressure cook or slow-cook ribs until tender, about 25-30 minutes.',
+      'Finish under a hot grill or in a pan on high heat for 8-10 minutes, basting with the marinade, until charred and sticky.',
+      'Rest briefly, then serve hot.'
+    ],
+    cutKeywords: ['ribs']
+  },
+  {
+    id: 'rec-17',
+    title: 'Mutton Bone Soup (Paya)',
+    category: 'mutton',
+    prepTime: '10 mins',
+    cookTime: '1 hr',
+    servings: 4,
+    difficulty: 'Easy',
+    calories: '180 kcal',
+    protein: '18g',
+    image: '/Images/Meat Images/Mutton/Mutton Soup Bones.jpg',
+    ingredients: [
+      '600g Mutton Soup Bones',
+      '1 Onion & 2 Tomatoes',
+      'Whole Spices (Bay Leaf, Cinnamon, Cloves)',
+      'Ginger Garlic Paste',
+      'Coriander Leaves & Black Pepper'
+    ],
+    steps: [
+      'Pressure cook soup bones with whole spices, onion, ginger garlic paste and water for 40-45 minutes until the broth is rich and bones are tender.',
+      'Add chopped tomatoes and simmer for another 10 minutes.',
+      'Season with salt and crushed black pepper.',
+      'Garnish with coriander and serve piping hot, ideal with parotta or on its own.'
+    ],
+    cutKeywords: ['soup bone', 'bone soup']
+  },
+  {
+    id: 'rec-18',
+    title: 'Pan-Seared Salmon',
+    category: 'fish',
+    prepTime: '10 mins',
+    cookTime: '10 mins',
+    servings: 2,
+    difficulty: 'Easy',
+    calories: '260 kcal',
+    protein: '28g',
+    image: '/Images/Meat Images/Fish/Salmon Fillet.jpg',
+    ingredients: [
+      '2 Salmon Fillets',
+      '1 tbsp Butter + 1 tbsp Oil',
+      'Salt, Pepper & Lemon Juice',
+      'Garlic Cloves, crushed',
+      'Fresh Herbs (optional)'
+    ],
+    steps: [
+      'Pat salmon fillets completely dry and season both sides with salt and pepper.',
+      'Heat oil in a pan on medium-high, place salmon skin-side down and press gently for even contact.',
+      'Cook 4-5 minutes until the skin is crisp, then flip and cook 2-3 minutes more — salmon is best served just barely cooked through.',
+      'Add butter and crushed garlic in the last minute, baste, and finish with a squeeze of lemon.'
+    ],
+    cutKeywords: ['salmon']
+  },
+  {
+    id: 'rec-19',
+    title: 'Chilli Garlic Squid Fry',
+    category: 'fish',
+    prepTime: '15 mins',
+    cookTime: '6 mins',
+    servings: 2,
+    difficulty: 'Easy',
+    calories: '190 kcal',
+    protein: '20g',
+    image: '/Images/Meat Images/Fish/Squid.jpg',
+    ingredients: [
+      '400g Squid, cleaned and sliced into rings',
+      '1 tbsp Minced Garlic & Chilli Flakes',
+      'Corn Flour for light dusting',
+      'Soy Sauce & Spring Onions',
+      'Oil for high-heat frying'
+    ],
+    steps: [
+      'Pat squid rings completely dry and dust lightly with corn flour.',
+      'Heat oil until very hot, then fry squid for exactly 60-90 seconds — squid turns rubbery almost instantly if overcooked, so work fast.',
+      'In the same pan, quickly sauté garlic and chilli flakes, toss the squid back in with a dash of soy sauce.',
+      'Garnish with spring onions and serve immediately.'
+    ],
+    cutKeywords: ['squid', 'calamari']
   }
 ];
 

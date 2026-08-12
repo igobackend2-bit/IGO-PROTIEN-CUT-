@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Star, Flame, RefreshCw, Check, Heart, Zap, Bell, Tag, Minus, Plus } from 'lucide-react';
+import { ShoppingBag, Check, Heart, Bell, Minus, Plus } from 'lucide-react';
 import { Product, ProductWeightOption } from '../types';
 import { StoreService } from '../lib/storage';
 import { FadeImage } from './FadeImage';
@@ -12,14 +12,19 @@ interface ProductCardProps {
   onNavigate?: (path: string) => void;
 }
 
+// Simplified to a minimal card — image, one status badge, category label,
+// name, weight, price with savings, Add button — replacing the previous
+// denser card (weight-tier selector grid, inline coupon call-out, nutrition
+// bar, Buy Now button, spinning "360°" badge that never had a real 360 view
+// behind it). Weight selection now happens on the product detail page after
+// tapping through, matching how the reference layout works; the card itself
+// always adds the product's default (first) weight tier.
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onSelectProduct,
-  onAddToCart,
-  onNavigate
+  onAddToCart
 }) => {
   const { t } = useLang();
-  const [selectedWeightIndex, setSelectedWeightIndex] = useState(0);
   const [added, setAdded] = useState(false);
   const [notified, setNotified] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(() => StoreService.getWishlist().includes(product.id));
@@ -35,8 +40,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     return () => window.removeEventListener('protein_cuts_wishlist_updated', sync);
   }, [product.id]);
 
-  const currentWeight = product.weightOptions[selectedWeightIndex] || product.weightOptions[0];
+  const currentWeight = product.weightOptions[0];
   const isOutOfStock = product.stockStatus === 'Out of Stock';
+  const isLowStock = product.stockStatus === 'Limited Stock';
+  const savings = currentWeight.originalPrice - currentWeight.price;
 
   // Previously Add just flashed to "Added!" for ~1.2s and reverted to a
   // plain Add button, with nothing on the card showing how many of the
@@ -50,16 +57,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     return () => window.removeEventListener('protein_cuts_cart_updated', sync);
   }, [product.id, currentWeight.label]);
 
-  // Inline coupon call-out (FreshToHome/ZappFresh pattern: "Use CODE" shown
-  // directly on the product card, not just buried in the cart).
-  const bestCoupon = StoreService.getCoupons()
-    .filter((c) => currentWeight.price >= c.minOrderValue)
-    .sort((a, b) => {
-      const aOff = a.discountType === 'flat' ? a.value : Math.round((currentWeight.price * a.value) / 100);
-      const bOff = b.discountType === 'flat' ? b.value : Math.round((currentWeight.price * b.value) / 100);
-      return bOff - aOff;
-    })[0];
-
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
     onAddToCart(product, currentWeight, 1);
@@ -70,12 +67,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const handleStepperChange = (e: React.MouseEvent, delta: number) => {
     e.stopPropagation();
     StoreService.adjustCartQuantity(product.id, currentWeight.label, delta);
-  };
-
-  const handleBuyNow = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onAddToCart(product, currentWeight, 1);
-    if (onNavigate) onNavigate('/cart');
   };
 
   const handleNotify = (e: React.MouseEvent) => {
@@ -89,6 +80,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     StoreService.toggleWishlist(product.id);
     setIsWishlisted(!isWishlisted);
   };
+
+  // Single top-left status pill, most urgent first — a card only ever shows
+  // one, matching the minimal reference layout instead of stacking multiple
+  // badges.
+  const statusBadge = isOutOfStock
+    ? { label: 'OUT OF STOCK', className: 'bg-[#0A1F12] text-white' }
+    : isLowStock
+    ? { label: 'LOW STOCK', className: 'bg-amber-500 text-white' }
+    : product.isTodayFresh
+    ? { label: 'FRESH TODAY', className: 'bg-emerald-600 text-white' }
+    : product.isBestSeller
+    ? { label: 'BEST SELLER', className: 'bg-white text-[#0A1F12]' }
+    : null;
 
   return (
     <div
@@ -107,30 +111,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           className={`w-full h-full object-cover group-hover:scale-105 transition duration-500 ${isOutOfStock ? 'grayscale opacity-70' : ''}`}
         />
 
-        {/* Overlay Gradient for badge legibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
-
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 items-center z-10">
-          {isOutOfStock ? (
-            <span className="bg-[#0A1F12] text-white font-extrabold text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow">
-              Out of Stock
-            </span>
-          ) : (
-            <>
-              {product.discountPercentage > 0 && (
-                <span className="bg-[#0F7B3A] text-white font-extrabold text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow">
-                  {product.discountPercentage}% OFF
-                </span>
-              )}
-              {product.isBestSeller && (
-                <span className="bg-white text-black font-extrabold text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider shadow flex items-center gap-1">
-                  <Flame className="w-3 h-3 fill-black" /> BEST SELLER
-                </span>
-              )}
-            </>
-          )}
-        </div>
+        {statusBadge && (
+          <span
+            className={`absolute top-3 left-3 z-10 font-extrabold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider shadow ${statusBadge.className}`}
+          >
+            {statusBadge.label}
+          </span>
+        )}
 
         {/* Wishlist Button */}
         <button
@@ -139,89 +126,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         >
           <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-emerald-500 text-emerald-500' : ''}`} />
         </button>
-
-        {/* Freshness Badge */}
-        <div className="absolute bottom-2 left-3 bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] text-white font-medium border border-white/10 flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          {product.freshnessGrade}
-        </div>
-
-        {/* 360 / 3D Quick Indicator */}
-        <div className="absolute bottom-2 right-3 flex items-center gap-1 text-[10px] text-white bg-black/60 px-2 py-0.5 rounded-full backdrop-blur-md">
-          <RefreshCw className="w-3 h-3 text-emerald-400 animate-spin-slow" /> 360°
-        </div>
       </div>
 
       {/* Product Content Details */}
       <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
         <div>
-          <div className="flex items-center justify-between text-xs text-neutral-500 mb-1">
-            <span className="uppercase tracking-wider text-[10px] font-bold text-emerald-600">
-              {product.subcategory} • {product.boneType}
-            </span>
-            <div className="flex items-center gap-1 text-[#0A1F12] font-bold">
-              <Star className="w-3.5 h-3.5 fill-emerald-600 text-emerald-600" />
-              <span>{product.rating}</span>
-              <span className="text-neutral-400 text-[10px]">({product.reviewCount})</span>
-            </div>
-          </div>
+          <span className="uppercase tracking-wider text-[10px] font-bold text-emerald-600">
+            {product.subcategory}
+          </span>
 
-          <h3 className="text-sm font-bold text-[#0A1F12] group-hover:text-emerald-600 transition line-clamp-1">
+          <h3 className="text-sm font-bold text-[#0A1F12] group-hover:text-emerald-600 transition line-clamp-1 mt-0.5">
             {product.name}
           </h3>
 
-          <p className="text-xs text-neutral-500 line-clamp-2 mt-1 leading-relaxed">
-            {product.shortDescription}
-          </p>
+          <div className="text-xs text-neutral-500 mt-1">{currentWeight.label}</div>
         </div>
-
-        {/* Nutrition High Bar */}
-        <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-2.5 py-1.5 flex items-center justify-between text-[11px]">
-          <span className="text-neutral-600">Protein: <strong className="text-emerald-700">{product.nutrition.protein}</strong></span>
-          <span className="text-neutral-600">Prep: <strong className="text-[#0A1F12]">{product.prepTimeMinutes} mins</strong></span>
-        </div>
-
-        {/* Inline Coupon Call-out */}
-        {!isOutOfStock && bestCoupon && (
-          <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#0F7B3A] bg-emerald-50/60 border border-dashed border-emerald-300 rounded-lg px-2 py-1">
-            <Tag className="w-3 h-3 shrink-0" />
-            Use <span className="font-mono">{bestCoupon.code}</span>: {bestCoupon.description}
-          </div>
-        )}
-
-        {/* Weight Selector */}
-        <div>
-          <label className="block text-[10px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">
-            Select Portion Cut
-          </label>
-          <div className="grid grid-cols-2 gap-1.5">
-            {product.weightOptions.map((opt, idx) => (
-              <button
-                key={opt.label}
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedWeightIndex(idx);
-                }}
-                className={`py-1.5 px-2 rounded-lg text-[11px] font-medium border text-center transition ${
-                  selectedWeightIndex === idx
-                    ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-bold'
-                    : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#0A1F12] hover:border-neutral-300'
-                }`}
-              >
-                {opt.label.split(' ')[0]}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Express Delivery Info */}
-        {!isOutOfStock && (
-          <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 font-semibold">
-            <Zap className="w-3 h-3 text-emerald-600 fill-emerald-600" />
-            {t('deliveryTime30to90')}
-          </div>
-        )}
 
         {/* Price & Add to Cart Footer */}
         <div className="pt-2 border-t border-neutral-100 flex items-center justify-between gap-2">
@@ -232,7 +151,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 <span className="text-xs text-neutral-400 line-through">₹{currentWeight.originalPrice}</span>
               )}
             </div>
-            <div className="text-[10px] text-neutral-500 font-medium">{currentWeight.servings}</div>
+            {savings > 0 && (
+              <span className="text-[10px] font-bold text-emerald-700 uppercase">Save ₹{savings}</span>
+            )}
           </div>
 
           {isOutOfStock ? (
@@ -254,58 +175,44 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 </>
               )}
             </button>
-          ) : (
-            <div className="flex items-center gap-1.5">
-              {onNavigate && (
-                <button
-                  onClick={handleBuyNow}
-                  className="px-3 py-2 rounded-xl text-xs font-bold border border-[#0F7B3A] text-[#0F7B3A] hover:bg-emerald-50 transition cursor-pointer"
-                >
-                  {t('buyNow')}
-                </button>
-              )}
-              {cartQty > 0 ? (
-                <div
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 rounded-xl px-1 py-1"
-                >
-                  <button
-                    onClick={(e) => handleStepperChange(e, -1)}
-                    aria-label="Decrease quantity"
-                    className="w-6 h-6 flex items-center justify-center text-emerald-700 hover:bg-emerald-100 rounded-lg transition cursor-pointer"
-                  >
-                    <Minus className="w-3.5 h-3.5" />
-                  </button>
-                  <span className="text-xs font-black text-[#0A1F12] min-w-[1ch] text-center">{cartQty}</span>
-                  <button
-                    onClick={(e) => handleStepperChange(e, 1)}
-                    aria-label="Increase quantity"
-                    className="w-6 h-6 flex items-center justify-center text-emerald-700 hover:bg-emerald-100 rounded-lg transition cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={handleAdd}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-md ${
-                    added
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-[#0F7B3A] hover:bg-emerald-500 text-white'
-                  }`}
-                >
-                  {added ? (
-                    <>
-                      <Check className="w-3.5 h-3.5" /> {t('added')}
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingBag className="w-3.5 h-3.5" /> {t('addToCart')}
-                    </>
-                  )}
-                </button>
-              )}
+          ) : cartQty > 0 ? (
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 rounded-xl px-1 py-1"
+            >
+              <button
+                onClick={(e) => handleStepperChange(e, -1)}
+                aria-label="Decrease quantity"
+                className="w-6 h-6 flex items-center justify-center text-emerald-700 hover:bg-emerald-100 rounded-lg transition cursor-pointer"
+              >
+                <Minus className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-xs font-black text-[#0A1F12] min-w-[1ch] text-center">{cartQty}</span>
+              <button
+                onClick={(e) => handleStepperChange(e, 1)}
+                aria-label="Increase quantity"
+                className="w-6 h-6 flex items-center justify-center text-emerald-700 hover:bg-emerald-100 rounded-lg transition cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+              </button>
             </div>
+          ) : (
+            <button
+              onClick={handleAdd}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-md ${
+                added ? 'bg-emerald-500 text-white' : 'bg-[#0F7B3A] hover:bg-emerald-500 text-white'
+              }`}
+            >
+              {added ? (
+                <>
+                  <Check className="w-3.5 h-3.5" /> {t('added')}
+                </>
+              ) : (
+                <>
+                  <ShoppingBag className="w-3.5 h-3.5" /> {t('addToCart')}
+                </>
+              )}
+            </button>
           )}
         </div>
       </div>

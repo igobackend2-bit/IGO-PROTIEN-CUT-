@@ -25,6 +25,45 @@ export const AboutPage: React.FC = () => {
         <p className="text-xs sm:text-base text-neutral-300 leading-relaxed">{content.intro}</p>
       </div>
 
+      {/* What We Sell — customer feedback pointed out that everything above
+          this point is guarantees/brand-story copy (antibiotic-free, cold
+          chain, certifications) without ever plainly stating what's actually
+          for sale. A new visitor reading only the hero had no quick way to
+          tell this is a fresh-meat-and-seafood delivery service rather than,
+          say, a supplement or grocery brand. This section says it directly. */}
+      <div className="bg-white border border-neutral-200 rounded-3xl p-8 space-y-6 shadow-sm">
+        <div className="max-w-2xl">
+          <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest">What We Sell</span>
+          <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight mt-2">
+            Fresh chicken, mutton, fish, seafood and eggs — cut to order and delivered in 30-90 minutes.
+          </h2>
+          <p className="text-sm text-neutral-600 leading-relaxed mt-3">
+            Protein Cuts is an online butcher: you pick the cut and weight, our butchers dress it fresh after you
+            order, and it reaches your door chilled at 0-4°C. Beyond individual cuts, we also sell ready-to-cook
+            marinated items, frozen snacks, combo packs for families or gym-goers, and recurring meat subscriptions.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          {[
+            'Fresh Chicken',
+            'Mutton & Beef',
+            'Fish & Seafood',
+            'Farm Eggs',
+            'Ready-to-Cook',
+            'Frozen Snacks',
+            'Combo Packs',
+            'Meat Subscriptions'
+          ].map((item) => (
+            <div
+              key={item}
+              className="bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2.5 font-bold text-[#0A1F12] text-center"
+            >
+              {item}
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Trust / Traceability — real facility photo, real facts already
           established elsewhere on the site (batch ID traceability, 0-4°C
           cold chain, heritage Nilgiris farms) rather than a fabricated
