@@ -112,6 +112,15 @@ export const CartPage: React.FC<CartPageProps> = ({
   const [paymentMethod, setPaymentMethod] = useState<Order['paymentMethod']>('UPI');
   const [isPlacing, setIsPlacing] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  // Previously choosing UPI/Card/Net Banking and hitting "Place Order" went
+  // straight to the confirmation screen with paymentStatus silently marked
+  // "Paid" — no UPI intent, no QR, nothing shown for a method that supposedly
+  // needed a payment. No live gateway key is configured yet (see
+  // CheckoutModal.tsx's own comment on this), so this is an honestly-labeled
+  // simulated payment step rather than a real gateway — but it's a real step
+  // the customer has to act on, instead of a silent, unearned "Paid".
+  const [showPaymentSim, setShowPaymentSim] = useState(false);
+  const needsPaymentStep = paymentMethod === 'UPI' || paymentMethod === 'Credit/Debit Card' || paymentMethod === 'Net Banking';
 
   // Step 3 — Cooking Plan
   const [activeGlobalCookingType, setActiveGlobalCookingType] = useState<CookingType>('Biryani');
@@ -276,7 +285,10 @@ export const CartPage: React.FC<CartPageProps> = ({
 
   const isPriorityMember = userProfile.membershipTier === 'Platinum' || userProfile.membershipTier === 'Elite';
   const deliveryFee = isPriorityMember || subtotal >= 499 || subtotal === 0 ? 0 : 39;
-  const walletDiscount = useWallet ? Math.min(subtotal, userProfile.IGOWalletBalance || 250) : 0;
+  // Was `|| 250` — a customer with a genuine ₹0 balance got a phantom ₹250
+  // knocked off their order the moment they ticked "use wallet credit",
+  // since `0 || 250` evaluates to 250 in JS. Real balance only, ever.
+  const walletDiscount = useWallet ? Math.min(subtotal, userProfile.IGOWalletBalance || 0) : 0;
   const tax = Math.round(subtotal * 0.05);
   const grandTotal = Math.max(0, subtotal - appliedDiscount - walletDiscount + deliveryFee + tax);
   const totalSavings = catalogSavings + appliedDiscount + walletDiscount + (deliveryFee === 0 && subtotal > 0 && !isPriorityMember ? 39 : 0);
@@ -1047,7 +1059,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                         className="w-4 h-4 rounded border-neutral-300 text-[#0F7B3A] focus:ring-emerald-500 bg-white cursor-pointer"
                       />
                       <span className="text-xs text-neutral-600 font-medium">
-                        Also redeem up to ₹{userProfile.IGOWalletBalance || 250} IGO Wallet credit on this order
+                        Also redeem up to ₹{userProfile.IGOWalletBalance || 0} IGO Wallet credit on this order
                       </span>
                     </label>
                   </div>
@@ -1407,7 +1419,7 @@ export const CartPage: React.FC<CartPageProps> = ({
 
                   {step === 3 && (
                     <button
-                      onClick={handlePlaceOrder}
+                      onClick={() => (needsPaymentStep ? setShowPaymentSim(true) : handlePlaceOrder())}
                       disabled={isPlacing}
                       className="flex-1 bg-[#0F7B3A] hover:bg-emerald-500 text-white font-black py-3.5 rounded-2xl text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
                     >
@@ -1479,6 +1491,44 @@ export const CartPage: React.FC<CartPageProps> = ({
           </div>
         );
       })()}
+
+      {/* Simulated Payment Modal — UPI / Card / Net Banking */}
+      {showPaymentSim && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-neutral-200 rounded-3xl max-w-sm w-full p-6 text-[#0A1F12] space-y-4 shadow-2xl text-center">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-700">
+              <Smartphone className="w-7 h-7" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold">Pay via {paymentMethod}</h3>
+              <p className="text-xs text-neutral-500 mt-1">
+                Live payment gateway isn't connected yet — this confirms your order as a demo payment. No real money is charged.
+              </p>
+            </div>
+            <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-4">
+              <div className="text-[10px] text-neutral-500 uppercase tracking-wide font-bold">Amount</div>
+              <div className="text-2xl font-black text-emerald-700">₹{grandTotal}</div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowPaymentSim(false)}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-neutral-200 text-neutral-600 hover:text-[#0A1F12] font-semibold text-xs cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowPaymentSim(false);
+                  handlePlaceOrder();
+                }}
+                className="flex-1 bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs uppercase cursor-pointer transition"
+              >
+                Confirm Payment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Partner Redirect Modal for Farmer's Factory & IGO Mart */}
       <PartnerRedirectModal

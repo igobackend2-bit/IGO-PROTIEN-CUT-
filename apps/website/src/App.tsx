@@ -548,6 +548,7 @@ export default function App() {
         currentPath={currentPath}
         lang={lang}
         onToggleLang={() => setLang((prev) => (prev === 'en' ? 'ta' : 'en'))}
+        products={products}
       />
 
       {/* Main View Area */}

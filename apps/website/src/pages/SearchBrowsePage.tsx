@@ -17,6 +17,7 @@ import {
 import { Product, ProductCategory, ProductWeightOption } from '../types';
 import { BrowseProductCard } from '../components/BrowseProductCard';
 import { useLang } from '../lib/language';
+import { scoreProductMatch } from '../lib/search';
 
 interface SearchBrowsePageProps {
   products: Product[];
@@ -159,6 +160,16 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
       if (sortBy === 'price-high') return b.basePrice - a.basePrice;
       if (sortBy === 'rating') return b.rating - a.rating;
       if (sortBy === 'newest') return (b.isTodayFresh ? 1 : 0) - (a.isTodayFresh ? 1 : 0);
+      // Default ("Featured") sort with an active text search — previously
+      // this returned 0 (no reorder), so results kept the catalog's
+      // original order and a search for "on" could show Watermelon before
+      // Onion just because Watermelon happened to be earlier in the
+      // catalog. Rank by the same relevance score the Navbar's live
+      // dropdown uses (see src/lib/search.ts) so the closest name matches
+      // surface first here too.
+      if (searchQuery.trim()) {
+        return scoreProductMatch(searchQuery, b) - scoreProductMatch(searchQuery, a);
+      }
       return 0;
     });
   }, [products, selectedCategory, selectedSubcategory, searchQuery, selectedBoneType, selectedFreshness, minRating, maxPrice, minDiscount, selectedPackSize, sortBy]);

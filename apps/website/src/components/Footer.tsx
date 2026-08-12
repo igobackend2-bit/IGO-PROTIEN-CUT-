@@ -125,7 +125,11 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <div>
               <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">{t('newsletter')}</h4>
               {subscribed ? (
-                <div className="flex items-center gap-2 bg-white/15 border border-white/25 text-white text-xs font-bold px-4 py-3 rounded-full">
+                // py-2.5 to match the form's own input/button padding below —
+                // it was py-3, a couple of px taller, so the section below
+                // (Follow Us) visibly nudged up and down as this swapped
+                // in and out on subscribe.
+                <div className="flex items-center gap-2 bg-white/15 border border-white/25 text-white text-xs font-bold px-4 py-2.5 rounded-full">
                   <CheckCircle2 className="w-4 h-4 shrink-0" /> {t('subscribedMsg')}
                 </div>
               ) : (

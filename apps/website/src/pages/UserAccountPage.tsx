@@ -102,6 +102,18 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
     initialTab && (VALID_ACCOUNT_TABS as string[]).includes(initialTab) ? (initialTab as AccountTab) : 'orders'
   );
 
+  // Re-sync when `initialTab` changes from OUTSIDE a tab-button click —
+  // i.e. the browser Back/Forward buttons, which change the URL (and this
+  // prop, derived from it in App.tsx) without this component ever
+  // unmounting. Without this, useState's initializer only ran once on the
+  // very first mount, so Back could change the URL back to `?tab=wallet`
+  // but the screen would keep showing whatever tab was already on screen.
+  useEffect(() => {
+    if (initialTab && (VALID_ACCOUNT_TABS as string[]).includes(initialTab)) {
+      setActiveTab(initialTab as AccountTab);
+    }
+  }, [initialTab]);
+
   const [userProfile, setUserProfile] = useState(() => StoreService.getUserProfile());
   const [orders, setOrders] = useState<Order[]>(() => StoreService.getOrders());
   // Real subscriptions from the canonical `subscriptions` table (same one the
@@ -134,6 +146,15 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
   // Add Money to Wallet
   const [showAddMoneyModal, setShowAddMoneyModal] = useState(false);
   const [addMoneyAmount, setAddMoneyAmount] = useState<number>(500);
+  // Previously there was no method choice at all — the transaction history
+  // hardcoded "Added money via UPI/Card" no matter what, so the record never
+  // actually reflected a real choice. UPI is now a real selectable option
+  // here (matching the doc's "no payment UPI is showing up" report), and the
+  // logged description matches whichever the customer actually picked.
+  const [addMoneyMethod, setAddMoneyMethod] = useState<'UPI' | 'Card'>('UPI');
+  const ADD_MONEY_MAX = 10000;
+  const addMoneyError =
+    addMoneyAmount > ADD_MONEY_MAX ? `Max ₹${ADD_MONEY_MAX.toLocaleString('en-IN')} per top-up.` : null;
 
   // Inline toast (replaces window.alert)
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -451,20 +472,34 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
     setSubActionBusyId(null);
   };
 
-  const handleCancelOrder = (orderId: string) => {
-    const updated = StoreService.updateOrderStatus(orderId, 'Cancelled');
+  // Cancelling used to be a single click with zero confirmation, and worked
+  // on an order at ANY status — including one already "Out for Express
+  // Delivery" with a rider en route, which no real order platform allows.
+  // Now cancel is only offered pre-dispatch (see the eligibility check at the
+  // render site), requires an explicit confirm step, and tells the customer
+  // what happens to their money instead of just changing a status silently.
+  const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
+
+  const handleCancelOrder = (order: Order) => {
+    const updated = StoreService.updateOrderStatus(order.id, 'Cancelled');
     setOrders(updated);
+    setConfirmCancelId(null);
+    if (order.paymentMethod === 'Cash on Delivery' || order.paymentStatus !== 'Paid') {
+      showToast('Order cancelled. Nothing was charged, so there’s nothing to refund.');
+    } else {
+      showToast(`Order cancelled. ₹${order.totalAmount} will be refunded to your original payment method within 5-7 business days.`);
+    }
   };
 
   const handleAddMoneySubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!addMoneyAmount || addMoneyAmount <= 0) return;
+    if (!addMoneyAmount || addMoneyAmount <= 0 || addMoneyAmount > ADD_MONEY_MAX) return;
     const updatedProfile = StoreService.addWalletFunds(addMoneyAmount);
     setUserProfile(updatedProfile);
     const updatedHistory = SupabaseService.addWalletTransaction({
       type: 'credit',
       amount: addMoneyAmount,
-      description: 'Added money via UPI/Card',
+      description: `Added money via ${addMoneyMethod}`,
       status: 'Completed'
     });
     setWalletHistory(updatedHistory);
@@ -617,7 +652,19 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => {
+                    setActiveTab(tab.id as AccountTab);
+                    // Previously this only set local state, so switching
+                    // tabs never touched the URL or browser history — Back
+                    // had nothing to step through for it. Landing on any
+                    // other page afterward and then pressing Back skipped
+                    // straight past every tab you'd visited, back to
+                    // whatever /account itself resolves to by default
+                    // (Orders), regardless of which tab you were last on.
+                    // Pushing a real `?tab=` entry per switch makes Back
+                    // step through tabs like any other page.
+                    onNavigate?.(`/account?tab=${tab.id}`);
+                  }}
                   className={`group relative flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition cursor-pointer whitespace-nowrap lg:w-full ${
                     isActive
                       ? 'bg-emerald-50 text-[#0F7B3A]'
@@ -761,13 +808,34 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
                               <Star className="w-3.5 h-3.5" /> Rate Your Order
                             </button>
                           )}
-                          {order.status !== 'Delivered' && order.status !== 'Cancelled' && (
-                            <button
-                              onClick={() => handleCancelOrder(order.id)}
-                              className="px-3 py-1.5 rounded-xl border border-neutral-300 bg-white text-neutral-700 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition font-semibold"
-                            >
-                              Cancel Order
-                            </button>
+                          {/* Cancel is only offered before the order actually leaves —
+                              once a rider has it ("Out for Express Delivery") or it's
+                              already delivered/cancelled, there's nothing left to cancel. */}
+                          {(order.status === 'Placed' || order.status === 'Freshly Cut' || order.status === 'Quality Passed') && (
+                            confirmCancelId === order.id ? (
+                              <div className="flex items-center gap-2">
+                                <span className="text-[11px] text-neutral-500">Cancel this order?</span>
+                                <button
+                                  onClick={() => handleCancelOrder(order)}
+                                  className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white transition font-semibold"
+                                >
+                                  Yes, Cancel
+                                </button>
+                                <button
+                                  onClick={() => setConfirmCancelId(null)}
+                                  className="px-3 py-1.5 rounded-xl border border-neutral-200 bg-white text-neutral-600 hover:text-[#0A1F12] transition font-semibold"
+                                >
+                                  Keep Order
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setConfirmCancelId(order.id)}
+                                className="px-3 py-1.5 rounded-xl border border-neutral-300 bg-white text-neutral-700 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition font-semibold"
+                              >
+                                Cancel Order
+                              </button>
+                            )
                           )}
                         </div>
                       </div>
@@ -1219,21 +1287,31 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
       {/* TAB 6: COUPONS */}
       {activeTab === 'coupons' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[
-            { code: 'FRESH100', desc: 'Flat ₹100 Off on your first organic chicken or mutton order', min: 499 },
-            { code: 'GYMPRO', desc: '15% Extra Cashback on boneless chicken & egg packs', min: 799 },
-            { code: 'SEAFOOD20', desc: 'Flat 20% Off on Wild Prawns and Atlantic Salmon steaks', min: 999 }
-          ].map((c) => (
+          {/* Previously three hardcoded example codes (FRESH100, GYMPRO,
+              SEAFOOD20) that had no guarantee of existing in the real
+              coupons table CartPage's handleApplyCoupon actually validates
+              against — a customer copying one of these and pasting it at
+              checkout would get "Invalid Coupon Code" every time. Now this
+              reads the exact same live list Checkout uses, so anything shown
+              here is guaranteed to apply. */}
+          {StoreService.getCoupons().length === 0 && (
+            <div className="md:col-span-2 text-center text-xs text-neutral-400 py-10">
+              No active coupons right now — check back soon.
+            </div>
+          )}
+          {StoreService.getCoupons().map((c) => (
             <div key={c.code} className="bg-white border border-neutral-200 rounded-3xl p-6 flex flex-col justify-between space-y-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="font-mono font-black text-[#0A1F12] bg-neutral-50 border border-neutral-200 px-3 py-1 rounded-xl text-sm">
                   {c.code}
                 </span>
                 <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
-                  Min Order ₹{c.min}
+                  Min Order ₹{c.minOrderValue}
                 </span>
               </div>
-              <p className="text-xs text-neutral-600">{c.desc}</p>
+              <p className="text-xs text-neutral-600">
+                {c.description || (c.discountType === 'percentage' ? `${c.value}% off your order` : `Flat ₹${c.value} off your order`)}
+              </p>
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(c.code);
@@ -1303,12 +1381,17 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
                         aria-checked={enabled}
                         disabled={busy}
                         onClick={() => handleToggleNotifyPref(row.key)}
-                        className={`shrink-0 w-11 h-6 rounded-full relative transition disabled:opacity-50 cursor-pointer ${
+                        className={`shrink-0 self-center w-11 h-6 rounded-full relative transition disabled:opacity-50 cursor-pointer ${
                           enabled ? 'bg-[#0F7B3A]' : 'bg-neutral-300'
                         }`}
                       >
+                        {/* Explicit left-0 — without it the thumb's horizontal
+                            position before the translate is left to each
+                            browser's "static position" fallback, which isn't
+                            guaranteed to be flush against the track, and read
+                            as the toggle sitting off-center in the row. */}
                         <span
-                          className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                          className={`absolute left-0 top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
                             enabled ? 'translate-x-[22px]' : 'translate-x-0.5'
                           }`}
                         />
@@ -1495,17 +1578,40 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
                 <input
                   type="number"
                   min={1}
+                  max={ADD_MONEY_MAX}
                   value={addMoneyAmount}
                   onChange={(e) => setAddMoneyAmount(Number(e.target.value))}
                   className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
                   required
                 />
+                {addMoneyError && <p className="text-[11px] text-red-600 font-semibold mt-1">{addMoneyError}</p>}
+              </div>
+              <div>
+                <label className="block font-bold text-neutral-600 mb-1.5">Pay Via</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['UPI', 'Card'] as const).map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setAddMoneyMethod(m)}
+                      className={`py-2 rounded-xl font-bold border transition cursor-pointer ${
+                        addMoneyMethod === m ? 'bg-emerald-50 border-emerald-400 text-emerald-700' : 'bg-white border-neutral-200 text-neutral-500'
+                      }`}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button type="button" onClick={() => setShowAddMoneyModal(false)} className="px-4 py-2 text-neutral-500 cursor-pointer">
                   Cancel
                 </button>
-                <button type="submit" className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl uppercase cursor-pointer transition">
+                <button
+                  type="submit"
+                  disabled={!!addMoneyError || !addMoneyAmount || addMoneyAmount <= 0}
+                  className="bg-[#0F7B3A] hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-5 py-2.5 rounded-xl uppercase cursor-pointer transition"
+                >
                   Add ₹{addMoneyAmount || 0}
                 </button>
               </div>

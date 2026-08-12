@@ -181,11 +181,36 @@ export function categoryToDbFilters(category: ProductCategory): string[] {
 /** Parses '500g' / '1kg' / '1.5 kg' into grams. Returns null if unparseable. */
 export function parseWeightToGrams(weight: string | null): number | null {
   if (!weight) return null;
-  const match = weight.toLowerCase().replace(/\s+/g, '').match(/([\d.]+)(kg|g)/);
-  if (!match) return null;
-  const value = parseFloat(match[1]);
-  if (Number.isNaN(value)) return null;
-  return match[2] === 'kg' ? Math.round(value * 1000) : Math.round(value);
+  const cleaned = weight.toLowerCase().replace(/\s+/g, '');
+  const withUnit = cleaned.match(/([\d.]+)(kg|g)/);
+  if (withUnit) {
+    const value = parseFloat(withUnit[1]);
+    if (Number.isNaN(value)) return null;
+    return withUnit[2] === 'kg' ? Math.round(value * 1000) : Math.round(value);
+  }
+  // Admin entered a bare number with no unit (e.g. "250") — the app's own
+  // weight field has always meant grams in that case, so treat it the same
+  // way rather than silently dropping it and falling back to a hardcoded
+  // default (which also threw off per-kg pricing for that product).
+  const bareNumber = cleaned.match(/^([\d.]+)$/);
+  if (bareNumber) {
+    const value = parseFloat(bareNumber[1]);
+    return Number.isNaN(value) ? null : Math.round(value);
+  }
+  return null;
+}
+
+/**
+ * Turns `products.weight` into a customer-facing label. Previously a bare
+ * admin entry like "250" was shown to the customer exactly as-is — "250"
+ * with no unit — instead of "250 g", which read as a display bug even
+ * though the underlying data was fine.
+ */
+export function formatWeightLabel(weight: string | null): string {
+  if (!weight) return '500g';
+  const trimmed = weight.trim();
+  if (/^[\d.]+$/.test(trimmed)) return `${trimmed} g`;
+  return trimmed;
 }
 
 /**
@@ -300,7 +325,7 @@ export function buildWeightOptions(
     const grams = parseWeightToGrams(row.weight) ?? 500;
     return [
       {
-        label: row.weight ?? '500g',
+        label: formatWeightLabel(row.weight),
         weightGrams: grams,
         price: Math.round(basePrice),
         originalPrice: Math.round(basePrice),
@@ -378,8 +403,16 @@ export function toWebsiteProduct(
   // the browser re-request the current page, so fall back to the brand mark
   // rather than emitting an empty string. Fix the real cause by uploading a
   // photo for that product in the admin dashboard.
-  const gallery = (row.image_urls ?? []).filter(
-    (url): url is string => typeof url === 'string' && url.trim().length > 0
+  // De-duplicated — some catalog rows have the same photo listed twice in
+  // `image_urls` (e.g. a single upload that got saved as both the primary
+  // and the first gallery entry), which showed up on the product page as
+  // two identical thumbnails side by side for what is really one photo.
+  const gallery = Array.from(
+    new Set(
+      (row.image_urls ?? []).filter(
+        (url): url is string => typeof url === 'string' && url.trim().length > 0
+      )
+    )
   );
   const rawPrimary = row.image_url?.trim();
   const primaryImage =

@@ -29,6 +29,8 @@ import { fetchNotifications } from '../lib/api/notifications';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { Language, TRANSLATIONS } from '../lib/language';
 import { isPincodeServiceable, isValidPincodeFormat } from '../lib/serviceability';
+import { Product } from '../types';
+import { rankedProductMatches } from '../lib/search';
 
 interface NavbarProps {
   onOpenCart: () => void;
@@ -42,6 +44,7 @@ interface NavbarProps {
   currentPath: string;
   lang?: Language;
   onToggleLang?: () => void;
+  products?: Product[];
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -55,7 +58,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNavigate,
   currentPath,
   lang = 'en',
-  onToggleLang
+  onToggleLang,
+  products = []
 }) => {
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
@@ -68,6 +72,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categoriesMenuOpen, setCategoriesMenuOpen] = useState(false);
   const [navSearchQuery, setNavSearchQuery] = useState('');
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const navSearchMatches = rankedProductMatches(navSearchQuery, products, 6);
   const [userProfile, setUserProfile] = useState(() => StoreService.getUserProfile());
   const [isLoggedIn, setIsLoggedIn] = useState(() => StoreService.isLoggedIn());
 
@@ -343,7 +349,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             submitNavSearch), now added here in the main header too, per
             request. The AI-branded click-through trigger this replaced is
             gone. Voice search stays, wasn't part of the earlier removal. */}
-        <div className="flex-1 min-w-[130px] sm:min-w-[160px] max-w-[180px] sm:max-w-[220px] md:max-w-xs hidden sm:flex items-center justify-center shrink">
+        <div className="relative flex-1 min-w-[130px] sm:min-w-[160px] max-w-[180px] sm:max-w-[220px] md:max-w-xs hidden sm:flex items-center justify-center shrink">
           {/* Mic now sits inside the pill as a trailing icon, matching the
               reference layout, instead of as a separate button beside it.
               Shrunk down to a compact size per request — smaller height and
@@ -354,12 +360,35 @@ export const Navbar: React.FC<NavbarProps> = ({
               type="text"
               value={navSearchQuery}
               onChange={(e) => setNavSearchQuery(e.target.value)}
+              onFocus={() => setShowSearchDropdown(true)}
+              // A short delay so a click on a dropdown row/button registers
+              // before blur closes it — onMouseDown on those rows fires
+              // first regardless, but this keeps keyboard/touch reliable too.
+              onBlur={() => setTimeout(() => setShowSearchDropdown(false), 150)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') submitNavSearch();
+                if (e.key === 'Enter') {
+                  setShowSearchDropdown(false);
+                  submitNavSearch();
+                } else if (e.key === 'Escape') {
+                  setShowSearchDropdown(false);
+                }
               }}
               placeholder={t.searchPlaceholder}
               className="flex-1 min-w-0 bg-transparent px-2 py-2 text-xs text-[#0A1F12] placeholder-neutral-400 focus:outline-none"
             />
+            {navSearchQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  setNavSearchQuery('');
+                  setShowSearchDropdown(false);
+                }}
+                aria-label="Clear search"
+                className="p-1.5 text-neutral-400 hover:text-neutral-600 transition cursor-pointer shrink-0"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
             <button
               onClick={onOpenVoiceSearch}
               title="Voice Search"
@@ -375,6 +404,60 @@ export const Navbar: React.FC<NavbarProps> = ({
               <Search className="w-3.5 h-3.5" />
             </button>
           </div>
+
+          {/* Live suggestions — relevance-ranked via rankedProductMatches
+              (src/lib/search.ts) instead of a flat "contains this substring
+              anywhere" match, so typing a prefix like "on" surfaces Onion
+              before Watermelon/Honey/Coconut Oil just because "on" happens
+              to sit inside those names too. */}
+          {showSearchDropdown && navSearchQuery.trim() && (
+            <div className="absolute z-40 top-full mt-2 left-0 right-0 min-w-[280px] bg-white border border-neutral-200 rounded-2xl shadow-2xl overflow-hidden">
+              {navSearchMatches.length > 0 ? (
+                <>
+                  <div className="max-h-80 overflow-y-auto">
+                    {navSearchMatches.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onMouseDown={() => {
+                          setShowSearchDropdown(false);
+                          setNavSearchQuery('');
+                          onNavigate(`/product/${p.id}`);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-neutral-50 transition cursor-pointer text-left border-b border-neutral-100 last:border-b-0"
+                      >
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          referrerPolicy="no-referrer"
+                          className="w-11 h-11 rounded-xl object-cover bg-neutral-100 border border-neutral-100 shrink-0"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-bold text-[#0A1F12] truncate">{p.name}</div>
+                          <div className="text-[10px] text-neutral-400 uppercase font-semibold tracking-wide">{p.category}</div>
+                        </div>
+                        <div className="text-xs font-black text-emerald-700 shrink-0">₹{p.basePrice}</div>
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onMouseDown={() => {
+                      setShowSearchDropdown(false);
+                      submitNavSearch();
+                    }}
+                    className="w-full text-center py-2.5 text-[11px] font-bold uppercase tracking-wider text-emerald-700 hover:bg-emerald-50 transition cursor-pointer border-t border-neutral-100"
+                  >
+                    View All Results
+                  </button>
+                </>
+              ) : (
+                <div className="px-4 py-4 text-xs text-neutral-400 text-center">
+                  No products match "{navSearchQuery.trim()}".
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Right Actions */}
