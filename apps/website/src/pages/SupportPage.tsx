@@ -42,6 +42,41 @@ const RETURN_REASONS_TA: Record<string, string> = {
   Other: 'மற்றவை'
 };
 
+// The 7 seeded FAQs (INITIAL_FAQS in mockData.ts) are website-owned local
+// mock data, not a live Supabase table — SupabaseService.getFAQs() just
+// caches them to localStorage. Safe to translate via an id-keyed lookup,
+// same pattern used for the mock recipes/subscription plans elsewhere.
+const FAQ_TA: Record<string, { question: string; answer: string }> = {
+  'faq-1': {
+    question: 'டெலிவரியின் போது 0-4°C புத்துணர்ச்சியை எப்படி உறுதிசெய்கிறீர்கள்?',
+    answer: 'எங்கள் அனைத்து இறைச்சியும் 2°C இல் இயங்கும் வெப்பநிலை கட்டுப்படுத்தப்பட்ட இருண்ட கடைகளில் வெட்டப்படுகிறது. பாக்கேஜ்கள் தெர்மல் டெலிவரி பைகளுக்குள் உணவு-தர ஜெல் ஐஸ் பேட்களால் இன்சுலேட் செய்யப்பட்டு, ஒப்படைக்கும் வரை கண்டிப்பாக 0-4°C ஐ பராமரிக்கின்றன.'
+  },
+  'faq-2': {
+    question: 'உங்கள் கோழிகள் ஆன்டிபயாடிக் மற்றும் இரசாயனம் இல்லாதவையா?',
+    answer: 'ஆம்! நாங்கள் சான்றளிக்கப்பட்ட உயிர்பாதுகாப்பு பண்ணைகளுடன் மட்டும் கூட்டு சேர்கிறோம். பறவைகள் எந்த ஆன்டிபயாடிக் வளர்ச்சி ஊக்குவிப்பான்கள், ஸ்டீராய்டுகள் அல்லது செயற்கை ஹார்மோன்கள் இல்லாமல் இயற்கை தானிய உணவில் வளர்க்கப்படுகின்றன.'
+  },
+  'faq-3': {
+    question: 'எக்ஸ்பிரஸ் 30-90 நிமிட டெலிவரி என்றால் என்ன?',
+    answer: '4கிமீ சுற்றளவில் உள்ள இருண்ட கடைகளில் இருந்து இயங்கும் எங்கள் ஹைப்பர்-லோக்கல் டெலிவரி சேவை எக்ஸ்பிரஸ் 30-90 நிமிடம். உங்கள் பின்கோட் தகுதியுடையதாக இருந்தால், கசாப்புக்காரர் பேக்கிங் செய்த உடனேயே உங்கள் ஆர்டர் அனுப்பப்படும்.'
+  },
+  'faq-4': {
+    question: 'ப்ரோட்டீன் கட்ஸ் சந்தா எப்படி வேலை செய்கிறது?',
+    answer: 'உங்களுக்கு விருப்பமான கட்கள், அதிர்வெண் (தினசரி, வாராந்திரம், மாதாந்திரம்) மற்றும் விருப்பமான டெலிவரி நேரத்தைத் தேர்ந்தெடுக்கவும். நீங்கள் தானியங்கு பூஜ்ஜிய-டெலிவரி-கட்டண காலை டெலிவரிகளைப் பெறுவீர்கள், மேலும் எப்போது வேண்டுமானாலும் இடைநிறுத்தலாம் அல்லது ரத்து செய்யலாம்.'
+  },
+  'faq-5': {
+    question: 'சேதமடைந்த பேக்கேஜிங்குடன் ஒரு பொருள் கிடைத்தால் என்ன செய்வது?',
+    answer: 'டெலிவரி ஆன 2 மணி நேரத்திற்குள் நீங்கள் ஒரு புகைப்பட டிக்கெட்டை எழுப்பினால், நாங்கள் உடனடி 100% மாற்று அல்லது உங்கள் IGO வாலெட்டுக்கு முழு பணத்திரும்பத்தை வழங்குகிறோம்.'
+  },
+  'faq-6': {
+    question: 'ஹலால் இறைச்சி கிடைக்குமா?',
+    answer: 'ஆம். IGO ப்ரோட்டீன் கட்ஸ் எங்கள் ஆன்டிபயாடிக் இல்லாத மூல தரநிலையுடன் 100% ஹலால் சான்றளிக்கப்பட்டுள்ளது — எங்கள் முழு சான்றிதழ்களையும் About பக்கத்தில் பார்க்கவும்.'
+  },
+  'faq-7': {
+    question: 'நீங்கள் எந்த கட்டண முறைகளை ஏற்கிறீர்கள்?',
+    answer: 'UPI, கிரெடிட்/டெபிட் கார்டு, IGO வாலெட் மற்றும் டெலிவரியின் போது பணம் — செக்அவுட்டில் நீங்கள் விரும்பியதைத் தேர்ந்தெடுக்கவும்.'
+  }
+};
+
 const TICKET_CATEGORIES_TA: Record<string, string> = {
   'Quality Concern': 'தர கவலை',
   'Delivery Delay': 'டெலிவரி தாமதம்',
@@ -255,6 +290,9 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
           <div className="space-y-3">
             {filteredFaqs.map((faq) => {
               const isExpanded = expandedFaqId === faq.id;
+              const faqTa = FAQ_TA[faq.id];
+              const displayQuestion = lang === 'ta' && faqTa ? faqTa.question : faq.question;
+              const displayAnswer = lang === 'ta' && faqTa ? faqTa.answer : faq.answer;
               return (
                 <div
                   key={faq.id}
@@ -266,14 +304,14 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                   >
                     <span className="flex items-center gap-2">
                       <HelpCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                      {faq.question}
+                      {displayQuestion}
                     </span>
                     {isExpanded ? <ChevronUp className="w-4 h-4 text-emerald-600" /> : <ChevronDown className="w-4 h-4 text-neutral-400" />}
                   </button>
 
                   {isExpanded && (
                     <div className="px-4 pb-4 pt-1 text-xs text-neutral-600 border-t border-neutral-100 leading-relaxed space-y-3">
-                      <p>{faq.answer}</p>
+                      <p>{displayAnswer}</p>
                       <div className="flex items-center gap-4 text-[11px] text-neutral-500 pt-2 border-t border-neutral-100">
                         <span>{lang === 'ta' ? 'இந்த பதில் உதவியாக இருந்ததா?' : 'Was this answer helpful?'}</span>
                         <button

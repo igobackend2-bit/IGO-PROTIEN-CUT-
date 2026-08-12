@@ -142,7 +142,15 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
       : { eyebrow: subsBlock.eyebrow, heading: subsBlock.heading };
   const plans: SubscriptionPlan[] =
     Array.isArray(subsBlock.items) && subsBlock.items.length > 0 ? subsBlock.items : INITIAL_SUBSCRIPTION_PLANS;
-  const usingMockPlans = plans === INITIAL_SUBSCRIPTION_PLANS;
+  // Deliberately NOT gated on "plans === INITIAL_SUBSCRIPTION_PLANS" — that
+  // reference-equality check silently fails in production because the CMS
+  // (igo_site_content, key `plans.subscriptions`) almost always has a stored
+  // row seeded with the same plan-01..04 ids, so `plans` is a *new* array
+  // with identical content, not the same object reference. That made this
+  // always evaluate false live, so the Tamil title/tagline/items lookup
+  // below never fired even though the ids matched. Look up by id directly
+  // instead — CMS-authored plans that reuse the original ids still get
+  // translated; anything with unrecognized ids just falls through untouched.
 
   const selectedPlan = plans.find((p) => p.id === selectedPlanId);
   const isCustomBuilder = selectedPlan?.category === 'Custom';
@@ -261,7 +269,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
       {/* Plan Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {plans.map((plan) => {
-          const planTa = usingMockPlans ? SUBSCRIPTION_PLANS_TA[plan.id] : undefined;
+          const planTa = SUBSCRIPTION_PLANS_TA[plan.id];
           const displayPlan = lang === 'ta' && planTa ? { ...plan, ...planTa } : plan;
           const segmentMeta = lang === 'ta' ? SEGMENT_META_TA[plan.category] : SEGMENT_META[plan.category];
           return (
