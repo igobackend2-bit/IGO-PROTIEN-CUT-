@@ -1,6 +1,0 @@
-Video wired up — no action needed.
-
-src/components/Hero3DCanvas.tsx now points to:
-  /videos/3D_animation_of_food_preparation_202607251716.mp4
-
-That's the file you dropped in this folder. You can delete this note.

@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://igo-protien-cut.vercel.app/sitemap.xml
