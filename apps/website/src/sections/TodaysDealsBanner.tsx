@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Flame, Clock3, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Product } from '../types';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
+import { useLang } from '../lib/language';
 
 interface TodaysDealsBannerProps {
   products: Product[];
@@ -22,6 +23,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 const CORE_MEAT_CATEGORIES: Product['category'][] = ['chicken', 'mutton', 'beef', 'fish'];
 
 export const TodaysDealsBanner: React.FC<TodaysDealsBannerProps> = ({ products, onNavigate }) => {
+  const { lang } = useLang();
   // Editable from /admin → Homepage → Flash Deals — heading.
   // The discount percentage stays computed from the live catalog — it must
   // never be typed, or it could advertise a discount that isn't real.
@@ -31,6 +33,13 @@ export const TodaysDealsBanner: React.FC<TodaysDealsBannerProps> = ({ products, 
     ctaLabel: 'Shop All Deals',
     ctaPath: '/offers'
   });
+  const flashHeadingTa = {
+    eyebrow: 'இன்றைய சிறப்பு',
+    heading: 'இன்றைய சிறப்பு தள்ளுபடி சலுகைகள்',
+    ctaLabel: 'அனைத்து சலுகைகளையும் காண்க',
+    ctaPath: '/offers'
+  };
+  const resolvedFlashHeading = lang === 'ta' ? flashHeadingTa : flashHeading;
 
   // Best discounted product per core category (deduped, so it's a genuine
   // spread across chicken/mutton/beef/fish rather than 4 chicken items just
@@ -106,26 +115,30 @@ export const TodaysDealsBanner: React.FC<TodaysDealsBannerProps> = ({ products, 
           <div className="max-w-xl">
             <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full mb-4">
               <Flame className="w-3.5 h-3.5 text-orange-400 fill-orange-400" />
-              <span className="text-[10px] font-bold text-white uppercase tracking-widest">{flashHeading.eyebrow}</span>
+              <span className="text-[10px] font-bold text-white uppercase tracking-widest">{resolvedFlashHeading.eyebrow}</span>
             </div>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-[0.95] tracking-tighter mb-3">
-              Up to {maxDiscount}% OFF
+              {lang === 'ta' ? `${maxDiscount}% வரை தள்ளுபடி` : `Up to ${maxDiscount}% OFF`}
             </h2>
             <p className="text-white/80 text-sm sm:text-base font-medium mb-6">
-              On {topDeal.name} and today's best cuts — limited time only.
+              {lang === 'ta'
+                ? `${topDeal.name} மற்றும் இன்றைய சிறந்த கட்ஸில் — குறுகிய காலத்திற்கு மட்டும்.`
+                : `On ${topDeal.name} and today's best cuts — limited time only.`}
             </p>
             <button
               onClick={() => onNavigate('/offers')}
               className="bg-white hover:bg-orange-50 text-[#0A1F12] font-black px-7 py-3.5 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg flex items-center gap-2"
             >
-              {flashHeading.ctaLabel} <ArrowRight className="w-4 h-4" />
+              {resolvedFlashHeading.ctaLabel} <ArrowRight className="w-4 h-4" />
             </button>
           </div>
 
           <div className="flex items-center gap-2.5 bg-black/40 border border-white/15 backdrop-blur-sm rounded-2xl px-5 py-4 shrink-0">
             <Clock3 className="w-5 h-5 text-white/80" />
             <div>
-              <div className="text-[9px] font-bold text-white/60 uppercase tracking-widest mb-1">Deal Refreshes In</div>
+              <div className="text-[9px] font-bold text-white/60 uppercase tracking-widest mb-1">
+                {lang === 'ta' ? 'சலுகை புதுப்பிக்கப்படும் நேரம்' : 'Deal Refreshes In'}
+              </div>
               <div className="flex items-center gap-1 font-mono font-black text-white text-2xl tracking-wider leading-none">
                 <span>{pad(hours)}</span>:<span>{pad(minutes)}</span>:<span>{pad(seconds)}</span>
               </div>

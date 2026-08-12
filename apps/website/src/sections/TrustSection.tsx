@@ -3,6 +3,22 @@ import { Check, Minus } from 'lucide-react';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
 import { resolveIcon } from '../lib/iconMap';
 import { COMPARISON_FALLBACK } from './WhyIGOSection';
+import { useLang } from '../lib/language';
+
+const COMPARISON_FALLBACK_TA = {
+  eyebrow: 'போட்டி முன்னிலை',
+  heading: 'ஏன் IGO புரோட்டீன் கட்ஸ்?',
+  subheading:
+    'இறைச்சி துறையில் தரத்திற்கான புதிய தரநிலையை நாங்கள் அமைத்துள்ளோம். உள்ளூர் சந்தையுடன் எங்களை ஒப்பிட்டு, வெளிப்படைத்தன்மை ஏற்படுத்தும் வித்தியாசத்தைப் பாருங்கள்.',
+  columns: { feature: 'அம்சம்', igo: 'IGO தரநிலை', local: 'உள்ளூர் சந்தை', competitor: 'போட்டியாளர்கள்' },
+  rows: [
+    { feature: 'கண்காணிப்பு', igo: 'முழு பண்ணை-முதல்-மேசை (QR ஸ்கேன்)', local: 'இல்லை / வாய்மொழி', competitor: 'குறைந்த பேட்ச் தகவல்' },
+    { feature: 'புத்துணர்ச்சி', igo: 'ஒருபோதும் உறையாது (0-4°C எப்போதும்)', local: 'அறை வெப்பநிலை / மாறுபடும்', competitor: 'சேமிப்புக்காக உறைய வைக்கப்பட்டது' },
+    { feature: 'செயலாக்கம்', igo: 'ISO 22000 கிருமி நீக்க வசதி', local: 'திறந்தவெளி சந்தை', competitor: 'சாதாரண கிடங்கு' },
+    { feature: 'டெலிவரி', igo: '30-90 நிமிட குளிர் சங்கிலி', local: 'டெலிவரி இல்லை', competitor: '3-4 மணி நேரம் / உலர் பை' },
+    { feature: 'ஆன்டிபயாடிக்குகள்', igo: '100% ஆன்டிபயாடிக் இல்லாதது', local: 'தெரியவில்லை', competitor: 'தேர்ந்தெடுக்கப்பட்டது' }
+  ]
+};
 
 // Consolidated "Why Choose IGO" trust section — merges what used to be five
 // separate stacked sections (Freshness Promise pillars, Farm-to-Home 4-step
@@ -34,13 +50,27 @@ const CERTS_FALLBACK = {
     { name: '100% Halal', icon: 'Sprout', desc: 'Zabiha certified sourcing', year: '' }
   ]
 };
+const CERTS_FALLBACK_TA = {
+  eyebrow: 'சரிபார்க்கப்பட்ட தோற்றம்',
+  heading: 'உயர்தர தரநிலைகள், சரிபார்க்கப்பட்டு நம்பப்படுகிறது.',
+  items: [
+    { name: 'ISO 22000', icon: 'ShieldCheck', desc: 'உணவு பாதுகாப்பு மேலாண்மை', year: '2027' },
+    { name: 'HACCP', icon: 'Award', desc: 'ஆபத்து மதிப்பீட்டு தரநிலை', year: '2027' },
+    { name: 'FSSAI உரிமம்', icon: 'Globe', desc: 'உரிமம்: 10022043000918', year: '2027' },
+    { name: '100% ஹலால்', icon: 'Sprout', desc: 'ஜபிஹா சான்றளிக்கப்பட்ட ஆதாரம்', year: '' }
+  ]
+};
 
 export const TrustSection: React.FC = () => {
+  const { lang } = useLang();
   const comparisonBlock = useSiteContent('sections.comparison', COMPARISON_FALLBACK);
   const certsBlock = useSiteContent('sections.certifications', CERTS_FALLBACK);
 
-  const comparison = comparisonBlock.rows;
-  const certs = certsBlock.items.map((c) => ({
+  const resolvedComparison = lang === 'ta' ? COMPARISON_FALLBACK_TA : comparisonBlock;
+  const resolvedCerts = lang === 'ta' ? CERTS_FALLBACK_TA : certsBlock;
+
+  const comparison = resolvedComparison.rows;
+  const certs = resolvedCerts.items.map((c) => ({
     name: c.name,
     desc: c.desc,
     icon: resolveIcon(c.icon)
@@ -50,10 +80,16 @@ export const TrustSection: React.FC = () => {
     <section className="bg-emerald-50/60 border-y border-emerald-100 py-16 sm:py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <div className="text-center max-w-2xl mx-auto space-y-2.5">
-          <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Why Choose Us</span>
-          <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">Why Choose IGO Protein Cuts?</h2>
+          <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
+            {lang === 'ta' ? 'ஏன் எங்களை தேர்வு செய்ய வேண்டும்' : 'Why Choose Us'}
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">
+            {lang === 'ta' ? 'ஏன் IGO புரோட்டீன் கட்ஸை தேர்வு செய்ய வேண்டும்?' : 'Why Choose IGO Protein Cuts?'}
+          </h2>
           <p className="text-xs sm:text-sm text-neutral-600">
-            An objective, feature-by-feature comparison — not marketing copy. See exactly what "farm to table" means in practice.
+            {lang === 'ta'
+              ? 'ஒரு புறநிலையான, அம்சம்-வாரியான ஒப்பீடு — சந்தைப்படுத்தல் பிரதி அல்ல. "பண்ணையிலிருந்து மேசை வரை" என்பது நடைமுறையில் என்ன என்பதைப் பாருங்கள்.'
+              : 'An objective, feature-by-feature comparison — not marketing copy. See exactly what "farm to table" means in practice.'}
           </p>
         </div>
 
@@ -63,7 +99,7 @@ export const TrustSection: React.FC = () => {
             <thead>
               <tr className="bg-[#0A1F12]">
                 <th className="py-5 px-6 text-white/50 font-bold uppercase text-[10px] tracking-wider">
-                  {comparisonBlock.columns.feature}
+                  {resolvedComparison.columns.feature}
                 </th>
                 <th className="py-5 px-6 bg-[#0F7B3A]/20 border-x border-emerald-500/20">
                   <div className="flex items-center gap-2.5">
@@ -71,15 +107,15 @@ export const TrustSection: React.FC = () => {
                       {React.createElement(resolveIcon('ShieldCheck'), { className: 'w-4.5 h-4.5' })}
                     </div>
                     <span className="font-black text-white text-sm tracking-tight">
-                      {comparisonBlock.columns.igo}
+                      {resolvedComparison.columns.igo}
                     </span>
                   </div>
                 </th>
                 <th className="py-5 px-6 text-white/50 font-bold uppercase text-[10px] tracking-wider">
-                  {comparisonBlock.columns.local}
+                  {resolvedComparison.columns.local}
                 </th>
                 <th className="py-5 px-6 text-white/50 font-bold uppercase text-[10px] tracking-wider">
-                  {comparisonBlock.columns.competitor}
+                  {resolvedComparison.columns.competitor}
                 </th>
               </tr>
             </thead>

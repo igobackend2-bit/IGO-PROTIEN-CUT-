@@ -61,6 +61,7 @@ import { useSiteContent, renderToken } from '../lib/hooks/useSiteContent';
 import { resolveIcon } from '../lib/iconMap';
 import { isPincodeServiceable } from '../lib/serviceability';
 import { FadeImage } from '../components/FadeImage';
+import { useLang } from '../lib/language';
 
 // Small count-up stat used in the hero — animates from 0 to its target once
 // on mount, matching the "0 -> real number" counter pattern.
@@ -114,6 +115,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   onNavigate,
   products
 }) => {
+  const { lang, t } = useLang();
   const [activeHeroTheme, setActiveHeroTheme] = useState(0);
   const [activeCollection, setActiveCollection] = useState<'premium' | 'organic' | 'farm-fresh' | 'seafood'>('premium');
   const [pincode, setPincode] = useState('');
@@ -202,7 +204,42 @@ export const HomePage: React.FC<HomePageProps> = ({
     ]
   });
 
-  const heroThemes = heroBlock.themes;
+  // Tamil version of the hero copy above. useSiteContent's returned value is
+  // frozen in state at mount (it only updates again when real CMS content
+  // loads), so passing a language-dependent fallback into it doesn't react to
+  // the language toggle while already sitting on this page — the hero would
+  // silently stay in whatever language was active on first render. Selecting
+  // between these two arrays directly in render, keyed off `lang`, is plain
+  // render-time logic and updates instantly when the Navbar language toggle
+  // is clicked, matching every other translated element on the page.
+  const heroThemesTa = [
+    {
+      label: 'IGO சூழல்-அமைப்பு • ஆர்டர் செய்தவுடன் வெட்டப்படும்',
+      headlineTop: 'தூய பண்ணை நன்னீர் கட்ஸ்.',
+      headlineAccent: '30-90 நிமிட எக்ஸ்பிரஸ்',
+      headlineBottom: 'குளிர் சங்கிலி.',
+      description:
+        'இந்தியாவின் தரமான ஆன்டிபயாடிக் இல்லாத கோழி, பண்ணை ஆட்டிறைச்சி, கடல் உணவு மற்றும் ஜிம் புரத திட்டங்களை அனுபவியுங்கள். திறமையான கசாப்புக்காரர்களால் கையால் வெட்டப்பட்டு, 0-4°C இல் குளிர்விக்கப்பட்டு, 30-90 நிமிடங்களில் உங்கள் சமையலறைக்கு வழங்கப்படுகிறது.'
+    },
+    {
+      label: 'முழுமையான கண்காணிப்பு',
+      headlineTop: 'ஸ்கேன் செய். சரிபார்.',
+      headlineAccent: 'ஒவ்வொரு',
+      headlineBottom: 'கட்டையும் நம்புங்கள்.',
+      description:
+        'ஒவ்வொரு பேக்கிலும் பேட்ச் ஐடி உள்ளது — இதன் மூலம் சரியான பண்ணை, வெட்டப்பட்ட தேதி, கையாண்டவரை கண்காணிக்கலாம் — வெறும் வாக்குறுதி அல்ல, முழுமையான பண்ணை-முதல்-மேசை வெளிப்படைத்தன்மை.'
+    },
+    {
+      label: 'பாரம்பரிய தமிழக பண்ணைகள்',
+      headlineTop: 'பண்ணை-நன்னீர் புரதங்கள்,',
+      headlineAccent: 'கண்காணிக்கப்பட்டவை',
+      headlineBottom: 'ஒவ்வொரு கட்டத்திலும்.',
+      description:
+        'ஒருபோதும் உறைய வைக்கப்படாது. எப்போதும் புதியது. எப்போதும் கண்காணிக்கப்படுகிறது. சான்றளிக்கப்பட்ட பங்குதார பண்ணைகளிலிருந்து கையால் தேர்ந்தெடுக்கப்பட்டு, 100% குளிர் சங்கிலி ஒருமைப்பாட்டுடன் அதே நாள் டெலிவரி.'
+    }
+  ];
+
+  const heroThemes = lang === 'ta' ? heroThemesTa : heroBlock.themes;
 
   useEffect(() => {
     const themeTimer = setInterval(() => {
@@ -232,7 +269,16 @@ export const HomePage: React.FC<HomePageProps> = ({
     ]
   });
 
-  const heroImages = heroImagesBlock.items;
+  // Same reasoning as heroThemesTa above — selected at render time, not
+  // baked into useSiteContent's fallback, so it reacts instantly to the
+  // language toggle instead of only on the next fresh page load.
+  const heroImagesTa = [
+    { src: '/Images/narrative/farm.jpg', alt: 'பாரம்பரிய தமிழக பண்ணைகள்', caption: 'ஹை மெடோஸ் பண்ணை', sub: 'நீலகிரி மலைத்தொடரில் சான்றளிக்கப்பட்ட பாரம்பரிய மேய்ச்சல் நிலங்கள்.' },
+    { src: '/Images/narrative/facility.jpg', alt: 'குளிர் சங்கிலி ஒருமைப்பாடு', caption: 'IGO குளிர் சங்கிலி வசதி', sub: '0-4°C கிருமி நீக்க செயலாக்கம், ISO 22000 சான்றளிக்கப்பட்டது.' },
+    { src: '/Images/narrative/packaging.jpg', alt: 'முழுமையான கண்காணிப்பு', caption: 'பேட்ச் கண்காணிக்கப்பட்ட பேக்கேஜிங்', sub: 'இன்சுலேட்டட் குளிர் சங்கிலி பைகள், பேக் செய்யும் இடத்திலேயே சீல் செய்யப்பட்டவை.' }
+  ];
+
+  const heroImages = lang === 'ta' ? heroImagesTa : heroImagesBlock.items;
 
   const handleCheckPincode = (e: React.FormEvent) => {
     e.preventDefault();
@@ -278,6 +324,18 @@ export const HomePage: React.FC<HomePageProps> = ({
       { value: '{{productCount}}+', label: 'FRESH PRODUCTS' }
     ]
   });
+  // Tamil versions of the fallback blocks below are all selected at render
+  // time via `lang === 'ta' ? X_TA : block.field` — same reasoning as
+  // heroThemesTa above — so they react instantly to the Navbar toggle.
+  const statsTa = {
+    heading: 'ஒரே சூழல் அமைப்பு, பண்ணையிலிருந்து உணவு மேசை வரை',
+    items: [
+      { value: '10,000+', label: 'மகிழ்ச்சியான வாடிக்கையாளர்கள்' },
+      { value: '0-4°C', label: 'கட்டுப்படுத்தப்பட்ட டெலிவரி' },
+      { value: '{{productCount}}+', label: 'புதிய பொருட்கள்' }
+    ]
+  };
+  const statsResolved = lang === 'ta' ? statsTa : statsBlock;
 
   // Ambient backdrop photography for each subscription plan card — reuses
   // real product photography already shot for this site (no stock/Pinterest
@@ -344,7 +402,46 @@ export const HomePage: React.FC<HomePageProps> = ({
     ]
   });
 
-  const promoSlides = promoBlock.items;
+  const promoSlidesTa = [
+    {
+      eyebrow: 'பருவகால தேர்வு',
+      title: 'மழைக்கால சிறப்பு:',
+      titleAccent: 'க்ரிஸ்பி விங்க்ஸ்',
+      copy: 'மழை நாள் ஆசைகளுக்கு தீர்வு — புதிதாக வெட்டப்பட்ட கோழி சிறகுகள், ஆர்டருக்கு ஏற்ப கையால் வெட்டப்பட்டு 30-90 நிமிடங்களில் டெலிவரி.',
+      badgeLine1: 'தொடங்குகிறது',
+      badgeLine2: '₹129',
+      cta: 'இப்போது ஆர்டர் செய்யுங்கள்',
+      path: '/search?q=Wings',
+      image: '/Images/banners/promo-wings-banner.jpg',
+      alt: 'Monsoon Special crispy chicken wings'
+    },
+    {
+      eyebrow: 'சந்தா சலுகை',
+      title: 'சந்தா செய்து',
+      titleAccent: 'மாதம் ₹1,200 சேமிக்கவும்',
+      copy: 'தொடர் ஆர்டர்கள் பூஜ்ஜிய டெலிவரி கட்டணம் மற்றும் முன்னுரிமை காலை டெலிவரி நேரங்களைத் திறக்கும் — ஒருமுறை அமைத்து, தானாகவே நிரப்பப்படும்.',
+      badgeLine1: 'இதுவரை சேமிக்கவும்',
+      badgeLine2: '₹1,200/mo',
+      cta: 'திட்டங்களை ஆராயுங்கள்',
+      path: '/subscriptions',
+      image: '/Images/banners/promo-subscriber-banner.jpg',
+      alt: 'IGO subscription — whole chicken'
+    },
+    {
+      eyebrow: 'இலவச டெலிவரி',
+      title: 'அனைத்து ஆர்டர்களிலும்',
+      titleAccent: '₹499 க்கு மேல்',
+      copy: 'குறைந்தபட்ச ஆர்டர் கவலை இல்லை — ₹499 தாண்டினால் டெலிவரி இலவசம், எல்லா வகைகளிலும், எப்போதும்.',
+      badgeLine1: 'இலவசம்',
+      badgeLine2: '₹499',
+      cta: 'ஷாப்பிங் தொடங்குங்கள்',
+      path: '/search',
+      image: '/Images/banners/promo-free-delivery-banner.jpg',
+      alt: 'Farm-fresh eggs — free delivery above ₹499'
+    }
+  ];
+
+  const promoSlides = lang === 'ta' ? promoSlidesTa : promoBlock.items;
 
   // Editable from /admin → Homepage → Ticker strip.
   const tickerBlock = useSiteContent('home.ticker', {
@@ -355,6 +452,15 @@ export const HomePage: React.FC<HomePageProps> = ({
       { label: 'Free Delivery Above ₹499' }
     ]
   });
+  const tickerTa = {
+    items: [
+      { label: '30 நிமிட எக்ஸ்பிரஸ் டெலிவரி' },
+      { label: '100% ஆன்டிபயாடிக் இல்லாதது' },
+      { label: '0-4°C குளிர் சங்கிலி' },
+      { label: '₹499 க்கு மேல் இலவச டெலிவரி' }
+    ]
+  };
+  const tickerResolved = lang === 'ta' ? tickerTa : tickerBlock;
 
   // Rail + section headings — editable from /admin → Homepage.
   const categoriesHeading = useSiteContent('home.section_categories', {
@@ -364,6 +470,14 @@ export const HomePage: React.FC<HomePageProps> = ({
       "From fresh cuts to eggs, marinades, and pantry staples — everything here is sourced straight from IGO's own farms, never through a broker.",
     badge: '30-90 Minute Express Delivery'
   });
+  const categoriesHeadingTa = {
+    eyebrow: 'IGO பண்ணை நெட்வொர்க்',
+    heading: 'பண்ணையிலிருந்து உணவு மேசை வரை, IGO முறையில்',
+    subheading:
+      'புதிய கட்ஸ் முதல் முட்டைகள், மசாலா கலவைகள் மற்றும் சமையலறைப் பொருட்கள் வரை — இங்குள்ள அனைத்தும் IGO-வின் சொந்த பண்ணைகளிலிருந்து நேரடியாக பெறப்படுகிறது, தரகர் மூலம் அல்ல.',
+    badge: '30-90 நிமிட எக்ஸ்பிரஸ் டெலிவரி'
+  };
+  const categoriesHeadingResolved = lang === 'ta' ? categoriesHeadingTa : categoriesHeading;
 
   const topPicksHeading = useSiteContent('home.rail_top_picks', {
     eyebrow: 'MOST POPULAR CUTS',
@@ -371,6 +485,13 @@ export const HomePage: React.FC<HomePageProps> = ({
     viewAllLabel: 'View All',
     viewAllPath: '/search'
   });
+  const topPicksHeadingTa = {
+    eyebrow: 'மிகவும் பிரபலமான கட்ஸ்',
+    heading: 'உங்களுக்கான சிறந்த தேர்வுகள்',
+    viewAllLabel: 'அனைத்தையும் காண்க',
+    viewAllPath: '/search'
+  };
+  const topPicksHeadingResolved = lang === 'ta' ? topPicksHeadingTa : topPicksHeading;
 
   const freshStockHeading = useSiteContent('home.rail_fresh_stock', {
     eyebrow: 'CUT FRESH THIS MORNING',
@@ -378,6 +499,13 @@ export const HomePage: React.FC<HomePageProps> = ({
     viewAllLabel: 'View All',
     viewAllPath: '/search'
   });
+  const freshStockHeadingTa = {
+    eyebrow: 'இன்று காலை புதிதாக வெட்டப்பட்டது',
+    heading: 'இன்றைய புதிய கையிருப்பு',
+    viewAllLabel: 'அனைத்தையும் காண்க',
+    viewAllPath: '/search'
+  };
+  const freshStockHeadingResolved = lang === 'ta' ? freshStockHeadingTa : freshStockHeading;
 
   const valuePropsBlock = useSiteContent('home.value_props', {
     items: [
@@ -387,6 +515,15 @@ export const HomePage: React.FC<HomePageProps> = ({
       { icon: 'Leaf', title: 'Sustainable', text: "Sourced through IGO's own farm network." }
     ]
   });
+  const valuePropsTa = {
+    items: [
+      { icon: 'Truck', title: 'விரைவு டெலிவரி', text: 'நம்பகமான குளிர் சங்கிலி டெலிவரி 30-90 நிமிடங்களில்.' },
+      { icon: 'Award', title: 'உயர்தர தரம்', text: 'ISO 22000 & HACCP சான்றளிக்கப்பட்ட தரநிலை.' },
+      { icon: 'Tag', title: 'சிறந்த விலைகள்', text: 'உண்மையான மொத்த ஆர்டர் மற்றும் சந்தா சேமிப்பு.' },
+      { icon: 'Leaf', title: 'நிலைத்தன்மை', text: 'IGO-வின் சொந்த பண்ணை நெட்வொர்க் மூலம் பெறப்படுகிறது.' }
+    ]
+  };
+  const valuePropsResolved = lang === 'ta' ? valuePropsTa : valuePropsBlock;
 
   const chefHeading = useSiteContent('home.rail_chef_picks', {
     eyebrow: 'HAND-PICKED BY OUR BUTCHERS',
@@ -394,6 +531,13 @@ export const HomePage: React.FC<HomePageProps> = ({
     viewAllLabel: 'View All',
     viewAllPath: '/recipes'
   });
+  const chefHeadingTa = {
+    eyebrow: 'எங்கள் கசாப்புக்காரர்களால் தேர்ந்தெடுக்கப்பட்டது',
+    heading: 'சமையல்காரர் பரிந்துரைக்கும் கட்ஸ்',
+    viewAllLabel: 'அனைத்தையும் காண்க',
+    viewAllPath: '/recipes'
+  };
+  const chefHeadingResolved = lang === 'ta' ? chefHeadingTa : chefHeading;
 
   const [activePromoSlide, setActivePromoSlide] = useState(0);
   const [isPromoPaused, setIsPromoPaused] = useState(false);
@@ -434,6 +578,23 @@ export const HomePage: React.FC<HomePageProps> = ({
       { title: 'Combo Packs', path: '/category/combo-packs', icon: 'Gift', count: '20% Off', image: '/Images/chicken-breast.png', badge: 'NEW' }
     ]
   });
+  const categoriesBlockTa = {
+    items: [
+      { title: 'புதிய கோழி', path: '/category/chicken', icon: 'Drumstick', count: '16 வகைகள்', image: '/Images/chicken-whole.png', badge: 'அதிகம் விற்பனையானது' },
+      { title: 'ஆட்டு இறைச்சி', path: '/category/mutton', icon: 'Beef', count: '12 வகைகள்', image: '/Images/Meat Images/Mutton/Mutton curry.jpg' },
+      { title: 'பிரீமியம் மாட்டிறைச்சி', path: '/category/beef', icon: 'Beef', count: '9 வகைகள்', image: '/Images/Meat Images/Beef/Ribeye Steak.jpg' },
+      { title: 'மீன்', path: '/category/fish', icon: 'Fish', count: '16 வகைகள்', image: '/Images/seer-fish.png' },
+      { title: 'கருவாடு', path: '/category/dry-fish', icon: 'Sun', count: 'கருவாடு தேர்வுகள்', image: '/Images/Meat Images/Fish/Anchovy.jpg' },
+      { title: 'பண்ணை முட்டைகள்', path: '/category/eggs', icon: 'Egg', count: '6 வகைகள்', image: '/Images/eggs.png' },
+      { title: 'ரெடி டு குக்', path: '/category/ready-to-cook', icon: 'UtensilsCrossed', count: '5 சிறப்புகள்', image: '/Images/Meat Images/Chicken/Chicken Wings.jpg' },
+      { title: 'மசாலா தடவப்பட்டவை', path: '/search?q=Marinated', icon: 'Flame', count: '{{marinatedCount}} மசாலா தேர்வுகள்', image: '/Images/Meat Images/Chicken/Chicken Wings.jpg' },
+      { title: 'பிரீமியம் கட்ஸ்', path: '/search?q=Premium', icon: 'Award', count: '{{premiumCount}}+ பிரீமியம் தேர்வுகள்', image: '/Images/Meat Images/Beef/Ribeye Steak.jpg' },
+      { title: 'உறைந்த உணவு', path: '/category/frozen-food', icon: 'Snowflake', count: '4 ஃப்ரீசர் தேர்வுகள்', image: '/Images/Meat Images/Fish/Salmon Fillet.jpg' },
+      { title: 'பிரியாணி கிட்ஸ்', path: '/category/biryani', icon: 'ChefHat', count: '3 கிட்ஸ்', image: '/Images/mutton-curry.png', badge: 'புதியது' },
+      { title: 'கோல்ட் கட்ஸ்', path: '/category/cold-cuts', icon: 'Sandwich', count: '4 டெலி தேர்வுகள்', image: '/Images/Meat Images/Chicken/Chicken Breast Boneless.jpg' },
+      { title: 'காம்போ பேக்குகள்', path: '/category/combo-packs', icon: 'Gift', count: '20% தள்ளுபடி', image: '/Images/chicken-breast.png', badge: 'புதியது' }
+    ]
+  };
 
   const categoryTokens = {
     productCount: products.length,
@@ -443,7 +604,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     ).length
   };
 
-  const categoryCards = categoriesBlock.items.map((item) => ({
+  const categoryCards = (lang === 'ta' ? categoriesBlockTa : categoriesBlock).items.map((item) => ({
     ...item,
     icon: resolveIcon(item.icon),
     count: renderToken(item.count ?? '', categoryTokens)
@@ -456,12 +617,20 @@ export const HomePage: React.FC<HomePageProps> = ({
   const todaysFreshStock = products.filter((p) => p.isTodayFresh).slice(0, 10);
 
   // Curated Collections — Premium / Organic / Farm Fresh / Seafood
-  const collectionTabs: { id: 'premium' | 'organic' | 'farm-fresh' | 'seafood'; label: string; icon: React.ElementType }[] = [
-    { id: 'premium', label: 'Premium Collection', icon: Crown },
-    { id: 'organic', label: 'Organic Collection', icon: Leaf },
-    { id: 'farm-fresh', label: 'Farm Fresh Today', icon: Sun },
-    { id: 'seafood', label: 'Seafood Collection', icon: Waves }
-  ];
+  const collectionTabs: { id: 'premium' | 'organic' | 'farm-fresh' | 'seafood'; label: string; icon: React.ElementType }[] =
+    lang === 'ta'
+      ? [
+          { id: 'premium', label: 'பிரீமியம் தொகுப்பு', icon: Crown },
+          { id: 'organic', label: 'ஆர்கானிக் தொகுப்பு', icon: Leaf },
+          { id: 'farm-fresh', label: 'இன்றைய பண்ணை நன்னீர்', icon: Sun },
+          { id: 'seafood', label: 'கடல் உணவு தொகுப்பு', icon: Waves }
+        ]
+      : [
+          { id: 'premium', label: 'Premium Collection', icon: Crown },
+          { id: 'organic', label: 'Organic Collection', icon: Leaf },
+          { id: 'farm-fresh', label: 'Farm Fresh Today', icon: Sun },
+          { id: 'seafood', label: 'Seafood Collection', icon: Waves }
+        ];
   const collectionsMap: Record<string, Product[]> = {
     premium: products.filter((p) => p.rating >= 4.9 || p.category === 'beef').slice(0, 8),
     organic: products.filter((p) => p.freshnessGrade === 'Organic Farm' || p.freshnessGrade === '100% Antibiotic-Free').slice(0, 8),
@@ -555,7 +724,9 @@ export const HomePage: React.FC<HomePageProps> = ({
                 ))}
               </div>
               <span className="font-bold text-[#0A1F12] text-sm">4.9</span>
-              <span className="text-neutral-400 text-xs">from 12,000+ verified reviews</span>
+              <span className="text-neutral-400 text-xs">
+                {lang === 'ta' ? '12,000+ சான்றளிக்கப்பட்ட மதிப்புரைகளிலிருந்து' : 'from 12,000+ verified reviews'}
+              </span>
             </div>
 
             {/* Pincode Checker */}
@@ -567,7 +738,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     type="text"
                     inputMode="numeric"
                     maxLength={6}
-                    placeholder="Enter pincode"
+                    placeholder={lang === 'ta' ? 'பின்கோடு உள்ளிடவும்' : 'Enter pincode'}
                     value={pincode}
                     onChange={(e) => {
                       setPincode(e.target.value);
@@ -581,26 +752,32 @@ export const HomePage: React.FC<HomePageProps> = ({
                   disabled={!pincode.trim()}
                   className="px-4 py-2.5 bg-[#0F7B3A] text-white text-sm font-bold rounded-xl hover:bg-emerald-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 cursor-pointer whitespace-nowrap"
                 >
-                  {pincodeStatus === 'checking' ? 'Checking…' : 'Check'}
+                  {pincodeStatus === 'checking'
+                    ? (lang === 'ta' ? 'சரிபார்க்கிறது…' : 'Checking…')
+                    : (lang === 'ta' ? 'சரிபார்' : 'Check')}
                 </button>
               </div>
               {pincodeStatus === 'available' && (
                 <p className="text-xs text-emerald-700 font-semibold mt-2 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Great news — we deliver to {pincode}!
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  {lang === 'ta' ? `நல்ல செய்தி — நாங்கள் ${pincode} க்கு டெலிவரி செய்கிறோம்!` : `Great news — we deliver to ${pincode}!`}
                 </p>
               )}
               {pincodeStatus === 'unavailable' && (
                 <p className="text-xs text-red-600 font-semibold mt-2 flex items-center gap-1">
-                  <XCircle className="w-3.5 h-3.5" /> Sorry, we don't deliver to {pincode} yet. We currently serve Bengaluru only.
+                  <XCircle className="w-3.5 h-3.5" />
+                  {lang === 'ta'
+                    ? `மன்னிக்கவும், நாங்கள் இன்னும் ${pincode} க்கு டெலிவரி செய்யவில்லை. தற்போது பெங்களூரு மட்டும் சேவை செய்கிறோம்.`
+                    : `Sorry, we don't deliver to ${pincode} yet. We currently serve Bengaluru only.`}
                 </p>
               )}
             </form>
 
             {/* Live Stat Counters */}
             <div className="grid grid-cols-3 gap-4 mb-7 max-w-md">
-              <AnimatedStat target={10000} suffix="+" icon={Sparkles} label="Happy Customers" />
-              <AnimatedStat target={products.length} suffix="+" icon={Package} label="Fresh Cuts Available" />
-              <AnimatedStat target={100} suffix="%" icon={ShieldCheck} label="Cold Chain" />
+              <AnimatedStat target={10000} suffix="+" icon={Sparkles} label={lang === 'ta' ? 'மகிழ்ச்சியான வாடிக்கையாளர்கள்' : 'Happy Customers'} />
+              <AnimatedStat target={products.length} suffix="+" icon={Package} label={lang === 'ta' ? 'கிடைக்கும் புதிய கட்ஸ்' : 'Fresh Cuts Available'} />
+              <AnimatedStat target={100} suffix="%" icon={ShieldCheck} label={lang === 'ta' ? 'குளிர் சங்கிலி' : 'Cold Chain'} />
             </div>
 
             {/* CTA Buttons */}
@@ -609,24 +786,32 @@ export const HomePage: React.FC<HomePageProps> = ({
                 onClick={() => onNavigate('/search')}
                 className="group bg-[#0F7B3A] text-white px-6 py-3.5 rounded-2xl font-bold flex items-center gap-2 hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-900/20 active:scale-95 text-sm cursor-pointer"
               >
-                Shop Fresh Now <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                {lang === 'ta' ? 'இப்போது ஷாப் செய்யுங்கள்' : 'Shop Fresh Now'} <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </button>
               <button
                 onClick={() => onNavigate('/b2b')}
                 className="bg-white/80 backdrop-blur-sm text-[#0A1F12] border-2 border-neutral-200 px-6 py-3.5 rounded-2xl font-bold hover:border-[#D4AF37] hover:text-[#D4AF37] transition-all active:scale-95 text-sm cursor-pointer"
               >
-                B2B Bulk Orders
+                {lang === 'ta' ? 'மொத்த வர்த்தக ஆர்டர்கள்' : 'B2B Bulk Orders'}
               </button>
             </div>
 
             {/* Highlight Icons */}
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-6 text-xs font-semibold text-neutral-500">
-              {[
-                { icon: Clock3, label: 'Fresh Daily' },
-                { icon: CheckCircle2, label: 'Halal Certified' },
-                { icon: Package, label: 'Hygienically Packed' },
-                { icon: Truck, label: 'Fast Delivery' }
-              ].map((item) => (
+              {(lang === 'ta'
+                ? [
+                    { icon: Clock3, label: 'தினமும் புதியது' },
+                    { icon: CheckCircle2, label: 'ஹலால் சான்றளிக்கப்பட்டது' },
+                    { icon: Package, label: 'சுகாதாரமாக பேக் செய்யப்பட்டது' },
+                    { icon: Truck, label: 'விரைவு டெலிவரி' }
+                  ]
+                : [
+                    { icon: Clock3, label: 'Fresh Daily' },
+                    { icon: CheckCircle2, label: 'Halal Certified' },
+                    { icon: Package, label: 'Hygienically Packed' },
+                    { icon: Truck, label: 'Fast Delivery' }
+                  ]
+              ).map((item) => (
                 <span key={item.label} className="flex items-center gap-1.5">
                   <item.icon className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> {item.label}
                 </span>
@@ -727,15 +912,15 @@ export const HomePage: React.FC<HomePageProps> = ({
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{categoriesHeading.eyebrow}</div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{categoriesHeading.heading}</h2>
-            <p className="text-xs text-neutral-500 mt-1">{categoriesHeading.subheading}</p>
+            <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{categoriesHeadingResolved.eyebrow}</div>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{categoriesHeadingResolved.heading}</h2>
+            <p className="text-xs text-neutral-500 mt-1">{categoriesHeadingResolved.subheading}</p>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-2 bg-emerald-50 border border-emerald-100 px-3.5 py-2 rounded-full shrink-0">
               <Bike className="w-4 h-4 text-emerald-600" />
-              <span className="text-xs font-bold text-emerald-700">{categoriesHeading.badge}</span>
+              <span className="text-xs font-bold text-emerald-700">{categoriesHeadingResolved.badge}</span>
             </div>
             <button
               onClick={() => onNavigate('/category/chicken')}
@@ -794,12 +979,14 @@ export const HomePage: React.FC<HomePageProps> = ({
       <section className="bg-[#0F7B3A] py-12">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center gap-10">
           <div>
-            <h2 className="text-white font-black text-2xl sm:text-3xl tracking-tight leading-none">Why IGO?</h2>
-            <p className="text-white/70 text-xs font-bold mt-2 uppercase tracking-widest">{statsBlock.heading}</p>
+            <h2 className="text-white font-black text-2xl sm:text-3xl tracking-tight leading-none">
+              {lang === 'ta' ? 'ஏன் IGO?' : 'Why IGO?'}
+            </h2>
+            <p className="text-white/70 text-xs font-bold mt-2 uppercase tracking-widest">{statsResolved.heading}</p>
           </div>
 
           <div className="flex items-center justify-center gap-6 sm:gap-10">
-            {statsBlock.items.map((badge) => (
+            {statsResolved.items.map((badge) => (
               <div key={badge.label} className="flex flex-col items-center gap-2 shrink-0">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white border-4 border-white/25 flex flex-col items-center justify-center text-center shadow-md shrink-0">
                   <span className="text-[#0A1F12] font-black text-sm sm:text-base leading-none">
@@ -814,7 +1001,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div className="w-16 h-px bg-white/25" />
 
           <div className="flex flex-wrap items-start justify-center gap-x-8 gap-y-8 sm:gap-x-10">
-            {valuePropsBlock.items
+            {valuePropsResolved.items
               .map((item, idx) => ({
                 icon: resolveIcon(item.icon),
                 title: item.title,
@@ -848,15 +1035,15 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1">
-              <Flame className="w-4 h-4 fill-emerald-600" /> {topPicksHeading.eyebrow}
+              <Flame className="w-4 h-4 fill-emerald-600" /> {topPicksHeadingResolved.eyebrow}
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{topPicksHeading.heading}</h2>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{topPicksHeadingResolved.heading}</h2>
           </div>
           <button
-            onClick={() => onNavigate(topPicksHeading.viewAllPath || '/search')}
+            onClick={() => onNavigate(topPicksHeadingResolved.viewAllPath || '/search')}
             className="text-xs font-bold text-neutral-500 hover:text-emerald-600 flex items-center gap-1 transition cursor-pointer shrink-0"
           >
-            {topPicksHeading.viewAllLabel} <ChevronRight className="w-4 h-4" />
+            {topPicksHeadingResolved.viewAllLabel} <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
@@ -879,11 +1066,11 @@ export const HomePage: React.FC<HomePageProps> = ({
                     <img src={product.image} alt={product.name} referrerPolicy="no-referrer" className={`w-full h-full object-cover group-hover/card:scale-110 transition duration-500 ${isOutOfStock ? 'grayscale opacity-70' : ''}`} />
                     {isOutOfStock ? (
                       <span className="absolute top-2 left-2 bg-[#0A1F12] text-white text-[10px] font-black px-2 py-0.5 rounded-full">
-                        Out of Stock
+                        {lang === 'ta' ? 'கையிருப்பில் இல்லை' : 'Out of Stock'}
                       </span>
                     ) : product.discountPercentage > 0 && (
                       <span className="absolute top-2 left-2 bg-[#0F7B3A] text-white text-[10px] font-black px-2 py-0.5 rounded-full">
-                        {product.discountPercentage}% OFF
+                        {product.discountPercentage}% {lang === 'ta' ? 'தள்ளுபடி' : 'OFF'}
                       </span>
                     )}
                     {/* Quick Shop hover overlay — desktop only */}
@@ -895,7 +1082,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                         }}
                         className="bg-white text-[#0A1F12] text-[10px] font-black px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg translate-y-2 group-hover/card:translate-y-0 transition cursor-pointer"
                       >
-                        <Eye className="w-3 h-3" /> QUICK VIEW
+                        <Eye className="w-3 h-3" /> {lang === 'ta' ? 'விரைவு பார்வை' : 'QUICK VIEW'}
                       </span>
                     </div>
                   </div>
@@ -956,7 +1143,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                               : 'bg-[#0F7B3A] hover:bg-emerald-500 text-white cursor-pointer'
                           }`}
                         >
-                          {isOutOfStock ? 'Sold Out' : 'Add'}
+                          {isOutOfStock ? t('soldOut') : t('addToCart')}
                         </button>
                       )}
                     </div>
@@ -995,7 +1182,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1">
                 <Clock3 className="w-3.5 h-3.5" /> CUT THIS MORNING
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{freshStockHeading.heading}</h2>
+              <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{freshStockHeadingResolved.heading}</h2>
             </div>
             <button
               onClick={() => onNavigate('/search')}
@@ -1239,7 +1426,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div className="flex w-max whitespace-nowrap animate-marquee">
               {[0, 1].map((dupIdx) => (
                 <div key={dupIdx} className="flex items-center shrink-0">
-                  {tickerBlock.items.map((item, idx) => (
+                  {tickerResolved.items.map((item, idx) => (
                     <span key={idx} className="text-emerald-400 text-[10px] font-bold uppercase tracking-wider px-6 flex items-center gap-6 shrink-0">
                       {item.label} <span className="text-white/30">•</span>
                     </span>
@@ -1336,9 +1523,15 @@ export const HomePage: React.FC<HomePageProps> = ({
         }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 relative z-10">
           <div className="text-center max-w-xl mx-auto space-y-2">
-            <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">AUTOMATED GYM & FAMILY SUPPLIES</span>
-            <h2 className="text-3xl font-black text-white tracking-tight">Protein Cuts Subscriptions</h2>
-            <p className="text-xs text-neutral-300">Save up to ₹1,200/month with zero delivery fees and priority morning slots.</p>
+            <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">
+              {lang === 'ta' ? 'தானியங்கி ஜிம் & குடும்ப சப்ளை' : 'AUTOMATED GYM & FAMILY SUPPLIES'}
+            </span>
+            <h2 className="text-3xl font-black text-white tracking-tight">{t('subscriptionsTitle')}</h2>
+            <p className="text-xs text-neutral-300">
+              {lang === 'ta'
+                ? 'பூஜ்ஜிய டெலிவரி கட்டணம் மற்றும் முன்னுரிமை காலை நேரங்களுடன் மாதம் ₹1,200 வரை சேமிக்கவும்.'
+                : 'Save up to ₹1,200/month with zero delivery fees and priority morning slots.'}
+            </p>
           </div>
 
           <div
@@ -1415,7 +1608,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                       onClick={() => onNavigate('/subscriptions')}
                       className="w-full bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-950/30"
                     >
-                      Activate Subscription <ArrowRight className="w-3.5 h-3.5" />
+                      {t('activateSub')} <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -1455,9 +1648,9 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div>
                 <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1">
-                  <Award className="w-3.5 h-3.5" /> {chefHeading.eyebrow}
+                  <Award className="w-3.5 h-3.5" /> {chefHeadingResolved.eyebrow}
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{chefHeading.heading}</h2>
+                <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{chefHeadingResolved.heading}</h2>
               </div>
             </div>
 
@@ -1471,12 +1664,15 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <div className="relative aspect-4/3 bg-neutral-100 overflow-hidden">
                     <img src={product.image} alt={product.name} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
                     <span className="absolute top-2 left-2 bg-[#0A1F12] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase flex items-center gap-1">
-                      <ChefHat className="w-3 h-3" /> Chef's Pick
+                      <ChefHat className="w-3 h-3" /> {lang === 'ta' ? 'சமையல்காரர் தேர்வு' : "Chef's Pick"}
                     </span>
                   </div>
                   <div className="p-3 space-y-1 flex-1">
                     <h3 className="text-xs font-bold text-[#0A1F12] line-clamp-1">{product.name}</h3>
-                    <p className="text-[10px] text-neutral-500 line-clamp-1">Best for: {product.recipePairing}</p>
+                    <p className="text-[10px] text-neutral-500 line-clamp-1">
+                      {lang === 'ta' ? 'இதற்கு சிறந்தது: ' : 'Best for: '}
+                      {product.recipePairing}
+                    </p>
                     <div className="text-sm font-black text-emerald-700 pt-1">₹{product.basePrice}</div>
                   </div>
                 </div>
@@ -1498,15 +1694,15 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="flex items-center justify-between">
           <div>
             <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1">
-              <ChefHat className="w-4 h-4" /> CHEF INSPIRATIONS
+              <ChefHat className="w-4 h-4" /> {lang === 'ta' ? 'சமையல் உத்வேகங்கள்' : 'CHEF INSPIRATIONS'}
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">Signature Meat Recipes</h2>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{t('signatureRecipes')}</h2>
           </div>
           <button
             onClick={() => onNavigate('/recipes')}
             className="text-xs font-bold text-neutral-500 hover:text-emerald-600 flex items-center gap-1 transition cursor-pointer"
           >
-            Explore All Recipes <ChevronRight className="w-4 h-4" />
+            {t('exploreRecipes')} <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
@@ -1532,8 +1728,8 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div className="absolute bottom-0 left-0 right-0 p-4 space-y-1.5">
                 <h3 className="font-black text-white text-base leading-tight group-hover:text-emerald-300 transition">{rec.title}</h3>
                 <div className="flex items-center gap-3 text-[11px] text-white/80 font-semibold">
-                  <span>Prep: {rec.prepTime}</span>
-                  <span>Protein: <strong className="text-emerald-400">{rec.protein}</strong></span>
+                  <span>{lang === 'ta' ? 'தயாரிப்பு: ' : 'Prep: '}{rec.prepTime}</span>
+                  <span>{lang === 'ta' ? 'புரதம்: ' : 'Protein: '}<strong className="text-emerald-400">{rec.protein}</strong></span>
                 </div>
               </div>
             </div>
@@ -1552,8 +1748,12 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <Flame className="w-6 h-6 fill-white" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-white uppercase tracking-wider leading-tight">Today's Flash Meat Deals</h3>
-                  <p className="text-xs text-emerald-100 mt-0.5">Limited quantity morning fresh cuts with instant extra discount</p>
+                  <h3 className="text-base font-black text-white uppercase tracking-wider leading-tight">{t('flashDeals')}</h3>
+                  <p className="text-xs text-emerald-100 mt-0.5">
+                    {lang === 'ta'
+                      ? 'குறைந்த அளவு காலை புதிய கட்ஸ் உடனடி கூடுதல் தள்ளுபடியுடன்'
+                      : 'Limited quantity morning fresh cuts with instant extra discount'}
+                  </p>
                 </div>
               </div>
 
@@ -1601,13 +1801,17 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div className="pt-3 border-t border-white/15 flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 text-white">
                 <Gift className="w-4 h-4" />
-                <span className="text-xs font-bold">Bundle &amp; save more with our curated Combo Packs — up to 20% off.</span>
+                <span className="text-xs font-bold">
+                  {lang === 'ta'
+                    ? 'எங்கள் தேர்ந்தெடுக்கப்பட்ட காம்போ பேக்குகளுடன் மேலும் சேமிக்கவும் — 20% வரை தள்ளுபடி.'
+                    : 'Bundle & save more with our curated Combo Packs — up to 20% off.'}
+                </span>
               </div>
               <button
                 onClick={() => onNavigate('/category/combo-packs')}
                 className="bg-white hover:bg-emerald-50 text-[#0F7B3A] font-black px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer shrink-0 flex items-center gap-2"
               >
-                Shop Combo Packs <ArrowRight className="w-3.5 h-3.5" />
+                {lang === 'ta' ? 'காம்போ பேக்குகளை வாங்குங்கள்' : 'Shop Combo Packs'} <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -1644,19 +1848,29 @@ export const HomePage: React.FC<HomePageProps> = ({
               real but not yet live on the stores, so this says "coming
               soon" instead of "download now". */}
           <div className="relative z-10 p-8 sm:p-10 flex flex-col justify-center gap-2.5">
-            <span className="text-[#D4AF37] font-black text-xs uppercase tracking-[0.25em]">Scan Me</span>
+            <span className="text-[#D4AF37] font-black text-xs uppercase tracking-[0.25em]">
+              {lang === 'ta' ? 'ஸ்கேன் செய்யுங்கள்' : 'Scan Me'}
+            </span>
             <h2 className="text-white text-2xl sm:text-3xl font-black leading-[1.05] uppercase tracking-tight">
-              Shop Faster<br />on Your Phone
+              {lang === 'ta' ? (
+                <>உங்கள் ஃபோனில்<br />வேகமாக ஷாப் செய்யுங்கள்</>
+              ) : (
+                <>Shop Faster<br />on Your Phone</>
+              )}
             </h2>
             <p className="text-[#D4AF37] font-black text-sm sm:text-base uppercase tracking-wide flex items-center gap-1.5">
-              <Clock3 className="w-4 h-4 shrink-0" /> Our New App — Coming Soon
+              <Clock3 className="w-4 h-4 shrink-0" /> {lang === 'ta' ? 'எங்கள் புதிய ஆப் — விரைவில் வருகிறது' : 'Our New App — Coming Soon'}
             </p>
             <p className="text-neutral-300 text-sm max-w-sm">
-              Reorder in seconds and track your delivery live — right from your phone's browser, no install required.
+              {lang === 'ta'
+                ? 'சில நொடிகளில் மீண்டும் ஆர்டர் செய்து உங்கள் டெலிவரியை நேரலையில் கண்காணிக்கவும் — உங்கள் ஃபோன் பிரவுசரிலிருந்தே, இன்ஸ்டால் தேவையில்லை.'
+                : "Reorder in seconds and track your delivery live — right from your phone's browser, no install required."}
             </p>
             <div className="mt-1 inline-flex items-center gap-2 bg-[#0F7B3A]/15 border border-[#0F7B3A]/30 px-3.5 py-1.5 rounded-full w-fit">
               <span className="text-emerald-400 font-black text-xs">FIRSTCUT</span>
-              <span className="text-neutral-300 text-xs">— Flat ₹75 off your first order</span>
+              <span className="text-neutral-300 text-xs">
+                {lang === 'ta' ? '— உங்கள் முதல் ஆர்டரில் ₹75 தள்ளுபடி' : '— Flat ₹75 off your first order'}
+              </span>
             </div>
           </div>
 
@@ -1670,7 +1884,9 @@ export const HomePage: React.FC<HomePageProps> = ({
                 alt="Scan to open IGO Protein Cuts on your phone"
                 className="w-24 h-24 sm:w-28 sm:h-28 block"
               />
-              <p className="text-[9px] font-black text-[#0A1F12] text-center mt-1 uppercase tracking-wider">Scan Me</p>
+              <p className="text-[9px] font-black text-[#0A1F12] text-center mt-1 uppercase tracking-wider">
+                {lang === 'ta' ? 'ஸ்கேன் செய்யுங்கள்' : 'Scan Me'}
+              </p>
             </div>
             <div className="flex flex-col gap-2">
               {/* Greyed-out, clearly-labeled "coming soon" state — not
@@ -1679,14 +1895,14 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div className="relative flex items-center gap-2 bg-white/5 border border-white/10 text-white/50 px-3.5 py-2 rounded-xl overflow-hidden">
                 <Apple className="w-4 h-4 shrink-0" />
                 <div className="leading-tight">
-                  <div className="text-[8px] text-neutral-500">Coming soon to the</div>
+                  <div className="text-[8px] text-neutral-500">{lang === 'ta' ? 'விரைவில்' : 'Coming soon to the'}</div>
                   <div className="text-[11px] font-bold">App Store</div>
                 </div>
               </div>
               <div className="relative flex items-center gap-2 bg-white/5 border border-white/10 text-white/50 px-3.5 py-2 rounded-xl overflow-hidden">
                 <Play className="w-4 h-4 shrink-0 fill-white/50" />
                 <div className="leading-tight">
-                  <div className="text-[8px] text-neutral-500">Coming soon on</div>
+                  <div className="text-[8px] text-neutral-500">{lang === 'ta' ? 'விரைவில்' : 'Coming soon on'}</div>
                   <div className="text-[11px] font-bold">Google Play</div>
                 </div>
               </div>
@@ -1701,7 +1917,9 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Instagram className="w-5 h-5 text-emerald-600" />
-            <h2 className="text-xl sm:text-2xl font-black text-[#0A1F12] tracking-tight">Follow @igoproteincuts</h2>
+            <h2 className="text-xl sm:text-2xl font-black text-[#0A1F12] tracking-tight">
+              {lang === 'ta' ? '@igoproteincuts ஐ பின்தொடருங்கள்' : 'Follow @igoproteincuts'}
+            </h2>
           </div>
           <a
             href="https://www.instagram.com/igoproteincuts"
@@ -1709,7 +1927,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             rel="noopener noreferrer"
             className="text-xs font-bold text-neutral-500 hover:text-emerald-600 flex items-center gap-1 transition"
           >
-            Follow Us <ChevronRight className="w-4 h-4" />
+            {t('followUs')} <ChevronRight className="w-4 h-4" />
           </a>
         </div>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">

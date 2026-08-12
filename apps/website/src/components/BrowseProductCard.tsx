@@ -120,25 +120,23 @@ export const BrowseProductCard: React.FC<BrowseProductCardProps> = ({
 
       {/* Details */}
       <div className="p-3 space-y-1.5">
-        <div className="flex items-center justify-between">
-          <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">{product.subcategory}</span>
-          <span className="flex items-center gap-0.5 text-[10px] font-bold text-[#0A1F12]">
-            ★ {product.rating}
-          </span>
-        </div>
+        <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">{product.subcategory}</span>
 
         <h3 className="text-sm font-bold text-[#0A1F12] line-clamp-1">{product.name}</h3>
         <p className="text-xs text-neutral-500">{defaultWeight?.label}</p>
 
-        <div className="flex items-center justify-between gap-2 pt-1">
-          <div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-sm font-black text-emerald-700">₹{defaultWeight?.price}</span>
-              {defaultWeight && defaultWeight.originalPrice > defaultWeight.price && (
-                <span className="text-[11px] text-neutral-400 line-through">₹{defaultWeight.originalPrice}</span>
-              )}
-            </div>
+        <div className="pt-1">
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-sm font-black text-emerald-700">₹{defaultWeight?.price}</span>
+            {defaultWeight && defaultWeight.originalPrice > defaultWeight.price && (
+              <span className="text-[11px] text-neutral-400 line-through">₹{defaultWeight.originalPrice}</span>
+            )}
           </div>
+          {defaultWeight && defaultWeight.originalPrice > defaultWeight.price && (
+            <span className="text-[9px] font-bold text-emerald-700 uppercase">
+              Save ₹{defaultWeight.originalPrice - defaultWeight.price}
+            </span>
+          )}
         </div>
 
         {!isOutOfStock && cartQty > 0 ? (

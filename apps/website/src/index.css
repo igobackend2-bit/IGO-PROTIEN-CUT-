@@ -19,6 +19,14 @@
   body {
     font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
+
+  /* Applies whenever <html lang="ta"> is set (App.tsx keeps this in sync
+     with the language toggle). Outfit has no Tamil glyphs, so without this
+     every Tamil string on the site rendered in the browser's fallback
+     system font instead of matching the rest of the page's typography. */
+  :lang(ta) {
+    font-family: 'Noto Sans Tamil', 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
 }
 
 /* Custom Scrollbars */

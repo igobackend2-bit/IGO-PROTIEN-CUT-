@@ -3,6 +3,7 @@ import { Heart, ArrowRight } from 'lucide-react';
 import { StoreService } from '../lib/storage';
 import type { Product } from '../types';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
+import { useLang } from '../lib/language';
 
 interface ComboCardsGridProps {
   products: Product[];
@@ -15,6 +16,7 @@ interface ComboCardsGridProps {
 // (StoreService.toggleWishlist, same as every other product card on this
 // site) rather than a decorative icon.
 export const ComboCardsGrid: React.FC<ComboCardsGridProps> = ({ products, onSelectProduct }) => {
+  const { lang } = useLang();
   // Editable from /admin → Homepage → Combo Packs — heading.
   const comboHeading = useSiteContent('home.rail_combo_packs', {
     eyebrow: 'Bundle & Save',
@@ -23,6 +25,14 @@ export const ComboCardsGrid: React.FC<ComboCardsGridProps> = ({ products, onSele
     viewAllLabel: 'View All',
     viewAllPath: '/category/combo-packs'
   });
+  const comboHeadingTa = {
+    eyebrow: 'தொகுத்து சேமிக்கவும்',
+    heading: 'காம்போ பேக்குகள்',
+    subheading: 'ஒவ்வொரு கட்டையும் தனித்தனியாக வாங்குவதை விட சிறந்த விலையில் தேர்ந்தெடுக்கப்பட்ட தொகுப்புகள்.',
+    viewAllLabel: 'அனைத்தையும் காண்க',
+    viewAllPath: '/category/combo-packs'
+  };
+  const resolvedComboHeading = lang === 'ta' ? comboHeadingTa : comboHeading;
 
   const combos = products.filter((p) => p.category === 'combo-packs');
   const [wishlist, setWishlist] = useState<string[]>(() => StoreService.getWishlist());
@@ -35,13 +45,15 @@ export const ComboCardsGrid: React.FC<ComboCardsGridProps> = ({ products, onSele
     setWishlist(StoreService.getWishlist());
   };
 
-  const ribbonTags = ['Best Combo!', 'Feast Combo!', 'Value Combo!'];
+  const ribbonTags = lang === 'ta'
+    ? ['சிறந்த காம்போ!', 'விருந்து காம்போ!', 'மதிப்பு காம்போ!']
+    : ['Best Combo!', 'Feast Combo!', 'Value Combo!'];
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
       <div>
-        <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{comboHeading.eyebrow}</div>
-        <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{comboHeading.heading}</h2>
+        <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{resolvedComboHeading.eyebrow}</div>
+        <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{resolvedComboHeading.heading}</h2>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -81,12 +93,12 @@ export const ComboCardsGrid: React.FC<ComboCardsGridProps> = ({ products, onSele
                   </div>
                   {!!combo.discountPercentage && (
                     <span className="bg-[#D4AF37] text-[#0A1F12] text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide">
-                      {combo.discountPercentage}% Off
+                      {combo.discountPercentage}% {lang === 'ta' ? 'தள்ளுபடி' : 'Off'}
                     </span>
                   )}
                 </div>
                 <span className="inline-flex items-center gap-1 text-white text-[10px] font-black uppercase tracking-wider mt-2 group-hover:gap-1.5 transition-all">
-                  Order Now <ArrowRight className="w-3 h-3" />
+                  {lang === 'ta' ? 'இப்போது ஆர்டர் செய்யுங்கள்' : 'Order Now'} <ArrowRight className="w-3 h-3" />
                 </span>
               </div>
             </div>

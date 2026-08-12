@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Snowflake, Fish, Flame, BookOpen, X, ArrowRight } from 'lucide-react';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
+import { useLang } from '../lib/language';
 
 export interface Guide {
   title: string;
@@ -89,14 +90,84 @@ const GUIDE_DETAILS_BY_ID: Record<string, Guide> = Object.fromEntries(
   guides.map((g, i) => [`guide-0${i + 1}`, g])
 );
 
+// Tamil versions of the same 3 guides, same ids/order/images so the modal
+// lookup by id still works. Selected at render time via `lang`, same pattern
+// as the rest of this translation pass.
+const guidesTa: Guide[] = [
+  {
+    title: 'வீட்டில் புதிய கட்ஸை எப்படி சேமிப்பது',
+    excerpt: 'புதிதாக டெலிவரி செய்யப்பட்டது என்பதால் அது எப்போதும் அப்படியே இருக்கும் என்று அர்த்தமல்ல — உங்கள் கட்ஸின் புத்துணர்ச்சியை பாதுகாக்க இதோ வழிமுறைகள்.',
+    icon: Snowflake,
+    image: '/Images/Meat Images/Chicken/Chicken Breast Boneless.jpg',
+    paragraphs: [
+      'உடனடியாக குளிர்சாதனப்பெட்டியில் வையுங்கள்: வந்த 20 நிமிடங்களுக்குள் உங்கள் டெலிவரியை நேரடியாக ஃபிரிட்ஜில் (0-4°C) அல்லது ஃப்ரீசரில் வையுங்கள் — அறை வெப்பநிலையில் வைக்க வேண்டாம்.',
+      '24-48 மணி நேரத்திற்குள் பயன்படுத்துங்கள்: புதிய, ஒருபோதும் உறையாத கட்ஸ் 1-2 நாட்களுக்குள் பயன்படுத்தினால் சிறந்த சுவை தரும். அவ்வளவு விரைவில் சமைக்க முடியாவிட்டால், அதை உறைய வையுங்கள்.',
+      'சரியாக உறைய வையுங்கள்: காற்றுப்புகா பையில் அல்லது கொள்கலனில் இறுக்கமாக சுற்றி, அதிக காற்றை அழுத்தி வெளியேற்றி, தேதியுடன் லேபிள் செய்யுங்கள். பெரும்பாலான கட்ஸ் தரம் இழக்காமல் 1-3 மாதங்கள் உறைந்த நிலையில் நன்றாக இருக்கும்.',
+      'பாதுகாப்பாக உருகவையுங்கள்: எப்போதும் ஃபிரிட்ஜில் இரவு முழுவதும் உருகவையுங்கள், மேசையில் அல்ல — இது கிருமி வளர்ச்சியை கட்டுப்படுத்தும்.',
+      'பச்சை மற்றும் சமைத்ததை தனியாக வையுங்கள்: பச்சை இறைச்சியை ஃபிரிட்ஜின் கீழ் அடுக்கில் வையுங்கள், இதனால் சாறு மற்ற உணவில் சொட்டாது, தனித்தனி வெட்டும் பலகைகளைப் பயன்படுத்துங்கள்.'
+    ]
+  },
+  {
+    title: 'கருவாடு வாங்குவதற்கான முழுமையான வழிகாட்டி',
+    excerpt: 'கருவாடு (வெயிலில் உலர்த்திய மீன்) தென்னிந்தியா முழுவதும் சமையலறையின் அத்தியாவசியப் பொருள் — நல்ல கருவாட்டையும் மோசமான கருவாட்டையும் பிரிப்பது என்ன என்பது இதோ.',
+    icon: Fish,
+    image: '/Images/Meat Images/Fish/Anchovy.jpg',
+    paragraphs: [
+      'பாருங்கள், வாசனை மட்டும் பார்க்க வேண்டாம்: நல்ல கருவாடு உறுதியாகவும் சற்று பளபளப்பாகவும் இருக்க வேண்டும், சுண்ணாம்பு போலவோ அதிக கருமையாகவோ இருக்கக்கூடாது. கடுமையான உப்பு வாசனை இயல்பானது; புளிப்பு அல்லது அம்மோனியா போன்ற வாசனை என்றால் அது கெட்டுவிட்டது என்று அர்த்தம்.',
+      'உப்பைச் சரிபார்க்கவும்: பாரம்பரிய வெயிலில் உலர்த்துதல் உப்பை இயற்கை பாதுகாப்பாகப் பயன்படுத்துகிறது — லேசான வெள்ளை படை பரவாயில்லை, ஆனால் அதிக உப்பு படிவு பொதுவாக மோசமான உலர்த்தும் நிலைமைகளைக் குறிக்கும்.',
+      'உணவுக்கு ஏற்ப வகையைத் தேர்ந்தெடுக்கவும்: நெத்திலி மற்றும் சிறிய இறால் விரைவான வறுவல் மற்றும் சட்னிகளுக்கு நன்றாக இருக்கும்; சுறா அல்லது வஞ்சிரம் போன்ற பெரிய கருவாடு குழம்புகளில் மெதுவாக சமைப்பதற்கு சிறந்தது.',
+      'சரியாக சேமிக்கவும்: கருவாட்டை குளிர்ந்த, உலர்ந்த இடத்தில் காற்றுப்புகா கொள்கலனில் வையுங்கள் — ஈரப்பதமான காலநிலையில் நீண்ட நாள் உபயோகத்திற்கு ஃபிரிட்ஜில் வையுங்கள்.',
+      'சமைப்பதற்கு முன் ஊற வையுங்கள்: 10-15 நிமிடங்கள் வெதுவெதுப்பான நீரில் ஊற வைப்பது மீனை மென்மையாக்கி, சமைப்பதற்கு முன் மேற்பரப்பு உப்பை கழுவும்.'
+    ]
+  },
+  {
+    title: 'மசாலா தடவப்பட்ட கோழி: சிறந்த முடிவுகளுக்கான சமையல் குறிப்புகள்',
+    excerpt: 'மசாலா தடவப்பட்டு சமைக்க தயாராக இருப்பது என்பது தவறு நடக்காது என்று அர்த்தமல்ல — சில சிறிய பழக்கங்கள்தான் ரப்பர் போன்ற சுவைக்கும் ரெஸ்டாரன்ட் தரத்திற்கும் இடையே உள்ள வித்தியாசத்தை உருவாக்கும்.',
+    icon: Flame,
+    image: '/Images/Meat Images/Chicken/Chicken Wings.jpg',
+    paragraphs: [
+      'முதலில் அறை வெப்பநிலைக்கு கொண்டு வாருங்கள்: மசாலா தடவப்பட்ட கோழியை சமைப்பதற்கு முன் 15-20 நிமிடங்கள் வெளியே வைக்கவும், இதனால் நடுவில் குளிர்ச்சியாக இல்லாமல் சமமாக சமையும்.',
+      'பாத்திரத்தில் அதிகமாக நிரப்ப வேண்டாம்: தேவைப்பட்டால் தொகுதிகளாக சமைக்கவும் — அதிகமாக நிரப்புவது நீராவியை சிக்க வைத்து மசாலா சரியாக காரமெலைஸ் ஆவதை தடுக்கும்.',
+      'கட்டுக்கு ஏற்ப வெப்பத்தை பொருத்தவும்: எலும்பில்லா துண்டுகள் அதிக வெப்பத்தில் விரைவாக சமையும் (சிறப்பாக வறுக்க); எலும்புடன் கூடிய துண்டுகளுக்கு நடுத்தர வெப்பமும் அதிக நேரமும் தேவை, இதனால் வெளியே கருகாமல் உள்ளே முழுமையாக சமையும்.',
+      'சரியாக சமைந்ததா என்று சரிபார்க்கவும்: கோழி 74°C (165°F) உள் வெப்பநிலையில் பாதுகாப்பாக சமைகிறது — வெட்டிப் பார்த்து யூகிப்பதை விட இறைச்சி தெர்மாமீட்டர் நம்பகமானது.',
+      'பரிமாறும் முன் ஓய்வு கொடுங்கள்: சமைத்த கோழியை வெப்பத்திலிருந்து எடுத்து 3-5 நிமிடங்கள் ஓய்வு கொடுங்கள், இதனால் சாறு தட்டில் ஓடாமல் மீண்டும் பரவும்.'
+    ]
+  }
+];
+
+const GUIDES_FALLBACK_TA: { eyebrow: string; heading: string; items: CmsGuideItem[] } = {
+  eyebrow: 'சமையலறை வழிகாட்டிகள்',
+  heading: 'சரியாக சமையுங்கள்',
+  items: guidesTa.map((g, i) => ({
+    id: `guide-0${i + 1}`,
+    title: g.title,
+    excerpt: g.excerpt,
+    image: g.image
+  }))
+};
+
+const GUIDE_DETAILS_BY_ID_TA: Record<string, Guide> = Object.fromEntries(
+  guidesTa.map((g, i) => [`guide-0${i + 1}`, g])
+);
+
 export const GuidesSection: React.FC = () => {
+  const { lang } = useLang();
   const [openGuide, setOpenGuide] = useState<Guide | null>(null);
 
   const block = useSiteContent('plans.guides', GUIDES_FALLBACK);
-  const items: CmsGuideItem[] = Array.isArray(block.items) && block.items.length > 0 ? block.items : GUIDES_FALLBACK.items;
+  const resolvedFallback = lang === 'ta' ? GUIDES_FALLBACK_TA : GUIDES_FALLBACK;
+  const resolvedDetailsById = lang === 'ta' ? GUIDE_DETAILS_BY_ID_TA : GUIDE_DETAILS_BY_ID;
+  const resolvedGuides = lang === 'ta' ? guidesTa : guides;
+  // CMS content (block.items) is English-only — if it's actively overriding
+  // the fallback, defer to it even in Tamil (same trade-off as the rest of
+  // this pass); otherwise use the full local Tamil fallback so the section
+  // isn't a mix of languages.
+  const usingCms = Array.isArray(block.items) && block.items.length > 0 && block.eyebrow !== GUIDES_FALLBACK.eyebrow;
+  const items: CmsGuideItem[] = usingCms ? block.items : resolvedFallback.items;
+  const resolvedHeadingBlock = usingCms ? block : resolvedFallback;
 
   const displayGuides: Guide[] = items.map((item, i) => {
-    const detail = (item.id && GUIDE_DETAILS_BY_ID[item.id]) || guides[i];
+    const detail = (item.id && resolvedDetailsById[item.id]) || resolvedGuides[i];
     return {
       title: item.title,
       excerpt: item.excerpt,
@@ -109,8 +180,8 @@ export const GuidesSection: React.FC = () => {
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
       <div>
-        <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{block.eyebrow}</div>
-        <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{block.heading}</h2>
+        <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{resolvedHeadingBlock.eyebrow}</div>
+        <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{resolvedHeadingBlock.heading}</h2>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -138,7 +209,7 @@ export const GuidesSection: React.FC = () => {
                 <h3 className="text-sm font-black text-[#0A1F12] leading-snug line-clamp-2">{guide.title}</h3>
                 <p className="text-xs text-neutral-500 leading-relaxed line-clamp-2">{guide.excerpt}</p>
                 <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 group-hover:gap-2 transition-all">
-                  Read Guide <ArrowRight className="w-3.5 h-3.5" />
+                  {lang === 'ta' ? 'வழிகாட்டியைப் படிக்க' : 'Read Guide'} <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </div>
             </button>

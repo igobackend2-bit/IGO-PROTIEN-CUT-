@@ -2,6 +2,7 @@ import React from 'react';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
 import { resolveIcon } from '../lib/iconMap';
 import { FadeImage } from '../components/FadeImage';
+import { useLang } from '../lib/language';
 
 /**
  * Editable from /admin → Sections → Our Farms and → Certifications.
@@ -45,24 +46,63 @@ const CERTS_FALLBACK = {
     { name: '100% Halal', icon: 'Sprout' }
   ]
 };
+const CERTS_FALLBACK_TA = {
+  items: [
+    { name: 'ISO 22000', icon: 'ShieldCheck' },
+    { name: 'HACCP', icon: 'Award' },
+    { name: 'FSSAI உரிமம்', icon: 'Globe' },
+    { name: '100% ஹலால்', icon: 'Sprout' }
+  ]
+};
+const FARMS_FALLBACK_TA = {
+  eyebrow: 'எங்கள் நெட்வொர்க்கிலிருந்து',
+  heading: 'எங்கள் பண்ணைகள்',
+  subheading: 'பாரம்பரிய மேய்ச்சல் நிலங்களிலிருந்து உங்கள் சமையலறை வரை — பயணத்தின் ஒவ்வொரு கட்டமும் நேர்மையாக கண்காணிக்கப்படுகிறது.',
+  items: [
+    {
+      label: 'பாரம்பரிய பண்ணைகள்',
+      caption: 'நீலகிரி மலைத்தொடர், தமிழ்நாடு',
+      image: '/Images/narrative/farm.jpg'
+    },
+    {
+      label: 'கிருமி நீக்க செயலாக்கம்',
+      caption: 'ISO 22000 இருண்ட கடைகள், 0-4°C',
+      image: '/Images/narrative/facility.jpg'
+    },
+    {
+      label: 'பேட்ச் கண்காணிக்கப்பட்ட பேக்கேஜிங்',
+      caption: 'இன்சுலேட்டட் குளிர் சங்கிலி டெலிவரி பைகள்',
+      image: '/Images/narrative/packaging.jpg'
+    }
+  ]
+};
 
 // "Our Farms" — real photography from the three-stage narrative sequence
 // already used elsewhere on the site (farm → facility → packaging), plus
 // the same certifications already listed on the About page. No new claims.
 export const OurFarmsSection: React.FC = () => {
+  const { lang } = useLang();
   const farmsBlock = useSiteContent('sections.our_farms', FARMS_FALLBACK);
   const certsBlock = useSiteContent('sections.certifications', CERTS_FALLBACK);
+  const resolvedFarmsBlock = lang === 'ta' ? FARMS_FALLBACK_TA : farmsBlock;
+  const resolvedCertsBlock = lang === 'ta' ? CERTS_FALLBACK_TA : certsBlock;
 
-  const journey = farmsBlock.items;
-  const certs = certsBlock.items.map((c) => ({ name: c.name, icon: resolveIcon(c.icon) }));
+  const journey = resolvedFarmsBlock.items;
+  const certs = resolvedCertsBlock.items.map((c) => ({ name: c.name, icon: resolveIcon(c.icon) }));
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
       <div className="text-center max-w-2xl mx-auto space-y-2">
-        <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Transparency Builds Trust</span>
-        <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">Our Farms</h2>
+        <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
+          {lang === 'ta' ? 'வெளிப்படைத்தன்மை நம்பிக்கையை உருவாக்குகிறது' : 'Transparency Builds Trust'}
+        </span>
+        <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">
+          {lang === 'ta' ? 'எங்கள் பண்ணைகள்' : 'Our Farms'}
+        </h2>
         <p className="text-xs sm:text-sm text-neutral-600">
-          From heritage pastures to your kitchen — every stage of the journey, shown honestly.
+          {lang === 'ta'
+            ? 'பாரம்பரிய மேய்ச்சல் நிலங்களிலிருந்து உங்கள் சமையலறை வரை — பயணத்தின் ஒவ்வொரு கட்டமும் நேர்மையாக காட்டப்படுகிறது.'
+            : 'From heritage pastures to your kitchen — every stage of the journey, shown honestly.'}
         </p>
       </div>
 

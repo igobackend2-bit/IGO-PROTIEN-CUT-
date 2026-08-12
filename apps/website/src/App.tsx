@@ -55,6 +55,16 @@ export default function App() {
   const [lang, setLang] = useState<Language>('en');
   const t = (key: string) => translate(lang, key);
 
+  // Keeps <html lang="..."> in sync with the in-app language toggle. This
+  // is what the `:lang(ta)` CSS rule in index.css keys off of to switch the
+  // whole site to a Tamil-covering font — Outfit (the site's default font)
+  // has no Tamil glyphs, so without this every Tamil string silently fell
+  // back to the browser's generic system font instead of matching the rest
+  // of the page's typography.
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
   // Modal States
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);

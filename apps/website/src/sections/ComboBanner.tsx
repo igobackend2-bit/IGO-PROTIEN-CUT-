@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, ChevronLeft, ChevronRight, Gift } from 'lucide-react';
 import type { Product } from '../types';
+import { useLang } from '../lib/language';
 
 interface ComboBannerProps {
   products: Product[];
@@ -13,6 +14,7 @@ interface ComboBannerProps {
 // CTA). Prices, discounts, and photos are pulled straight from mockData.ts
 // combo-pack entries, never invented.
 export const ComboBanner: React.FC<ComboBannerProps> = ({ products, onSelectProduct }) => {
+  const { lang } = useLang();
   const combos = products.filter((p) => p.category === 'combo-packs');
   const [active, setActive] = useState(0);
 
@@ -43,7 +45,9 @@ export const ComboBanner: React.FC<ComboBannerProps> = ({ products, onSelectProd
         <div className="relative z-10 h-full flex flex-col justify-center gap-4 p-8 py-10 pl-8 sm:pl-16 sm:pr-12 max-w-xl">
           <div className="inline-flex items-center gap-2 w-fit bg-white/10 border border-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
             <Gift className="w-3.5 h-3.5 text-[#D4AF37]" />
-            <span className="text-[10px] font-bold text-white uppercase tracking-widest">Combo Pack</span>
+            <span className="text-[10px] font-bold text-white uppercase tracking-widest">
+              {lang === 'ta' ? 'காம்போ பேக்' : 'Combo Pack'}
+            </span>
           </div>
 
           <h2 className="text-3xl sm:text-4xl font-black text-white leading-[1.05] tracking-tight">{combo.name}</h2>
@@ -65,7 +69,7 @@ export const ComboBanner: React.FC<ComboBannerProps> = ({ products, onSelectProd
               </div>
               {combo.discountPercentage > 0 && (
                 <span className="block text-[9px] uppercase tracking-widest font-bold mt-1">
-                  {combo.discountPercentage}% Off
+                  {combo.discountPercentage}% {lang === 'ta' ? 'தள்ளுபடி' : 'Off'}
                 </span>
               )}
             </div>
@@ -74,7 +78,7 @@ export const ComboBanner: React.FC<ComboBannerProps> = ({ products, onSelectProd
               onClick={() => onSelectProduct(combo)}
               className="bg-white hover:bg-emerald-50 text-[#0A1F12] font-black px-6 py-3 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg flex items-center gap-2"
             >
-              Order Now <ArrowRight className="w-4 h-4" />
+              {lang === 'ta' ? 'இப்போது ஆர்டர் செய்யுங்கள்' : 'Order Now'} <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>

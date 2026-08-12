@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Product } from '../types';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
+import { useLang } from '../lib/language';
 
 interface PromoTileStripProps {
   products: Product[];
@@ -27,8 +28,19 @@ const FALLBACK = {
 // "Free Delivery / Newly Added / Bestseller" tile-strip pattern seen on
 // other meat-delivery sites. Content, images and links come from the CMS
 // (sections.promo_tiles), editable in /admin without a code change.
+const FALLBACK_TA = {
+  items: [
+    { title: 'இலவச டெலிவரி', subtitle: '₹499 க்கு மேல்', cta: 'இப்போது ஷாப் செய்யுங்கள்', path: '/search', image: '/Images/banners/promo-free-delivery-banner.jpg', theme: 'light' },
+    { title: 'பிரியாணி கிட்ஸ்', subtitle: 'அனைத்தும் அடங்கும்', cta: 'இப்போது ஆர்டர் செய்யுங்கள்', path: '/category/biryani', image: '/Images/banners/biryani-kit.jpg', theme: 'dark', badge: 'புதியது' },
+    { title: 'வாராந்திர ஃபிட்னஸ் புரோட்டீன் பாஸ்', subtitle: '12 டெலிவரிகள்', cta: 'திட்டத்தைக் காண்க', path: '/subscriptions', image: '/Images/banners/plan-fitness-banner.jpg', theme: 'dark' },
+    { title: 'சந்தா செய்து சேமிக்கவும்', subtitle: '20% வரை தள்ளுபடி', cta: 'தொடங்குங்கள்', path: '/subscriptions', image: '/Images/banners/promo-subscriber-banner.jpg', theme: 'light' }
+  ]
+};
+
 export const PromoTileStrip: React.FC<PromoTileStripProps> = ({ onNavigate }) => {
+  const { lang } = useLang();
   const block = useSiteContent('sections.promo_tiles', FALLBACK);
+  const resolvedBlock = lang === 'ta' ? FALLBACK_TA : block;
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollByAmount = (dir: 'left' | 'right') => {
     const el = scrollRef.current;
@@ -36,7 +48,7 @@ export const PromoTileStrip: React.FC<PromoTileStripProps> = ({ onNavigate }) =>
     el.scrollBy({ left: dir === 'left' ? -336 : 336, behavior: 'smooth' });
   };
 
-  const tiles = block.items.map((item) => {
+  const tiles = resolvedBlock.items.map((item) => {
     const light = item.theme === 'light';
     return {
       badge: item.badge ?? null,

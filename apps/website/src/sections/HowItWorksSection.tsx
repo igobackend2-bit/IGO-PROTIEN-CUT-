@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
 import { resolveIcon } from '../lib/iconMap';
+import { useLang } from '../lib/language';
 
 /**
  * Editable from /admin → Sections → How It Works.
@@ -28,9 +29,33 @@ const FALLBACK = {
   ]
 };
 
+const FALLBACK_TA = {
+  eyebrow: 'எளிய செயல்முறை',
+  heading: '3 படிகளில் உங்கள் வீட்டு வாசலுக்கு புதியது',
+  items: [
+    {
+      icon: 'ShoppingCart',
+      title: 'உங்கள் ஆர்டரை வையுங்கள்',
+      text: 'புதிய வகைகளை உலாவி, உங்கள் கட்ஸைத் தேர்ந்தெடுத்து, 2 நிமிடங்களுக்குள் செக்அவுட் செய்யுங்கள்.'
+    },
+    {
+      icon: 'PackageCheck',
+      title: 'செயலாக்கம் & புதிதாக பேக் செய்யப்படுகிறது',
+      text: 'கட்ஸ் அதே காலையில் கிருமி நீக்கப்பட்ட, வெப்பநிலை கட்டுப்படுத்தப்பட்ட இருண்ட கடைகளில் செயலாக்கப்படுகிறது.'
+    },
+    {
+      icon: 'Truck',
+      title: 'புதியதாக டெலிவரி செய்யப்படுகிறது',
+      text: 'இறுதி-முதல்-இறுதி குளிர் சங்கிலியுடன் அதிகபட்ச புத்துணர்ச்சியில் (0-4°C) உங்கள் வீட்டு வாசலுக்கு வருகிறது.'
+    }
+  ]
+};
+
 export const HowItWorksSection: React.FC = () => {
+  const { lang } = useLang();
   const block = useSiteContent('sections.how_it_works', FALLBACK);
-  const steps = block.items.map((item, index) => ({
+  const resolvedBlock = lang === 'ta' ? FALLBACK_TA : block;
+  const steps = resolvedBlock.items.map((item, index) => ({
     id: index + 1,
     title: item.title,
     desc: item.text,
@@ -40,8 +65,8 @@ export const HowItWorksSection: React.FC = () => {
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
       <div className="text-center max-w-2xl mx-auto space-y-2">
-        <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{block.eyebrow}</span>
-        <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{block.heading}</h2>
+        <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{resolvedBlock.eyebrow}</span>
+        <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">{resolvedBlock.heading}</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
