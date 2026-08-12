@@ -11,7 +11,6 @@ import { IGOEcosystemModal } from './components/IGOEcosystemModal';
 import { ProteinCalculatorModal } from './components/ProteinCalculatorModal';
 import { NotificationCenterModal } from './components/NotificationCenterModal';
 import { FloatingContactWidget } from './components/FloatingContactWidget';
-import { StickyOfferRibbon } from './components/StickyOfferRibbon';
 import { MobileTabBar } from './components/MobileTabBar';
 import { AddedToCartOverlay } from './components/AddedToCartOverlay';
 
@@ -39,7 +38,7 @@ import { AdminDashboard } from './pages/AdminDashboard';
 
 import { Product, ProductWeightOption, ProductCategory } from './types';
 import { StoreService } from './lib/storage';
-import { Language } from './lib/language';
+import { Language, LanguageContext, translate } from './lib/language';
 import { isActiveAdmin, onAuthStateChange, onPasswordRecovery, getCurrentUser } from './lib/api/auth';
 import { AdminLogin } from './components/admin/AdminLogin';
 
@@ -54,6 +53,7 @@ export default function App() {
 
   const [products, setProducts] = useState<Product[]>(() => StoreService.getProducts());
   const [lang, setLang] = useState<Language>('en');
+  const t = (key: string) => translate(lang, key);
 
   // Modal States
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -519,6 +519,7 @@ export default function App() {
   }
 
   return (
+    <LanguageContext.Provider value={{ lang, t }}>
     <div className="min-h-screen bg-white font-sans text-[#0A1F12] antialiased selection:bg-[#0F7B3A] selection:text-white flex flex-col justify-between">
       {/* Navbar */}
       <Navbar
@@ -546,7 +547,6 @@ export default function App() {
 
       {/* Persistent floating contact + mobile bottom tab bar */}
       <FloatingContactWidget onNavigate={navigate} />
-      <StickyOfferRibbon onNavigate={navigate} />
       <MobileTabBar
         currentPath={currentPath}
         onNavigate={navigate}
@@ -614,5 +614,6 @@ export default function App() {
         onNavigate={navigate}
       />
     </div>
+    </LanguageContext.Provider>
   );
 }

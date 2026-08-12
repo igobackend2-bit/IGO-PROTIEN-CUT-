@@ -25,7 +25,9 @@ import {
   BookOpen,
   Timer,
   Bone,
-  Check
+  Check,
+  Bell,
+  X
 } from 'lucide-react';
 import { Product, ProductWeightOption } from '../types';
 import { StoreService } from '../lib/storage';
@@ -35,6 +37,9 @@ import { BULK_TIERS, getActiveBulkTier, getBulkUnitPrice, getBulkLineTotal } fro
 import { INITIAL_RECIPES } from '../data/mockData';
 import { fetchProduct } from '../lib/api/catalog';
 import { submitReview, fetchMyReview, deleteMyReview, MyReview } from '../lib/api/reviews';
+import { useLang } from '../lib/language';
+import { requestStockNotify } from '../lib/api/stockNotify';
+import { getCurrentUser } from '../lib/api/auth';
 
 const CUT_PREFERENCES_BY_CATEGORY: Record<string, string[]> = {
   chicken: ['Curry Cut', 'Boneless Cubes', 'Whole (Skinless)', 'Biryani Cut'],
@@ -118,10 +123,47 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   onSelectProduct,
   onNavigate
 }) => {
+  const { t } = useLang();
   const [selectedWeight, setSelectedWeight] = useState<ProductWeightOption>(product.weightOptions[0]);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(product.image);
   const [isWishlisted, setIsWishlisted] = useState(() => StoreService.getWishlist().includes(product.id));
+
+  // Real out-of-stock handling for the full product page — previously this
+  // page never checked product.stockStatus at all, so an out-of-stock item
+  // showed a fully working Add to Cart button with no warning (the quick-view
+  // modal and listing-grid cards already handled this correctly; this was
+  // the one page that didn't). "Notify me" now writes a real row to
+  // igo_stock_notify_requests (see supabase/migrations/0020_*.sql) that the
+  // website's own /admin panel surfaces per product.
+  const isOutOfStock = product.stockStatus === 'Out of Stock';
+  const [isNotifyOpen, setIsNotifyOpen] = useState(false);
+  const [notifyEmail, setNotifyEmail] = useState('');
+  const [notifyPhone, setNotifyPhone] = useState('');
+  const [notifyStatus, setNotifyStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+
+  useEffect(() => {
+    let cancelled = false;
+    getCurrentUser().then((user) => {
+      if (!cancelled && user?.email) setNotifyEmail(user.email);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleSubmitNotify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!notifyEmail.trim()) return;
+    setNotifyStatus('submitting');
+    const res = await requestStockNotify({
+      productId: product.id,
+      productName: product.name,
+      email: notifyEmail,
+      phone: notifyPhone
+    });
+    setNotifyStatus(res.ok ? 'success' : 'error');
+  };
 
   // Keeps the heart icon in sync when the same product's wishlist state is
   // toggled elsewhere (a card in "You Might Also Like"/"Recently Viewed" on
@@ -362,7 +404,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12 pb-44 lg:pb-10">
       {/* Breadcrumbs */}
       <div className="flex items-center gap-2 text-xs text-neutral-500">
-        <button onClick={() => onNavigate('/')} className="hover:text-emerald-600 transition">Home</button>
+        <button onClick={() => onNavigate('/')} className="hover:text-emerald-600 transition">{t('home')}</button>
         <ChevronRight className="w-3.5 h-3.5" />
         <button onClick={() => onNavigate(`/category/${product.category}`)} className="hover:text-emerald-600 uppercase transition font-bold">
           {product.category}
@@ -441,6 +483,13 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
         {/* Right Column: Title, Weight Selection, Pricing, Actions */}
         <div className="lg:col-span-6 space-y-6">
+          {isOutOfStock && (
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
+              <p className="text-sm font-black text-red-700">{t('outOfStockBanner')}</p>
+              <p className="text-xs text-red-600 mt-1">{t('outOfStockBannerSub')}</p>
+            </div>
+          )}
+
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold px-2.5 py-0.5 rounded-full uppercase">
@@ -653,29 +702,41 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Qty Selector */}
-              <div className="flex items-center bg-white border border-neutral-200 rounded-2xl p-1">
+              {isOutOfStock ? (
                 <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 font-bold hover:bg-emerald-100 transition"
+                  onClick={() => setIsNotifyOpen(true)}
+                  className="bg-red-600 hover:bg-red-500 text-white font-black px-6 py-3.5 rounded-2xl text-xs uppercase tracking-wider flex flex-col items-center leading-tight transition cursor-pointer shadow-xl shadow-red-900/20"
                 >
-                  -
+                  <span className="flex items-center gap-2"><Bell className="w-4 h-4" /> {t('notifyMeCta')}</span>
+                  <span className="text-[9px] normal-case font-semibold opacity-80">{t('notifyMeSub')}</span>
                 </button>
-                <span className="px-3 font-bold text-sm text-[#0A1F12]">{quantity}</span>
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 font-bold hover:bg-emerald-100 transition"
-                >
-                  +
-                </button>
-              </div>
+              ) : (
+                <>
+                  {/* Qty Selector */}
+                  <div className="flex items-center bg-white border border-neutral-200 rounded-2xl p-1">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 font-bold hover:bg-emerald-100 transition"
+                    >
+                      -
+                    </button>
+                    <span className="px-3 font-bold text-sm text-[#0A1F12]">{quantity}</span>
+                    <button
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 font-bold hover:bg-emerald-100 transition"
+                    >
+                      +
+                    </button>
+                  </div>
 
-              <button
-                onClick={() => onAddToCart(product, selectedWeight, quantity, selectedCut || undefined)}
-                className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-black px-6 py-3.5 rounded-2xl text-xs uppercase tracking-wider flex items-center gap-2 transition cursor-pointer shadow-xl shadow-emerald-900/20"
-              >
-                <ShoppingBag className="w-4 h-4" /> Add to Cart
-              </button>
+                  <button
+                    onClick={() => onAddToCart(product, selectedWeight, quantity, selectedCut || undefined)}
+                    className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-black px-6 py-3.5 rounded-2xl text-xs uppercase tracking-wider flex items-center gap-2 transition cursor-pointer shadow-xl shadow-emerald-900/20"
+                  >
+                    <ShoppingBag className="w-4 h-4" /> {t('addToCart')}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -1105,13 +1166,101 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
               two different totals for the same quantity on the same page. */}
           <div className="text-lg font-black text-[#0A1F12]">₹{bulkTotal}</div>
         </div>
-        <button
-          onClick={() => onAddToCart(product, selectedWeight, quantity, selectedCut || undefined)}
-          className="flex-1 max-w-[220px] bg-[#0F7B3A] hover:bg-emerald-500 text-white font-black py-3 rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2"
-        >
-          <ShoppingBag className="w-4 h-4" /> Add to Cart
-        </button>
+        {isOutOfStock ? (
+          <button
+            onClick={() => setIsNotifyOpen(true)}
+            className="flex-1 max-w-[220px] bg-red-600 hover:bg-red-500 text-white font-black py-3 rounded-2xl text-xs uppercase tracking-wider flex flex-col items-center justify-center leading-tight gap-0.5"
+          >
+            <span className="flex items-center gap-2"><Bell className="w-4 h-4" /> {t('notifyMeCta')}</span>
+            <span className="text-[9px] normal-case font-semibold opacity-80">{t('notifyMeSub')}</span>
+          </button>
+        ) : (
+          <button
+            onClick={() => onAddToCart(product, selectedWeight, quantity, selectedCut || undefined)}
+            className="flex-1 max-w-[220px] bg-[#0F7B3A] hover:bg-emerald-500 text-white font-black py-3 rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2"
+          >
+            <ShoppingBag className="w-4 h-4" /> {t('addToCart')}
+          </button>
+        )}
       </div>
+
+      {/* Notify Me modal — request written to igo_stock_notify_requests,
+          visible to admin in /admin → Stock Alerts. Not auto-sent (see
+          migration 0020 for why); admin reaches out once restocked. */}
+      {isNotifyOpen && (
+        <div
+          onClick={() => {
+            setIsNotifyOpen(false);
+            setNotifyStatus('idle');
+          }}
+          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-fadeIn cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 max-w-sm w-full text-center space-y-4 animate-popIn cursor-default relative"
+          >
+            <button
+              onClick={() => {
+                setIsNotifyOpen(false);
+                setNotifyStatus('idle');
+              }}
+              className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600"
+              aria-label={t('close')}
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {notifyStatus === 'success' ? (
+              <>
+                <div className="w-16 h-16 rounded-full bg-emerald-50 border-4 border-emerald-100 flex items-center justify-center mx-auto">
+                  <CheckCircle2 className="w-9 h-9 text-[#0F7B3A]" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-[#0A1F12]">{t('requestAccepted')}</h2>
+                  <p className="text-xs text-neutral-500 mt-1">{t('requestAcceptedSub')}</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="w-14 h-14 rounded-full bg-red-50 border-4 border-red-100 flex items-center justify-center mx-auto">
+                  <Bell className="w-7 h-7 text-red-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-[#0A1F12]">{t('notifyMeCta')}</h2>
+                  <p className="text-xs text-neutral-500 mt-1">{t('outOfStockBannerSub')}</p>
+                </div>
+                <form onSubmit={handleSubmitNotify} className="space-y-2.5 text-left">
+                  <input
+                    type="email"
+                    required
+                    placeholder={t('emailPlaceholder')}
+                    value={notifyEmail}
+                    onChange={(e) => setNotifyEmail(e.target.value)}
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-[#0A1F12] focus:outline-none focus:border-emerald-500"
+                  />
+                  <input
+                    type="tel"
+                    placeholder="Phone (optional)"
+                    value={notifyPhone}
+                    onChange={(e) => setNotifyPhone(e.target.value)}
+                    className="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-4 py-2.5 text-sm text-[#0A1F12] focus:outline-none focus:border-emerald-500"
+                  />
+                  {notifyStatus === 'error' && (
+                    <p className="text-xs text-red-600 font-semibold">{t('notifyErrorGeneric')}</p>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={notifyStatus === 'submitting'}
+                    className="w-full bg-red-600 hover:bg-red-500 disabled:opacity-60 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer"
+                  >
+                    {notifyStatus === 'submitting' ? t('notifySubmitting') : t('notifySubmit')}
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

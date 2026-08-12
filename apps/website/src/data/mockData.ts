@@ -2705,8 +2705,8 @@ export const INITIAL_FAQS = [
   },
   {
     id: 'faq-3',
-    question: 'What is Express 30-Minute Delivery?',
-    answer: 'Express 30 Mins is our hyper-local delivery service operating from dark stores within 4km radius. If your pincode is eligible, your order is dispatched immediately after butcher packing.',
+    question: 'What is Express 30-90 Minute Delivery?',
+    answer: 'Express 30-90 Min is our hyper-local delivery service operating from dark stores within 4km radius. If your pincode is eligible, your order is dispatched immediately after butcher packing.',
     category: 'Delivery',
     helpfulVotes: 210,
     unhelpfulVotes: 8

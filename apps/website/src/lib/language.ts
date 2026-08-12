@@ -1,10 +1,12 @@
+import { createContext, useContext } from 'react';
+
 export type Language = 'en' | 'ta';
 
 export const TRANSLATIONS: Record<Language, Record<string, string>> = {
   en: {
     brandName: 'IGO PROTEIN CUTS',
     tagline: 'Farm-Fresh, Antibiotic-Free Protein',
-    taglineSub: 'Delivered in 30 Minutes',
+    taglineSub: 'Delivered in 30-90 Minutes',
     ecosystem: 'IGO ECOSYSTEM',
     adminPortal: 'Admin Portal',
     deliverTo: 'Deliver to',
@@ -12,7 +14,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     cart: 'CART',
     account: 'Account',
     member: 'Member',
-    expressActive: 'EXPRESS 30-MIN DELIVERY ACTIVE',
+    expressActive: 'EXPRESS 30-90 MIN DELIVERY ACTIVE',
     orderFreshCuts: 'Order Fresh Cuts Now',
     exploreGymPlans: 'Explore Gym Protein Plans',
     ordersToday: 'Orders Delivered Today',
@@ -33,11 +35,54 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     calcBtn: 'Calculate Protein Needs',
     igoFamily: 'IGO Ecosystem Family',
     igoFamilySub: 'Explore our integrated agro, cold-chain, fisheries, and express delivery groups',
+    // Footer
+    footerTagline: 'Farm Fresh, Stay Healthy',
+    customerCare: 'Customer Care',
+    termsConditions: 'Terms & Conditions',
+    privacyPolicy: 'Privacy Policy',
+    shippingPolicy: 'Shipping Policy',
+    returnPolicy: 'Return Policy',
+    contactUs: 'Contact us',
+    accountHeading: 'Account',
+    myAccount: 'My Account',
+    cartNav: 'Cart',
+    wishlist: 'Wishlist',
+    productNav: 'Product',
+    blog: 'Blog',
+    newsletter: 'News Letter',
+    subscribedMsg: 'Subscribed! Watch your inbox.',
+    emailPlaceholder: 'Email',
+    subscribe: 'Subscribe',
+    followUs: 'Follow Us',
+    copyright: 'IGO Protein Cuts. All rights reserved.',
+    fssaiLic: 'FSSAI Lic: 10022043000918',
+    // Breadcrumbs & common
+    home: 'Home',
+    addToCart: 'Add',
+    soldOut: 'Sold Out',
+    deliveryIn: 'Delivery in',
+    deliveryTime30to90: 'Delivery in 30-90 mins',
+    buyNow: 'Buy Now',
+    added: 'Added!',
+    notify: 'Notify',
+    notified: 'Notified!',
+    addToBasket: 'Add to Basket',
+    outOfStockBanner: 'Currently Out of Stock',
+    outOfStockBannerSub: "We're restocking this — leave your email and we'll let you know the moment it's back.",
+    notifyMeCta: 'Notify Me',
+    notifyMeSub: 'when back in stock',
+    requestAccepted: 'Request Accepted',
+    requestAcceptedSub: "We'll notify you when this product becomes available.",
+    notifySubmit: 'Notify Me',
+    notifySubmitting: 'Submitting...',
+    notifyCancel: 'Cancel',
+    notifyErrorGeneric: "Couldn't submit your request — please try again in a moment.",
+    close: 'Close',
   },
   ta: {
     brandName: 'IGO புரோட்டீன் கட்ஸ்',
     tagline: 'பண்ணை நன்னீர் & ஆர்கானிக் புரதம்',
-    taglineSub: '30 நிமிடங்களில் உங்கள் இல்லத்தில்',
+    taglineSub: '30-90 நிமிடங்களில் உங்கள் இல்லத்தில்',
     ecosystem: 'IGO ஈகோசிஸ்டம்',
     adminPortal: 'நிர்வாகி போர்ட்டல்',
     deliverTo: 'டெலிவரி இடம்',
@@ -45,7 +90,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     cart: 'கார்ட்',
     account: 'கணக்கு',
     member: 'உறுப்பினர்',
-    expressActive: '30 நிமிட விரைவு டெலிவரி இயங்குகிறது',
+    expressActive: '30-90 நிமிட விரைவு டெலிவரி இயங்குகிறது',
     orderFreshCuts: 'இப்பொழுதே ஆர்டர் செய்க',
     exploreGymPlans: 'ஜிம் புரோட்டீன் திட்டங்கள்',
     ordersToday: 'இன்று டெலிவரி செய்யப்பட்டவை',
@@ -66,5 +111,70 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     calcBtn: 'புரதத் தேவையைத் தெரிந்துகொள்க',
     igoFamily: 'IGO குழுமத்தின் துணை நிறுவனங்கள்',
     igoFamilySub: 'பண்ணை, குளிர் சங்கிலி, மீன்வளம் மற்றும் விரைவு விநியோக சேவைகளை ஆராயுங்கள்',
+    // Footer
+    footerTagline: 'பண்ணை நன்னீர், ஆரோக்கியமாக இருங்கள்',
+    customerCare: 'வாடிக்கையாளர் சேவை',
+    termsConditions: 'விதிமுறைகள் & நிபந்தனைகள்',
+    privacyPolicy: 'தனியுரிமைக் கொள்கை',
+    shippingPolicy: 'டெலிவரி கொள்கை',
+    returnPolicy: 'திரும்பப்பெறும் கொள்கை',
+    contactUs: 'எங்களை தொடர்பு கொள்ள',
+    accountHeading: 'கணக்கு',
+    myAccount: 'எனது கணக்கு',
+    cartNav: 'கார்ட்',
+    wishlist: 'விருப்பப் பட்டியல்',
+    productNav: 'பொருட்கள்',
+    blog: 'வலைப்பதிவு',
+    newsletter: 'செய்திமடல்',
+    subscribedMsg: 'சந்தா செய்யப்பட்டது! உங்கள் இன்பாக்ஸைப் பாருங்கள்.',
+    emailPlaceholder: 'மின்னஞ்சல்',
+    subscribe: 'சந்தா செய்யுங்கள்',
+    followUs: 'எங்களைப் பின்தொடருங்கள்',
+    copyright: 'IGO புரோட்டீன் கட்ஸ். அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.',
+    fssaiLic: 'FSSAI உரிமம்: 10022043000918',
+    // Breadcrumbs & common
+    home: 'முகப்பு',
+    addToCart: 'சேர்',
+    soldOut: 'கையிருப்பில் இல்லை',
+    deliveryIn: 'டெலிவரி',
+    deliveryTime30to90: '30-90 நிமிடங்களில் டெலிவரி',
+    buyNow: 'இப்போது வாங்குங்கள்',
+    added: 'சேர்க்கப்பட்டது!',
+    notify: 'அறிவிக்கவும்',
+    notified: 'அறிவிக்கப்பட்டது!',
+    addToBasket: 'கூடையில் சேர்',
+    outOfStockBanner: 'தற்போது கையிருப்பில் இல்லை',
+    outOfStockBannerSub: 'நாங்கள் மீண்டும் நிரப்புகிறோம் — உங்கள் மின்னஞ்சலைக் கொடுங்கள், கிடைத்தவுடன் தெரிவிக்கிறோம்.',
+    notifyMeCta: 'எனக்கு தெரிவிக்கவும்',
+    notifyMeSub: 'கையிருப்பில் வரும்போது',
+    requestAccepted: 'கோரிக்கை ஏற்கப்பட்டது',
+    requestAcceptedSub: 'இந்த பொருள் கிடைக்கும்போது உங்களுக்கு தெரிவிப்போம்.',
+    notifySubmit: 'எனக்கு தெரிவிக்கவும்',
+    notifySubmitting: 'சமர்ப்பிக்கிறது...',
+    notifyCancel: 'ரத்து செய்',
+    notifyErrorGeneric: 'கோரிக்கையை சமர்ப்பிக்க முடியவில்லை — சிறிது நேரம் கழித்து முயற்சிக்கவும்.',
+    close: 'மூடு',
   }
 };
+
+// Previously `lang` only ever reached the Navbar (passed as a direct prop
+// from App.tsx) — every other page and component had no way to read the
+// selected language, so toggling to Tamil only ever changed the header and
+// left the rest of the site in English. This context makes `lang` and a
+// `t(key)` helper available anywhere in the tree without prop-drilling
+// through 25+ page components.
+interface LanguageContextValue {
+  lang: Language;
+  t: (key: string) => string;
+}
+
+const translate = (lang: Language, key: string): string =>
+  TRANSLATIONS[lang]?.[key] ?? TRANSLATIONS.en[key] ?? key;
+
+export const LanguageContext = createContext<LanguageContextValue>({
+  lang: 'en',
+  t: (key: string) => translate('en', key)
+});
+
+export const useLang = () => useContext(LanguageContext);
+export { translate };

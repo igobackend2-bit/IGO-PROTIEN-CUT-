@@ -3,6 +3,7 @@ import { Heart, Check, Minus, Plus } from 'lucide-react';
 import { Product, ProductWeightOption } from '../types';
 import { StoreService } from '../lib/storage';
 import { FadeImage } from './FadeImage';
+import { useLang } from '../lib/language';
 
 interface BrowseProductCardProps {
   product: Product;
@@ -23,6 +24,7 @@ export const BrowseProductCard: React.FC<BrowseProductCardProps> = ({
   onSelectProduct,
   onAddToCart
 }) => {
+  const { t } = useLang();
   const [added, setAdded] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(() => StoreService.getWishlist().includes(product.id));
   // Previously Add just flashed to "Added" for ~1.2s and reverted to a plain
@@ -91,7 +93,7 @@ export const BrowseProductCard: React.FC<BrowseProductCardProps> = ({
         {isOutOfStock && (
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="bg-white text-[#0A1F12] text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow -rotate-6 border border-neutral-200">
-              Sold Out
+              {t('soldOut')}
             </span>
           </div>
         )}
@@ -153,7 +155,7 @@ export const BrowseProductCard: React.FC<BrowseProductCardProps> = ({
                   : 'bg-[#0F7B3A] hover:bg-emerald-500 text-white'
             }`}
           >
-            {isOutOfStock ? 'Sold Out' : added ? (<><Check className="w-3.5 h-3.5" /> Added</>) : 'Add to Basket'}
+            {isOutOfStock ? t('soldOut') : added ? (<><Check className="w-3.5 h-3.5" /> {t('added')}</>) : t('addToBasket')}
           </button>
         )}
       </div>

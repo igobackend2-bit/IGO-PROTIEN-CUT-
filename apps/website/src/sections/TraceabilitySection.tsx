@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { MapPin, Thermometer, QrCode, ShieldCheck, ArrowRight, CheckCircle2, Clock } from 'lucide-react';
+import { MapPin, Thermometer, QrCode, ShieldCheck, ArrowRight, CheckCircle2, Clock, XCircle, Loader2 } from 'lucide-react';
+import { lookupBatch, BatchTraceRow } from '../lib/api/batchTrace';
 
 interface TraceResult {
   batchId: string;
+  productName: string | null;
   farmName: string;
   farmLocation: string;
   cutDate: string;
@@ -38,22 +40,47 @@ const features = [
   }
 ];
 
+const toResult = (row: BatchTraceRow): TraceResult => ({
+  batchId: row.batch_id.toUpperCase(),
+  productName: row.product_name,
+  farmName: row.farm_name,
+  farmLocation: row.farm_location,
+  cutDate: new Date(row.cut_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+  handler: row.handler,
+  tempLog: row.temp_log,
+  status: 'verified'
+});
+
 export const TraceabilitySection: React.FC = () => {
   const [batchId, setBatchId] = useState('');
   const [result, setResult] = useState<TraceResult | null>(null);
+  // Was previously hardcoded to always return the same fake "Verified"
+  // result for any input, including nonsense batch IDs — a real trust risk
+  // once a customer actually tried it. Now queries the real igo_batch_trace
+  // table and shows an honest "not found" state when there's no match.
+  const [status, setStatus] = useState<'idle' | 'loading' | 'not_found' | 'error'>('idle');
 
-  const handleTrace = (e: React.FormEvent) => {
+  const handleTrace = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!batchId.trim()) return;
-    setResult({
-      batchId: batchId.trim().toUpperCase(),
-      farmName: 'High Meadows Heritage Farm',
-      farmLocation: 'Nilgiris Range, Tamil Nadu',
-      cutDate: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-      handler: 'Certified Butcher #IGO-041',
-      tempLog: '2.1°C - 3.4°C (within 0-4°C range, zero breaks)',
-      status: 'verified'
-    });
+    const trimmed = batchId.trim();
+    if (!trimmed) return;
+
+    setStatus('loading');
+    setResult(null);
+
+    const res = await lookupBatch(trimmed);
+
+    if (!res.ok) {
+      setStatus('error');
+      return;
+    }
+    if (!res.data) {
+      setStatus('not_found');
+      return;
+    }
+
+    setResult(toResult(res.data));
+    setStatus('idle');
   };
 
   return (
@@ -80,17 +107,41 @@ export const TraceabilitySection: React.FC = () => {
             <input
               type="text"
               value={batchId}
-              onChange={(e) => setBatchId(e.target.value)}
+              onChange={(e) => {
+                setBatchId(e.target.value);
+                if (status !== 'loading') setStatus('idle');
+              }}
               placeholder="Enter Batch ID (e.g., IGO-9421) to verify..."
               className="w-full bg-white border border-neutral-200 rounded-2xl px-4 py-3 text-sm text-[#0A1F12] focus:outline-none focus:border-emerald-500"
             />
             <button
               type="submit"
-              className="w-full sm:w-auto shrink-0 bg-[#0F7B3A] hover:bg-emerald-500 text-white font-black px-6 py-3 rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer"
+              disabled={status === 'loading'}
+              className="w-full sm:w-auto shrink-0 bg-[#0F7B3A] hover:bg-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-black px-6 py-3 rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer"
             >
-              Trace Now <ArrowRight className="w-4 h-4" />
+              {status === 'loading' ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Tracing...
+                </>
+              ) : (
+                <>
+                  Trace Now <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </form>
+
+          {status === 'not_found' && (
+            <div className="bg-red-950/40 border border-red-800 rounded-2xl p-4 text-left flex items-center gap-2 text-red-300 text-xs font-bold animate-fadeIn">
+              <XCircle className="w-4 h-4 shrink-0" /> No batch found for "{batchId.trim()}" — double-check the code on your pack, or contact support if it looks wrong.
+            </div>
+          )}
+
+          {status === 'error' && (
+            <div className="bg-red-950/40 border border-red-800 rounded-2xl p-4 text-left flex items-center gap-2 text-red-300 text-xs font-bold animate-fadeIn">
+              <XCircle className="w-4 h-4 shrink-0" /> Couldn't reach the traceability service right now — please try again in a moment.
+            </div>
+          )}
 
           {result && (
             <div className="bg-white/5 border border-emerald-800 rounded-2xl p-5 text-left space-y-3 animate-fadeIn">
@@ -100,6 +151,9 @@ export const TraceabilitySection: React.FC = () => {
                   <CheckCircle2 className="w-3 h-3" /> Verified
                 </span>
               </div>
+              {result.productName && (
+                <div className="text-xs text-neutral-400 -mt-1">{result.productName}</div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-neutral-300">
                 <div className="flex items-start gap-2">
                   <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />

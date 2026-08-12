@@ -105,7 +105,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
             Exclusive Morning Fresh Meat & Seafood Deals
           </h1>
           <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
-            Get up to 25% Off on premium antibiotic-free Chicken, wild seafood, goat mutton cuts, and 1-click combo packs. Delivered chilled at 0-4°C in 30 minutes.
+            Get up to 25% Off on premium antibiotic-free Chicken, wild seafood, goat mutton cuts, and 1-click combo packs. Delivered chilled at 0-4°C in 30-90 minutes.
           </p>
         </div>
       </div>

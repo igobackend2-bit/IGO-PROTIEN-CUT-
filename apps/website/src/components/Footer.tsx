@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import {
   Instagram,
   Facebook,
-  Twitter,
-  Youtube,
   Send,
   CheckCircle2
 } from 'lucide-react';
 import { submitLead } from '../lib/api/catalog';
+import { useLang } from '../lib/language';
 
 interface FooterProps {
   onNavigate: (path: string) => void;
@@ -21,6 +20,7 @@ interface FooterProps {
 // B2B/franchise/signup flows already use, tagged `leadType: 'newsletter'`,
 // rather than being a fake no-op form.
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+  const { t } = useLang();
   const [email, setEmail] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
@@ -65,23 +65,23 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 />
               </div>
             </button>
-            <p className="text-sm text-white/70">Farm Fresh, Stay Healthy</p>
+            <p className="text-sm text-white/70">{t('footerTagline')}</p>
           </div>
 
           {/* Col 2: Customer Care */}
           <div>
-            <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">Customer Care</h4>
+            <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">{t('customerCare')}</h4>
             <ul className="space-y-2.5 text-sm">
               {[
                 // Previously all four policy links pointed at the exact same
                 // /policy URL, so they all opened the same undifferentiated
                 // page — now each deep-links its own section (see
                 // PolicyPage.tsx's `section` prop) and scrolls straight to it.
-                { label: 'Terms & Conditions', path: '/policy?section=terms' },
-                { label: 'Privacy Policy', path: '/policy?section=privacy' },
-                { label: 'Shipping Policy', path: '/policy?section=shipping' },
-                { label: 'Return Policy', path: '/policy?section=returns' },
-                { label: 'Contact us', path: '/contact' }
+                { label: t('termsConditions'), path: '/policy?section=terms' },
+                { label: t('privacyPolicy'), path: '/policy?section=privacy' },
+                { label: t('shippingPolicy'), path: '/policy?section=shipping' },
+                { label: t('returnPolicy'), path: '/policy?section=returns' },
+                { label: t('contactUs'), path: '/contact' }
               ].map((link) => (
                 <li key={link.label}>
                   <button
@@ -97,14 +97,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
           {/* Col 3: Account */}
           <div>
-            <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">Account</h4>
+            <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">{t('accountHeading')}</h4>
             <ul className="space-y-2.5 text-sm">
               {[
-                { label: 'My Account', path: '/account' },
-                { label: 'Cart', path: '/cart' },
-                { label: 'Wishlist', path: '/wishlist' },
-                { label: 'Product', path: '/search' },
-                { label: 'Blog', path: '/blog' }
+                { label: t('myAccount'), path: '/account' },
+                { label: t('cartNav'), path: '/cart' },
+                { label: t('wishlist'), path: '/wishlist' },
+                { label: t('productNav'), path: '/search' },
+                { label: t('blog'), path: '/blog' }
               ].map((link) => (
                 <li key={link.label}>
                   <button
@@ -121,17 +121,17 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* Col 4: Newsletter + Follow Us */}
           <div className="space-y-6">
             <div>
-              <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">News Letter</h4>
+              <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">{t('newsletter')}</h4>
               {subscribed ? (
                 <div className="flex items-center gap-2 bg-white/15 border border-white/25 text-white text-xs font-bold px-4 py-3 rounded-full">
-                  <CheckCircle2 className="w-4 h-4 shrink-0" /> Subscribed! Watch your inbox.
+                  <CheckCircle2 className="w-4 h-4 shrink-0" /> {t('subscribedMsg')}
                 </div>
               ) : (
                 <form onSubmit={handleSubscribe} className="flex items-center bg-white border border-white/20 rounded-full overflow-hidden shadow-sm transition">
                   <input
                     type="email"
                     required
-                    placeholder="Email"
+                    placeholder={t('emailPlaceholder')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="flex-1 min-w-0 bg-transparent px-4 py-2.5 text-sm text-[#0A1F12] placeholder-neutral-400 focus:outline-none"
@@ -141,23 +141,17 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                     disabled={isSending}
                     className="shrink-0 flex items-center gap-1.5 bg-[#0A1F12] hover:bg-[#0B5C2A] text-white font-bold px-5 py-2.5 text-xs uppercase tracking-wide transition cursor-pointer disabled:opacity-60"
                   >
-                    {isSending ? '...' : 'Subscribe'} <Send className="w-3.5 h-3.5" />
+                    {isSending ? '...' : t('subscribe')} <Send className="w-3.5 h-3.5" />
                   </button>
                 </form>
               )}
             </div>
 
             <div>
-              <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">Follow Us</h4>
+              <h4 className="text-xs font-black text-white uppercase tracking-widest mb-4">{t('followUs')}</h4>
               <div className="flex items-center gap-3">
                 <a href="https://facebook.com/igoproteincuts" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-[#1877F2] text-white flex items-center justify-center hover:opacity-90 transition">
                   <Facebook className="w-4 h-4" fill="currentColor" />
-                </a>
-                <a href="https://twitter.com/igoproteincuts" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-black text-white flex items-center justify-center hover:opacity-90 transition">
-                  <Twitter className="w-4 h-4" />
-                </a>
-                <a href="https://youtube.com/@igoproteincuts" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-[#FF0000] text-white flex items-center justify-center hover:opacity-90 transition">
-                  <Youtube className="w-4 h-4" fill="currentColor" />
                 </a>
                 <a
                   href="https://instagram.com/igoproteincuts"
@@ -175,9 +169,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
         {/* Bottom Bar — single centered copyright line, matching the reference */}
         <div className="pt-6 border-t border-white/15 flex flex-col sm:flex-row items-center justify-center gap-2 text-xs text-white/70 text-center">
-          <span>© {new Date().getFullYear()} IGO Protein Cuts. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} {t('copyright')}</span>
           <span className="hidden sm:inline text-white/30">•</span>
-          <span className="text-white/60">FSSAI Lic: 10022043000918</span>
+          <span className="text-white/60">{t('fssaiLic')}</span>
         </div>
       </div>
     </footer>

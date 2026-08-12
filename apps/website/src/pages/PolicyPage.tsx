@@ -42,7 +42,7 @@ export const PolicyPage: React.FC<PolicyPageProps> = ({ section }) => {
           <section id="shipping-policy" className={sectionClass('shipping-policy')}>
             <h2 className="text-sm font-bold uppercase text-emerald-700">1. Cold Chain & Delivery (Shipping) Policy</h2>
             <p>
-              Protein Cuts guarantees 30-minute express delivery in insulated cold bags. Freshness is strictly maintained at 0°C to 4°C. If any product is delivered above 8°C, we provide 100% instant refund or replacement.
+              Protein Cuts guarantees 30-90 minute express delivery in insulated cold bags. Freshness is strictly maintained at 0°C to 4°C. If any product is delivered above 8°C, we provide 100% instant refund or replacement.
             </p>
           </section>
 

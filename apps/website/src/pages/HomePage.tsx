@@ -40,9 +40,12 @@ import {
   Briefcase,
   Tag,
   Dumbbell,
-  Users
+  Users,
+  Minus,
+  Plus
 } from 'lucide-react';
 import { Product, ProductWeightOption } from '../types';
+import { StoreService } from '../lib/storage';
 import { INITIAL_SUBSCRIPTION_PLANS, INITIAL_RECIPES } from '../data/mockData';
 import { HowItWorksSection } from '../sections/HowItWorksSection';
 import { TrustSection } from '../sections/TrustSection';
@@ -119,6 +122,18 @@ export const HomePage: React.FC<HomePageProps> = ({
   const [pincode, setPincode] = useState('');
   const [pincodeStatus, setPincodeStatus] = useState<'idle' | 'checking' | 'available' | 'unavailable'>('idle');
 
+  // The "Top Picks For You" rail used to always show a static "Add" button,
+  // even after the item was already in the cart — unlike the Category page
+  // cards, which swap to a +/- stepper. This tick just forces a re-read of
+  // cart quantities from storage whenever the cart changes, so that rail can
+  // show the same stepper feedback.
+  const [, setCartTick] = useState(0);
+  useEffect(() => {
+    const sync = () => setCartTick((t) => t + 1);
+    window.addEventListener('protein_cuts_cart_updated', sync);
+    return () => window.removeEventListener('protein_cuts_cart_updated', sync);
+  }, []);
+
   // Refs + helper for the arrow-button carousel navigation on the
   // horizontal product strips (Today's Fresh Stock, Top Picks, Chef
   // Recommended) — supplements native touch/drag scrolling with clickable
@@ -166,10 +181,10 @@ export const HomePage: React.FC<HomePageProps> = ({
       {
         label: 'IGO ECOSYSTEM • FRESH CUT ON ORDER',
         headlineTop: 'PURE FARM FRESH CUTS.',
-        headlineAccent: '30-MIN EXPRESS',
+        headlineAccent: '30-90 MIN EXPRESS',
         headlineBottom: 'COLD CHAIN.',
         description:
-          "Experience India's finest antibiotic-free Chicken, pasture-fed Mutton, wild seafood, and gym protein plans. Hand-trimmed by master butchers, chilled at 0-4°C, and delivered to your kitchen in 30 minutes."
+          "Experience India's finest antibiotic-free Chicken, pasture-fed Mutton, wild seafood, and gym protein plans. Hand-trimmed by master butchers, chilled at 0-4°C, and delivered to your kitchen in 30-90 minutes."
       },
       {
         label: 'TOTAL TRACEABILITY',
@@ -297,7 +312,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       eyebrow: 'Seasonal Pick',
       title: 'Monsoon Special:',
       titleAccent: 'Crispy Wings',
-      copy: 'Rainy-day cravings, sorted — fresh-cut chicken wings, hand-trimmed to order and delivered in 30 minutes.',
+      copy: 'Rainy-day cravings, sorted — fresh-cut chicken wings, hand-trimmed to order and delivered in 30-90 minutes.',
       badgeLine1: 'Starts From',
       badgeLine2: '₹129',
       cta: 'Order Now',
@@ -350,7 +365,7 @@ export const HomePage: React.FC<HomePageProps> = ({
     heading: 'Farm to Fork, the IGO Way',
     subheading:
       "From fresh cuts to eggs, marinades, and pantry staples — everything here is sourced straight from IGO's own farms, never through a broker.",
-    badge: '30-Minute Express Delivery'
+    badge: '30-90 Minute Express Delivery'
   });
 
   const topPicksHeading = useSiteContent('home.rail_top_picks', {
@@ -519,7 +534,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div className="inline-flex items-center gap-2 bg-[#0F7B3A]/10 border border-[#0F7B3A]/20 px-3.5 py-1.5 rounded-full">
                 <span className="w-2 h-2 rounded-full bg-[#0F7B3A] animate-pulse" />
                 <span className="text-[10px] sm:text-xs font-bold text-[#0F7B3A] uppercase tracking-wider">
-                  Delivering in 30 mins · Free above ₹499
+                  Delivering in 30-90 mins · Free above ₹499
                 </span>
               </div>
               <div className="inline-flex items-center gap-2 bg-white border border-neutral-200 px-3.5 py-1.5 rounded-full shadow-sm">
@@ -698,7 +713,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <Truck className="w-5 h-5" />
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">Delivery Time</p>
-                  <p className="font-black text-sm">30 Minutes</p>
+                  <p className="font-black text-sm">30-90 Minutes</p>
                 </div>
               </div>
 
@@ -866,6 +881,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               // that ProductCard.tsx/BrowseProductCard.tsx already enforce,
               // so a Sold Out product could still be added from here.
               const isOutOfStock = product.stockStatus === 'Out of Stock';
+              const cartQty = StoreService.getCartQuantity(product.id);
               return (
                 <div
                   key={product.id}
@@ -912,21 +928,50 @@ export const HomePage: React.FC<HomePageProps> = ({
                           <span className="text-[10px] text-neutral-400 line-through ml-1">₹{weight.originalPrice}</span>
                         )}
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (isOutOfStock) return;
-                          onAddToCart(product, weight, 1);
-                        }}
-                        disabled={isOutOfStock}
-                        className={`text-[10px] font-bold px-3 py-1.5 rounded-full transition shrink-0 ${
-                          isOutOfStock
-                            ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
-                            : 'bg-[#0F7B3A] hover:bg-emerald-500 text-white cursor-pointer'
-                        }`}
-                      >
-                        {isOutOfStock ? 'Sold Out' : 'Add'}
-                      </button>
+                      {!isOutOfStock && cartQty > 0 ? (
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-full overflow-hidden shrink-0"
+                        >
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              StoreService.adjustCartQuantity(product.id, weight.label, -1);
+                            }}
+                            aria-label="Decrease quantity"
+                            className="w-6 h-6 flex items-center justify-center text-emerald-700 hover:bg-emerald-100 transition cursor-pointer"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="text-[10px] font-black text-[#0A1F12] px-1">{cartQty}</span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              StoreService.adjustCartQuantity(product.id, weight.label, 1);
+                            }}
+                            aria-label="Increase quantity"
+                            className="w-6 h-6 flex items-center justify-center text-emerald-700 hover:bg-emerald-100 transition cursor-pointer"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isOutOfStock) return;
+                            onAddToCart(product, weight, 1);
+                          }}
+                          disabled={isOutOfStock}
+                          className={`text-[10px] font-bold px-3 py-1.5 rounded-full transition shrink-0 ${
+                            isOutOfStock
+                              ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
+                              : 'bg-[#0F7B3A] hover:bg-emerald-500 text-white cursor-pointer'
+                          }`}
+                        >
+                          {isOutOfStock ? 'Sold Out' : 'Add'}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1056,7 +1101,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <h3 className="text-2xl sm:text-3xl font-black text-white mt-1.5 leading-tight">Everyday Fresh, Delivered.</h3>
               </div>
               <ul className="space-y-2.5 text-sm text-emerald-50">
-                {['Same-day 30-min express delivery', 'Money-back freshness guarantee', 'Subscribe & Save early access'].map((item) => (
+                {['Same-day 30-90 min express delivery', 'Money-back freshness guarantee', 'Subscribe & Save early access'].map((item) => (
                   <li key={item} className="flex items-center gap-2.5">
                     <CheckCircle2 className="w-4 h-4 text-white/90 shrink-0" /> {item}
                   </li>

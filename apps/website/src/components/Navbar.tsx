@@ -148,7 +148,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     // — previously any 6-digit string was accepted as deliverable.
     if (isPincodeServiceable(inputPincode)) {
       setSelectedPincode(`${inputPincode} (Express Available)`);
-      setPincodeStatus('30-Minute Express Cold Chain Delivery Active in your zone!');
+      setPincodeStatus('30-90 Minute Express Cold Chain Delivery Active in your zone!');
       setTimeout(() => {
         setShowPincodeModal(false);
         setPincodeStatus(null);
@@ -196,7 +196,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           setSelectedPincode(`Current Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
         }
 
-        setPincodeStatus('Live location detected — 30-Minute Express Cold Chain Delivery Active in your zone!');
+        setPincodeStatus('Live location detected — 30-90 Minute Express Cold Chain Delivery Active in your zone!');
         setIsLocating(false);
         setTimeout(() => {
           setShowPincodeModal(false);

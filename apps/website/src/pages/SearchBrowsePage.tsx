@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Product, ProductCategory, ProductWeightOption } from '../types';
 import { BrowseProductCard } from '../components/BrowseProductCard';
+import { useLang } from '../lib/language';
 
 interface SearchBrowsePageProps {
   products: Product[];
@@ -34,6 +35,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
   initialCategory = 'all',
   initialSearchQuery = ''
 }) => {
+  const { t } = useLang();
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('all');
@@ -241,7 +243,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
       {selectedCategory !== 'all' && (
         <nav className="flex items-center gap-1.5 text-xs text-neutral-500 font-medium">
           <button onClick={() => onNavigate('/')} className="hover:text-emerald-600 transition cursor-pointer font-semibold">
-            Home
+            {t('home')}
           </button>
           <ChevronRight className="w-3.5 h-3.5" />
           <span className="text-[#0A1F12] font-bold">{currentCategoryName}</span>

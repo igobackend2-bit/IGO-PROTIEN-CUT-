@@ -2,6 +2,7 @@ import React from 'react';
 import { ShieldCheck, Award, Clock, CheckCircle2, Truck } from 'lucide-react';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
 import { FadeImage } from '../components/FadeImage';
+import { TraceabilitySection } from '../sections/TraceabilitySection';
 
 export const AboutPage: React.FC = () => {
   // Only the hero title/intro are admin-editable here (via /admin → Pages &
@@ -12,7 +13,7 @@ export const AboutPage: React.FC = () => {
   const content = useSiteContent('pages.about', {
     title: 'The Protein Cuts Story',
     intro:
-      'Protein Cuts was born out of a single obsession: to eradicate chemical preservatives, antibiotics, and stale frozen meats from Indian households. As part of the prestigious IGO Groups ecosystem, we leverage technology, farm partnerships, and cold-chain logistics to deliver pure, fresh protein in 30 minutes.'
+      'Protein Cuts was born out of a single obsession: to eradicate chemical preservatives, antibiotics, and stale frozen meats from Indian households. As part of the prestigious IGO Groups ecosystem, we leverage technology, farm partnerships, and cold-chain logistics to deliver pure, fresh protein in 30-90 minutes.'
   });
 
   return (
@@ -85,6 +86,11 @@ export const AboutPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Real batch lookup — was built but never wired into any page, so the
+          "scan your pack" claim above had no actual tool behind it. Backed by
+          igo_batch_trace (see supabase/migrations/0019_batch_traceability.sql). */}
+      <TraceabilitySection />
 
       {/* Leadership & Vision */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">

@@ -3,6 +3,7 @@ import { ShoppingBag, Star, Flame, RefreshCw, Check, Heart, Zap, Bell, Tag, Minu
 import { Product, ProductWeightOption } from '../types';
 import { StoreService } from '../lib/storage';
 import { FadeImage } from './FadeImage';
+import { useLang } from '../lib/language';
 
 interface ProductCardProps {
   product: Product;
@@ -17,6 +18,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onAddToCart,
   onNavigate
 }) => {
+  const { t } = useLang();
   const [selectedWeightIndex, setSelectedWeightIndex] = useState(0);
   const [added, setAdded] = useState(false);
   const [notified, setNotified] = useState(false);
@@ -217,7 +219,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {!isOutOfStock && (
           <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 font-semibold">
             <Zap className="w-3 h-3 text-emerald-600 fill-emerald-600" />
-            Delivery in 30 mins
+            {t('deliveryTime30to90')}
           </div>
         )}
 
@@ -244,11 +246,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             >
               {notified ? (
                 <>
-                  <Check className="w-3.5 h-3.5" /> Notified!
+                  <Check className="w-3.5 h-3.5" /> {t('notified')}
                 </>
               ) : (
                 <>
-                  <Bell className="w-3.5 h-3.5" /> Notify
+                  <Bell className="w-3.5 h-3.5" /> {t('notify')}
                 </>
               )}
             </button>
@@ -259,7 +261,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   onClick={handleBuyNow}
                   className="px-3 py-2 rounded-xl text-xs font-bold border border-[#0F7B3A] text-[#0F7B3A] hover:bg-emerald-50 transition cursor-pointer"
                 >
-                  Buy Now
+                  {t('buyNow')}
                 </button>
               )}
               {cartQty > 0 ? (
@@ -294,11 +296,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 >
                   {added ? (
                     <>
-                      <Check className="w-3.5 h-3.5" /> Added!
+                      <Check className="w-3.5 h-3.5" /> {t('added')}
                     </>
                   ) : (
                     <>
-                      <ShoppingBag className="w-3.5 h-3.5" /> Add
+                      <ShoppingBag className="w-3.5 h-3.5" /> {t('addToCart')}
                     </>
                   )}
                 </button>

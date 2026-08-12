@@ -21,7 +21,10 @@ import {
   Tag,
   Star,
   ThumbsDown,
-  Truck
+  Truck,
+  QrCode,
+  Bell,
+  Mail
 } from 'lucide-react';
 import { signOut } from '../lib/api/auth';
 import { MediaLibrary } from '../components/admin/MediaLibrary';
@@ -55,6 +58,13 @@ import {
   ReviewRow,
   OrderFeedbackRow
 } from '../lib/api/websiteAdmin';
+import { listBatchTrace, createBatchTrace, deleteBatchTrace, BatchTraceRow } from '../lib/api/batchTrace';
+import {
+  listPendingStockNotifyRequests,
+  markStockNotifyRequestSent,
+  markProductStockNotifyRequestsSent,
+  StockNotifyRequestRow
+} from '../lib/api/stockNotify';
 
 /**
  * WEBSITE CONTENT ADMIN
@@ -85,7 +95,9 @@ type Tab =
   | 'merch'
   | 'reviews'
   | 'feedback'
-  | 'leads';
+  | 'leads'
+  | 'trace'
+  | 'stock';
 
 // 'weights' (Weight Options), 'seo' (Product SEO), 'media' (Media library)
 // and 'banners' (raw content-block editor) tabs removed per request — their
@@ -104,7 +116,9 @@ const TABS: { id: Tab; label: string; icon: typeof ImageIcon }[] = [
   { id: 'merch', label: 'Pricing & Badges', icon: Tag },
   { id: 'reviews', label: 'Reviews', icon: Star },
   { id: 'feedback', label: 'Delivery Feedback', icon: Truck },
-  { id: 'leads', label: 'Leads', icon: Users }
+  { id: 'leads', label: 'Leads', icon: Users },
+  { id: 'trace', label: 'Batch Traceability', icon: QrCode },
+  { id: 'stock', label: 'Stock Alerts', icon: Bell }
 ];
 
 interface AdminDashboardProps {
@@ -262,6 +276,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {activeTab === 'feedback' && <FeedbackTab notify={notify} />}
 
       {activeTab === 'leads' && <LeadsTab notify={notify} />}
+
+      {activeTab === 'trace' && <TraceabilityTab notify={notify} />}
+
+      {activeTab === 'stock' && <StockAlertsTab notify={notify} products={products} />}
 
       {toast && (
         <div
@@ -1012,6 +1030,312 @@ const LeadsTab: React.FC<{ notify: Notify }> = ({ notify }) => {
           </tbody>
         </table>
       </div>
+    </div>
+  );
+};
+
+// ── Batch Traceability ───────────────────────────────────────────────────────
+// Backs the real batch lookup on the About page (TraceabilitySection.tsx),
+// which used to return the same hardcoded fake result for any input. Add a
+// batch here right after packing, and it becomes traceable on the site
+// immediately — no deploy needed.
+const emptyBatchForm = {
+  batch_id: '',
+  product_name: '',
+  farm_name: '',
+  farm_location: '',
+  cut_date: new Date().toISOString().slice(0, 10),
+  handler: '',
+  temp_log: ''
+};
+
+const TraceabilityTab: React.FC<{ notify: Notify }> = ({ notify }) => {
+  const [rows, setRows] = useState<BatchTraceRow[] | null>(null);
+  const [form, setForm] = useState(emptyBatchForm);
+  const [saving, setSaving] = useState(false);
+
+  const load = useCallback(async () => {
+    const res = await listBatchTrace();
+    if (!res.ok) {
+      notify(res.error ?? 'Could not load batches.', 'err');
+      setRows([]);
+      return;
+    }
+    setRows(res.data ?? []);
+  }, [notify]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  if (rows === null) return <Loading />;
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.batch_id.trim() || !form.farm_name.trim() || !form.handler.trim()) {
+      notify('Batch ID, farm name and handler are required.', 'err');
+      return;
+    }
+    setSaving(true);
+    const res = await createBatchTrace({
+      batch_id: form.batch_id.trim().toUpperCase(),
+      product_name: form.product_name.trim(),
+      farm_name: form.farm_name.trim(),
+      farm_location: form.farm_location.trim(),
+      cut_date: form.cut_date,
+      handler: form.handler.trim(),
+      temp_log: form.temp_log.trim() || 'Within 0-4°C range, zero breaks'
+    });
+    setSaving(false);
+    if (!res.ok) {
+      notify(res.error ?? 'Could not save — is this batch ID already used?', 'err');
+      return;
+    }
+    notify('Batch added — live on the site now.');
+    setForm(emptyBatchForm);
+    void load();
+  };
+
+  return (
+    <div className="space-y-6">
+      <form onSubmit={handleAdd} className="space-y-3 rounded-xl border border-neutral-200 p-4">
+        <p className="text-sm font-semibold text-neutral-700">Add a batch</p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <input
+            value={form.batch_id}
+            onChange={(e) => setForm({ ...form, batch_id: e.target.value })}
+            placeholder="Batch ID (e.g. IGO-9423)"
+            className="rounded border border-neutral-300 px-3 py-2 text-sm"
+          />
+          <input
+            value={form.product_name}
+            onChange={(e) => setForm({ ...form, product_name: e.target.value })}
+            placeholder="Product (e.g. Country Chicken)"
+            className="rounded border border-neutral-300 px-3 py-2 text-sm"
+          />
+          <input
+            value={form.farm_name}
+            onChange={(e) => setForm({ ...form, farm_name: e.target.value })}
+            placeholder="Farm name"
+            className="rounded border border-neutral-300 px-3 py-2 text-sm"
+          />
+          <input
+            value={form.farm_location}
+            onChange={(e) => setForm({ ...form, farm_location: e.target.value })}
+            placeholder="Farm location"
+            className="rounded border border-neutral-300 px-3 py-2 text-sm"
+          />
+          <input
+            type="date"
+            value={form.cut_date}
+            onChange={(e) => setForm({ ...form, cut_date: e.target.value })}
+            className="rounded border border-neutral-300 px-3 py-2 text-sm"
+          />
+          <input
+            value={form.handler}
+            onChange={(e) => setForm({ ...form, handler: e.target.value })}
+            placeholder="Handler (e.g. Certified Butcher #IGO-041)"
+            className="rounded border border-neutral-300 px-3 py-2 text-sm"
+          />
+          <input
+            value={form.temp_log}
+            onChange={(e) => setForm({ ...form, temp_log: e.target.value })}
+            placeholder="Temp log (optional — defaults to standard range)"
+            className="rounded border border-neutral-300 px-3 py-2 text-sm sm:col-span-2"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={saving}
+          className="rounded-full bg-[#0F7B3A] px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-60"
+        >
+          {saving ? 'Saving…' : 'Add batch'}
+        </button>
+      </form>
+
+      {rows.length === 0 ? (
+        <Empty>No batches added yet — the site's lookup will show "not found" until you add some here.</Empty>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-neutral-200">
+          <table className="w-full text-sm">
+            <thead className="bg-neutral-50 text-left text-xs uppercase text-neutral-500">
+              <tr>
+                <th className="p-3">Batch ID</th>
+                <th className="p-3">Product</th>
+                <th className="p-3">Farm</th>
+                <th className="p-3">Cut Date</th>
+                <th className="p-3">Handler</th>
+                <th className="p-3" />
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.id} className="border-t border-neutral-100 align-top">
+                  <td className="p-3 font-mono font-semibold">{row.batch_id}</td>
+                  <td className="p-3">{row.product_name ?? '—'}</td>
+                  <td className="p-3 text-xs">
+                    {row.farm_name}
+                    <div className="text-neutral-500">{row.farm_location}</div>
+                  </td>
+                  <td className="p-3 whitespace-nowrap text-xs text-neutral-500">
+                    {new Date(row.cut_date).toLocaleDateString('en-IN')}
+                  </td>
+                  <td className="p-3 text-xs">{row.handler}</td>
+                  <td className="p-3 text-right">
+                    <button
+                      onClick={async () => {
+                        const res = await deleteBatchTrace(row.id);
+                        if (!res.ok) notify(res.error ?? 'Failed.', 'err');
+                        else {
+                          notify('Batch deleted.');
+                          void load();
+                        }
+                      }}
+                      className="text-neutral-400 hover:text-red-600"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Stock status only ever changes in the separate Flutter admin app (this
+// website reads `products` read-only) — so this can't fire a notification
+// automatically the instant something is restocked. Instead: group every
+// pending "notify me" request by product, show that product's current live
+// stock status (from the `products` prop already loaded for the storefront),
+// and give staff a one-click mailto to the whole waiting list once they've
+// actually restocked it. See supabase/migrations/0020_stock_notify_requests.sql.
+const StockAlertsTab: React.FC<{ notify: Notify; products: Product[] }> = ({ notify, products }) => {
+  const [rows, setRows] = useState<StockNotifyRequestRow[] | null>(null);
+
+  const load = useCallback(async () => {
+    const res = await listPendingStockNotifyRequests();
+    if (!res.ok) {
+      notify(res.error ?? 'Could not load stock alert requests.', 'err');
+      setRows([]);
+      return;
+    }
+    setRows(res.data ?? []);
+  }, [notify]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  if (rows === null) return <Loading />;
+
+  const grouped = new Map<string, StockNotifyRequestRow[]>();
+  rows.forEach((row) => {
+    const list = grouped.get(row.product_id) ?? [];
+    list.push(row);
+    grouped.set(row.product_id, list);
+  });
+
+  const groups = Array.from(grouped.entries()).map(([productId, requests]) => {
+    const liveProduct = products.find((p) => p.id === productId);
+    return {
+      productId,
+      productName: liveProduct?.name ?? requests[0].product_name,
+      inStock: liveProduct ? liveProduct.stockStatus !== 'Out of Stock' : null,
+      requests
+    };
+  });
+
+  return (
+    <div className="space-y-6">
+      <p className="text-sm text-neutral-600">
+        Customers who asked to be notified when an out-of-stock item is restocked. Restocking itself
+        still happens in the{' '}
+        <a href={ADMIN_DASHBOARD_URL} target="_blank" rel="noreferrer" className="underline font-semibold">
+          main admin dashboard
+        </a>
+        — once you've done that, use "Email everyone" here to reach out and mark the group as handled.
+      </p>
+
+      {groups.length === 0 ? (
+        <Empty>No one's waiting on a restock right now.</Empty>
+      ) : (
+        <div className="space-y-4">
+          {groups.map((group) => (
+            <div key={group.productId} className="rounded-xl border border-neutral-200 overflow-hidden">
+              <div className="flex flex-wrap items-center justify-between gap-3 bg-neutral-50 p-4">
+                <div>
+                  <p className="font-bold text-[#0A1F12]">{group.productName}</p>
+                  <p className="text-xs text-neutral-500">
+                    {group.requests.length} waiting ·{' '}
+                    {group.inStock === null ? (
+                      <span className="text-neutral-400">Product not in current catalog</span>
+                    ) : group.inStock ? (
+                      <span className="text-emerald-600 font-semibold">Back in stock now</span>
+                    ) : (
+                      <span className="text-red-600 font-semibold">Still out of stock</span>
+                    )}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`mailto:?bcc=${group.requests.map((r) => encodeURIComponent(r.customer_email)).join(',')}&subject=${encodeURIComponent(`${group.productName} is back in stock!`)}&body=${encodeURIComponent(`Good news — ${group.productName} is back in stock on IGO Protein Cuts. Order now before it sells out again!`)}`}
+                    className="flex items-center gap-1.5 rounded-full bg-[#0F7B3A] px-4 py-2 text-xs font-bold text-white hover:bg-emerald-600"
+                  >
+                    <Mail className="h-3.5 w-3.5" /> Email everyone
+                  </a>
+                  <button
+                    onClick={async () => {
+                      const res = await markProductStockNotifyRequestsSent(group.productId);
+                      if (!res.ok) notify(res.error ?? 'Failed.', 'err');
+                      else {
+                        notify('Marked as notified.');
+                        void load();
+                      }
+                    }}
+                    className="rounded-full border border-neutral-300 px-4 py-2 text-xs font-bold text-neutral-700 hover:bg-neutral-100"
+                  >
+                    Mark all handled
+                  </button>
+                </div>
+              </div>
+              <table className="w-full text-sm">
+                <tbody>
+                  {group.requests.map((row) => (
+                    <tr key={row.id} className="border-t border-neutral-100">
+                      <td className="p-3 text-xs">{row.customer_email}</td>
+                      <td className="p-3 text-xs text-neutral-500">{row.customer_phone ?? '—'}</td>
+                      <td className="p-3 text-xs text-neutral-400 whitespace-nowrap">
+                        {new Date(row.created_at).toLocaleDateString('en-IN')}
+                      </td>
+                      <td className="p-3 text-right">
+                        <button
+                          onClick={async () => {
+                            const res = await markStockNotifyRequestSent(row.id);
+                            if (!res.ok) notify(res.error ?? 'Failed.', 'err');
+                            else {
+                              notify('Marked as notified.');
+                              void load();
+                            }
+                          }}
+                          className="text-neutral-400 hover:text-emerald-600"
+                          title="Mark handled"
+                        >
+                          <Check className="h-4 w-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

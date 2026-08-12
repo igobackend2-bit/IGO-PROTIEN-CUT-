@@ -180,7 +180,14 @@ export const CartPage: React.FC<CartPageProps> = ({
     const match = coupons.find((c) => c.code.toUpperCase() === targetCode);
 
     if (!match) {
-      setCouponMessage('Invalid Coupon Code. Try "PROTEIN100" or "IGO20"');
+      // Used to hardcode 'Try "PROTEIN100" or "IGO20"' — those codes aren't
+      // guaranteed to exist in the admin-managed coupons table, so the hint
+      // could send customers looking for a code that was never active. Now
+      // it points at whatever coupons are actually live right now, if any.
+      const liveExamples = coupons.slice(0, 2).map((c) => `"${c.code}"`).join(' or ');
+      setCouponMessage(
+        liveExamples ? `Invalid Coupon Code. Try ${liveExamples}` : 'Invalid Coupon Code.'
+      );
       setAppliedDiscount(0);
       setAppliedCouponName(null);
       return;
