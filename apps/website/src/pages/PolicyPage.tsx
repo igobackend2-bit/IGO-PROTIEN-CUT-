@@ -26,9 +26,16 @@ export const PolicyPage: React.FC<PolicyPageProps> = ({ section }) => {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [highlightId]);
 
+  // p-4 -m-4 and the border are applied to EVERY section, highlighted or
+  // not, so the box always reserves the same layout space — only its
+  // background/border color toggles. Previously those were only added when
+  // highlighted, so the negative margin made the box visually bigger
+  // without reserving that extra space, and it bled into the next
+  // section's heading (customers reported the green highlight box
+  // overlapping "4. Terms & Conditions").
   const sectionClass = (id: string) =>
-    `space-y-2 scroll-mt-24 rounded-2xl transition-colors ${
-      highlightId === id ? 'bg-emerald-50 border border-emerald-200 p-4 -m-4' : ''
+    `space-y-2 scroll-mt-24 rounded-2xl transition-colors p-4 -m-4 border ${
+      highlightId === id ? 'bg-emerald-50 border-emerald-200' : 'border-transparent'
     }`;
 
   return (
