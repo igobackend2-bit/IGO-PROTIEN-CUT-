@@ -663,7 +663,12 @@ export const HomePage: React.FC<HomePageProps> = ({
                   >
                     <FadeImage src={img.src} alt={img.alt} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                    <div className="absolute bottom-5 left-5 right-5">
+                    {/* pl-44 keeps this clear of the "Delivery Time" badge
+                        floating over the bottom-left corner below — without
+                        it, the badge sat on top of this caption text and
+                        customers couldn't read it (e.g. "IGO Cold-Chain
+                        Facility" was hidden behind the green badge). */}
+                    <div className="absolute bottom-5 left-5 right-5 pl-44">
                       <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">{img.alt}</span>
                       <p className="text-white font-black text-lg mt-0.5 leading-tight">{img.caption}</p>
                     </div>
