@@ -1,0 +1,30 @@
+# IGO Protein Cuts
+
+> Farm-fresh meat delivery across India — chicken, mutton, fish & seafood. Never frozen, delivered in 60–90 minutes from heritage Tamil farms. FSSAI certified, antibiotic-free. Currently serving Coimbatore with pan-India expansion underway.
+
+IGO Protein Cuts is a direct farm-to-fork meat delivery service. All products are fresh, never frozen, and delivered with 100% cold-chain integrity. Every order is traceable back to its source farm.
+
+## Key pages
+
+- [Home](https://igoproteincuts.com/): Overview, delivery promise, and full product catalog.
+- [Shop / Products](https://igoproteincuts.com/#products): Browse fresh chicken, mutton, fish, seafood, and eggs by category.
+- [Blog](https://igoproteincuts.com/blog): Recipes, food science, and cold-chain / traceability articles.
+- [Checkout](https://igoproteincuts.com/checkout): Secure order checkout.
+
+## What we offer
+
+- Fresh Chicken — broiler and Naattu Kozhi (country chicken), never frozen.
+- Fresh Mutton — premium goat mutton, same-day delivery.
+- Fresh Fish & Seafood — river and sea fish, prawns, crab, never frozen, cold-chain delivered.
+- Heritage Eggs — free-range country eggs.
+
+## Facts
+
+- Delivery window: 60–90 minutes (express), or scheduled next-day slots.
+- Certification: FSSAI certified, antibiotic-free.
+- Service area: Coimbatore, Tamil Nadu, with pan-India expansion in progress.
+- Contact: support@igoatech.com
+
+## Notes for AI crawlers
+
+This site is a client-rendered single-page application. Structured data (Organization, LocalBusiness, Product, FAQPage) is embedded as JSON-LD in the page `<head>` and reflects the same facts listed above.
