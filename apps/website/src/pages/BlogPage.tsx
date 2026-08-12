@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, X, BookOpen } from 'lucide-react';
-import { guides, Guide } from '../sections/GuidesSection';
+import { guides, guidesTa, Guide } from '../sections/GuidesSection';
+import { useLang } from '../lib/language';
 
 /**
  * BLOG — reuses the same real, genuinely useful cooking/food-safety guides
@@ -10,23 +11,26 @@ import { guides, Guide } from '../sections/GuidesSection';
  * still exists as a teaser for these same guides.
  */
 export const BlogPage: React.FC = () => {
+  const { lang } = useLang();
   const [openGuide, setOpenGuide] = useState<Guide | null>(null);
+  const resolvedGuides = lang === 'ta' ? guidesTa : guides;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
       {/* Hero */}
       <div className="bg-[#0A1F12] rounded-3xl p-8 sm:p-12 text-center max-w-3xl mx-auto space-y-3 text-white shadow-lg shadow-emerald-950/20">
         <BookOpen className="w-10 h-10 text-emerald-400 mx-auto" />
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight">IGO Kitchen Guides</h1>
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight">{lang === 'ta' ? 'IGO சமையலறை வழிகாட்டிகள்' : 'IGO Kitchen Guides'}</h1>
         <p className="text-xs sm:text-sm text-neutral-300 max-w-xl mx-auto">
-          Practical, real food-safety and cooking guidance — how to store what you bought, how to judge quality, and how to
-          cook it right. No filler, just what actually matters in your kitchen.
+          {lang === 'ta'
+            ? 'நடைமுறை, உண்மையான உணவு பாதுகாப்பு மற்றும் சமையல் வழிகாட்டுதல் — நீங்கள் வாங்கியதை எப்படி சேமிப்பது, தரத்தை எப்படி மதிப்பிடுவது, மற்றும் எப்படி சரியாக சமைப்பது. அலங்காரமில்லாமல், உங்கள் சமையலறையில் உண்மையில் முக்கியமானது மட்டும்.'
+            : "Practical, real food-safety and cooking guidance — how to store what you bought, how to judge quality, and how to cook it right. No filler, just what actually matters in your kitchen."}
         </p>
       </div>
 
       {/* Guide grid — same cards/modal pattern as the homepage strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {guides.map((guide) => {
+        {resolvedGuides.map((guide) => {
           const Icon = guide.icon;
           return (
             <button
@@ -50,7 +54,7 @@ export const BlogPage: React.FC = () => {
                 <h3 className="text-sm font-black text-[#0A1F12] leading-snug">{guide.title}</h3>
                 <p className="text-xs text-neutral-500 leading-relaxed">{guide.excerpt}</p>
                 <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 group-hover:gap-2 transition-all">
-                  Read Guide <ArrowRight className="w-3.5 h-3.5" />
+                  {lang === 'ta' ? 'வழிகாட்டியைப் படிக்கவும்' : 'Read Guide'} <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </div>
             </button>
@@ -73,7 +77,7 @@ export const BlogPage: React.FC = () => {
               <button
                 onClick={() => setOpenGuide(null)}
                 className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-[#0A1F12] cursor-pointer transition"
-                aria-label="Close guide"
+                aria-label={lang === 'ta' ? 'வழிகாட்டியை மூடு' : 'Close guide'}
               >
                 <X className="w-4 h-4" />
               </button>

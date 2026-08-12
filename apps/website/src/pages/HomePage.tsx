@@ -63,6 +63,69 @@ import { isPincodeServiceable } from '../lib/serviceability';
 import { FadeImage } from '../components/FadeImage';
 import { useLang } from '../lib/language';
 
+// Tamil titles for the 19 INITIAL_RECIPES entries (src/data/mockData.ts),
+// keyed by recipe id rather than adding a titleTa field to the shared Recipe
+// type — that type is also used by RecipesPage and ProductDetailPage, and
+// this keeps the translation local to where it's actually rendered here.
+const RECIPE_TITLES_TA: Record<string, string> = {
+  'rec-01': 'செட்டிநாடு மிளகு கோழி',
+  'rec-02': 'ராயல் மட்டன் ரோகன் ஜோஷ்',
+  'rec-03': 'க்ரிஸ்பி வஞ்சிரம் தவா வறுவல்',
+  'rec-04': 'கோழி கல்லீரல் மிளகு வறுவல்',
+  'rec-05': 'மட்டன் கல்லீரல் மசாலா',
+  'rec-06': 'கடலோர மாட்டிறைச்சி வறுவல்',
+  'rec-07': 'மாட்டு கல்லீரல் வறுவல்',
+  'rec-08': 'மிளகு நண்டு மசாலா',
+  'rec-09': 'பூண்டு வெண்ணெய் இறால் வறுவல்',
+  'rec-10': 'கோழி கீமா மசாலா',
+  'rec-11': 'மட்டன் கீமா மசாலா',
+  'rec-12': 'க்ரிஸ்பி வறுத்த கோழி சிறகுகள்',
+  'rec-13': 'கோழி லாலிபாப் வறுவல்',
+  'rec-14': 'மிளகு வறுத்த காடை',
+  'rec-15': 'கிரில் செய்த மட்டன் சாப்ஸ்',
+  'rec-16': 'புகைபோட்ட மட்டன் ரிப்ஸ் ரோஸ்ட்',
+  'rec-17': 'மட்டன் எலும்பு சூப் (பாயா)',
+  'rec-18': 'பான்-சியர் செய்த சால்மன்',
+  'rec-19': 'மிளகாய் பூண்டு கணவாய் வறுவல்'
+};
+const DIFFICULTY_TA: Record<string, string> = {
+  Easy: 'எளிது',
+  Medium: 'நடுத்தரம்',
+  'Chef Special': 'சமையல்காரர் சிறப்பு'
+};
+
+// Tamil copy for the 4 INITIAL_SUBSCRIPTION_PLANS entries, same
+// keyed-by-id/local-lookup approach as RECIPE_TITLES_TA above.
+const SUBSCRIPTION_PLANS_TA: Record<string, { title: string; tagline: string; itemsIncluded: string[]; savings: string; badge?: string }> = {
+  'plan-01': {
+    title: 'டெய்லி ஃபிட்னஸ் புரோட்டீன் பிளான்',
+    tagline: 'ஜிம் புரதம் ஒருபோதும் தீராது',
+    itemsIncluded: ['500g எலும்பில்லா கோழி மார்பகம்', '6 ஆர்கானிக் முட்டைகள்', 'இலவச எக்ஸ்பிரஸ் காலை டெலிவரி'],
+    savings: '₹601 / மாதம் சேமிக்கவும்',
+    badge: 'அதிகம் பிரபலமானது'
+  },
+  'plan-02': {
+    title: 'வாராந்திர குடும்ப இறைச்சி பாக்ஸ்',
+    tagline: 'புதிய வார இறுதி விருந்து தானாக',
+    itemsIncluded: ['1kg கறி கட் கோழி', '500g மட்டன் கட்', '500g வஞ்சிரம் மீன் ஸ்டீக்ஸ்', '30 முட்டைகள் ட்ரே'],
+    savings: '₹701 / மாதம் சேமிக்கவும்'
+  },
+  'plan-03': {
+    title: 'மாதாந்திர எலைட் மீட் பாஸ்',
+    tagline: 'வரம்பற்ற இலவச எக்ஸ்பிரஸ் டெலிவரிகள் + 20% தள்ளுபடி',
+    itemsIncluded: ['தனிப்பயன் இறைச்சி தேர்வாளர்', 'முன்னுரிமை 20-நிமிட எக்ஸ்பிரஸ் நேரம்', 'பிரத்யேக IGO பட்லர் சேவை', '0 டெலிவரி கட்டணம்'],
+    savings: '₹1201 / மாதம் சேமிக்கவும்',
+    badge: 'லக்ஷரி VIP'
+  },
+  'plan-04': {
+    title: 'பார்பிக்யூ & கிரில் பேக்',
+    tagline: 'வார இறுதி கிரில்லிங்கிற்கான அனைத்தும், வெள்ளி காலை டெலிவரி',
+    itemsIncluded: ['500g கோழி லாலிபாப் கட்ஸ்', '500g தந்தூரி சிக்கன் டிக்கா (மசாலா தடவப்பட்டது)', '500g மட்டன் சீக் கபாப் (மசாலா தடவப்பட்டது)', '500g செஃப் பேரி பேரி மசாலா கோழி சிறகுகள்'],
+    savings: '₹601 / மாதம் சேமிக்கவும்',
+    badge: 'புதியது'
+  }
+};
+
 // Small count-up stat used in the hero — animates from 0 to its target once
 // on mount, matching the "0 -> real number" counter pattern.
 const AnimatedStat: React.FC<{ target: number; suffix?: string; icon: React.ElementType; label: string }> = ({
@@ -1271,11 +1334,18 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <User className="w-5 h-5 text-white" />
               </div>
               <div>
-                <span className="text-xs font-bold text-emerald-100 uppercase tracking-widest">For Home Cooks &amp; Families</span>
-                <h3 className="text-2xl sm:text-3xl font-black text-white mt-1.5 leading-tight">Everyday Fresh, Delivered.</h3>
+                <span className="text-xs font-bold text-emerald-100 uppercase tracking-widest">
+                  {lang === 'ta' ? 'வீட்டு சமையல்காரர்கள் & குடும்பங்களுக்கு' : 'For Home Cooks & Families'}
+                </span>
+                <h3 className="text-2xl sm:text-3xl font-black text-white mt-1.5 leading-tight">
+                  {lang === 'ta' ? 'தினமும் புதியது, டெலிவரி செய்யப்படுகிறது.' : 'Everyday Fresh, Delivered.'}
+                </h3>
               </div>
               <ul className="space-y-2.5 text-sm text-emerald-50">
-                {['Same-day 30-90 min express delivery', 'Money-back freshness guarantee', 'Subscribe & Save early access'].map((item) => (
+                {(lang === 'ta'
+                  ? ['அதே நாள் 30-90 நிமிட எக்ஸ்பிரஸ் டெலிவரி', 'பணம் திரும்ப தரும் புத்துணர்ச்சி உத்தரவாதம்', 'சந்தா செய்து முன்கூட்டிய அணுகல் பெறுங்கள்']
+                  : ['Same-day 30-90 min express delivery', 'Money-back freshness guarantee', 'Subscribe & Save early access']
+                ).map((item) => (
                   <li key={item} className="flex items-center gap-2.5">
                     <CheckCircle2 className="w-4 h-4 text-white/90 shrink-0" /> {item}
                   </li>
@@ -1287,7 +1357,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               onClick={() => onNavigate('/category/chicken')}
               className="relative z-10 mt-6 w-fit bg-white hover:bg-emerald-50 text-[#0F7B3A] font-black px-6 py-3 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg flex items-center gap-2"
             >
-              Shop Fresh Now <ShoppingCart className="w-4 h-4" />
+              {lang === 'ta' ? 'இப்போது ஷாப் செய்யுங்கள்' : 'Shop Fresh Now'} <ShoppingCart className="w-4 h-4" />
             </button>
           </div>
 
@@ -1306,11 +1376,18 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <Building2 className="w-5 h-5 text-[#D4AF37]" />
               </div>
               <div>
-                <span className="text-xs font-bold text-[#D4AF37] uppercase tracking-widest">For Restaurants &amp; Businesses</span>
-                <h3 className="text-2xl sm:text-3xl font-black text-white mt-1.5 leading-tight">Bulk Supply, Simplified.</h3>
+                <span className="text-xs font-bold text-[#D4AF37] uppercase tracking-widest">
+                  {lang === 'ta' ? 'உணவகங்கள் & வணிகங்களுக்கு' : 'For Restaurants & Businesses'}
+                </span>
+                <h3 className="text-2xl sm:text-3xl font-black text-white mt-1.5 leading-tight">
+                  {lang === 'ta' ? 'மொத்த சப்ளை, எளிமையாக்கப்பட்டது.' : 'Bulk Supply, Simplified.'}
+                </h3>
               </div>
               <ul className="space-y-2.5 text-sm text-neutral-300">
-                {['Wholesale pricing & tiered discounts', 'Custom labeling & GST invoicing', 'Dedicated delivery slots for kitchens'].map((item) => (
+                {(lang === 'ta'
+                  ? ['மொத்த விலை & அடுக்கு தள்ளுபடிகள்', 'தனிப்பயன் லேபிளிங் & GST இன்வாய்சிங்', 'சமையலறைகளுக்கான பிரத்யேக டெலிவரி நேரங்கள்']
+                  : ['Wholesale pricing & tiered discounts', 'Custom labeling & GST invoicing', 'Dedicated delivery slots for kitchens']
+                ).map((item) => (
                   <li key={item} className="flex items-center gap-2.5">
                     <CheckCircle2 className="w-4 h-4 text-[#D4AF37] shrink-0" /> {item}
                   </li>
@@ -1322,7 +1399,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               onClick={() => onNavigate('/b2b')}
               className="relative z-10 mt-6 w-fit bg-[#D4AF37] hover:bg-[#c4a12e] text-[#0A1F12] font-black px-6 py-3 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg flex items-center gap-2"
             >
-              Request Wholesale Quote <Briefcase className="w-4 h-4" />
+              {lang === 'ta' ? 'மொத்த விலை மேற்கோள் கோருங்கள்' : 'Request Wholesale Quote'} <Briefcase className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -1335,8 +1412,12 @@ export const HomePage: React.FC<HomePageProps> = ({
       <Reveal>
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div>
-          <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Curated For You</div>
-          <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">Our Collections</h2>
+          <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
+            {lang === 'ta' ? 'உங்களுக்காக தேர்ந்தெடுக்கப்பட்டது' : 'Curated For You'}
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">
+            {lang === 'ta' ? 'எங்கள் தொகுப்புகள்' : 'Our Collections'}
+          </h2>
         </div>
 
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
@@ -1361,7 +1442,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
         {activeCollectionProducts.length === 0 ? (
           <div className="bg-white border border-neutral-200 rounded-2xl p-8 text-center text-xs text-neutral-500">
-            No items in this collection yet — check back soon.
+            {lang === 'ta' ? 'இந்த தொகுப்பில் இன்னும் பொருட்கள் இல்லை — விரைவில் மீண்டும் பாருங்கள்.' : 'No items in this collection yet — check back soon.'}
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -1375,7 +1456,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <img src={product.image} alt={product.name} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
                   {product.discountPercentage > 0 && (
                     <span className="absolute top-2 left-2 bg-[#0F7B3A] text-white text-[10px] font-black px-2 py-0.5 rounded-full">
-                      {product.discountPercentage}% OFF
+                      {product.discountPercentage}% {lang === 'ta' ? 'தள்ளுபடி' : 'OFF'}
                     </span>
                   )}
                 </div>
@@ -1547,6 +1628,10 @@ export const HomePage: React.FC<HomePageProps> = ({
             >
               {INITIAL_SUBSCRIPTION_PLANS.map((plan) => {
                 const PlanIcon = subscriptionPlanIcons[plan.id] || Package;
+                const planTa = SUBSCRIPTION_PLANS_TA[plan.id];
+                const displayPlan = lang === 'ta' && planTa
+                  ? { ...plan, title: planTa.title, tagline: planTa.tagline, itemsIncluded: planTa.itemsIncluded, savings: planTa.savings, badge: planTa.badge }
+                  : plan;
                 return (
                 <div
                   key={plan.id}
@@ -1559,7 +1644,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <div className="relative h-44 w-full overflow-hidden shrink-0">
                     <img
                       src={subscriptionPlanImages[plan.id]}
-                      alt={plan.title}
+                      alt={displayPlan.title}
                       className="w-full h-full object-cover scale-100 group-hover:scale-110 transition-transform duration-700 ease-out"
                     />
                     {/* Single soft bottom-only fade so the photo reads clearly
@@ -1571,17 +1656,17 @@ export const HomePage: React.FC<HomePageProps> = ({
                     <div className="absolute top-3.5 left-3.5 w-9 h-9 rounded-xl bg-white/15 border border-white/25 backdrop-blur-sm flex items-center justify-center">
                       <PlanIcon className="w-4.5 h-4.5 text-white" />
                     </div>
-                    {plan.badge && (
+                    {displayPlan.badge && (
                       <span className="absolute top-3.5 right-3.5 bg-[#0F7B3A] text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-md">
-                        {plan.badge}
+                        {displayPlan.badge}
                       </span>
                     )}
                   </div>
 
                   <div className="flex flex-col justify-between grow p-6 pt-5 space-y-5">
                     <div>
-                      <h3 className="text-lg font-bold text-white leading-snug">{plan.title}</h3>
-                      <p className="text-xs text-neutral-400 mt-1">{plan.tagline}</p>
+                      <h3 className="text-lg font-bold text-white leading-snug">{displayPlan.title}</h3>
+                      <p className="text-xs text-neutral-400 mt-1">{displayPlan.tagline}</p>
 
                       <div className="my-4 pt-4 border-t border-white/10">
                         <div className="flex items-baseline gap-2 flex-wrap">
@@ -1589,13 +1674,13 @@ export const HomePage: React.FC<HomePageProps> = ({
                           {plan.originalPrice > plan.pricePerMonth && (
                             <span className="text-xs text-neutral-500 line-through">₹{plan.originalPrice}</span>
                           )}
-                          <span className="text-xs text-neutral-500 font-normal">/ month</span>
+                          <span className="text-xs text-neutral-500 font-normal">{lang === 'ta' ? '/ மாதம்' : '/ month'}</span>
                         </div>
-                        <div className="text-xs text-emerald-400 font-bold mt-0.5">{plan.savings}</div>
+                        <div className="text-xs text-emerald-400 font-bold mt-0.5">{displayPlan.savings}</div>
                       </div>
 
                       <ul className="space-y-2 text-xs text-neutral-300">
-                        {plan.itemsIncluded.map((item, idx) => (
+                        {displayPlan.itemsIncluded.map((item, idx) => (
                           <li key={idx} className="flex items-center gap-2">
                             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                             <span>{item}</span>
@@ -1715,18 +1800,20 @@ export const HomePage: React.FC<HomePageProps> = ({
             >
               <img
                 src={rec.image}
-                alt={rec.title}
+                alt={lang === 'ta' ? RECIPE_TITLES_TA[rec.id] ?? rec.title : rec.title}
                 referrerPolicy="no-referrer"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
 
               <div className="absolute top-3 left-3 bg-[#0F7B3A] text-white text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">
-                {rec.difficulty}
+                {lang === 'ta' ? DIFFICULTY_TA[rec.difficulty] ?? rec.difficulty : rec.difficulty}
               </div>
 
               <div className="absolute bottom-0 left-0 right-0 p-4 space-y-1.5">
-                <h3 className="font-black text-white text-base leading-tight group-hover:text-emerald-300 transition">{rec.title}</h3>
+                <h3 className="font-black text-white text-base leading-tight group-hover:text-emerald-300 transition">
+                  {lang === 'ta' ? RECIPE_TITLES_TA[rec.id] ?? rec.title : rec.title}
+                </h3>
                 <div className="flex items-center gap-3 text-[11px] text-white/80 font-semibold">
                   <span>{lang === 'ta' ? 'தயாரிப்பு: ' : 'Prep: '}{rec.prepTime}</span>
                   <span>{lang === 'ta' ? 'புரதம்: ' : 'Protein: '}<strong className="text-emerald-400">{rec.protein}</strong></span>

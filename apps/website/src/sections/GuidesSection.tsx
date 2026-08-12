@@ -93,7 +93,7 @@ const GUIDE_DETAILS_BY_ID: Record<string, Guide> = Object.fromEntries(
 // Tamil versions of the same 3 guides, same ids/order/images so the modal
 // lookup by id still works. Selected at render time via `lang`, same pattern
 // as the rest of this translation pass.
-const guidesTa: Guide[] = [
+export const guidesTa: Guide[] = [
   {
     title: 'வீட்டில் புதிய கட்ஸை எப்படி சேமிப்பது',
     excerpt: 'புதிதாக டெலிவரி செய்யப்பட்டது என்பதால் அது எப்போதும் அப்படியே இருக்கும் என்று அர்த்தமல்ல — உங்கள் கட்ஸின் புத்துணர்ச்சியை பாதுகாக்க இதோ வழிமுறைகள்.',
@@ -155,16 +155,15 @@ export const GuidesSection: React.FC = () => {
   const [openGuide, setOpenGuide] = useState<Guide | null>(null);
 
   const block = useSiteContent('plans.guides', GUIDES_FALLBACK);
-  const resolvedFallback = lang === 'ta' ? GUIDES_FALLBACK_TA : GUIDES_FALLBACK;
   const resolvedDetailsById = lang === 'ta' ? GUIDE_DETAILS_BY_ID_TA : GUIDE_DETAILS_BY_ID;
   const resolvedGuides = lang === 'ta' ? guidesTa : guides;
-  // CMS content (block.items) is English-only — if it's actively overriding
-  // the fallback, defer to it even in Tamil (same trade-off as the rest of
-  // this pass); otherwise use the full local Tamil fallback so the section
-  // isn't a mix of languages.
-  const usingCms = Array.isArray(block.items) && block.items.length > 0 && block.eyebrow !== GUIDES_FALLBACK.eyebrow;
-  const items: CmsGuideItem[] = usingCms ? block.items : resolvedFallback.items;
-  const resolvedHeadingBlock = usingCms ? block : resolvedFallback;
+  // In Tamil, always show the local Tamil fallback rather than whatever the
+  // CMS block resolved to — the CMS only ever stores English text (no
+  // per-language field), so trusting it here silently mixed English guide
+  // titles into an otherwise-Tamil page. English keeps reading straight from
+  // the CMS block as before, so admin edits still show up.
+  const items: CmsGuideItem[] = lang === 'ta' ? GUIDES_FALLBACK_TA.items : block.items;
+  const resolvedHeadingBlock = lang === 'ta' ? GUIDES_FALLBACK_TA : block;
 
   const displayGuides: Guide[] = items.map((item, i) => {
     const detail = (item.id && resolvedDetailsById[item.id]) || resolvedGuides[i];

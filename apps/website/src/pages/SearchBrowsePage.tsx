@@ -36,7 +36,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
   initialCategory = 'all',
   initialSearchQuery = ''
 }) => {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('all');
@@ -56,6 +56,22 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
   const recentSearches = ['Chicken Breast Boneless', 'Atlantic Salmon Steak', 'Organic Eggs 6 Pack', 'Goat Mutton Curry Cut'];
   const trendingSearches = ['Boneless Chicken', 'Tiger Prawns', 'Brown Country Eggs', 'Lamb Chop'];
 
+  const CATEGORY_NAMES_TA: Record<string, string> = {
+    all: 'அனைத்து புதிய புரதம்',
+    chicken: 'புதிய கோழி',
+    mutton: 'ஆடு மட்டன்',
+    beef: 'பிரீமியம் மாட்டிறைச்சி',
+    fish: 'மீன் & கடல் உணவு',
+    'dry-fish': 'வெயிலில் உலர்த்திய மீன்',
+    eggs: 'பண்ணை முட்டைகள்',
+    'healthy-addons': 'ஆரோக்கிய சேர்க்கைகள்',
+    'ready-to-cook': 'சமைக்க தயார்',
+    'frozen-food': 'உறைந்த உணவு',
+    biryani: 'பிரியாணி கிட்ஸ்',
+    'cold-cuts': 'கோல்ட் கட்ஸ்',
+    'combo-packs': 'காம்போ பாக்குகள்'
+  };
+
   const categories = [
     { id: 'all', name: 'All Fresh Protein' },
     { id: 'chicken', name: 'Fresh Chicken' },
@@ -71,6 +87,8 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
     { id: 'cold-cuts', name: 'Cold Cuts' },
     { id: 'combo-packs', name: 'Combo Packs' }
   ];
+  const categoryDisplayName = (cat: { id: string; name: string }) =>
+    lang === 'ta' ? CATEGORY_NAMES_TA[cat.id] ?? cat.name : cat.name;
 
   const handleSimulateReload = () => {
     setIsLoading(true);
@@ -198,7 +216,10 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
     (selectedPackSize !== 'all' ? 1 : 0) +
     (searchQuery.trim() ? 1 : 0);
 
-  const currentCategoryName = categories.find((c) => c.id === selectedCategory)?.name || 'Category';
+  const currentCategoryObj = categories.find((c) => c.id === selectedCategory);
+  const currentCategoryName = currentCategoryObj
+    ? categoryDisplayName(currentCategoryObj)
+    : lang === 'ta' ? 'வகை' : 'Category';
 
   // Shared filter controls, rendered both in the desktop sidebar and the
   // mobile filter drawer — trimmed down to just Category + Price Range, the
@@ -220,14 +241,14 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
                 : 'text-neutral-600 hover:bg-emerald-50 hover:text-[#0A1F12]'
             }`}
           >
-            {cat.name}
+            {categoryDisplayName(cat)}
           </button>
         ))}
       </div>
 
       {/* Price Range */}
       <div className="space-y-2.5 rounded-2xl border border-neutral-200 p-4 mt-5">
-        <label className="text-xs font-bold text-[#0A1F12] uppercase tracking-wider block">Price Range</label>
+        <label className="text-xs font-bold text-[#0A1F12] uppercase tracking-wider block">{lang === 'ta' ? 'விலை வரம்பு' : 'Price Range'}</label>
         <input
           type="range"
           min={100}
@@ -238,11 +259,11 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
           className="w-full accent-emerald-500 cursor-pointer"
         />
         <div className="flex items-center justify-between text-[11px]">
-          <span className="text-neutral-400">To</span>
-          <span className="font-black text-emerald-700">Up to ₹{maxPrice}</span>
+          <span className="text-neutral-400">{lang === 'ta' ? 'வரை' : 'To'}</span>
+          <span className="font-black text-emerald-700">{lang === 'ta' ? `₹${maxPrice} வரை` : `Up to ₹${maxPrice}`}</span>
         </div>
         <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider pt-1 border-t border-neutral-100">
-          {filteredProducts.length} products match
+          {lang === 'ta' ? `${filteredProducts.length} தயாரிப்புகள் பொருந்துகின்றன` : `${filteredProducts.length} products match`}
         </p>
       </div>
     </>
@@ -267,7 +288,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
         <aside className="hidden lg:block lg:col-span-3 space-y-5 sticky top-24">
           <div className="bg-white border border-neutral-200 rounded-2xl p-5">
             <h3 className="font-black text-[#0A1F12] text-sm flex items-center gap-1.5 mb-3">
-              <Filter className="w-4 h-4 text-emerald-600" /> Categories
+              <Filter className="w-4 h-4 text-emerald-600" /> {lang === 'ta' ? 'வகைகள்' : 'Categories'}
             </h3>
             {filterControlsContent}
           </div>
@@ -278,7 +299,15 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
           {/* Top Sort Selector */}
           <div className="bg-white border border-neutral-200 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
             <div className="text-xs text-neutral-500 font-semibold">
-              Found <strong className="text-[#0A1F12] font-black">{filteredProducts.length}</strong> items matching your criteria
+              {lang === 'ta' ? (
+                <>
+                  <strong className="text-[#0A1F12] font-black">{filteredProducts.length}</strong> பொருட்கள் உங்கள் தேடலுடன் பொருந்துகின்றன
+                </>
+              ) : (
+                <>
+                  Found <strong className="text-[#0A1F12] font-black">{filteredProducts.length}</strong> items matching your criteria
+                </>
+              )}
             </div>
 
             <div className="flex items-center gap-3">
@@ -287,7 +316,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
                 className="lg:hidden flex items-center gap-1.5 bg-white border border-neutral-200 hover:border-emerald-400 rounded-xl px-3 py-1.5 text-xs font-bold text-[#0A1F12] transition cursor-pointer shadow-sm"
               >
                 <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-600" />
-                Filters
+                {lang === 'ta' ? 'வடிகட்டிகள்' : 'Filters'}
                 {activeFilterCount > 0 && (
                   <span className="bg-[#0F7B3A] text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">
                     {activeFilterCount}
@@ -297,17 +326,17 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
 
               <div className="flex items-center gap-2 text-xs">
                 <ArrowUpDown className="w-4 h-4 text-emerald-600" />
-                <span className="text-neutral-500 font-bold hidden sm:inline">Sort By:</span>
+                <span className="text-neutral-500 font-bold hidden sm:inline">{lang === 'ta' ? 'வரிசைப்படுத்து:' : 'Sort By:'}</span>
                 <select
                   value={sortBy}
                   onChange={(e: any) => setSortBy(e.target.value)}
                   className="bg-white border border-neutral-200 text-[#0A1F12] rounded-xl px-3 py-1.5 focus:outline-none font-bold text-xs cursor-pointer"
                 >
-                  <option value="featured">Featured Fresh Cuts</option>
-                  <option value="newest">Newest Arrivals</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="rating">Highest Rated</option>
+                  <option value="featured">{lang === 'ta' ? 'சிறப்பு புதிய கட்ஸ்' : 'Featured Fresh Cuts'}</option>
+                  <option value="newest">{lang === 'ta' ? 'புதிய வரவுகள்' : 'Newest Arrivals'}</option>
+                  <option value="price-low">{lang === 'ta' ? 'விலை: குறைவு முதல் அதிகம்' : 'Price: Low to High'}</option>
+                  <option value="price-high">{lang === 'ta' ? 'விலை: அதிகம் முதல் குறைவு' : 'Price: High to Low'}</option>
+                  <option value="rating">{lang === 'ta' ? 'அதிக மதிப்பீடு' : 'Highest Rated'}</option>
                 </select>
               </div>
             </div>
@@ -332,30 +361,34 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
               <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto text-white">
                 <X className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-white">Failed to sync fresh catalog</h3>
+              <h3 className="text-xl font-bold text-white">{lang === 'ta' ? 'புதிய பட்டியலை ஒத்திசைக்க முடியவில்லை' : 'Failed to sync fresh catalog'}</h3>
               <p className="text-xs text-neutral-300 max-w-md mx-auto">
-                Unable to retrieve the latest temperature-monitored darkstore inventory. Please retry.
+                {lang === 'ta'
+                  ? 'சமீபத்திய வெப்பநிலை-கண்காணிக்கப்பட்ட டார்க்ஸ்டோர் இருப்பை மீட்டெடுக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.'
+                  : 'Unable to retrieve the latest temperature-monitored darkstore inventory. Please retry.'}
               </p>
               <button
                 onClick={handleSimulateReload}
                 className="bg-white hover:bg-neutral-200 text-black font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer"
               >
-                Retry Loading
+                {lang === 'ta' ? 'மீண்டும் ஏற்றவும்' : 'Retry Loading'}
               </button>
             </div>
           ) : filteredProducts.length === 0 ? (
             /* STATE 3: EMPTY STATE */
             <div className="bg-white border border-neutral-200 rounded-3xl p-12 text-center space-y-4 shadow-sm">
               <ShoppingBag className="w-16 h-16 mx-auto text-emerald-200" />
-              <h3 className="text-xl font-black text-[#0A1F12]">No Fresh Cuts Match Your Search</h3>
+              <h3 className="text-xl font-black text-[#0A1F12]">{lang === 'ta' ? 'உங்கள் தேடலுக்கு பொருந்தும் புதிய கட்ஸ் இல்லை' : 'No Fresh Cuts Match Your Search'}</h3>
               <p className="text-xs text-neutral-500 max-w-md mx-auto">
-                We couldn't find any protein products matching your selected filters. Try broadening your criteria or reset filters.
+                {lang === 'ta'
+                  ? 'உங்கள் தேர்ந்தெடுக்கப்பட்ட வடிகட்டிகளுடன் பொருந்தும் புரத தயாரிப்புகள் எதுவும் கிடைக்கவில்லை. உங்கள் அளவுகோல்களை விரிவுபடுத்த முயற்சிக்கவும் அல்லது வடிகட்டிகளை மீட்டமைக்கவும்.'
+                  : "We couldn't find any protein products matching your selected filters. Try broadening your criteria or reset filters."}
               </p>
               <button
                 onClick={clearAllFilters}
                 className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer"
               >
-                Reset All Filters
+                {lang === 'ta' ? 'அனைத்து வடிகட்டிகளையும் மீட்டமைக்கவும்' : 'Reset All Filters'}
               </button>
             </div>
           ) : (
@@ -387,7 +420,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
           <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto bg-white rounded-t-3xl p-6 space-y-6 shadow-2xl">
             <div className="flex items-center justify-between pb-4 border-b border-neutral-200 sticky -top-6 bg-white pt-1 -mt-1">
               <h3 className="font-black text-[#0A1F12] text-base flex items-center gap-2">
-                <Filter className="w-4 h-4 text-emerald-600" /> Filter Cuts
+                <Filter className="w-4 h-4 text-emerald-600" /> {lang === 'ta' ? 'கட்ஸை வடிகட்டவும்' : 'Filter Cuts'}
               </h3>
               <button
                 onClick={() => setShowMobileFilters(false)}
@@ -403,7 +436,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
               onClick={() => setShowMobileFilters(false)}
               className="w-full bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer"
             >
-              Show {filteredProducts.length} Results
+              {lang === 'ta' ? `${filteredProducts.length} முடிவுகளைக் காட்டு` : `Show ${filteredProducts.length} Results`}
             </button>
           </div>
         </div>
