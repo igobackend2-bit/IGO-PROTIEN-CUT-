@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { Product, ProductCategory, ProductWeightOption } from '../types';
 import { BrowseProductCard } from '../components/BrowseProductCard';
-import { useLang } from '../lib/language';
+import { useLang, pick } from '../lib/language';
 import { scoreProductMatch } from '../lib/search';
 
 interface SearchBrowsePageProps {
@@ -72,6 +72,54 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
     'combo-packs': 'காம்போ பாக்குகள்'
   };
 
+  const CATEGORY_NAMES_HI: Record<string, string> = {
+    all: 'सभी फ्रेश प्रोटीन',
+    chicken: 'फ्रेश चिकन',
+    mutton: 'बकरी मटन',
+    beef: 'प्रीमियम बीफ',
+    fish: 'मछली और सीफूड',
+    'dry-fish': 'धूप में सुखाई मछली',
+    eggs: 'फार्म अंडे',
+    'healthy-addons': 'हेल्दी ऐड-ऑन',
+    'ready-to-cook': 'रेडी-टू-कुक',
+    'frozen-food': 'फ्रोज़न फूड',
+    biryani: 'बिरयानी किट्स',
+    'cold-cuts': 'कोल्ड कट्स',
+    'combo-packs': 'कॉम्बो पैक्स'
+  };
+
+  const CATEGORY_NAMES_ML: Record<string, string> = {
+    all: 'എല്ലാ ഫ്രഷ് പ്രോട്ടീനും',
+    chicken: 'ഫ്രഷ് ചിക്കൻ',
+    mutton: 'ആട്ടിറച്ചി (മട്ടൺ)',
+    beef: 'പ്രീമിയം ബീഫ്',
+    fish: 'മീനും സീഫുഡും',
+    'dry-fish': 'വെയിലത്ത് ഉണക്കിയ മീൻ',
+    eggs: 'ഫാം മുട്ട',
+    'healthy-addons': 'ആരോഗ്യകരമായ ആഡ്-ഓണുകൾ',
+    'ready-to-cook': 'റെഡി-ടു-കുക്ക്',
+    'frozen-food': 'ഫ്രോസൺ ഫുഡ്',
+    biryani: 'ബിരിയാണി കിറ്റുകൾ',
+    'cold-cuts': 'കോൾഡ് കട്സ്',
+    'combo-packs': 'കോംബോ പാക്കുകൾ'
+  };
+
+  const CATEGORY_NAMES_TE: Record<string, string> = {
+    all: 'అన్ని ఫ్రెష్ ప్రోటీన్',
+    chicken: 'ఫ్రెష్ చికెన్',
+    mutton: 'మేక మటన్',
+    beef: 'ప్రీమియం బీఫ్',
+    fish: 'చేపలు & సీఫుడ్',
+    'dry-fish': 'ఎండు చేపలు',
+    eggs: 'ఫార్మ్ గుడ్లు',
+    'healthy-addons': 'ఆరోగ్యకరమైన యాడ్-ఆన్‌లు',
+    'ready-to-cook': 'రెడీ-టు-కుక్',
+    'frozen-food': 'ఫ్రోజెన్ ఫుడ్',
+    biryani: 'బిర్యానీ కిట్స్',
+    'cold-cuts': 'కోల్డ్ కట్స్',
+    'combo-packs': 'కాంబో ప్యాక్స్'
+  };
+
   const categories = [
     { id: 'all', name: 'All Fresh Protein' },
     { id: 'chicken', name: 'Fresh Chicken' },
@@ -88,7 +136,15 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
     { id: 'combo-packs', name: 'Combo Packs' }
   ];
   const categoryDisplayName = (cat: { id: string; name: string }) =>
-    lang === 'ta' ? CATEGORY_NAMES_TA[cat.id] ?? cat.name : cat.name;
+    lang === 'ta'
+      ? CATEGORY_NAMES_TA[cat.id] ?? cat.name
+      : lang === 'hi'
+      ? CATEGORY_NAMES_HI[cat.id] ?? cat.name
+      : lang === 'ml'
+      ? CATEGORY_NAMES_ML[cat.id] ?? cat.name
+      : lang === 'te'
+      ? CATEGORY_NAMES_TE[cat.id] ?? cat.name
+      : cat.name;
 
   const handleSimulateReload = () => {
     setIsLoading(true);
@@ -219,7 +275,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
   const currentCategoryObj = categories.find((c) => c.id === selectedCategory);
   const currentCategoryName = currentCategoryObj
     ? categoryDisplayName(currentCategoryObj)
-    : lang === 'ta' ? 'வகை' : 'Category';
+    : pick(lang, { en: 'Category', ta: 'வகை', hi: 'श्रेणी', ml: 'വിഭാഗം', te: 'కేటగిరీ' });
 
   // Shared filter controls, rendered both in the desktop sidebar and the
   // mobile filter drawer — trimmed down to just Category + Price Range, the
@@ -248,7 +304,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
 
       {/* Price Range */}
       <div className="space-y-2.5 rounded-2xl border border-neutral-200 p-4 mt-5">
-        <label className="text-xs font-bold text-[#0A1F12] uppercase tracking-wider block">{lang === 'ta' ? 'விலை வரம்பு' : 'Price Range'}</label>
+        <label className="text-xs font-bold text-[#0A1F12] uppercase tracking-wider block">{pick(lang, { en: 'Price Range', ta: 'விலை வரம்பு', hi: 'मूल्य सीमा', ml: 'വില പരിധി', te: 'ధర పరిధి' })}</label>
         <input
           type="range"
           min={100}
@@ -259,11 +315,25 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
           className="w-full accent-emerald-500 cursor-pointer"
         />
         <div className="flex items-center justify-between text-[11px]">
-          <span className="text-neutral-400">{lang === 'ta' ? 'வரை' : 'To'}</span>
-          <span className="font-black text-emerald-700">{lang === 'ta' ? `₹${maxPrice} வரை` : `Up to ₹${maxPrice}`}</span>
+          <span className="text-neutral-400">{pick(lang, { en: 'To', ta: 'வரை', hi: 'तक', ml: 'വരെ', te: 'వరకు' })}</span>
+          <span className="font-black text-emerald-700">
+            {pick(lang, {
+              en: `Up to ₹${maxPrice}`,
+              ta: `₹${maxPrice} வரை`,
+              hi: `₹${maxPrice} तक`,
+              ml: `₹${maxPrice} വരെ`,
+              te: `₹${maxPrice} వరకు`
+            })}
+          </span>
         </div>
         <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider pt-1 border-t border-neutral-100">
-          {lang === 'ta' ? `${filteredProducts.length} தயாரிப்புகள் பொருந்துகின்றன` : `${filteredProducts.length} products match`}
+          {pick(lang, {
+            en: `${filteredProducts.length} products match`,
+            ta: `${filteredProducts.length} தயாரிப்புகள் பொருந்துகின்றன`,
+            hi: `${filteredProducts.length} उत्पाद मेल खाते हैं`,
+            ml: `${filteredProducts.length} ഉൽപ്പന്നങ്ങൾ പൊരുത്തപ്പെടുന്നു`,
+            te: `${filteredProducts.length} ఉత్పత్తులు సరిపోలాయి`
+          })}
         </p>
       </div>
     </>
@@ -288,7 +358,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
         <aside className="hidden lg:block lg:col-span-3 space-y-5 sticky top-24">
           <div className="bg-white border border-neutral-200 rounded-2xl p-5">
             <h3 className="font-black text-[#0A1F12] text-sm flex items-center gap-1.5 mb-3">
-              <Filter className="w-4 h-4 text-emerald-600" /> {lang === 'ta' ? 'வகைகள்' : 'Categories'}
+              <Filter className="w-4 h-4 text-emerald-600" /> {pick(lang, { en: 'Categories', ta: 'வகைகள்', hi: 'श्रेणियां', ml: 'വിഭാഗങ്ങൾ', te: 'కేటగిరీలు' })}
             </h3>
             {filterControlsContent}
           </div>
@@ -303,6 +373,18 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
                 <>
                   <strong className="text-[#0A1F12] font-black">{filteredProducts.length}</strong> பொருட்கள் உங்கள் தேடலுடன் பொருந்துகின்றன
                 </>
+              ) : lang === 'hi' ? (
+                <>
+                  आपकी शर्तों से मेल खाने वाले <strong className="text-[#0A1F12] font-black">{filteredProducts.length}</strong> आइटम मिले
+                </>
+              ) : lang === 'ml' ? (
+                <>
+                  നിങ്ങളുടെ മാനദണ്ഡങ്ങളുമായി പൊരുത്തപ്പെടുന്ന <strong className="text-[#0A1F12] font-black">{filteredProducts.length}</strong> ഇനങ്ങൾ കണ്ടെത്തി
+                </>
+              ) : lang === 'te' ? (
+                <>
+                  మీ ప్రమాణాలకు సరిపోలే <strong className="text-[#0A1F12] font-black">{filteredProducts.length}</strong> వస్తువులు కనుగొనబడ్డాయి
+                </>
               ) : (
                 <>
                   Found <strong className="text-[#0A1F12] font-black">{filteredProducts.length}</strong> items matching your criteria
@@ -316,7 +398,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
                 className="lg:hidden flex items-center gap-1.5 bg-white border border-neutral-200 hover:border-emerald-400 rounded-xl px-3 py-1.5 text-xs font-bold text-[#0A1F12] transition cursor-pointer shadow-sm"
               >
                 <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-600" />
-                {lang === 'ta' ? 'வடிகட்டிகள்' : 'Filters'}
+                {pick(lang, { en: 'Filters', ta: 'வடிகட்டிகள்', hi: 'फ़िल्टर', ml: 'ഫിൽട്ടറുകൾ', te: 'ఫిల్టర్‌లు' })}
                 {activeFilterCount > 0 && (
                   <span className="bg-[#0F7B3A] text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">
                     {activeFilterCount}
@@ -326,17 +408,17 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
 
               <div className="flex items-center gap-2 text-xs">
                 <ArrowUpDown className="w-4 h-4 text-emerald-600" />
-                <span className="text-neutral-500 font-bold hidden sm:inline">{lang === 'ta' ? 'வரிசைப்படுத்து:' : 'Sort By:'}</span>
+                <span className="text-neutral-500 font-bold hidden sm:inline">{pick(lang, { en: 'Sort By:', ta: 'வரிசைப்படுத்து:', hi: 'क्रमबद्ध करें:', ml: 'ക്രമീകരിക്കുക:', te: 'క్రమబద్ధీకరించు:' })}</span>
                 <select
                   value={sortBy}
                   onChange={(e: any) => setSortBy(e.target.value)}
                   className="bg-white border border-neutral-200 text-[#0A1F12] rounded-xl px-3 py-1.5 focus:outline-none font-bold text-xs cursor-pointer"
                 >
-                  <option value="featured">{lang === 'ta' ? 'சிறப்பு புதிய கட்ஸ்' : 'Featured Fresh Cuts'}</option>
-                  <option value="newest">{lang === 'ta' ? 'புதிய வரவுகள்' : 'Newest Arrivals'}</option>
-                  <option value="price-low">{lang === 'ta' ? 'விலை: குறைவு முதல் அதிகம்' : 'Price: Low to High'}</option>
-                  <option value="price-high">{lang === 'ta' ? 'விலை: அதிகம் முதல் குறைவு' : 'Price: High to Low'}</option>
-                  <option value="rating">{lang === 'ta' ? 'அதிக மதிப்பீடு' : 'Highest Rated'}</option>
+                  <option value="featured">{pick(lang, { en: 'Featured Fresh Cuts', ta: 'சிறப்பு புதிய கட்ஸ்', hi: 'फीचर्ड फ्रेश कट्स', ml: 'ഫീച്ചേർഡ് ഫ്രഷ് കട്സ്', te: 'ఫీచర్డ్ ఫ్రెష్ కట్స్' })}</option>
+                  <option value="newest">{pick(lang, { en: 'Newest Arrivals', ta: 'புதிய வரவுகள்', hi: 'नवीनतम आगमन', ml: 'ഏറ്റവും പുതിയവ', te: 'కొత్తగా వచ్చినవి' })}</option>
+                  <option value="price-low">{pick(lang, { en: 'Price: Low to High', ta: 'விலை: குறைவு முதல் அதிகம்', hi: 'कीमत: कम से ज़्यादा', ml: 'വില: കുറഞ്ഞത് മുതൽ കൂടിയത് വരെ', te: 'ధర: తక్కువ నుండి ఎక్కువ' })}</option>
+                  <option value="price-high">{pick(lang, { en: 'Price: High to Low', ta: 'விலை: அதிகம் முதல் குறைவு', hi: 'कीमत: ज़्यादा से कम', ml: 'വില: കൂടിയത് മുതൽ കുറഞ്ഞത് വരെ', te: 'ధర: ఎక్కువ నుండి తక్కువ' })}</option>
+                  <option value="rating">{pick(lang, { en: 'Highest Rated', ta: 'அதிக மதிப்பீடு', hi: 'सबसे ज़्यादा रेटेड', ml: 'ഏറ്റവും ഉയർന്ന റേറ്റിംഗ്', te: 'అత్యధిక రేటింగ్' })}</option>
                 </select>
               </div>
             </div>
@@ -361,34 +443,42 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
               <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto text-white">
                 <X className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-white">{lang === 'ta' ? 'புதிய பட்டியலை ஒத்திசைக்க முடியவில்லை' : 'Failed to sync fresh catalog'}</h3>
+              <h3 className="text-xl font-bold text-white">{pick(lang, { en: 'Failed to sync fresh catalog', ta: 'புதிய பட்டியலை ஒத்திசைக்க முடியவில்லை', hi: 'फ्रेश कैटलॉग सिंक नहीं हो सका', ml: 'ഫ്രഷ് കാറ്റലോഗ് സിങ്ക് ചെയ്യാൻ കഴിഞ്ഞില്ല', te: 'ఫ్రెష్ కేటలాగ్‌ను సింక్ చేయలేకపోయాము' })}</h3>
               <p className="text-xs text-neutral-300 max-w-md mx-auto">
-                {lang === 'ta'
-                  ? 'சமீபத்திய வெப்பநிலை-கண்காணிக்கப்பட்ட டார்க்ஸ்டோர் இருப்பை மீட்டெடுக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.'
-                  : 'Unable to retrieve the latest temperature-monitored darkstore inventory. Please retry.'}
+                {pick(lang, {
+                  en: 'Unable to retrieve the latest temperature-monitored darkstore inventory. Please retry.',
+                  ta: 'சமீபத்திய வெப்பநிலை-கண்காணிக்கப்பட்ட டார்க்ஸ்டோர் இருப்பை மீட்டெடுக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
+                  hi: 'नवीनतम तापमान-निगरानी वाले डार्कस्टोर इन्वेंट्री को प्राप्त करने में असमर्थ। कृपया फिर से कोशिश करें।',
+                  ml: 'ഏറ്റവും പുതിയ താപനില-നിരീക്ഷിത ഡാർക്ക്സ്റ്റോർ ഇൻവെന്ററി വീണ്ടെടുക്കാൻ കഴിഞ്ഞില്ല. വീണ്ടും ശ്രമിക്കുക.',
+                  te: 'తాజా ఉష్ణోగ్రత-పర్యవేక్షిత డార్క్‌స్టోర్ ఇన్వెంటరీని పొందలేకపోయాము. దయచేసి మళ్లీ ప్రయత్నించండి.'
+                })}
               </p>
               <button
                 onClick={handleSimulateReload}
                 className="bg-white hover:bg-neutral-200 text-black font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer"
               >
-                {lang === 'ta' ? 'மீண்டும் ஏற்றவும்' : 'Retry Loading'}
+                {pick(lang, { en: 'Retry Loading', ta: 'மீண்டும் ஏற்றவும்', hi: 'फिर से लोड करें', ml: 'വീണ്ടും ലോഡ് ചെയ്യൂ', te: 'మళ్లీ లోడ్ చేయండి' })}
               </button>
             </div>
           ) : filteredProducts.length === 0 ? (
             /* STATE 3: EMPTY STATE */
             <div className="bg-white border border-neutral-200 rounded-3xl p-12 text-center space-y-4 shadow-sm">
               <ShoppingBag className="w-16 h-16 mx-auto text-emerald-200" />
-              <h3 className="text-xl font-black text-[#0A1F12]">{lang === 'ta' ? 'உங்கள் தேடலுக்கு பொருந்தும் புதிய கட்ஸ் இல்லை' : 'No Fresh Cuts Match Your Search'}</h3>
+              <h3 className="text-xl font-black text-[#0A1F12]">{pick(lang, { en: 'No Fresh Cuts Match Your Search', ta: 'உங்கள் தேடலுக்கு பொருந்தும் புதிய கட்ஸ் இல்லை', hi: 'आपकी खोज से मेल खाने वाले कोई फ्रेश कट्स नहीं मिले', ml: 'നിങ്ങളുടെ തിരയലുമായി പൊരുത്തപ്പെടുന്ന ഫ്രഷ് കട്സ് ഇല്ല', te: 'మీ శోధనకు సరిపోలే ఫ్రెష్ కట్స్ లేవు' })}</h3>
               <p className="text-xs text-neutral-500 max-w-md mx-auto">
-                {lang === 'ta'
-                  ? 'உங்கள் தேர்ந்தெடுக்கப்பட்ட வடிகட்டிகளுடன் பொருந்தும் புரத தயாரிப்புகள் எதுவும் கிடைக்கவில்லை. உங்கள் அளவுகோல்களை விரிவுபடுத்த முயற்சிக்கவும் அல்லது வடிகட்டிகளை மீட்டமைக்கவும்.'
-                  : "We couldn't find any protein products matching your selected filters. Try broadening your criteria or reset filters."}
+                {pick(lang, {
+                  en: "We couldn't find any protein products matching your selected filters. Try broadening your criteria or reset filters.",
+                  ta: 'உங்கள் தேர்ந்தெடுக்கப்பட்ட வடிகட்டிகளுடன் பொருந்தும் புரத தயாரிப்புகள் எதுவும் கிடைக்கவில்லை. உங்கள் அளவுகோல்களை விரிவுபடுத்த முயற்சிக்கவும் அல்லது வடிகட்டிகளை மீட்டமைக்கவும்.',
+                  hi: 'हमें आपके चुने हुए फ़िल्टर से मेल खाने वाले कोई प्रोटीन उत्पाद नहीं मिले। अपने मानदंड को व्यापक बनाने की कोशिश करें या फ़िल्टर रीसेट करें।',
+                  ml: 'നിങ്ങൾ തിരഞ്ഞെടുത്ത ഫിൽട്ടറുകളുമായി പൊരുത്തപ്പെടുന്ന പ്രോട്ടീൻ ഉൽപ്പന്നങ്ങളൊന്നും ഞങ്ങൾക്ക് കണ്ടെത്താനായില്ല. നിങ്ങളുടെ മാനദണ്ഡങ്ങൾ വിശാലമാക്കുകയോ ഫിൽട്ടറുകൾ റീസെറ്റ് ചെയ്യുകയോ ചെയ്യുക.',
+                  te: 'మీరు ఎంచుకున్న ఫిల్టర్‌లకు సరిపోలే ప్రోటీన్ ఉత్పత్తులు మాకు కనిపించలేదు. మీ ప్రమాణాలను విస్తృతం చేయడానికి ప్రయత్నించండి లేదా ఫిల్టర్‌లను రీసెట్ చేయండి.'
+                })}
               </p>
               <button
                 onClick={clearAllFilters}
                 className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer"
               >
-                {lang === 'ta' ? 'அனைத்து வடிகட்டிகளையும் மீட்டமைக்கவும்' : 'Reset All Filters'}
+                {pick(lang, { en: 'Reset All Filters', ta: 'அனைத்து வடிகட்டிகளையும் மீட்டமைக்கவும்', hi: 'सभी फ़िल्टर रीसेट करें', ml: 'എല്ലാ ഫിൽട്ടറുകളും റീസെറ്റ് ചെയ്യൂ', te: 'అన్ని ఫిల్టర్‌లను రీసెట్ చేయండి' })}
               </button>
             </div>
           ) : (
@@ -420,7 +510,7 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
           <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto bg-white rounded-t-3xl p-6 space-y-6 shadow-2xl">
             <div className="flex items-center justify-between pb-4 border-b border-neutral-200 sticky -top-6 bg-white pt-1 -mt-1">
               <h3 className="font-black text-[#0A1F12] text-base flex items-center gap-2">
-                <Filter className="w-4 h-4 text-emerald-600" /> {lang === 'ta' ? 'கட்ஸை வடிகட்டவும்' : 'Filter Cuts'}
+                <Filter className="w-4 h-4 text-emerald-600" /> {pick(lang, { en: 'Filter Cuts', ta: 'கட்ஸை வடிகட்டவும்', hi: 'कट्स फ़िल्टर करें', ml: 'കട്സ് ഫിൽട്ടർ ചെയ്യൂ', te: 'కట్స్‌ను ఫిల్టర్ చేయండి' })}
               </h3>
               <button
                 onClick={() => setShowMobileFilters(false)}
@@ -436,7 +526,13 @@ export const SearchBrowsePage: React.FC<SearchBrowsePageProps> = ({
               onClick={() => setShowMobileFilters(false)}
               className="w-full bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer"
             >
-              {lang === 'ta' ? `${filteredProducts.length} முடிவுகளைக் காட்டு` : `Show ${filteredProducts.length} Results`}
+              {pick(lang, {
+                en: `Show ${filteredProducts.length} Results`,
+                ta: `${filteredProducts.length} முடிவுகளைக் காட்டு`,
+                hi: `${filteredProducts.length} परिणाम दिखाएं`,
+                ml: `${filteredProducts.length} ഫലങ്ങൾ കാണിക്കൂ`,
+                te: `${filteredProducts.length} ఫలితాలను చూపించు`
+              })}
             </button>
           </div>
         </div>

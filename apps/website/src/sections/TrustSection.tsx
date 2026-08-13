@@ -3,7 +3,7 @@ import { Check, Minus } from 'lucide-react';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
 import { resolveIcon } from '../lib/iconMap';
 import { COMPARISON_FALLBACK } from './WhyIGOSection';
-import { useLang } from '../lib/language';
+import { useLang, pick } from '../lib/language';
 
 const COMPARISON_FALLBACK_TA = {
   eyebrow: 'போட்டி முன்னிலை',
@@ -17,6 +17,51 @@ const COMPARISON_FALLBACK_TA = {
     { feature: 'செயலாக்கம்', igo: 'ISO 22000 கிருமி நீக்க வசதி', local: 'திறந்தவெளி சந்தை', competitor: 'சாதாரண கிடங்கு' },
     { feature: 'டெலிவரி', igo: '30-90 நிமிட குளிர் சங்கிலி', local: 'டெலிவரி இல்லை', competitor: '3-4 மணி நேரம் / உலர் பை' },
     { feature: 'ஆன்டிபயாடிக்குகள்', igo: '100% ஆன்டிபயாடிக் இல்லாதது', local: 'தெரியவில்லை', competitor: 'தேர்ந்தெடுக்கப்பட்டது' }
+  ]
+};
+
+const COMPARISON_FALLBACK_HI = {
+  eyebrow: 'प्रतिस्पर्धी बढ़त',
+  heading: 'IGO प्रोटीन कट्स को क्यों चुनें?',
+  subheading:
+    'हमने मीट इंडस्ट्री में गुणवत्ता के लिए एक नया मानदंड स्थापित किया है। हमें स्थानीय बाज़ार से तुलना करें और पारदर्शिता से आने वाला फ़र्क़ देखें।',
+  columns: { feature: 'विशेषता', igo: 'IGO मानक', local: 'स्थानीय बाज़ार', competitor: 'प्रतिस्पर्धी' },
+  rows: [
+    { feature: 'ट्रेसेबिलिटी', igo: 'पूरी फार्म-टू-टेबल (QR स्कैन)', local: 'कुछ नहीं / मुंह-ज़बानी', competitor: 'सीमित बैच जानकारी' },
+    { feature: 'ताज़गी', igo: 'कभी फ्रोज़न नहीं (हमेशा 0-4°C)', local: 'कमरे का तापमान / अनिश्चित', competitor: 'भंडारण के लिए फ्रोज़न' },
+    { feature: 'प्रोसेसिंग', igo: 'ISO 22000 स्टेराइल फैसिलिटी', local: 'खुले बाज़ार में', competitor: 'सामान्य गोदाम' },
+    { feature: 'डिलीवरी', igo: '30-90 मिनट कोल्ड-चेन', local: 'कोई डिलीवरी नहीं', competitor: '3-4 घंटे / सूखा बैग' },
+    { feature: 'एंटीबायोटिक्स', igo: '100% एंटीबायोटिक-मुक्त', local: 'अज्ञात', competitor: 'चुनिंदा' }
+  ]
+};
+
+const COMPARISON_FALLBACK_ML = {
+  eyebrow: 'മത്സരപരമായ മുൻതൂക്കം',
+  heading: 'എന്തുകൊണ്ട് IGO പ്രോട്ടീൻ കട്സ് തിരഞ്ഞെടുക്കണം?',
+  subheading:
+    'മാംസ വ്യവസായത്തിൽ ഗുണനിലവാരത്തിന് ഞങ്ങൾ ഒരു പുതിയ മാനദണ്ഡം സ്ഥാപിച്ചിരിക്കുന്നു. ഞങ്ങളെ പ്രാദേശിക വിപണിയുമായി താരതമ്യം ചെയ്ത്, സുതാര്യത ഉണ്ടാക്കുന്ന വ്യത്യാസം കാണുക.',
+  columns: { feature: 'സവിശേഷത', igo: 'IGO നിലവാരം', local: 'പ്രാദേശിക വിപണി', competitor: 'എതിരാളികൾ' },
+  rows: [
+    { feature: 'ട്രെയ്സബിലിറ്റി', igo: 'സമ്പൂർണ്ണ ഫാം-ടു-ടേബിൾ (QR സ്കാൻ)', local: 'ഒന്നുമില്ല / വാമൊഴി', competitor: 'പരിമിതമായ ബാച്ച് വിവരം' },
+    { feature: 'പുതുമ', igo: 'ഒരിക്കലും ഫ്രീസ് ചെയ്യാറില്ല (എപ്പോഴും 0-4°C)', local: 'മുറി താപനില / വ്യത്യാസപ്പെടും', competitor: 'സംഭരണത്തിനായി ഫ്രീസ് ചെയ്തത്' },
+    { feature: 'പ്രോസസ്സിംഗ്', igo: 'ISO 22000 അണുവിമുക്ത സൗകര്യം', local: 'തുറന്ന വിപണി', competitor: 'സാധാരണ വെയർഹൗസ്' },
+    { feature: 'ഡെലിവറി', igo: '30-90 മിനിറ്റ് കോൾഡ്-ചെയിൻ', local: 'ഡെലിവറി ഇല്ല', competitor: '3-4 മണിക്കൂർ / ഡ്രൈ ബാഗ്' },
+    { feature: 'ആന്റിബയോട്ടിക്കുകൾ', igo: '100% ആന്റിബയോട്ടിക് രഹിതം', local: 'അജ്ഞാതം', competitor: 'തിരഞ്ഞെടുത്തത്' }
+  ]
+};
+
+const COMPARISON_FALLBACK_TE = {
+  eyebrow: 'పోటీ ప్రయోజనం',
+  heading: 'IGO ప్రోటీన్ కట్స్‌ను ఎందుకు ఎంచుకోవాలి?',
+  subheading:
+    'మాంస పరిశ్రమలో నాణ్యత కోసం మేము ఒక కొత్త ప్రమాణాన్ని నెలకొల్పాము. మమ్మల్ని స్థానిక మార్కెట్‌తో పోల్చి, పారదర్శకత తెచ్చే తేడాను చూడండి.',
+  columns: { feature: 'ఫీచర్', igo: 'IGO ప్రమాణం', local: 'స్థానిక మార్కెట్', competitor: 'పోటీదారులు' },
+  rows: [
+    { feature: 'ట్రేసబిలిటీ', igo: 'పూర్తి ఫార్మ్-టు-టేబుల్ (QR స్కాన్)', local: 'ఏమీ లేదు / మాటల ద్వారా', competitor: 'పరిమిత బ్యాచ్ సమాచారం' },
+    { feature: 'తాజాదనం', igo: 'ఎప్పుడూ ఫ్రీజ్ చేయబడదు (ఎల్లప్పుడూ 0-4°C)', local: 'గది ఉష్ణోగ్రత / మారుతూ ఉంటుంది', competitor: 'నిల్వ కోసం ఫ్రీజ్ చేయబడింది' },
+    { feature: 'ప్రాసెసింగ్', igo: 'ISO 22000 స్టెరైల్ ఫెసిలిటీ', local: 'బహిరంగ మార్కెట్', competitor: 'సాధారణ గోడౌన్' },
+    { feature: 'డెలివరీ', igo: '30-90 నిమిషాల కోల్డ్-చైన్', local: 'డెలివరీ లేదు', competitor: '3-4 గంటలు / డ్రై బ్యాగ్' },
+    { feature: 'యాంటీబయాటిక్స్', igo: '100% యాంటీబయాటిక్-రహితం', local: 'తెలియదు', competitor: 'ఎంపిక చేయబడింది' }
   ]
 };
 
@@ -61,13 +106,46 @@ const CERTS_FALLBACK_TA = {
   ]
 };
 
+const CERTS_FALLBACK_HI = {
+  eyebrow: 'सत्यापित मूल',
+  heading: 'प्रीमियम मानक, सत्यापित और भरोसेमंद।',
+  items: [
+    { name: 'ISO 22000', icon: 'ShieldCheck', desc: 'खाद्य सुरक्षा प्रबंधन', year: '2027' },
+    { name: 'HACCP', icon: 'Award', desc: 'जोखिम मूल्यांकन मानक', year: '2027' },
+    { name: 'FSSAI लाइसेंस प्राप्त', icon: 'Globe', desc: 'लाइसेंस: 10022043000918', year: '2027' },
+    { name: '100% हलाल', icon: 'Sprout', desc: 'ज़बीहा प्रमाणित सोर्सिंग', year: '' }
+  ]
+};
+const CERTS_FALLBACK_ML = {
+  eyebrow: 'സ്ഥിരീകരിച്ച ഉത്ഭവം',
+  heading: 'പ്രീമിയം നിലവാരം, സ്ഥിരീകരിച്ചതും വിശ്വസനീയവും.',
+  items: [
+    { name: 'ISO 22000', icon: 'ShieldCheck', desc: 'ഭക്ഷ്യ സുരക്ഷാ മാനേജ്മെന്റ്', year: '2027' },
+    { name: 'HACCP', icon: 'Award', desc: 'റിസ്ക് അസസ്മെന്റ് സ്റ്റാൻഡേർഡ്', year: '2027' },
+    { name: 'FSSAI ലൈസൻസുള്ളത്', icon: 'Globe', desc: 'ലൈസൻസ്: 10022043000918', year: '2027' },
+    { name: '100% ഹലാൽ', icon: 'Sprout', desc: 'സബീഹ സർട്ടിഫൈഡ് സോഴ്സിംഗ്', year: '' }
+  ]
+};
+const CERTS_FALLBACK_TE = {
+  eyebrow: 'ధృవీకరించబడిన మూలం',
+  heading: 'ప్రీమియం ప్రమాణాలు, ధృవీకరించబడినవి మరియు నమ్మదగినవి.',
+  items: [
+    { name: 'ISO 22000', icon: 'ShieldCheck', desc: 'ఆహార భద్రతా నిర్వహణ', year: '2027' },
+    { name: 'HACCP', icon: 'Award', desc: 'రిస్క్ అసెస్‌మెంట్ ప్రమాణం', year: '2027' },
+    { name: 'FSSAI లైసెన్స్ పొందినది', icon: 'Globe', desc: 'లైసెన్స్: 10022043000918', year: '2027' },
+    { name: '100% హలాల్', icon: 'Sprout', desc: 'జబీహా సర్టిఫైడ్ సోర్సింగ్', year: '' }
+  ]
+};
+
 export const TrustSection: React.FC = () => {
   const { lang } = useLang();
   const comparisonBlock = useSiteContent('sections.comparison', COMPARISON_FALLBACK);
   const certsBlock = useSiteContent('sections.certifications', CERTS_FALLBACK);
 
-  const resolvedComparison = lang === 'ta' ? COMPARISON_FALLBACK_TA : comparisonBlock;
-  const resolvedCerts = lang === 'ta' ? CERTS_FALLBACK_TA : certsBlock;
+  const resolvedComparison =
+    lang === 'ta' ? COMPARISON_FALLBACK_TA : lang === 'hi' ? COMPARISON_FALLBACK_HI : lang === 'ml' ? COMPARISON_FALLBACK_ML : lang === 'te' ? COMPARISON_FALLBACK_TE : comparisonBlock;
+  const resolvedCerts =
+    lang === 'ta' ? CERTS_FALLBACK_TA : lang === 'hi' ? CERTS_FALLBACK_HI : lang === 'ml' ? CERTS_FALLBACK_ML : lang === 'te' ? CERTS_FALLBACK_TE : certsBlock;
 
   const comparison = resolvedComparison.rows;
   const certs = resolvedCerts.items.map((c) => ({
@@ -81,15 +159,19 @@ export const TrustSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <div className="text-center max-w-2xl mx-auto space-y-2.5">
           <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
-            {lang === 'ta' ? 'ஏன் எங்களை தேர்வு செய்ய வேண்டும்' : 'Why Choose Us'}
+            {pick(lang, { en: 'Why Choose Us', ta: 'ஏன் எங்களை தேர்வு செய்ய வேண்டும்', hi: 'हमें क्यों चुनें', ml: 'ഞങ്ങളെ എന്തുകൊണ്ട് തിരഞ്ഞെടുക്കണം', te: 'మమ్మల్ని ఎందుకు ఎంచుకోవాలి' })}
           </span>
           <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">
-            {lang === 'ta' ? 'ஏன் IGO புரோட்டீன் கட்ஸை தேர்வு செய்ய வேண்டும்?' : 'Why Choose IGO Protein Cuts?'}
+            {pick(lang, { en: 'Why Choose IGO Protein Cuts?', ta: 'ஏன் IGO புரோட்டீன் கட்ஸை தேர்வு செய்ய வேண்டும்?', hi: 'IGO प्रोटीन कट्स को क्यों चुनें?', ml: 'എന്തുകൊണ്ട് IGO പ്രോട്ടീൻ കട്സ് തിരഞ്ഞെടുക്കണം?', te: 'IGO ప్రోటీన్ కట్స్‌ను ఎందుకు ఎంచుకోవాలి?' })}
           </h2>
           <p className="text-xs sm:text-sm text-neutral-600">
-            {lang === 'ta'
-              ? 'ஒரு புறநிலையான, அம்சம்-வாரியான ஒப்பீடு — சந்தைப்படுத்தல் பிரதி அல்ல. "பண்ணையிலிருந்து மேசை வரை" என்பது நடைமுறையில் என்ன என்பதைப் பாருங்கள்.'
-              : 'An objective, feature-by-feature comparison — not marketing copy. See exactly what "farm to table" means in practice.'}
+            {pick(lang, {
+              en: 'An objective, feature-by-feature comparison — not marketing copy. See exactly what "farm to table" means in practice.',
+              ta: 'ஒரு புறநிலையான, அம்சம்-வாரியான ஒப்பீடு — சந்தைப்படுத்தல் பிரதி அல்ல. "பண்ணையிலிருந்து மேசை வரை" என்பது நடைமுறையில் என்ன என்பதைப் பாருங்கள்.',
+              hi: 'एक निष्पक्ष, फीचर-दर-फीचर तुलना — मार्केटिंग कॉपी नहीं। देखें कि व्यवहार में "फार्म टू टेबल" का वास्तव में क्या मतलब है।',
+              ml: 'വസ്തുനിഷ്ഠമായ, സവിശേഷത അടിസ്ഥാനത്തിലുള്ള താരതമ്യം — മാർക്കറ്റിംഗ് വാചകമല്ല. "ഫാം ടു ടേബിൾ" പ്രായോഗികമായി എന്താണ് അർത്ഥമാക്കുന്നതെന്ന് കൃത്യമായി കാണുക.',
+              te: 'ఒక నిష్పాక్షిక, ఫీచర్-బై-ఫీచర్ పోలిక — మార్కెటింగ్ కాపీ కాదు. ఆచరణలో "ఫార్మ్ టు టేబుల్" అంటే నిజంగా ఏమిటో సరిగ్గా చూడండి.'
+            })}
           </p>
         </div>
 

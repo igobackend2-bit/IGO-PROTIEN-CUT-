@@ -2,7 +2,7 @@ import React from 'react';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
 import { resolveIcon } from '../lib/iconMap';
 import { FadeImage } from '../components/FadeImage';
-import { useLang } from '../lib/language';
+import { useLang, pick } from '../lib/language';
 
 /**
  * Editable from /admin → Sections → Our Farms and → Certifications.
@@ -54,6 +54,30 @@ const CERTS_FALLBACK_TA = {
     { name: '100% ஹலால்', icon: 'Sprout' }
   ]
 };
+const CERTS_FALLBACK_HI = {
+  items: [
+    { name: 'ISO 22000', icon: 'ShieldCheck' },
+    { name: 'HACCP', icon: 'Award' },
+    { name: 'FSSAI लाइसेंस प्राप्त', icon: 'Globe' },
+    { name: '100% हलाल', icon: 'Sprout' }
+  ]
+};
+const CERTS_FALLBACK_ML = {
+  items: [
+    { name: 'ISO 22000', icon: 'ShieldCheck' },
+    { name: 'HACCP', icon: 'Award' },
+    { name: 'FSSAI ലൈസൻസ്', icon: 'Globe' },
+    { name: '100% ഹലാൽ', icon: 'Sprout' }
+  ]
+};
+const CERTS_FALLBACK_TE = {
+  items: [
+    { name: 'ISO 22000', icon: 'ShieldCheck' },
+    { name: 'HACCP', icon: 'Award' },
+    { name: 'FSSAI లైసెన్స్డ్', icon: 'Globe' },
+    { name: '100% హలాల్', icon: 'Sprout' }
+  ]
+};
 const FARMS_FALLBACK_TA = {
   eyebrow: 'எங்கள் நெட்வொர்க்கிலிருந்து',
   heading: 'எங்கள் பண்ணைகள்',
@@ -76,6 +100,72 @@ const FARMS_FALLBACK_TA = {
     }
   ]
 };
+const FARMS_FALLBACK_HI = {
+  eyebrow: 'हमारे नेटवर्क से',
+  heading: 'हमारे फार्म',
+  subheading: 'पारंपरिक चरागाहों से आपकी रसोई तक — यात्रा के हर चरण को ईमानदारी से ट्रैक किया गया है।',
+  items: [
+    {
+      label: 'विरासती फार्म',
+      caption: 'नीलगिरि पर्वतमाला, तमिलनाडु',
+      image: '/Images/narrative/farm.jpg'
+    },
+    {
+      label: 'स्टेराइल प्रोसेसिंग',
+      caption: 'ISO 22000 डार्क स्टोर्स, 0-4°C',
+      image: '/Images/narrative/facility.jpg'
+    },
+    {
+      label: 'बैच-ट्रैक्ड पैकेजिंग',
+      caption: 'इंसुलेटेड कोल्ड-चेन डिलीवरी बैग',
+      image: '/Images/narrative/packaging.jpg'
+    }
+  ]
+};
+const FARMS_FALLBACK_ML = {
+  eyebrow: 'ഞങ്ങളുടെ നെറ്റ്‌വർക്കിൽ നിന്ന്',
+  heading: 'ഞങ്ങളുടെ ഫാമുകൾ',
+  subheading: 'പരമ്പരാഗത മേച്ചിൽപ്പുറങ്ങളിൽ നിന്ന് നിങ്ങളുടെ അടുക്കളയിലേക്ക് — യാത്രയുടെ ഓരോ ഘട്ടവും സത്യസന്ധമായി കണ്ടെത്തി.',
+  items: [
+    {
+      label: 'പൈതൃക ഫാമുകൾ',
+      caption: 'നീലഗിരി മലനിരകൾ, തമിഴ്‌നാട്',
+      image: '/Images/narrative/farm.jpg'
+    },
+    {
+      label: 'സ്റ്റെറൈൽ പ്രോസസിംഗ്',
+      caption: 'ISO 22000 ഡാർക്ക് സ്റ്റോറുകൾ, 0-4°C',
+      image: '/Images/narrative/facility.jpg'
+    },
+    {
+      label: 'ബാച്ച്-ട്രാക്ക്ഡ് പാക്കേജിംഗ്',
+      caption: 'ഇൻസുലേറ്റഡ് കോൾഡ്-ചെയിൻ ഡെലിവറി ബാഗുകൾ',
+      image: '/Images/narrative/packaging.jpg'
+    }
+  ]
+};
+const FARMS_FALLBACK_TE = {
+  eyebrow: 'మా నెట్‌వర్క్ నుండి',
+  heading: 'మా పొలాలు',
+  subheading: 'సంప్రదాయ పచ్చిక బయళ్ల నుండి మీ వంటగది వరకు — ప్రయాణంలోని ప్రతి దశను నిజాయితీగా ట్రేస్ చేయబడింది.',
+  items: [
+    {
+      label: 'వారసత్వ పొలాలు',
+      caption: 'నీలగిరి కొండలు, తమిళనాడు',
+      image: '/Images/narrative/farm.jpg'
+    },
+    {
+      label: 'స్టెరైల్ ప్రాసెసింగ్',
+      caption: 'ISO 22000 డార్క్ స్టోర్లు, 0-4°C',
+      image: '/Images/narrative/facility.jpg'
+    },
+    {
+      label: 'బ్యాచ్-ట్రాక్డ్ ప్యాకేజింగ్',
+      caption: 'ఇన్సులేటెడ్ కోల్డ్-చైన్ డెలివరీ బ్యాగులు',
+      image: '/Images/narrative/packaging.jpg'
+    }
+  ]
+};
 
 // "Our Farms" — real photography from the three-stage narrative sequence
 // already used elsewhere on the site (farm → facility → packaging), plus
@@ -84,8 +174,8 @@ export const OurFarmsSection: React.FC = () => {
   const { lang } = useLang();
   const farmsBlock = useSiteContent('sections.our_farms', FARMS_FALLBACK);
   const certsBlock = useSiteContent('sections.certifications', CERTS_FALLBACK);
-  const resolvedFarmsBlock = lang === 'ta' ? FARMS_FALLBACK_TA : farmsBlock;
-  const resolvedCertsBlock = lang === 'ta' ? CERTS_FALLBACK_TA : certsBlock;
+  const resolvedFarmsBlock = lang === 'ta' ? FARMS_FALLBACK_TA : lang === 'hi' ? FARMS_FALLBACK_HI : lang === 'ml' ? FARMS_FALLBACK_ML : lang === 'te' ? FARMS_FALLBACK_TE : farmsBlock;
+  const resolvedCertsBlock = lang === 'ta' ? CERTS_FALLBACK_TA : lang === 'hi' ? CERTS_FALLBACK_HI : lang === 'ml' ? CERTS_FALLBACK_ML : lang === 'te' ? CERTS_FALLBACK_TE : certsBlock;
 
   const journey = resolvedFarmsBlock.items;
   const certs = resolvedCertsBlock.items.map((c) => ({ name: c.name, icon: resolveIcon(c.icon) }));
@@ -94,15 +184,19 @@ export const OurFarmsSection: React.FC = () => {
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
       <div className="text-center max-w-2xl mx-auto space-y-2">
         <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
-          {lang === 'ta' ? 'வெளிப்படைத்தன்மை நம்பிக்கையை உருவாக்குகிறது' : 'Transparency Builds Trust'}
+          {pick(lang, { en: 'Transparency Builds Trust', ta: 'வெளிப்படைத்தன்மை நம்பிக்கையை உருவாக்குகிறது', hi: 'पारदर्शिता विश्वास बनाती है', ml: 'സുതാര്യത വിശ്വാസം വളർത്തുന്നു', te: 'పారదర్శకత నమ్మకాన్ని పెంచుతుంది' })}
         </span>
         <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">
-          {lang === 'ta' ? 'எங்கள் பண்ணைகள்' : 'Our Farms'}
+          {pick(lang, { en: 'Our Farms', ta: 'எங்கள் பண்ணைகள்', hi: 'हमारे फार्म', ml: 'ഞങ്ങളുടെ ഫാമുകൾ', te: 'మా పొలాలు' })}
         </h2>
         <p className="text-xs sm:text-sm text-neutral-600">
-          {lang === 'ta'
-            ? 'பாரம்பரிய மேய்ச்சல் நிலங்களிலிருந்து உங்கள் சமையலறை வரை — பயணத்தின் ஒவ்வொரு கட்டமும் நேர்மையாக காட்டப்படுகிறது.'
-            : 'From heritage pastures to your kitchen — every stage of the journey, shown honestly.'}
+          {pick(lang, {
+            en: 'From heritage pastures to your kitchen — every stage of the journey, shown honestly.',
+            ta: 'பாரம்பரிய மேய்ச்சல் நிலங்களிலிருந்து உங்கள் சமையலறை வரை — பயணத்தின் ஒவ்வொரு கட்டமும் நேர்மையாக காட்டப்படுகிறது.',
+            hi: 'पारंपरिक चरागाहों से आपकी रसोई तक — यात्रा का हर चरण ईमानदारी से दिखाया गया है।',
+            ml: 'പരമ്പരാഗത മേച്ചിൽപ്പുറങ്ങളിൽ നിന്ന് നിങ്ങളുടെ അടുക്കളയിലേക്ക് — യാത്രയുടെ ഓരോ ഘട്ടവും സത്യസന്ധമായി കാണിച്ചിരിക്കുന്നു.',
+            te: 'సంప్రదాయ పచ్చిక బయళ్ల నుండి మీ వంటగది వరకు — ప్రయాణంలోని ప్రతి దశను నిజాయితీగా చూపబడింది.'
+          })}
         </p>
       </div>
 

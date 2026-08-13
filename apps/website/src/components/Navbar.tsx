@@ -27,7 +27,7 @@ import {
 import { StoreService } from '../lib/storage';
 import { fetchNotifications } from '../lib/api/notifications';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { Language, TRANSLATIONS } from '../lib/language';
+import { Language, TRANSLATIONS, LANGUAGES, LANGUAGE_LABELS, pick } from '../lib/language';
 import { isPincodeServiceable, isValidPincodeFormat } from '../lib/serviceability';
 import { Product } from '../types';
 import { rankedProductMatches } from '../lib/search';
@@ -43,7 +43,7 @@ interface NavbarProps {
   onNavigate: (path: string) => void;
   currentPath: string;
   lang?: Language;
-  onToggleLang?: () => void;
+  onSetLang?: (lang: Language) => void;
   products?: Product[];
 }
 
@@ -57,17 +57,26 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenNotifications,
   onNavigate,
   currentPath,
-  lang = 'en',
-  onToggleLang,
+  lang = 'en' as Language,
+  onSetLang,
   products = []
 }) => {
   const [cartCount, setCartCount] = useState(0);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [mobileLangMenuOpen, setMobileLangMenuOpen] = useState(false);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   const [selectedPincode, setSelectedPincode] = useState('560038 (Indiranagar)');
   const [showPincodeModal, setShowPincodeModal] = useState(false);
   const [inputPincode, setInputPincode] = useState('');
   const [pincodeStatus, setPincodeStatus] = useState<string | null>(null);
+  // Tracks whether the current pincodeStatus message represents success
+  // (styled green) vs. informational/error (styled neutral). Previously this
+  // was inferred by checking pincodeStatus.includes('Active') on the English
+  // string itself — that check silently breaks once the message is
+  // translated into a language where "Active" doesn't appear verbatim, so
+  // success/failure is now tracked explicitly instead of string-sniffed.
+  const [pincodeStatusOk, setPincodeStatusOk] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categoriesMenuOpen, setCategoriesMenuOpen] = useState(false);
@@ -147,20 +156,47 @@ export const Navbar: React.FC<NavbarProps> = ({
   const handleVerifyPincode = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValidPincodeFormat(inputPincode)) {
-      setPincodeStatus('Please enter a valid 6-digit Pincode.');
+      setPincodeStatusOk(false);
+      setPincodeStatus(
+        pick(lang, {
+          en: 'Please enter a valid 6-digit Pincode.',
+          ta: 'சரியான 6-இலக்க பின்கோடை உள்ளிடவும்.',
+          hi: 'कृपया एक मान्य 6-अंकीय पिनकोड दर्ज करें।',
+          ml: 'സാധുവായ 6-അക്ക പിൻകോഡ് നൽകുക.',
+          te: 'దయచేసి చెల్లుబాటు అయ్యే 6-అంకెల పిన్‌కోడ్‌ను నమోదు చేయండి.'
+        })
+      );
       return;
     }
     // Real check against the serviceable-pincode list (src/lib/serviceability.ts)
     // — previously any 6-digit string was accepted as deliverable.
     if (isPincodeServiceable(inputPincode)) {
       setSelectedPincode(`${inputPincode} (Express Available)`);
-      setPincodeStatus('30-90 Minute Express Cold Chain Delivery Active in your zone!');
+      setPincodeStatusOk(true);
+      setPincodeStatus(
+        pick(lang, {
+          en: '30-90 Minute Express Cold Chain Delivery Active in your zone!',
+          ta: 'உங்கள் பகுதியில் 30-90 நிமிட எக்ஸ்பிரஸ் குளிர் சங்கிலி டெலிவரி இயங்குகிறது!',
+          hi: 'आपके क्षेत्र में 30-90 मिनट एक्सप्रेस कोल्ड चेन डिलीवरी सक्रिय है!',
+          ml: 'നിങ്ങളുടെ പ്രദേശത്ത് 30-90 മിനിറ്റ് എക്സ്പ്രസ് കോൾഡ് ചെയിൻ ഡെലിവറി സജീവമാണ്!',
+          te: 'మీ ప్రాంతంలో 30-90 నిమిషాల ఎక్స్‌ప్రెస్ కోల్డ్ చైన్ డెలివరీ యాక్టివ్‌గా ఉంది!'
+        })
+      );
       setTimeout(() => {
         setShowPincodeModal(false);
         setPincodeStatus(null);
       }, 1500);
     } else {
-      setPincodeStatus("Sorry, we don't deliver to this Pincode yet. We currently serve Bengaluru only.");
+      setPincodeStatusOk(false);
+      setPincodeStatus(
+        pick(lang, {
+          en: "Sorry, we don't deliver to this Pincode yet. We currently serve Bengaluru only.",
+          ta: 'மன்னிக்கவும், நாங்கள் இந்த பின்கோடுக்கு இன்னும் டெலிவரி செய்யவில்லை. நாங்கள் தற்போது பெங்களூருக்கு மட்டுமே சேவை செய்கிறோம்.',
+          hi: 'क्षमा करें, हम अभी इस पिनकोड पर डिलीवरी नहीं करते। हम फ़िलहाल केवल बेंगलुरु में सेवा देते हैं।',
+          ml: 'ക്ഷമിക്കണം, ഈ പിൻകോഡിലേക്ക് ഞങ്ങൾ ഇതുവരെ ഡെലിവർ ചെയ്യുന്നില്ല. ഞങ്ങൾ നിലവിൽ ബെംഗളൂരുവിൽ മാത്രമേ സേവനം നൽകുന്നുള്ളൂ.',
+          te: 'క్షమించండి, మేము ఇంకా ఈ పిన్‌కోడ్‌కు డెలివరీ చేయడం లేదు. మేము ప్రస్తుతం బెంగళూరులో మాత్రమే సేవలందిస్తున్నాము.'
+        })
+      );
     }
   };
 
@@ -172,7 +208,16 @@ export const Navbar: React.FC<NavbarProps> = ({
   // ever presenting the customer with bare numbers when a name is available.
   const handleUseCurrentLocation = () => {
     if (!('geolocation' in navigator)) {
-      setPincodeStatus('Live location isn\'t supported on this browser. Please enter your Pincode instead.');
+      setPincodeStatusOk(false);
+      setPincodeStatus(
+        pick(lang, {
+          en: "Live location isn't supported on this browser. Please enter your Pincode instead.",
+          ta: 'இந்த உலாவியில் நேரடி இருப்பிடம் ஆதரிக்கப்படவில்லை. உங்கள் பின்கோடை உள்ளிடவும்.',
+          hi: 'इस ब्राउज़र पर लाइव लोकेशन समर्थित नहीं है। कृपया इसके बजाय अपना पिनकोड दर्ज करें।',
+          ml: 'ഈ ബ്രൗസറിൽ ലൈവ് ലൊക്കേഷൻ പിന്തുണയ്‌ക്കുന്നില്ല. പകരം നിങ്ങളുടെ പിൻകോഡ് നൽകുക.',
+          te: 'ఈ బ్రౌజర్‌లో లైవ్ లొకేషన్ మద్దతు లేదు. దయచేసి బదులుగా మీ పిన్‌కోడ్‌ను నమోదు చేయండి.'
+        })
+      );
       return;
     }
     setIsLocating(true);
@@ -202,7 +247,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           setSelectedPincode(`Current Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
         }
 
-        setPincodeStatus('Live location detected — 30-90 Minute Express Cold Chain Delivery Active in your zone!');
+        setPincodeStatusOk(true);
+        setPincodeStatus(
+          pick(lang, {
+            en: 'Live location detected — 30-90 Minute Express Cold Chain Delivery Active in your zone!',
+            ta: 'நேரடி இருப்பிடம் கண்டறியப்பட்டது — உங்கள் பகுதியில் 30-90 நிமிட எக்ஸ்பிரஸ் குளிர் சங்கிலி டெலிவரி இயங்குகிறது!',
+            hi: 'लाइव लोकेशन का पता चला — आपके क्षेत्र में 30-90 मिनट एक्सप्रेस कोल्ड चेन डिलीवरी सक्रिय है!',
+            ml: 'ലൈവ് ലൊക്കേഷൻ കണ്ടെത്തി — നിങ്ങളുടെ പ്രദേശത്ത് 30-90 മിനിറ്റ് എക്സ്പ്രസ് കോൾഡ് ചെയിൻ ഡെലിവറി സജീവമാണ്!',
+            te: 'లైవ్ లొకేషన్ కనుగొనబడింది — మీ ప్రాంతంలో 30-90 నిమిషాల ఎక్స్‌ప్రెస్ కోల్డ్ చైన్ డెలివరీ యాక్టివ్‌గా ఉంది!'
+          })
+        );
         setIsLocating(false);
         setTimeout(() => {
           setShowPincodeModal(false);
@@ -217,9 +271,16 @@ export const Navbar: React.FC<NavbarProps> = ({
         // can bypass. The most useful thing to do here is tell the
         // customer exactly which browser control re-enables it, rather
         // than a flat "denied" message with no next step.
+        setPincodeStatusOk(false);
         if (err.code === err.PERMISSION_DENIED) {
           setPincodeStatus(
-            "Location access is blocked for this site. Tap the lock/info icon next to the address bar, turn Location on, then tap \"Use My Current Location\" again — or just enter your Pincode below."
+            pick(lang, {
+              en: 'Location access is blocked for this site. Tap the lock/info icon next to the address bar, turn Location on, then tap "Use My Current Location" again — or just enter your Pincode below.',
+              ta: 'இந்த தளத்திற்கு இருப்பிட அணுகல் தடுக்கப்பட்டுள்ளது. முகவரிப் பட்டைக்கு அருகில் உள்ள லாக்/தகவல் ஐகானைத் தட்டி, இருப்பிடத்தை இயக்கி, "என் தற்போதைய இருப்பிடத்தைப் பயன்படுத்து" என்பதை மீண்டும் தட்டவும் — அல்லது கீழே உங்கள் பின்கோடை உள்ளிடவும்.',
+              hi: 'इस साइट के लिए लोकेशन एक्सेस अवरुद्ध है। एड्रेस बार के पास लॉक/जानकारी आइकन टैप करें, लोकेशन चालू करें, फिर "मेरी वर्तमान लोकेशन का उपयोग करें" पर फिर टैप करें — या नीचे अपना पिनकोड दर्ज करें।',
+              ml: 'ഈ സൈറ്റിനുള്ള ലൊക്കേഷൻ ആക്സസ് തടഞ്ഞിരിക്കുന്നു. അഡ്രസ് ബാറിനടുത്തുള്ള ലോക്ക്/ഇൻഫോ ഐക്കണിൽ ടാപ്പ് ചെയ്ത്, ലൊക്കേഷൻ ഓണാക്കി, "എന്റെ നിലവിലെ ലൊക്കേഷൻ ഉപയോഗിക്കുക" വീണ്ടും ടാപ്പ് ചെയ്യുക — അല്ലെങ്കിൽ താഴെ നിങ്ങളുടെ പിൻകോഡ് നൽകുക.',
+              te: 'ఈ సైట్ కోసం లొకేషన్ యాక్సెస్ నిరోధించబడింది. అడ్రస్ బార్ పక్కన ఉన్న లాక్/ఇన్ఫో చిహ్నాన్ని నొక్కి, లొకేషన్‌ను ఆన్ చేసి, "నా ప్రస్తుత లొకేషన్‌ను ఉపయోగించండి" మళ్లీ నొక్కండి — లేదా దిగువన మీ పిన్‌కోడ్‌ను నమోదు చేయండి.'
+            })
           );
         } else if (err.code === err.TIMEOUT) {
           // With enableHighAccuracy previously forced on, laptops/desktops
@@ -227,9 +288,25 @@ export const Navbar: React.FC<NavbarProps> = ({
           // routinely blew past a 10s timeout and silently failed — this
           // read to the customer as "location isn't capturing" with no
           // explanation. Give an actionable retry message instead.
-          setPincodeStatus('Location is taking too long to detect. Please try again, or enter your Pincode below.');
+          setPincodeStatus(
+            pick(lang, {
+              en: 'Location is taking too long to detect. Please try again, or enter your Pincode below.',
+              ta: 'இருப்பிடத்தை கண்டறிய அதிக நேரம் ஆகிறது. மீண்டும் முயற்சிக்கவும், அல்லது கீழே உங்கள் பின்கோடை உள்ளிடவும்.',
+              hi: 'लोकेशन का पता लगाने में बहुत समय लग रहा है। कृपया फिर से प्रयास करें, या नीचे अपना पिनकोड दर्ज करें।',
+              ml: 'ലൊക്കേഷൻ കണ്ടെത്താൻ വളരെയധികം സമയമെടുക്കുന്നു. വീണ്ടും ശ്രമിക്കുക, അല്ലെങ്കിൽ താഴെ നിങ്ങളുടെ പിൻകോഡ് നൽകുക.',
+              te: 'లొకేషన్‌ను గుర్తించడానికి చాలా సమయం పడుతోంది. దయచేసి మళ్లీ ప్రయత్నించండి, లేదా దిగువన మీ పిన్‌కోడ్‌ను నమోదు చేయండి.'
+            })
+          );
         } else {
-          setPincodeStatus('Could not detect your live location. Please enter your Pincode instead.');
+          setPincodeStatus(
+            pick(lang, {
+              en: 'Could not detect your live location. Please enter your Pincode instead.',
+              ta: 'உங்கள் நேரடி இருப்பிடத்தை கண்டறிய முடியவில்லை. பதிலாக உங்கள் பின்கோடை உள்ளிடவும்.',
+              hi: 'आपकी लाइव लोकेशन का पता नहीं चल सका। कृपया इसके बजाय अपना पिनकोड दर्ज करें।',
+              ml: 'നിങ്ങളുടെ ലൈവ് ലൊക്കേഷൻ കണ്ടെത്താനായില്ല. പകരം നിങ്ങളുടെ പിൻകോഡ് നൽകുക.',
+              te: 'మీ లైవ్ లొకేషన్‌ను గుర్తించలేకపోయాము. దయచేసి బదులుగా మీ పిన్‌కోడ్‌ను నమోదు చేయండి.'
+            })
+          );
         }
       },
       // High accuracy forces GPS-chip-grade positioning, which desktops and
@@ -249,24 +326,24 @@ export const Navbar: React.FC<NavbarProps> = ({
   // search bar already covers discovery, so it was removed rather than kept
   // as an unfamiliar, redundant nav item.
   const primaryLinks = [
-    { name: lang === 'ta' ? 'முகப்பு' : 'Home', path: '/', icon: Home }
+    { name: pick(lang, { en: 'Home', ta: 'முகப்பு', hi: 'होम', ml: 'ഹോം', te: 'హోమ్' }), path: '/', icon: Home }
   ];
 
   // All shop-by-category links grouped under the "Categories" dropdown so the
   // header doesn't overflow into a cramped single row as more categories are added
   const categoryLinks = [
-    { name: lang === 'ta' ? 'சிக்கன்' : 'Chicken', path: '/category/chicken' },
-    { name: lang === 'ta' ? 'மட்டன்' : 'Mutton', path: '/category/mutton' },
-    { name: lang === 'ta' ? 'பீஃப்' : 'Beef', path: '/category/beef' },
-    { name: lang === 'ta' ? 'மீன் & சீஃபுட்' : 'Fish & Seafood', path: '/category/fish' },
-    { name: lang === 'ta' ? 'கருவாடு' : 'Dry Fish', path: '/category/dry-fish' },
-    { name: lang === 'ta' ? 'முட்டை' : 'Eggs', path: '/category/eggs' },
-    { name: lang === 'ta' ? 'ஆரோக்கிய சேர்க்கைகள்' : 'Healthy Add-ons', path: '/category/healthy-addons' },
-    { name: lang === 'ta' ? 'ரெடி-டு-குக்' : 'Ready-to-Cook', path: '/category/ready-to-cook' },
-    { name: lang === 'ta' ? 'உறைந்த உணவு' : 'Frozen Food', path: '/category/frozen-food' },
-    { name: lang === 'ta' ? 'பிரியாணி கிட்' : 'Biryani Kits', path: '/category/biryani' },
-    { name: lang === 'ta' ? 'கோல்ட் கட்ஸ்' : 'Cold Cuts', path: '/category/cold-cuts' },
-    { name: lang === 'ta' ? 'கம்போஸ்' : 'Combos', path: '/category/combo-packs' }
+    { name: pick(lang, { en: 'Chicken', ta: 'சிக்கன்', hi: 'चिकन', ml: 'ചിക്കൻ', te: 'చికెన్' }), path: '/category/chicken' },
+    { name: pick(lang, { en: 'Mutton', ta: 'மட்டன்', hi: 'मटन', ml: 'മട്ടൺ', te: 'మటన్' }), path: '/category/mutton' },
+    { name: pick(lang, { en: 'Beef', ta: 'பீஃப்', hi: 'बीफ', ml: 'ബീഫ്', te: 'బీఫ్' }), path: '/category/beef' },
+    { name: pick(lang, { en: 'Fish & Seafood', ta: 'மீன் & சீஃபுட்', hi: 'मछली व सीफूड', ml: 'മീനും സീഫുഡും', te: 'చేపలు & సీఫుడ్' }), path: '/category/fish' },
+    { name: pick(lang, { en: 'Dry Fish', ta: 'கருவாடு', hi: 'सूखी मछली', ml: 'ഉണക്ക മീൻ', te: 'ఎండు చేపలు' }), path: '/category/dry-fish' },
+    { name: pick(lang, { en: 'Eggs', ta: 'முட்டை', hi: 'अंडे', ml: 'മുട്ട', te: 'గుడ్లు' }), path: '/category/eggs' },
+    { name: pick(lang, { en: 'Healthy Add-ons', ta: 'ஆரோக்கிய சேர்க்கைகள்', hi: 'हेल्दी ऐड-ऑन', ml: 'ആരോഗ്യകരമായ ആഡ്-ഓണുകൾ', te: 'ఆరోగ్యకరమైన యాడ్-ఆన్‌లు' }), path: '/category/healthy-addons' },
+    { name: pick(lang, { en: 'Ready-to-Cook', ta: 'ரெடி-டு-குக்', hi: 'रेडी-टू-कुक', ml: 'റെഡി-ടു-കുക്ക്', te: 'రెడీ-టు-కుక్' }), path: '/category/ready-to-cook' },
+    { name: pick(lang, { en: 'Frozen Food', ta: 'உறைந்த உணவு', hi: 'फ्रोज़न फूड', ml: 'ഫ്രോസൺ ഫുഡ്', te: 'ఫ్రోజెన్ ఫుడ్' }), path: '/category/frozen-food' },
+    { name: pick(lang, { en: 'Biryani Kits', ta: 'பிரியாணி கிட்', hi: 'बिरयानी किट', ml: 'ബിരിയാണി കിറ്റുകൾ', te: 'బిర్యానీ కిట్స్' }), path: '/category/biryani' },
+    { name: pick(lang, { en: 'Cold Cuts', ta: 'கோல்ட் கட்ஸ்', hi: 'कोल्ड कट्स', ml: 'കോൾഡ് കട്സ്', te: 'కోల్డ్ కట్స్' }), path: '/category/cold-cuts' },
+    { name: pick(lang, { en: 'Combos', ta: 'கம்போஸ்', hi: 'कॉम्बोज़', ml: 'കോംബോകൾ', te: 'కాంబోలు' }), path: '/category/combo-packs' }
   ];
 
   // Ordered to match the standard professional nav pattern (browse → business
@@ -283,18 +360,18 @@ export const Navbar: React.FC<NavbarProps> = ({
     // customer who wasn't on the homepage or an empty cart had no way to
     // find it. It's a real standalone page (OffersPage.tsx), so it belongs
     // in the nav like every other section.
-    { name: lang === 'ta' ? 'சலுகைகள்' : 'Offers', path: '/offers', icon: Percent },
+    { name: pick(lang, { en: 'Offers', ta: 'சலுகைகள்', hi: 'ऑफर', ml: 'ഓഫറുകൾ', te: 'ఆఫర్లు' }), path: '/offers', icon: Percent },
     // Was only reachable from a homepage rail and the checkout's "activate
     // subscription" flow — never had its own nav entry despite being a real,
     // dedicated page (SubscriptionsPage.tsx). Customer feedback flagged this
     // as a suggestion; adding a genuine nav link is the minimal way to
     // satisfy it without restructuring the page itself.
-    { name: lang === 'ta' ? 'சந்தா' : 'Subscriptions', path: '/subscriptions', icon: Package },
-    { name: lang === 'ta' ? 'மொத்த வர்த்தகம்' : 'B2B', path: '/b2b', icon: Briefcase },
-    { name: lang === 'ta' ? 'எங்களை பற்றி' : 'About', path: '/about', icon: Info },
-    { name: lang === 'ta' ? 'வலைப்பதிவு' : 'Blog', path: '/blog', icon: Newspaper },
-    { name: lang === 'ta' ? 'கேள்விகள்' : 'FAQ', path: '/support', icon: HelpCircle },
-    { name: lang === 'ta' ? 'தொடர்பு' : 'Contact', path: '/contact', icon: Mail }
+    { name: pick(lang, { en: 'Subscriptions', ta: 'சந்தா', hi: 'सब्सक्रिप्शन', ml: 'സബ്സ്ക്രിപ്ഷനുകൾ', te: 'సబ్‌స్క్రిప్షన్లు' }), path: '/subscriptions', icon: Package },
+    { name: pick(lang, { en: 'B2B', ta: 'மொத்த வர்த்தகம்', hi: 'B2B', ml: 'B2B', te: 'B2B' }), path: '/b2b', icon: Briefcase },
+    { name: pick(lang, { en: 'About', ta: 'எங்களை பற்றி', hi: 'हमारे बारे में', ml: 'ഞങ്ങളെക്കുറിച്ച്', te: 'మా గురించి' }), path: '/about', icon: Info },
+    { name: pick(lang, { en: 'Blog', ta: 'வலைப்பதிவு', hi: 'ब्लॉग', ml: 'ബ്ലോഗ്', te: 'బ్లాగ్' }), path: '/blog', icon: Newspaper },
+    { name: pick(lang, { en: 'FAQ', ta: 'கேள்விகள்', hi: 'सामान्य प्रश्न', ml: 'പതിവ് ചോദ്യങ്ങൾ', te: 'తరచుగా అడిగే ప్రశ్నలు' }), path: '/support', icon: HelpCircle },
+    { name: pick(lang, { en: 'Contact', ta: 'தொடர்பு', hi: 'संपर्क करें', ml: 'ബന്ധപ്പെടുക', te: 'సంప్రదించండి' }), path: '/contact', icon: Mail }
   ];
 
   // Link styling for the dark sub-nav bar — plain bold text with a bottom
@@ -404,7 +481,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
             <button
               onClick={onOpenVoiceSearch}
-              title="Voice Search"
+              title={pick(lang, { en: 'Voice Search', ta: 'குரல் தேடல்', hi: 'वॉइस सर्च', ml: 'വോയ്‌സ് സെർച്ച്', te: 'వాయిస్ సెర్చ్' })}
               className="p-2 text-emerald-600 hover:text-emerald-700 transition cursor-pointer shrink-0"
             >
               <Mic className="w-4 h-4" />
@@ -461,12 +538,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                     }}
                     className="w-full text-center py-2.5 text-[11px] font-bold uppercase tracking-wider text-emerald-700 hover:bg-emerald-50 transition cursor-pointer border-t border-neutral-100"
                   >
-                    View All Results
+                    {pick(lang, { en: 'View All Results', ta: 'அனைத்து முடிவுகளையும் காண்க', hi: 'सभी परिणाम देखें', ml: 'എല്ലാ ഫലങ്ങളും കാണുക', te: 'అన్ని ఫలితాలు చూడండి' })}
                   </button>
                 </>
               ) : (
                 <div className="px-4 py-4 text-xs text-neutral-400 text-center">
-                  No products match "{navSearchQuery.trim()}".
+                  {pick(lang, {
+                    en: `No products match "${navSearchQuery.trim()}".`,
+                    ta: `"${navSearchQuery.trim()}" உடன் பொருந்தும் தயாரிப்புகள் இல்லை.`,
+                    hi: `"${navSearchQuery.trim()}" से मेल खाने वाला कोई उत्पाद नहीं मिला।`,
+                    ml: `"${navSearchQuery.trim()}" പൊരുത്തപ്പെടുന്ന ഉൽപ്പന്നങ്ങളൊന്നുമില്ല.`,
+                    te: `"${navSearchQuery.trim()}" తో సరిపోలే ఉత్పత్తులు లేవు.`
+                  })}
                 </div>
               )}
             </div>
@@ -477,20 +560,47 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-1.5 sm:gap-2 md:gap-2.5 shrink-0">
           {/* Protein Calculator and Call quick-dial buttons removed per request. */}
 
-          {/* Language Toggle — globe icon added to match the reference layout */}
-          <button
-            onClick={onToggleLang}
-            className="hidden md:flex items-center h-10 gap-1.5 px-3 rounded-full bg-neutral-50 border border-neutral-300 shadow-sm text-[11px] font-bold text-neutral-600 hover:text-emerald-700 hover:border-emerald-400 transition cursor-pointer"
-          >
-            <Globe className="w-3.5 h-3.5" />
-            {lang === 'en' ? 'தமிழ்' : 'EN'}
-          </button>
+          {/* Language Switcher — was a 2-way EN/Tamil toggle button; now a
+              dropdown since the site supports 5 languages (English, Tamil,
+              Hindi, Malayalam, Telugu) and a toggle can't express more than
+              2 states. */}
+          <div className="relative hidden md:block">
+            <button
+              onClick={() => setLangMenuOpen((v) => !v)}
+              className="flex items-center h-10 gap-1.5 px-3 rounded-full bg-neutral-50 border border-neutral-300 shadow-sm text-[11px] font-bold text-neutral-600 hover:text-emerald-700 hover:border-emerald-400 transition cursor-pointer"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              {LANGUAGE_LABELS[lang]}
+              <ChevronDown className={`w-3 h-3 transition-transform ${langMenuOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {langMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setLangMenuOpen(false)} />
+                <div className="absolute top-full right-0 mt-2 w-40 bg-white border border-neutral-200 rounded-2xl shadow-xl overflow-hidden z-50">
+                  {LANGUAGES.map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => {
+                        onSetLang?.(l);
+                        setLangMenuOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-2.5 text-xs font-semibold transition cursor-pointer ${
+                        lang === l ? 'bg-emerald-50 text-emerald-700' : 'text-neutral-600 hover:bg-emerald-50 hover:text-emerald-700'
+                      }`}
+                    >
+                      {LANGUAGE_LABELS[l]}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
 
           {/* Notifications Button */}
           <button
             onClick={onOpenNotifications}
             className="relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-neutral-50 border border-neutral-300 shadow-sm text-neutral-500 hover:text-emerald-700 hover:border-emerald-400 transition cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400"
-            title="Notifications"
+            title={pick(lang, { en: 'Notifications', ta: 'அறிவிப்புகள்', hi: 'सूचनाएं', ml: 'അറിയിപ്പുകൾ', te: 'నోటిఫికేషన్లు' })}
           >
             <Bell className="w-4 h-4 text-emerald-600" />
             {unreadNotifCount > 0 && (
@@ -507,7 +617,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={() => onNavigate('/wishlist')}
             className="relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-neutral-50 border border-neutral-300 shadow-sm text-neutral-500 hover:text-emerald-700 hover:border-emerald-400 transition cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400"
-            title="Wishlist"
+            title={pick(lang, { en: 'Wishlist', ta: 'விருப்பப் பட்டியல்', hi: 'विशलिस्ट', ml: 'വിഷ്‌ലിസ്റ്റ്', te: 'విష్‌లిస్ట్' })}
           >
             <Heart className="w-4 h-4" />
             {wishlistCount > 0 && (
@@ -542,17 +652,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               }
             }}
             className="flex items-center h-9 sm:h-10 gap-2 px-1 sm:px-1.5 xl:pr-3 rounded-full bg-neutral-50 border border-neutral-300 shadow-sm text-neutral-600 hover:border-emerald-400 hover:text-emerald-700 transition cursor-pointer text-xs font-medium focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400 shrink-0"
-            title={isLoggedIn ? 'Go to Profile' : 'Login'}
+            title={isLoggedIn ? pick(lang, { en: 'Go to Profile', ta: 'சுயவிவரத்திற்குச் செல்', hi: 'प्रोफ़ाइल पर जाएं', ml: 'പ്രൊഫൈലിലേക്ക് പോകുക', te: 'ప్రొఫైల్‌కు వెళ్లండి' }) : pick(lang, { en: 'Login', ta: 'உள்நுழைய', hi: 'लॉगिन', ml: 'ലോഗിൻ', te: 'లాగిన్' })}
           >
             <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">
               {isLoggedIn && userProfile.name ? userProfile.name.trim().charAt(0).toUpperCase() : <User className="w-3.5 h-3.5" />}
             </span>
             <span className="hidden xl:flex flex-col items-start leading-tight">
               <span className="text-[9px] uppercase tracking-wide text-neutral-400 font-bold">
-                {isLoggedIn ? 'My Profile' : 'Welcome'}
+                {isLoggedIn
+                  ? pick(lang, { en: 'My Profile', ta: 'எனது சுயவிவரம்', hi: 'मेरी प्रोफ़ाइल', ml: 'എന്റെ പ്രൊഫൈൽ', te: 'నా ప్రొఫైల్' })
+                  : pick(lang, { en: 'Welcome', ta: 'வரவேற்கிறோம்', hi: 'स्वागत है', ml: 'സ്വാഗതം', te: 'స్వాగతం' })}
               </span>
               <span className="text-[#0A1F12] font-bold">
-                {isLoggedIn ? (userProfile.name ? userProfile.name.split(' ')[0] : 'Profile') : t.account}
+                {isLoggedIn ? (userProfile.name ? userProfile.name.split(' ')[0] : pick(lang, { en: 'Profile', ta: 'சுயவிவரம்', hi: 'प्रोफ़ाइल', ml: 'പ്രൊഫൈൽ', te: 'ప్రొఫైల్' })) : t.account}
               </span>
             </span>
             <ChevronDown className="hidden xl:block w-3 h-3 text-neutral-400 shrink-0" />
@@ -593,7 +705,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     : 'text-white/85 border-transparent hover:text-white hover:border-white/50'
                 }`}
               >
-                {lang === 'ta' ? 'வகைகள்' : 'Category'}
+                {pick(lang, { en: 'Category', ta: 'வகைகள்', hi: 'श्रेणी', ml: 'വിഭാഗം', te: 'వర్గం' })}
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${categoriesMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
@@ -602,8 +714,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <div className="fixed inset-0 z-40" onClick={() => setCategoriesMenuOpen(false)} />
                   <div className="absolute top-full left-0 mt-2 w-[440px] bg-white border border-neutral-200 rounded-2xl shadow-xl overflow-hidden z-50">
                     <div className="px-5 pt-4 pb-3 border-b border-neutral-100">
-                      <div className="text-sm font-black text-[#0A1F12]">Shop by Category</div>
-                      <div className="text-[11px] text-neutral-400">{categoryLinks.length} categories, fresh every day</div>
+                      <div className="text-sm font-black text-[#0A1F12]">
+                        {pick(lang, { en: 'Shop by Category', ta: 'வகைகள் மூலம் ஷாப்பிங்', hi: 'श्रेणी अनुसार खरीदें', ml: 'വിഭാഗം അനുസരിച്ച് ഷോപ്പ് ചെയ്യുക', te: 'వర్గం వారీగా షాపింగ్' })}
+                      </div>
+                      <div className="text-[11px] text-neutral-400">
+                        {pick(lang, {
+                          en: `${categoryLinks.length} categories, fresh every day`,
+                          ta: `${categoryLinks.length} வகைகள், தினமும் புதியது`,
+                          hi: `${categoryLinks.length} श्रेणियां, हर दिन ताज़ा`,
+                          ml: `${categoryLinks.length} വിഭാഗങ്ങൾ, എല്ലാ ദിവസവും ഫ്രഷ്`,
+                          te: `${categoryLinks.length} వర్గాలు, ప్రతిరోజూ ఫ్రెష్`
+                        })}
+                      </div>
                     </div>
                     <div className="grid grid-cols-2 gap-1 p-3">
                       {categoryLinks.map((link) => (
@@ -661,13 +783,32 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Protein Calculator quick-access removed per request. */}
-          <div className="flex items-center justify-end pb-2 border-b border-neutral-200">
+          <div className="relative flex items-center justify-end pb-2 border-b border-neutral-200">
             <button
-              onClick={onToggleLang}
-              className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded font-bold"
+              onClick={() => setMobileLangMenuOpen((v) => !v)}
+              className="flex items-center gap-1 text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded font-bold"
             >
-              {lang === 'en' ? 'தமிழ்' : 'English'}
+              {LANGUAGE_LABELS[lang]}
+              <ChevronDown className={`w-3 h-3 transition-transform ${mobileLangMenuOpen ? 'rotate-180' : ''}`} />
             </button>
+            {mobileLangMenuOpen && (
+              <div className="absolute top-full right-0 mt-1 w-36 bg-white border border-neutral-200 rounded-xl shadow-xl overflow-hidden z-50">
+                {LANGUAGES.map((l) => (
+                  <button
+                    key={l}
+                    onClick={() => {
+                      onSetLang?.(l);
+                      setMobileLangMenuOpen(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 text-xs font-semibold transition cursor-pointer ${
+                      lang === l ? 'bg-emerald-50 text-emerald-700' : 'text-neutral-600'
+                    }`}
+                  >
+                    {LANGUAGE_LABELS[l]}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 gap-2 text-xs">
@@ -690,7 +831,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest pt-2">
-            {lang === 'ta' ? 'வகைகள் மூலம் ஷாப்பிங்' : 'Shop by Category'}
+            {pick(lang, { en: 'Shop by Category', ta: 'வகைகள் மூலம் ஷாப்பிங்', hi: 'श्रेणी अनुसार खरीदें', ml: 'വിഭാഗം അനുസരിച്ച് ഷോപ്പ് ചെയ്യുക', te: 'వర్గం వారీగా షాపింగ్' })}
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs">
             {categoryLinks.map((link) => (
@@ -731,7 +872,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className="pt-2 flex items-center justify-center text-xs text-neutral-500">
-            <span>Customer Care: 1800-446-446</span>
+            <span>{pick(lang, { en: 'Customer Care: 1800-446-446', ta: 'வாடிக்கையாளர் சேவை: 1800-446-446', hi: 'ग्राहक सेवा: 1800-446-446', ml: 'കസ്റ്റമർ കെയർ: 1800-446-446', te: 'కస్టమర్ కేర్: 1800-446-446' })}</span>
           </div>
         </div>
       )}
@@ -756,10 +897,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               <X className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2 text-emerald-700 font-bold mb-2">
-              <MapPin className="w-5 h-5" /> Select Delivery Location
+              <MapPin className="w-5 h-5" /> {pick(lang, { en: 'Select Delivery Location', ta: 'டெலிவரி இடத்தைத் தேர்ந்தெடுக்கவும்', hi: 'डिलीवरी स्थान चुनें', ml: 'ഡെലിവറി സ്ഥലം തിരഞ്ഞെടുക്കുക', te: 'డెలివరీ స్థానాన్ని ఎంచుకోండి' })}
             </div>
             <p className="text-xs text-neutral-500 mb-4">
-              Use your live location, or search your delivery address below.
+              {pick(lang, {
+                en: 'Use your live location, or search your delivery address below.',
+                ta: 'உங்கள் நேரடி இருப்பிடத்தைப் பயன்படுத்தவும், அல்லது கீழே உங்கள் டெலிவரி முகவரியைத் தேடவும்.',
+                hi: 'अपनी लाइव लोकेशन का उपयोग करें, या नीचे अपना डिलीवरी पता खोजें।',
+                ml: 'നിങ്ങളുടെ ലൈവ് ലൊക്കേഷൻ ഉപയോഗിക്കുക, അല്ലെങ്കിൽ താഴെ നിങ്ങളുടെ ഡെലിവറി വിലാസം തിരയുക.',
+                te: 'మీ లైవ్ లొకేషన్‌ను ఉపయోగించండి, లేదా దిగువన మీ డెలివరీ చిరునామాను వెతకండి.'
+              })}
             </p>
 
             <button
@@ -771,18 +918,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               {isLocating ? (
                 <>
                   <div className="w-3.5 h-3.5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-                  Detecting Your Location...
+                  {pick(lang, { en: 'Detecting Your Location...', ta: 'உங்கள் இருப்பிடத்தைக் கண்டறிகிறது...', hi: 'आपकी लोकेशन का पता लगाया जा रहा है...', ml: 'നിങ്ങളുടെ ലൊക്കേഷൻ കണ്ടെത്തുന്നു...', te: 'మీ లొకేషన్‌ను గుర్తిస్తోంది...' })}
                 </>
               ) : (
                 <>
-                  <LocateFixed className="w-3.5 h-3.5" /> Use My Current Location (GPS)
+                  <LocateFixed className="w-3.5 h-3.5" /> {pick(lang, { en: 'Use My Current Location (GPS)', ta: 'என் தற்போதைய இருப்பிடத்தைப் பயன்படுத்து (GPS)', hi: 'मेरी वर्तमान लोकेशन का उपयोग करें (GPS)', ml: 'എന്റെ നിലവിലെ ലൊക്കേഷൻ ഉപയോഗിക്കുക (GPS)', te: 'నా ప్రస్తుత లొకేషన్‌ను ఉపయోగించండి (GPS)' })}
                 </>
               )}
             </button>
 
             <div className="flex items-center gap-3 mb-4">
               <div className="h-px flex-1 bg-neutral-200" />
-              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Or Enter Manually</span>
+              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+                {pick(lang, { en: 'Or Enter Manually', ta: 'அல்லது கைமுறையாக உள்ளிடவும்', hi: 'या मैन्युअल रूप से दर्ज करें', ml: 'അല്ലെങ്കിൽ സ്വയം നൽകുക', te: 'లేదా మాన్యువల్‌గా నమోదు చేయండి' })}
+              </span>
               <div className="h-px flex-1 bg-neutral-200" />
             </div>
 
@@ -797,7 +946,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="text"
-                  placeholder="Enter your delivery Pincode, e.g. 560038"
+                  placeholder={pick(lang, {
+                    en: 'Enter your delivery Pincode, e.g. 560038',
+                    ta: 'உங்கள் டெலிவரி பின்கோடை உள்ளிடவும், உதா. 560038',
+                    hi: 'अपना डिलीवरी पिनकोड दर्ज करें, उदा. 560038',
+                    ml: 'നിങ്ങളുടെ ഡെലിവറി പിൻകോഡ് നൽകുക, ഉദാ. 560038',
+                    te: 'మీ డెలివరీ పిన్‌కోడ్‌ను నమోదు చేయండి, ఉదా. 560038'
+                  })}
                   value={inputPincode}
                   onChange={(e) => setInputPincode(e.target.value)}
                   className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-xl pl-10 pr-9 py-3 text-sm text-[#0A1F12] focus:outline-none"
@@ -818,7 +973,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               {pincodeStatus && (
                 <div
                   className={`text-xs p-3 rounded-xl border ${
-                    pincodeStatus.includes('Active')
+                    pincodeStatusOk
                       ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
                       : 'bg-neutral-50 border-neutral-200 text-neutral-600'
                   }`}
@@ -831,7 +986,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 type="submit"
                 className="w-full bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold py-3 rounded-full text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-emerald-900/20"
               >
-                Confirm Location
+                {pick(lang, { en: 'Confirm Location', ta: 'இருப்பிடத்தை உறுதிப்படுத்தவும்', hi: 'लोकेशन की पुष्टि करें', ml: 'ലൊക്കേഷൻ സ്ഥിരീകരിക്കുക', te: 'లొకేషన్‌ను నిర్ధారించండి' })}
               </button>
             </form>
           </div>

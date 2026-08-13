@@ -36,11 +36,35 @@ const FALLBACK_TA = {
     { title: 'சந்தா செய்து சேமிக்கவும்', subtitle: '20% வரை தள்ளுபடி', cta: 'தொடங்குங்கள்', path: '/subscriptions', image: '/Images/banners/promo-subscriber-banner.jpg', theme: 'light' }
   ]
 };
+const FALLBACK_HI = {
+  items: [
+    { title: 'मुफ्त डिलीवरी', subtitle: '₹499 से ऊपर', cta: 'अभी शॉप करें', path: '/search', image: '/Images/banners/promo-free-delivery-banner.jpg', theme: 'light' },
+    { title: 'बिरयानी किट्स', subtitle: 'सब कुछ शामिल', cta: 'अभी ऑर्डर करें', path: '/category/biryani', image: '/Images/banners/biryani-kit.jpg', theme: 'dark', badge: 'नया' },
+    { title: 'साप्ताहिक फिटनेस प्रोटीन पास', subtitle: '12 डिलीवरी', cta: 'प्लान देखें', path: '/subscriptions', image: '/Images/banners/plan-fitness-banner.jpg', theme: 'dark' },
+    { title: 'सब्सक्राइब करें और बचाएं', subtitle: '20% तक की छूट', cta: 'शुरू करें', path: '/subscriptions', image: '/Images/banners/promo-subscriber-banner.jpg', theme: 'light' }
+  ]
+};
+const FALLBACK_ML = {
+  items: [
+    { title: 'സൗജന്യ ഡെലിവറി', subtitle: '₹499-ന് മുകളിൽ', cta: 'ഇപ്പോൾ ഷോപ്പ് ചെയ്യൂ', path: '/search', image: '/Images/banners/promo-free-delivery-banner.jpg', theme: 'light' },
+    { title: 'ബിരിയാണി കിറ്റുകൾ', subtitle: 'എല്ലാം ഉൾപ്പെടുന്നു', cta: 'ഇപ്പോൾ ഓർഡർ ചെയ്യൂ', path: '/category/biryani', image: '/Images/banners/biryani-kit.jpg', theme: 'dark', badge: 'പുതിയത്' },
+    { title: 'വീക്ക്‌ലി ഫിറ്റ്‌നസ് പ്രോട്ടീൻ പാസ്', subtitle: '12 ഡെലിവറികൾ', cta: 'പ്ലാൻ കാണുക', path: '/subscriptions', image: '/Images/banners/plan-fitness-banner.jpg', theme: 'dark' },
+    { title: 'സബ്‌സ്ക്രൈബ് ചെയ്ത് ലാഭിക്കൂ', subtitle: '20% വരെ കിഴിവ്', cta: 'ആരംഭിക്കൂ', path: '/subscriptions', image: '/Images/banners/promo-subscriber-banner.jpg', theme: 'light' }
+  ]
+};
+const FALLBACK_TE = {
+  items: [
+    { title: 'ఉచిత డెలివరీ', subtitle: '₹499పైన', cta: 'ఇప్పుడే షాప్ చేయండి', path: '/search', image: '/Images/banners/promo-free-delivery-banner.jpg', theme: 'light' },
+    { title: 'బిర్యానీ కిట్స్', subtitle: 'అన్నీ చేర్చబడ్డాయి', cta: 'ఇప్పుడే ఆర్డర్ చేయండి', path: '/category/biryani', image: '/Images/banners/biryani-kit.jpg', theme: 'dark', badge: 'కొత్తది' },
+    { title: 'వీక్లీ ఫిట్‌నెస్ ప్రోటీన్ పాస్', subtitle: '12 డెలివరీలు', cta: 'ప్లాన్ చూడండి', path: '/subscriptions', image: '/Images/banners/plan-fitness-banner.jpg', theme: 'dark' },
+    { title: 'సబ్‌స్క్రైబ్ చేసి ఆదా చేయండి', subtitle: '20% వరకు తగ్గింపు', cta: 'ప్రారంభించండి', path: '/subscriptions', image: '/Images/banners/promo-subscriber-banner.jpg', theme: 'light' }
+  ]
+};
 
 export const PromoTileStrip: React.FC<PromoTileStripProps> = ({ onNavigate }) => {
   const { lang } = useLang();
   const block = useSiteContent('sections.promo_tiles', FALLBACK);
-  const resolvedBlock = lang === 'ta' ? FALLBACK_TA : block;
+  const resolvedBlock = lang === 'ta' ? FALLBACK_TA : lang === 'hi' ? FALLBACK_HI : lang === 'ml' ? FALLBACK_ML : lang === 'te' ? FALLBACK_TE : block;
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollByAmount = (dir: 'left' | 'right') => {
     const el = scrollRef.current;

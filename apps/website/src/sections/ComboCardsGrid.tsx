@@ -3,7 +3,7 @@ import { Heart, ArrowRight } from 'lucide-react';
 import { StoreService } from '../lib/storage';
 import type { Product } from '../types';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
-import { useLang } from '../lib/language';
+import { useLang, pick } from '../lib/language';
 
 interface ComboCardsGridProps {
   products: Product[];
@@ -32,7 +32,28 @@ export const ComboCardsGrid: React.FC<ComboCardsGridProps> = ({ products, onSele
     viewAllLabel: 'அனைத்தையும் காண்க',
     viewAllPath: '/category/combo-packs'
   };
-  const resolvedComboHeading = lang === 'ta' ? comboHeadingTa : comboHeading;
+  const comboHeadingHi = {
+    eyebrow: 'बंडल करें और बचाएं',
+    heading: 'कॉम्बो पैक',
+    subheading: 'हर कट अलग से खरीदने से बेहतर कीमत पर चुने हुए बंडल।',
+    viewAllLabel: 'सभी देखें',
+    viewAllPath: '/category/combo-packs'
+  };
+  const comboHeadingMl = {
+    eyebrow: 'ബണ്ടിൽ ചെയ്ത് ലാഭിക്കൂ',
+    heading: 'കോംബോ പായ്ക്കുകൾ',
+    subheading: 'ഓരോ കട്ടും പ്രത്യേകം വാങ്ങുന്നതിനേക്കാൾ മികച്ച വിലയിൽ തിരഞ്ഞെടുത്ത ബണ്ടിലുകൾ.',
+    viewAllLabel: 'എല്ലാം കാണുക',
+    viewAllPath: '/category/combo-packs'
+  };
+  const comboHeadingTe = {
+    eyebrow: 'బండిల్ చేసి ఆదా చేయండి',
+    heading: 'కాంబో ప్యాక్‌లు',
+    subheading: 'ప్రతి ముక్కను విడిగా కొనడం కంటే మంచి ధరలో ఎంపిక చేసిన బండిల్స్.',
+    viewAllLabel: 'అన్నీ చూడండి',
+    viewAllPath: '/category/combo-packs'
+  };
+  const resolvedComboHeading = lang === 'ta' ? comboHeadingTa : lang === 'hi' ? comboHeadingHi : lang === 'ml' ? comboHeadingMl : lang === 'te' ? comboHeadingTe : comboHeading;
 
   const combos = products.filter((p) => p.category === 'combo-packs');
   const [wishlist, setWishlist] = useState<string[]>(() => StoreService.getWishlist());
@@ -47,6 +68,12 @@ export const ComboCardsGrid: React.FC<ComboCardsGridProps> = ({ products, onSele
 
   const ribbonTags = lang === 'ta'
     ? ['சிறந்த காம்போ!', 'விருந்து காம்போ!', 'மதிப்பு காம்போ!']
+    : lang === 'hi'
+    ? ['बेस्ट कॉम्बो!', 'फीस्ट कॉम्बो!', 'वैल्यू कॉम्बो!']
+    : lang === 'ml'
+    ? ['ബെസ്റ്റ് കോംബോ!', 'ഫീസ്റ്റ് കോംബോ!', 'വാല്യൂ കോംബോ!']
+    : lang === 'te'
+    ? ['బెస్ట్ కాంబో!', 'ఫీస్ట్ కాంబో!', 'వాల్యూ కాంబో!']
     : ['Best Combo!', 'Feast Combo!', 'Value Combo!'];
 
   return (
@@ -93,12 +120,12 @@ export const ComboCardsGrid: React.FC<ComboCardsGridProps> = ({ products, onSele
                   </div>
                   {!!combo.discountPercentage && (
                     <span className="bg-[#D4AF37] text-[#0A1F12] text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide">
-                      {combo.discountPercentage}% {lang === 'ta' ? 'தள்ளுபடி' : 'Off'}
+                      {combo.discountPercentage}% {pick(lang, { en: 'Off', ta: 'தள்ளுபடி', hi: 'छूट', ml: 'കിഴിവ്', te: 'తగ్గింపు' })}
                     </span>
                   )}
                 </div>
                 <span className="inline-flex items-center gap-1 text-white text-[10px] font-black uppercase tracking-wider mt-2 group-hover:gap-1.5 transition-all">
-                  {lang === 'ta' ? 'இப்போது ஆர்டர் செய்யுங்கள்' : 'Order Now'} <ArrowRight className="w-3 h-3" />
+                  {pick(lang, { en: 'Order Now', ta: 'இப்போது ஆர்டர் செய்யுங்கள்', hi: 'अभी ऑर्डर करें', ml: 'ഇപ്പോൾ ഓർഡർ ചെയ്യുക', te: 'ఇప్పుడే ఆర్డర్ చేయండి' })} <ArrowRight className="w-3 h-3" />
                 </span>
               </div>
             </div>

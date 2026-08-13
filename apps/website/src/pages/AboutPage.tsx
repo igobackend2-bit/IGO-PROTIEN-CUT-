@@ -3,12 +3,30 @@ import { ShieldCheck, Award, Clock, CheckCircle2, Truck } from 'lucide-react';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
 import { FadeImage } from '../components/FadeImage';
 import { TraceabilitySection } from '../sections/TraceabilitySection';
-import { useLang } from '../lib/language';
+import { useLang, pick } from '../lib/language';
 
 const CONTENT_TA = {
   title: 'ப்ரோட்டீன் கட்ஸ் கதை',
   intro:
     'இந்திய வீடுகளில் இருந்து இரசாயன பாதுகாப்பான்கள், ஆன்டிபயாடிக்குகள் மற்றும் பழைய உறைந்த இறைச்சிகளை ஒழிக்க வேண்டும் என்ற ஒரே ஆர்வத்தில் இருந்து ப்ரோட்டீன் கட்ஸ் பிறந்தது. மதிப்புமிக்க IGO குரூப்ஸ் சுற்றுச்சூழல் அமைப்பின் ஒரு பகுதியாக, தொழில்நுட்பம், பண்ணை கூட்டாண்மைகள் மற்றும் குளிர்சாதன சேமிப்பு லாஜிஸ்டிக்ஸை பயன்படுத்தி 30-90 நிமிடங்களில் தூய்மையான, புதிய புரதத்தை வழங்குகிறோம்.'
+};
+
+const CONTENT_HI = {
+  title: 'प्रोटीन कट्स की कहानी',
+  intro:
+    'प्रोटीन कट्स का जन्म एक ही जुनून से हुआ: भारतीय घरों से रासायनिक परिरक्षकों, एंटीबायोटिक्स और बासी जमे हुए मांस को खत्म करना। प्रतिष्ठित आईजीओ ग्रुप्स इकोसिस्टम के हिस्से के रूप में, हम तकनीक, फार्म साझेदारी और कोल्ड-चेन लॉजिस्टिक्स का उपयोग करके 30-90 मिनट में शुद्ध, ताज़ा प्रोटीन पहुंचाते हैं।'
+};
+
+const CONTENT_ML = {
+  title: 'പ്രോട്ടീൻ കട്ട്‌സിന്റെ കഥ',
+  intro:
+    'ഇന്ത്യൻ വീടുകളിൽ നിന്ന് രാസ പ്രിസർവേറ്റീവുകൾ, ആന്റിബയോട്ടിക്കുകൾ, പഴകിയ ഫ്രോസൺ മാംസം എന്നിവ ഇല്ലാതാക്കുക എന്ന ഒരൊറ്റ ലക്ഷ്യത്തിൽ നിന്നാണ് പ്രോട്ടീൻ കട്ട്‌സ് പിറന്നത്. അഭിമാനകരമായ ഐജിഒ ഗ്രൂപ്‌സ് ഇക്കോസിസ്റ്റത്തിന്റെ ഭാഗമായി, സാങ്കേതികവിദ്യ, ഫാം പങ്കാളിത്തങ്ങൾ, കോൾഡ്-ചെയിൻ ലോജിസ്റ്റിക്‌സ് എന്നിവ ഉപയോഗിച്ച് ഞങ്ങൾ 30-90 മിനിറ്റിനുള്ളിൽ ശുദ്ധവും പുതിയതുമായ പ്രോട്ടീൻ എത്തിക്കുന്നു.'
+};
+
+const CONTENT_TE = {
+  title: 'ప్రోటీన్ కట్స్ కథ',
+  intro:
+    'భారతీయ ఇళ్ల నుండి రసాయన సంరక్షణకారులు, యాంటీబయాటిక్స్ మరియు పాత ఫ్రోజెన్ మాంసాన్ని తొలగించాలనే ఒకే ఒక్క తపనతో ప్రోటీన్ కట్స్ పుట్టింది. ప్రతిష్టాత్మకమైన ఐజీవో గ్రూప్స్ పర్యావరణ వ్యవస్థలో భాగంగా, సాంకేతికత, వ్యవసాయ భాగస్వామ్యాలు మరియు కోల్డ్-చైన్ లాజిస్టిక్స్‌ను ఉపయోగించి మేము 30-90 నిమిషాల్లో స్వచ్ఛమైన, తాజా ప్రోటీన్‌ను అందిస్తాము.'
 };
 
 const WHAT_WE_SELL_TA = [
@@ -20,6 +38,39 @@ const WHAT_WE_SELL_TA = [
   'உறைந்த சிற்றுண்டிகள்',
   'காம்போ பாக்குகள்',
   'இறைச்சி சந்தாக்கள்'
+];
+
+const WHAT_WE_SELL_HI = [
+  'ताज़ा चिकन',
+  'मटन और बीफ़',
+  'मछली और सीफूड',
+  'फार्म अंडे',
+  'रेडी-टू-कुक',
+  'फ्रोज़न स्नैक्स',
+  'कॉम्बो पैक',
+  'मीट सब्सक्रिप्शन'
+];
+
+const WHAT_WE_SELL_ML = [
+  'ഫ്രഷ് ചിക്കൻ',
+  'മട്ടൻ & ബീഫ്',
+  'മീൻ & കടൽ വിഭവങ്ങൾ',
+  'ഫാം മുട്ടകൾ',
+  'റെഡി-ടു-കുക്ക്',
+  'ഫ്രോസൺ സ്നാക്സ്',
+  'കോംബോ പാക്കുകൾ',
+  'മീറ്റ് സബ്സ്ക്രിപ്ഷനുകൾ'
+];
+
+const WHAT_WE_SELL_TE = [
+  'తాజా చికెన్',
+  'మటన్ & బీఫ్',
+  'చేపలు & సీఫుడ్',
+  'ఫార్మ్ గుడ్లు',
+  'రెడీ-టు-కుక్',
+  'ఫ్రోజెన్ స్నాక్స్',
+  'కాంబో ప్యాక్‌లు',
+  'మీట్ సబ్‌స్క్రిప్షన్‌లు'
 ];
 
 export const AboutPage: React.FC = () => {
@@ -34,23 +85,33 @@ export const AboutPage: React.FC = () => {
     intro:
       'Protein Cuts was born out of a single obsession: to eradicate chemical preservatives, antibiotics, and stale frozen meats from Indian households. As part of the prestigious IGO Groups ecosystem, we leverage technology, farm partnerships, and cold-chain logistics to deliver pure, fresh protein in 30-90 minutes.'
   });
-  const resolvedContent = lang === 'ta' ? CONTENT_TA : content;
-  const whatWeSellItems = lang === 'ta' ? WHAT_WE_SELL_TA : [
-    'Fresh Chicken',
-    'Mutton & Beef',
-    'Fish & Seafood',
-    'Farm Eggs',
-    'Ready-to-Cook',
-    'Frozen Snacks',
-    'Combo Packs',
-    'Meat Subscriptions'
-  ];
+  const resolvedContent =
+    lang === 'ta' ? CONTENT_TA : lang === 'hi' ? CONTENT_HI : lang === 'ml' ? CONTENT_ML : lang === 'te' ? CONTENT_TE : content;
+  const whatWeSellItems =
+    lang === 'ta'
+      ? WHAT_WE_SELL_TA
+      : lang === 'hi'
+      ? WHAT_WE_SELL_HI
+      : lang === 'ml'
+      ? WHAT_WE_SELL_ML
+      : lang === 'te'
+      ? WHAT_WE_SELL_TE
+      : [
+          'Fresh Chicken',
+          'Mutton & Beef',
+          'Fish & Seafood',
+          'Farm Eggs',
+          'Ready-to-Cook',
+          'Frozen Snacks',
+          'Combo Packs',
+          'Meat Subscriptions'
+        ];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
       {/* Hero */}
       <div className="bg-[#0A1F12] rounded-3xl p-8 sm:p-12 text-center max-w-4xl mx-auto space-y-4 shadow-lg shadow-emerald-950/20 text-white">
-        <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">{lang === 'ta' ? 'IGO சுற்றுச்சூழல் அமைப்பு பிராண்ட்' : 'IGO ECOSYSTEM BRAND'}</span>
+        <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">{pick(lang, { en: 'IGO ECOSYSTEM BRAND', ta: 'IGO சுற்றுச்சூழல் அமைப்பு பிராண்ட்', hi: 'आईजीओ इकोसिस्टम ब्रांड', ml: 'ഐജിഒ ഇക്കോസിസ്റ്റം ബ്രാൻഡ്', te: 'ఐజీవో పర్యావరణ వ్యవస్థ బ్రాండ్' })}</span>
         <h1 className="text-3xl sm:text-5xl font-black tracking-tight">{resolvedContent.title}</h1>
         <p className="text-xs sm:text-base text-neutral-300 leading-relaxed">{resolvedContent.intro}</p>
       </div>
@@ -63,16 +124,24 @@ export const AboutPage: React.FC = () => {
           say, a supplement or grocery brand. This section says it directly. */}
       <div className="bg-white border border-neutral-200 rounded-3xl p-8 space-y-6 shadow-sm">
         <div className="max-w-2xl">
-          <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest">{lang === 'ta' ? 'நாங்கள் விற்பது என்ன' : 'What We Sell'}</span>
+          <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest">{pick(lang, { en: 'What We Sell', ta: 'நாங்கள் விற்பது என்ன', hi: 'हम क्या बेचते हैं', ml: 'ഞങ്ങൾ വിൽക്കുന്നത്', te: 'మేము ఏమి విక్రయిస్తాము' })}</span>
           <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight mt-2">
-            {lang === 'ta'
-              ? 'புதிய கோழி, மட்டன், மீன், கடல் உணவு மற்றும் முட்டைகள் — ஆர்டர் செய்யும்போது வெட்டப்பட்டு 30-90 நிமிடங்களில் வழங்கப்படும்.'
-              : 'Fresh chicken, mutton, fish, seafood and eggs — cut to order and delivered in 30-90 minutes.'}
+            {pick(lang, {
+              en: 'Fresh chicken, mutton, fish, seafood and eggs — cut to order and delivered in 30-90 minutes.',
+              ta: 'புதிய கோழி, மட்டன், மீன், கடல் உணவு மற்றும் முட்டைகள் — ஆர்டர் செய்யும்போது வெட்டப்பட்டு 30-90 நிமிடங்களில் வழங்கப்படும்.',
+              hi: 'ताज़ा चिकन, मटन, मछली, सीफूड और अंडे — ऑर्डर के अनुसार काटे जाते हैं और 30-90 मिनट में डिलीवर होते हैं।',
+              ml: 'ഫ്രഷ് ചിക്കൻ, മട്ടൻ, മീൻ, കടൽ വിഭവങ്ങൾ, മുട്ടകൾ — ഓർഡർ അനുസരിച്ച് മുറിച്ച് 30-90 മിനിറ്റിനുള്ളിൽ എത്തിക്കുന്നു.',
+              te: 'తాజా చికెన్, మటన్, చేపలు, సీఫుడ్ మరియు గుడ్లు — ఆర్డర్ చేసిన వెంటనే కట్ చేసి 30-90 నిమిషాల్లో డెలివరీ చేస్తాము.'
+            })}
           </h2>
           <p className="text-sm text-neutral-600 leading-relaxed mt-3">
-            {lang === 'ta'
-              ? 'ப்ரோட்டீன் கட்ஸ் ஒரு ஆன்லைன் கசாப்புக் கடை: நீங்கள் வெட்டு மற்றும் எடையைத் தேர்ந்தெடுக்கிறீர்கள், நீங்கள் ஆர்டர் செய்த பிறகு எங்கள் கசாப்புக்காரர்கள் அதை புதிதாக தயார் செய்கிறார்கள், அது 0-4°C குளிர்ச்சியில் உங்கள் வீட்டிற்கு வருகிறது. தனிப்பட்ட வெட்டுகளுக்கு அப்பால், நாங்கள் சமைக்கத் தயார் மேரினேட் செய்யப்பட்ட பொருட்கள், உறைந்த சிற்றுண்டிகள், குடும்பங்கள் அல்லது ஜிம் பயனர்களுக்கான காம்போ பாக்குகள் மற்றும் தொடர் இறைச்சி சந்தாக்களையும் விற்கிறோம்.'
-              : 'Protein Cuts is an online butcher: you pick the cut and weight, our butchers dress it fresh after you order, and it reaches your door chilled at 0-4°C. Beyond individual cuts, we also sell ready-to-cook marinated items, frozen snacks, combo packs for families or gym-goers, and recurring meat subscriptions.'}
+            {pick(lang, {
+              en: 'Protein Cuts is an online butcher: you pick the cut and weight, our butchers dress it fresh after you order, and it reaches your door chilled at 0-4°C. Beyond individual cuts, we also sell ready-to-cook marinated items, frozen snacks, combo packs for families or gym-goers, and recurring meat subscriptions.',
+              ta: 'ப்ரோட்டீன் கட்ஸ் ஒரு ஆன்லைன் கசாப்புக் கடை: நீங்கள் வெட்டு மற்றும் எடையைத் தேர்ந்தெடுக்கிறீர்கள், நீங்கள் ஆர்டர் செய்த பிறகு எங்கள் கசாப்புக்காரர்கள் அதை புதிதாக தயார் செய்கிறார்கள், அது 0-4°C குளிர்ச்சியில் உங்கள் வீட்டிற்கு வருகிறது. தனிப்பட்ட வெட்டுகளுக்கு அப்பால், நாங்கள் சமைக்கத் தயார் மேரினேட் செய்யப்பட்ட பொருட்கள், உறைந்த சிற்றுண்டிகள், குடும்பங்கள் அல்லது ஜிம் பயனர்களுக்கான காம்போ பாக்குகள் மற்றும் தொடர் இறைச்சி சந்தாக்களையும் விற்கிறோம்.',
+              hi: 'प्रोटीन कट्स एक ऑनलाइन कसाई की दुकान है: आप कट और वज़न चुनते हैं, आपके ऑर्डर के बाद हमारे कसाई इसे ताज़ा तैयार करते हैं, और यह 0-4°C पर ठंडा होकर आपके दरवाज़े तक पहुँचता है। अलग-अलग कट्स के अलावा, हम रेडी-टू-कुक मैरिनेटेड आइटम, फ्रोज़न स्नैक्स, परिवारों या जिम जाने वालों के लिए कॉम्बो पैक, और नियमित मीट सब्सक्रिप्शन भी बेचते हैं।',
+              ml: 'പ്രോട്ടീൻ കട്ട്‌സ് ഒരു ഓൺലൈൻ ബുച്ചർ ഷോപ്പ് ആണ്: നിങ്ങൾ കട്ടും തൂക്കവും തിരഞ്ഞെടുക്കുന്നു, നിങ്ങൾ ഓർഡർ ചെയ്ത ശേഷം ഞങ്ങളുടെ ബുച്ചർമാർ അത് പുതുതായി തയ്യാറാക്കുന്നു, അത് 0-4°C തണുപ്പിൽ നിങ്ങളുടെ വീട്ടിലെത്തുന്നു. ഒറ്റ കട്ടുകൾക്ക് പുറമേ, റെഡി-ടു-കുക്ക് മാരിനേറ്റഡ് ഐറ്റങ്ങൾ, ഫ്രോസൺ സ്നാക്സ്, കുടുംബങ്ങൾക്കോ ജിം പോകുന്നവർക്കോ ഉള്ള കോംബോ പാക്കുകൾ, ആവർത്തിക്കുന്ന മീറ്റ് സബ്സ്ക്രിപ്ഷനുകൾ എന്നിവയും ഞങ്ങൾ വിൽക്കുന്നു.',
+              te: 'ప్రోటీన్ కట్స్ ఒక ఆన్‌లైన్ మాంస దుకాణం: మీరు కట్ మరియు బరువు ఎంచుకుంటారు, మీరు ఆర్డర్ చేసిన తర్వాత మా కసాయిలు దానిని తాజాగా సిద్ధం చేస్తారు, అది 0-4°C చల్లదనంలో మీ ఇంటికి చేరుతుంది. వ్యక్తిగత కట్స్‌తో పాటు, రెడీ-టు-కుక్ మెరినేటెడ్ వస్తువులు, ఫ్రోజెన్ స్నాక్స్, కుటుంబాలు లేదా జిమ్ వెళ్ళేవారి కోసం కాంబో ప్యాక్‌లు, పునరావృత మీట్ సబ్‌స్క్రిప్షన్‌లను కూడా మేము విక్రయిస్తాము.'
+            })}
           </p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
@@ -93,16 +162,20 @@ export const AboutPage: React.FC = () => {
           phone/QR-code composite image. */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
         <div className="space-y-5">
-          <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest">{lang === 'ta' ? 'உங்கள் புரதத்தை நம்புங்கள்' : 'Trust Your Protein'}</span>
+          <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest">{pick(lang, { en: 'Trust Your Protein', ta: 'உங்கள் புரதத்தை நம்புங்கள்', hi: 'अपने प्रोटीन पर भरोसा करें', ml: 'നിങ്ങളുടെ പ്രോട്ടീനിൽ വിശ്വസിക്കുക', te: 'మీ ప్రోటీన్‌ను నమ్మండి' })}</span>
           <h2 className="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
-            <span className="text-[#0A1F12]">{lang === 'ta' ? 'உங்கள் மூலத்தை அறியுங்கள்.' : 'Know Your Source.'}</span>
+            <span className="text-[#0A1F12]">{pick(lang, { en: 'Know Your Source.', ta: 'உங்கள் மூலத்தை அறியுங்கள்.', hi: 'अपना स्रोत जानें।', ml: 'നിങ്ങളുടെ ഉറവിടം അറിയുക.', te: 'మీ మూలాన్ని తెలుసుకోండి.' })}</span>
             <br />
-            <span className="text-[#D4AF37]">{lang === 'ta' ? 'உங்கள் வெட்டை நம்புங்கள்.' : 'Trust Your Cut.'}</span>
+            <span className="text-[#D4AF37]">{pick(lang, { en: 'Trust Your Cut.', ta: 'உங்கள் வெட்டை நம்புங்கள்.', hi: 'अपने कट पर भरोसा करें।', ml: 'നിങ്ങളുടെ കട്ട് വിശ്വസിക്കുക.', te: 'మీ కట్‌ను నమ్మండి.' })}</span>
           </h2>
           <p className="text-sm text-neutral-600 leading-relaxed max-w-md">
-            {lang === 'ta'
-              ? 'எங்கள் தொழில்நுட்ப-இயங்கும் கண்காணிப்பு அமைப்பு பண்ணையிலிருந்து மேசைக்கு முழுமையான வெளிப்படைத்தன்மையை வழங்குகிறது. ஒவ்வொரு பாக்கிலும் ஒரு தனித்துவமான பேட்ச் ஐடி மற்றும் QR குறியீடு உள்ளது, இது உங்கள் இறைச்சியின் பயணத்தை — குறிப்பிட்ட பண்ணையிலிருந்து அதன் டெலிவரியின் வெப்பநிலை பதிவுகள் வரை — வெளிப்படுத்துகிறது.'
-              : 'Our technology-driven traceability system provides complete farm-to-table transparency. Every pack carries a unique batch ID and QR code that reveals the journey of your meat — from the specific farm to the temperature logs of its delivery.'}
+            {pick(lang, {
+              en: 'Our technology-driven traceability system provides complete farm-to-table transparency. Every pack carries a unique batch ID and QR code that reveals the journey of your meat — from the specific farm to the temperature logs of its delivery.',
+              ta: 'எங்கள் தொழில்நுட்ப-இயங்கும் கண்காணிப்பு அமைப்பு பண்ணையிலிருந்து மேசைக்கு முழுமையான வெளிப்படைத்தன்மையை வழங்குகிறது. ஒவ்வொரு பாக்கிலும் ஒரு தனித்துவமான பேட்ச் ஐடி மற்றும் QR குறியீடு உள்ளது, இது உங்கள் இறைச்சியின் பயணத்தை — குறிப்பிட்ட பண்ணையிலிருந்து அதன் டெலிவரியின் வெப்பநிலை பதிவுகள் வரை — வெளிப்படுத்துகிறது.',
+              hi: 'हमारा तकनीक-संचालित ट्रेसेबिलिटी सिस्टम फार्म से टेबल तक पूरी पारदर्शिता प्रदान करता है। हर पैक में एक अनोखा बैच आईडी और क्यूआर कोड होता है जो आपके मांस की यात्रा को उजागर करता है — विशिष्ट फार्म से लेकर उसकी डिलीवरी के तापमान लॉग तक।',
+              ml: 'ഞങ്ങളുടെ സാങ്കേതികവിദ്യാധിഷ്ഠിത ട്രെയ്സബിലിറ്റി സിസ്റ്റം ഫാം മുതൽ മേശ വരെ പൂർണ്ണ സുതാര്യത നൽകുന്നു. ഓരോ പാക്കിനും ഒരു അതുല്യമായ ബാച്ച് ഐഡിയും ക്യുആർ കോഡും ഉണ്ട്, അത് നിങ്ങളുടെ മാംസത്തിന്റെ യാത്ര — നിർദ്ദിഷ്ട ഫാമിൽ നിന്ന് അതിന്റെ ഡെലിവറിയുടെ താപനില രേഖകൾ വരെ — വെളിപ്പെടുത്തുന്നു.',
+              te: 'మా సాంకేతికత ఆధారిత ట్రేసబిలిటీ వ్యవస్థ వ్యవసాయ క్షేత్రం నుండి టేబుల్ వరకు పూర్తి పారదర్శకతను అందిస్తుంది. ప్రతి ప్యాక్‌లో ఒక ప్రత్యేకమైన బ్యాచ్ ఐడీ మరియు క్యూఆర్ కోడ్ ఉంటుంది, ఇది మీ మాంసం ప్రయాణాన్ని — నిర్దిష్ట వ్యవసాయ క్షేత్రం నుండి దాని డెలివరీ ఉష్ణోగ్రత రికార్డుల వరకు — వెల్లడిస్తుంది.'
+            })}
           </p>
 
           <div className="space-y-4 pt-2">
@@ -111,8 +184,8 @@ export const AboutPage: React.FC = () => {
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               </div>
               <div>
-                <div className="font-bold text-[#0A1F12] text-sm">{lang === 'ta' ? 'சரிபார்க்கப்பட்ட தோற்றங்கள்' : 'Verified Origins'}</div>
-                <p className="text-xs text-neutral-500">{lang === 'ta' ? 'தமிழ்நாட்டின் நீலகிரி மலைத்தொடரில் உள்ள பாரம்பரிய பண்ணைகளுக்கு கண்டறியப்பட்டது.' : 'Traced back to heritage farms in the Nilgiris range, Tamil Nadu.'}</p>
+                <div className="font-bold text-[#0A1F12] text-sm">{pick(lang, { en: 'Verified Origins', ta: 'சரிபார்க்கப்பட்ட தோற்றங்கள்', hi: 'सत्यापित मूल', ml: 'സ്ഥിരീകരിച്ച ഉറവിടങ്ങൾ', te: 'ధృవీకరించబడిన మూలాలు' })}</div>
+                <p className="text-xs text-neutral-500">{pick(lang, { en: 'Traced back to heritage farms in the Nilgiris range, Tamil Nadu.', ta: 'தமிழ்நாட்டின் நீலகிரி மலைத்தொடரில் உள்ள பாரம்பரிய பண்ணைகளுக்கு கண்டறியப்பட்டது.', hi: 'तमिलनाडु के नीलगिरि पर्वतमाला की पारंपरिक फार्मों तक वापस खोजा गया।', ml: 'തമിഴ്‌നാട്ടിലെ നീലഗിരി മലനിരകളിലെ പൈതൃക ഫാമുകളിലേക്ക് കണ്ടെത്തിയത്.', te: 'తమిళనాడులోని నీలగిరి పర్వత శ్రేణిలోని వారసత్వ వ్యవసాయ క్షేత్రాలకు గుర్తించబడింది.' })}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -120,8 +193,8 @@ export const AboutPage: React.FC = () => {
                 <Truck className="w-4 h-4 text-amber-600" />
               </div>
               <div>
-                <div className="font-bold text-[#0A1F12] text-sm">{lang === 'ta' ? 'குளிர்சாதன சேமிப்பு வெளிப்படைத்தன்மை' : 'Cold Chain Transparency'}</div>
-                <p className="text-xs text-neutral-500">{lang === 'ta' ? 'ஒவ்வொரு பேட்சும் பண்ணையிலிருந்து வீடு வரை 0-4°C வரம்பிற்குள் கண்காணிக்கப்படுகிறது.' : 'Every batch stays tracked within a 0-4°C window, farm to door.'}</p>
+                <div className="font-bold text-[#0A1F12] text-sm">{pick(lang, { en: 'Cold Chain Transparency', ta: 'குளிர்சாதன சேமிப்பு வெளிப்படைத்தன்மை', hi: 'कोल्ड चेन पारदर्शिता', ml: 'കോൾഡ് ചെയിൻ സുതാര്യത', te: 'కోల్డ్ చైన్ పారదర్శకత' })}</div>
+                <p className="text-xs text-neutral-500">{pick(lang, { en: 'Every batch stays tracked within a 0-4°C window, farm to door.', ta: 'ஒவ்வொரு பேட்சும் பண்ணையிலிருந்து வீடு வரை 0-4°C வரம்பிற்குள் கண்காணிக்கப்படுகிறது.', hi: 'हर बैच फार्म से दरवाज़े तक 0-4°C के दायरे में ट्रैक किया जाता है।', ml: 'ഓരോ ബാച്ചും ഫാമിൽ നിന്ന് വീട്ടിലേക്ക് 0-4°C പരിധിക്കുള്ളിൽ ട്രാക്ക് ചെയ്യപ്പെടുന്നു.', te: 'ప్రతి బ్యాచ్ వ్యవసాయ క్షేత్రం నుండి ఇంటి వరకు 0-4°C పరిధిలో ట్రాక్ చేయబడుతుంది.' })}</p>
               </div>
             </div>
           </div>
@@ -141,8 +214,8 @@ export const AboutPage: React.FC = () => {
 
           <div className="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md rounded-2xl px-4 py-3 flex items-center justify-between gap-3">
             <div>
-              <div className="text-[9px] font-bold text-white/60 uppercase tracking-widest">{lang === 'ta' ? 'ஊடாடும் பயணம்' : 'Interactive Journey'}</div>
-              <div className="text-sm font-black text-white">{lang === 'ta' ? '0-4°C விநியோக சங்கிலி ஒருமைப்பாடு' : '0-4°C Supply Chain Integrity'}</div>
+              <div className="text-[9px] font-bold text-white/60 uppercase tracking-widest">{pick(lang, { en: 'Interactive Journey', ta: 'ஊடாடும் பயணம்', hi: 'इंटरैक्टिव यात्रा', ml: 'ഇന്ററാക്ടീവ് യാത്ര', te: 'ఇంటరాక్టివ్ ప్రయాణం' })}</div>
+              <div className="text-sm font-black text-white">{pick(lang, { en: '0-4°C Supply Chain Integrity', ta: '0-4°C விநியோக சங்கிலி ஒருமைப்பாடு', hi: '0-4°C आपूर्ति श्रृंखला अखंडता', ml: '0-4°C സപ്ലൈ ചെയിൻ ഇന്റഗ്രിറ്റി', te: '0-4°C సరఫరా గొలుసు సమగ్రత' })}</div>
             </div>
             <div className="w-9 h-9 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
               <CheckCircle2 className="w-4.5 h-4.5 text-white" />
@@ -159,42 +232,46 @@ export const AboutPage: React.FC = () => {
       {/* Leadership & Vision */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
         <div className="space-y-4">
-          <span className="text-xs font-bold text-emerald-700 uppercase">{lang === 'ta' ? 'தர சுகாதார அறிக்கை' : 'QUALITY HYGIENE MANIFESTO'}</span>
-          <h2 className="text-2xl font-black text-[#0A1F12]">{lang === 'ta' ? 'நிறுவனர் & CEO செய்தி' : 'Founder & CEO Message'}</h2>
+          <span className="text-xs font-bold text-emerald-700 uppercase">{pick(lang, { en: 'QUALITY HYGIENE MANIFESTO', ta: 'தர சுகாதார அறிக்கை', hi: 'गुणवत्ता स्वच्छता घोषणापत्र', ml: 'ഗുണനിലവാര ശുചിത്വ പ്രഖ്യാപനം', te: 'నాణ్యత పరిశుభ్రత ప్రకటన' })}</span>
+          <h2 className="text-2xl font-black text-[#0A1F12]">{pick(lang, { en: 'Founder & CEO Message', ta: 'நிறுவனர் & CEO செய்தி', hi: 'संस्थापक और सीईओ का संदेश', ml: 'സ്ഥാപകൻ & സിഇഒ സന്ദേശം', te: 'వ్యవస్థాపకుడు & సీఈఓ సందేశం' })}</h2>
           <p className="text-xs text-neutral-600 leading-relaxed">
-            {lang === 'ta'
-              ? '"இறைச்சி அழுக்கு மற்றும் ஈக்களுக்கு வெளிப்படும் திறந்த கவுண்டர்களில் இருக்கக்கூடாது, தண்ணீர் அல்லது ஸ்டீராய்டுகள் ஏற்றப்படவும் கூடாது. ப்ரோட்டீன் கட்ஸில், ஒவ்வொரு வெட்டும் வெப்பநிலை கட்டுப்படுத்தப்பட்ட இருண்ட கடைகளில் தயார் செய்யப்படுகிறது, 150+ ஆய்வக சோதனைச் சாவடிகளுக்கு உட்படுத்தப்படுகிறது, மற்றும் மூடப்பட்ட தெர்மல் பைகளில் வழங்கப்படுகிறது."'
-              : '"Meat shouldn\'t sit on open counters exposed to dirt and flies, nor should it be injected with water or steroids. At Protein Cuts, every single cut is dressed under temperature-controlled dark stores, subjected to 150+ lab checkpoints, and delivered in sealed thermal bags."'}
+            {pick(lang, {
+              en: '"Meat shouldn\'t sit on open counters exposed to dirt and flies, nor should it be injected with water or steroids. At Protein Cuts, every single cut is dressed under temperature-controlled dark stores, subjected to 150+ lab checkpoints, and delivered in sealed thermal bags."',
+              ta: '"இறைச்சி அழுக்கு மற்றும் ஈக்களுக்கு வெளிப்படும் திறந்த கவுண்டர்களில் இருக்கக்கூடாது, தண்ணீர் அல்லது ஸ்டீராய்டுகள் ஏற்றப்படவும் கூடாது. ப்ரோட்டீன் கட்ஸில், ஒவ்வொரு வெட்டும் வெப்பநிலை கட்டுப்படுத்தப்பட்ட இருண்ட கடைகளில் தயார் செய்யப்படுகிறது, 150+ ஆய்வக சோதனைச் சாவடிகளுக்கு உட்படுத்தப்படுகிறது, மற்றும் மூடப்பட்ட தெர்மல் பைகளில் வழங்கப்படுகிறது."',
+              hi: '"मांस को धूल और मक्खियों के संपर्क में खुले काउंटर पर नहीं रखा जाना चाहिए, न ही उसमें पानी या स्टेरॉयड इंजेक्ट किया जाना चाहिए। प्रोटीन कट्स में, हर एक कट तापमान-नियंत्रित डार्क स्टोर्स में तैयार किया जाता है, 150+ लैब चेकपॉइंट्स से गुजरता है, और सीलबंद थर्मल बैग में डिलीवर किया जाता है।"',
+              ml: '"മാംസം അഴുക്കും ഈച്ചകളും തുറന്നിരിക്കുന്ന കൗണ്ടറുകളിൽ വയ്ക്കരുത്, വെള്ളമോ സ്റ്റിറോയിഡുകളോ കുത്തിവയ്ക്കുകയും അരുത്. പ്രോട്ടീൻ കട്ട്‌സിൽ, ഓരോ കട്ടും താപനില നിയന്ത്രിത ഡാർക്ക് സ്റ്റോറുകളിൽ തയ്യാറാക്കുന്നു, 150+ ലാബ് ചെക്ക്‌പോയിന്റുകൾക്ക് വിധേയമാക്കുന്നു, സീൽ ചെയ്ത തെർമൽ ബാഗുകളിൽ എത്തിക്കുന്നു."',
+              te: '"మాంసం ధూళి మరియు ఈగలకు గురయ్యే బహిరంగ కౌంటర్లపై ఉండకూడదు, అలాగే దానిలో నీరు లేదా స్టెరాయిడ్లు ఇంజెక్ట్ చేయకూడదు. ప్రోటీన్ కట్స్‌లో, ప్రతి కట్ ఉష్ణోగ్రత-నియంత్రిత డార్క్ స్టోర్లలో సిద్ధం చేయబడుతుంది, 150+ ల్యాబ్ చెక్‌పాయింట్‌లకు లోబడి ఉంటుంది, మరియు సీల్డ్ థర్మల్ బ్యాగుల్లో డెలివరీ చేయబడుతుంది."'
+            })}
           </p>
           <div className="font-bold text-[#0A1F12] text-sm pt-2">
-            {lang === 'ta' ? '— IGO நிர்வாக குழு & மாஸ்டர் கசாப்பு குழு' : '— IGO Executive Board & Master Butchery Team'}
+            {pick(lang, { en: '— IGO Executive Board & Master Butchery Team', ta: '— IGO நிர்வாக குழு & மாஸ்டர் கசாப்பு குழு', hi: '— आईजीओ कार्यकारी बोर्ड और मास्टर बुचरी टीम', ml: '— ഐജിഒ എക്സിക്യൂട്ടീവ് ബോർഡ് & മാസ്റ്റർ ബുച്ചറി ടീം', te: '— ఐజీవో ఎగ్జిక్యూటివ్ బోర్డ్ & మాస్టర్ బుచరీ టీమ్' })}
           </div>
         </div>
 
         <div className="bg-white border border-neutral-200 rounded-3xl p-6 space-y-4 shadow-sm">
-          <h3 className="font-bold text-[#0A1F12] text-base">{lang === 'ta' ? 'முக்கிய IGO சான்றிதழ்கள்' : 'Key IGO Certifications'}</h3>
+          <h3 className="font-bold text-[#0A1F12] text-base">{pick(lang, { en: 'Key IGO Certifications', ta: 'முக்கிய IGO சான்றிதழ்கள்', hi: 'प्रमुख आईजीओ प्रमाणपत्र', ml: 'പ്രധാന ഐജിഒ സർട്ടിഫിക്കേഷനുകൾ', te: 'ప్రధాన ఐజీవో సర్టిఫికేషన్‌లు' })}</h3>
           <div className="space-y-3 text-xs text-neutral-600">
             <div className="flex items-center gap-3 bg-emerald-50 p-3 rounded-2xl border border-emerald-100">
               <Award className="w-5 h-5 text-emerald-600 shrink-0" />
               <div>
-                <strong className="text-[#0A1F12] block">{lang === 'ta' ? 'FSSAI சான்றளிக்கப்பட்ட யூனிட்' : 'FSSAI Certified Unit'}</strong>
-                <span>{lang === 'ta' ? 'உரிமம் எண். 10020042001928' : 'License No. 10020042001928'}</span>
+                <strong className="text-[#0A1F12] block">{pick(lang, { en: 'FSSAI Certified Unit', ta: 'FSSAI சான்றளிக்கப்பட்ட யூனிட்', hi: 'एफएसएसएआई प्रमाणित इकाई', ml: 'എഫ്എസ്എസ്എഐ സർട്ടിഫൈഡ് യൂണിറ്റ്', te: 'ఎఫ్‌ఎస్‌ఎస్‌ఏఐ సర్టిఫైడ్ యూనిట్' })}</strong>
+                <span>{pick(lang, { en: 'License No. 10020042001928', ta: 'உரிமம் எண். 10020042001928', hi: 'लाइसेंस संख्या. 10020042001928', ml: 'ലൈസൻസ് നമ്പർ. 10020042001928', te: 'లైసెన్స్ నం. 10020042001928' })}</span>
               </div>
             </div>
 
             <div className="flex items-center gap-3 bg-emerald-50 p-3 rounded-2xl border border-emerald-100">
               <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
               <div>
-                <strong className="text-[#0A1F12] block">{lang === 'ta' ? '100% ஹலால் & ஆன்டிபயாடிக் இல்லாதது' : '100% Halal & Antibiotic-Free'}</strong>
-                <span>{lang === 'ta' ? 'கடுமையான சடங்கு இணக்கம் மற்றும் பூஜ்ஜிய இரசாயன எச்ச உத்தரவாதங்கள்' : 'Strict ritual compliance and zero chemical residue guarantees'}</span>
+                <strong className="text-[#0A1F12] block">{pick(lang, { en: '100% Halal & Antibiotic-Free', ta: '100% ஹலால் & ஆன்டிபயாடிக் இல்லாதது', hi: '100% हलाल और एंटीबायोटिक-मुक्त', ml: '100% ഹലാൽ & ആന്റിബയോട്ടിക് രഹിതം', te: '100% హలాల్ & యాంటీబయాటిక్ రహితం' })}</strong>
+                <span>{pick(lang, { en: 'Strict ritual compliance and zero chemical residue guarantees', ta: 'கடுமையான சடங்கு இணக்கம் மற்றும் பூஜ்ஜிய இரசாயன எச்ச உத்தரவாதங்கள்', hi: 'सख्त अनुष्ठान अनुपालन और शून्य रासायनिक अवशेष की गारंटी', ml: 'കർശനമായ ആചാര പാലനവും പൂജ്യം രാസ അവശിഷ്ട ഉറപ്പും', te: 'కఠినమైన సంప్రదాయ అనుసరణ మరియు సున్నా రసాయన అవశేష హామీలు' })}</span>
               </div>
             </div>
 
             <div className="flex items-center gap-3 bg-emerald-50 p-3 rounded-2xl border border-emerald-100">
               <Clock className="w-5 h-5 text-emerald-600 shrink-0" />
               <div>
-                <strong className="text-[#0A1F12] block">{lang === 'ta' ? 'ISO 22000 உணவு பாதுகாப்பு தரநிலை' : 'ISO 22000 Food Safety Standard'}</strong>
-                <span>{lang === 'ta' ? 'போக்குவரத்து முழுவதும் 0°C முதல் 4°C வரை HACCP வெப்பநிலை கண்காணிப்பு' : 'HACCP temperature monitoring from 0°C to 4°C throughout transport'}</span>
+                <strong className="text-[#0A1F12] block">{pick(lang, { en: 'ISO 22000 Food Safety Standard', ta: 'ISO 22000 உணவு பாதுகாப்பு தரநிலை', hi: 'आईएसओ 22000 खाद्य सुरक्षा मानक', ml: 'ISO 22000 ഭക്ഷ്യ സുരക്ഷാ നിലവാരം', te: 'ISO 22000 ఆహార భద్రతా ప్రమాణం' })}</strong>
+                <span>{pick(lang, { en: 'HACCP temperature monitoring from 0°C to 4°C throughout transport', ta: 'போக்குவரத்து முழுவதும் 0°C முதல் 4°C வரை HACCP வெப்பநிலை கண்காணிப்பு', hi: 'परिवहन के दौरान 0°C से 4°C तक HACCP तापमान निगरानी', ml: 'ഗതാഗതത്തിലുടനീളം 0°C മുതൽ 4°C വരെ HACCP താപനില നിരീക്ഷണം', te: 'రవాణా అంతటా 0°C నుండి 4°C వరకు HACCP ఉష్ణోగ్రత పర్యవేక్షణ' })}</span>
               </div>
             </div>
           </div>

@@ -51,10 +51,76 @@ const FALLBACK_TA = {
   ]
 };
 
+const FALLBACK_HI = {
+  eyebrow: 'सरल प्रक्रिया',
+  heading: '3 चरणों में आपके दरवाज़े तक ताज़ा',
+  items: [
+    {
+      icon: 'ShoppingCart',
+      title: 'अपना ऑर्डर दें',
+      text: 'ताज़ा कैटेगरी ब्राउज़ करें, अपने कट्स चुनें, और 2 मिनट से भी कम समय में चेकआउट करें।'
+    },
+    {
+      icon: 'PackageCheck',
+      title: 'प्रोसेस और ताज़ा पैक',
+      text: 'कट्स को उसी सुबह स्टेराइल, तापमान-नियंत्रित डार्क स्टोर्स में प्रोसेस किया जाता है।'
+    },
+    {
+      icon: 'Truck',
+      title: 'ताज़ा डिलीवर',
+      text: 'एंड-टू-एंड कोल्ड चेन के साथ अधिकतम ताज़गी (0-4°C) में आपके दरवाज़े पर पहुँचता है।'
+    }
+  ]
+};
+
+const FALLBACK_ML = {
+  eyebrow: 'ലളിതമായ പ്രക്രിയ',
+  heading: '3 ഘട്ടങ്ങളിൽ നിങ്ങളുടെ വീട്ടുവാതിൽക്കൽ പുതുമ',
+  items: [
+    {
+      icon: 'ShoppingCart',
+      title: 'നിങ്ങളുടെ ഓർഡർ നൽകുക',
+      text: 'പുതിയ വിഭാഗങ്ങൾ ബ്രൗസ് ചെയ്യുക, നിങ്ങളുടെ കട്ടുകൾ തിരഞ്ഞെടുക്കുക, 2 മിനിറ്റിനുള്ളിൽ ചെക്ക്ഔട്ട് ചെയ്യുക.'
+    },
+    {
+      icon: 'PackageCheck',
+      title: 'പ്രോസസ്സ് ചെയ്ത് പുതുതായി പായ്ക്ക് ചെയ്യുന്നു',
+      text: 'കട്ടുകൾ അതേ രാവിലെ തന്നെ അണുവിമുക്തമായ, താപനില നിയന്ത്രിത ഡാർക്ക് സ്റ്റോറുകളിൽ പ്രോസസ്സ് ചെയ്യുന്നു.'
+    },
+    {
+      icon: 'Truck',
+      title: 'പുതുമയോടെ ഡെലിവർ ചെയ്യുന്നു',
+      text: 'എൻഡ്-ടു-എൻഡ് കോൾഡ് ചെയിനോടെ പരമാവധി പുതുമയിൽ (0-4°C) നിങ്ങളുടെ വീട്ടുവാതിൽക്കൽ എത്തുന്നു.'
+    }
+  ]
+};
+
+const FALLBACK_TE = {
+  eyebrow: 'సరళమైన ప్రక్రియ',
+  heading: '3 దశల్లో మీ ఇంటి తలుపు వద్దకు తాజాగా',
+  items: [
+    {
+      icon: 'ShoppingCart',
+      title: 'మీ ఆర్డర్ పెట్టండి',
+      text: 'తాజా కేటగిరీలను బ్రౌజ్ చేయండి, మీ కట్స్ ఎంచుకోండి, 2 నిమిషాల్లోపు చెక్అవుట్ చేయండి.'
+    },
+    {
+      icon: 'PackageCheck',
+      title: 'ప్రాసెస్ చేసి తాజాగా ప్యాక్ చేయడం',
+      text: 'కట్స్ అదే ఉదయం స్టెరైల్, ఉష్ణోగ్రత-నియంత్రిత డార్క్ స్టోర్లలో ప్రాసెస్ చేయబడతాయి.'
+    },
+    {
+      icon: 'Truck',
+      title: 'తాజాగా డెలివరీ',
+      text: 'ఎండ్-టు-ఎండ్ కోల్డ్ చైన్‌తో గరిష్ట తాజాదనంతో (0-4°C) మీ ఇంటి తలుపు వద్దకు చేరుకుంటుంది.'
+    }
+  ]
+};
+
 export const HowItWorksSection: React.FC = () => {
   const { lang } = useLang();
   const block = useSiteContent('sections.how_it_works', FALLBACK);
-  const resolvedBlock = lang === 'ta' ? FALLBACK_TA : block;
+  const resolvedBlock = lang === 'ta' ? FALLBACK_TA : lang === 'hi' ? FALLBACK_HI : lang === 'ml' ? FALLBACK_ML : lang === 'te' ? FALLBACK_TE : block;
   const steps = resolvedBlock.items.map((item, index) => ({
     id: index + 1,
     title: item.title,

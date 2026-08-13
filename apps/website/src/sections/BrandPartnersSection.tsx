@@ -17,11 +17,26 @@ const FALLBACK_TA = {
   heading: 'எங்கள் பண்ணை & சப்ளை பங்குதாரர்கள்',
   subheading: 'பிராந்தியம் முழுவதும் உள்ள சான்றளிக்கப்பட்ட பண்ணைகள் மற்றும் அடைகாக்கும் நிலையங்களிலிருந்து நேரடியாக பெறப்படுகிறது.'
 };
+const FALLBACK_HI = {
+  eyebrow: 'भरोसेमंद सोर्सिंग नेटवर्क',
+  heading: 'हमारे फार्म और सप्लाई पार्टनर्स',
+  subheading: 'क्षेत्र भर के प्रमाणित फार्मों और हैचरी से सीधे प्राप्त किया जाता है।'
+};
+const FALLBACK_ML = {
+  eyebrow: 'വിശ്വസനീയമായ സോഴ്‌സിംഗ് നെറ്റ്‌വർക്ക്',
+  heading: 'ഞങ്ങളുടെ ഫാം & സപ്ലൈ പാർട്ണർമാർ',
+  subheading: 'പ്രദേശത്തുടനീളമുള്ള സർട്ടിഫൈഡ് ഫാമുകളിൽ നിന്നും ഹാച്ചറികളിൽ നിന്നും നേരിട്ട് ലഭ്യമാക്കുന്നു.'
+};
+const FALLBACK_TE = {
+  eyebrow: 'నమ్మకమైన సోర్సింగ్ నెట్‌వర్క్',
+  heading: 'మా ఫార్మ్ & సప్లై భాగస్వాములు',
+  subheading: 'ప్రాంతం అంతటా సర్టిఫైడ్ ఫార్మ్‌ల నుండి మరియు హేచరీల నుండి నేరుగా సేకరించబడుతుంది.'
+};
 
 export const BrandPartnersSection: React.FC = () => {
   const { lang } = useLang();
   const block = useSiteContent('sections.partners', FALLBACK);
-  const resolved = lang === 'ta' ? FALLBACK_TA : block;
+  const resolved = lang === 'ta' ? FALLBACK_TA : lang === 'hi' ? FALLBACK_HI : lang === 'ml' ? FALLBACK_ML : lang === 'te' ? FALLBACK_TE : block;
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">

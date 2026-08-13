@@ -19,7 +19,7 @@ import {
 import { FAQItem, SupportTicket, Order } from '../types';
 import { SupabaseService } from '../lib/supabaseClient';
 import { StoreService } from '../lib/storage';
-import { useLang } from '../lib/language';
+import { useLang, pick } from '../lib/language';
 
 interface SupportPageProps {
   onNavigate: (path: string) => void;
@@ -34,12 +34,63 @@ const FAQ_CATEGORIES_TA: Record<string, string> = {
   'Payment & Orders': 'கட்டணம் & ஆர்டர்கள்'
 };
 
+const FAQ_CATEGORIES_HI: Record<string, string> = {
+  All: 'सभी',
+  'Quality & Sourcing': 'गुणवत्ता और स्रोत',
+  Delivery: 'डिलीवरी',
+  Subscriptions: 'सदस्यता',
+  'Refunds & Returns': 'रिफंड और रिटर्न',
+  'Payment & Orders': 'भुगतान और ऑर्डर'
+};
+
+const FAQ_CATEGORIES_ML: Record<string, string> = {
+  All: 'എല്ലാം',
+  'Quality & Sourcing': 'ഗുണനിലവാരവും സ്രോതസ്സും',
+  Delivery: 'ഡെലിവറി',
+  Subscriptions: 'സബ്സ്ക്രിപ്ഷനുകൾ',
+  'Refunds & Returns': 'റീഫണ്ടും റിട്ടേണും',
+  'Payment & Orders': 'പേയ്മെന്റും ഓർഡറുകളും'
+};
+
+const FAQ_CATEGORIES_TE: Record<string, string> = {
+  All: 'అన్నీ',
+  'Quality & Sourcing': 'నాణ్యత & సోర్సింగ్',
+  Delivery: 'డెలివరీ',
+  Subscriptions: 'సబ్‌స్క్రిప్షన్లు',
+  'Refunds & Returns': 'రీఫండ్‌లు & రిటర్న్‌లు',
+  'Payment & Orders': 'చెల్లింపు & ఆర్డర్‌లు'
+};
+
 const RETURN_REASONS_TA: Record<string, string> = {
   'Temperature deviation (Above 4°C)': 'வெப்பநிலை மாறுபாடு (4°C க்கு மேல்)',
   'Pack seal damaged in transit': 'போக்குவரத்தில் பேக் சீல் சேதமடைந்தது',
   'Cut precision issue (Not matching boneless/pieces)': 'வெட்டு துல்லிய பிரச்சனை (எலும்பில்லா/துண்டுகள் பொருந்தவில்லை)',
   'Weight discrepancy': 'எடை முரண்பாடு',
   Other: 'மற்றவை'
+};
+
+const RETURN_REASONS_HI: Record<string, string> = {
+  'Temperature deviation (Above 4°C)': 'तापमान विचलन (4°C से अधिक)',
+  'Pack seal damaged in transit': 'परिवहन के दौरान पैक सील क्षतिग्रस्त',
+  'Cut precision issue (Not matching boneless/pieces)': 'कटिंग सटीकता समस्या (बोनलेस/टुकड़े मेल नहीं खाते)',
+  'Weight discrepancy': 'वजन में अंतर',
+  Other: 'अन्य'
+};
+
+const RETURN_REASONS_ML: Record<string, string> = {
+  'Temperature deviation (Above 4°C)': 'താപനില വ്യതിയാനം (4°C-ന് മുകളിൽ)',
+  'Pack seal damaged in transit': 'ഗതാഗതത്തിനിടെ പായ്ക്ക് സീൽ കേടായി',
+  'Cut precision issue (Not matching boneless/pieces)': 'കട്ട് കൃത്യതയിലെ പ്രശ്നം (എല്ലില്ലാത്ത/കഷണങ്ങൾ പൊരുത്തപ്പെടുന്നില്ല)',
+  'Weight discrepancy': 'ഭാരത്തിലെ പൊരുത്തക്കേട്',
+  Other: 'മറ്റുള്ളവ'
+};
+
+const RETURN_REASONS_TE: Record<string, string> = {
+  'Temperature deviation (Above 4°C)': 'ఉష్ణోగ్రత వ్యత్యాసం (4°C కంటే ఎక్కువ)',
+  'Pack seal damaged in transit': 'రవాణాలో ప్యాక్ సీల్ దెబ్బతింది',
+  'Cut precision issue (Not matching boneless/pieces)': 'కట్ ఖచ్చితత్వ సమస్య (ఎముక లేని/ముక్కలు సరిపోలడం లేదు)',
+  'Weight discrepancy': 'బరువు వ్యత్యాసం',
+  Other: 'ఇతరం'
 };
 
 // The 7 seeded FAQs (INITIAL_FAQS in mockData.ts) are website-owned local
@@ -77,12 +128,129 @@ const FAQ_TA: Record<string, { question: string; answer: string }> = {
   }
 };
 
+const FAQ_HI: Record<string, { question: string; answer: string }> = {
+  'faq-1': {
+    question: 'डिलीवरी के दौरान आप 0-4°C ताज़गी कैसे सुनिश्चित करते हैं?',
+    answer: 'हमारा सारा मांस 2°C पर तापमान-नियंत्रित डार्क स्टोर में काटा जाता है। पैकेजों को थर्मल डिलीवरी बैग के अंदर फूड-ग्रेड जेल आइस पैक से इंसुलेट किया जाता है, जो सौंपे जाने तक सख्ती से 0-4°C बनाए रखते हैं।'
+  },
+  'faq-2': {
+    question: 'क्या आपकी मुर्गियाँ एंटीबायोटिक और रसायन मुक्त हैं?',
+    answer: 'हाँ! हम केवल प्रमाणित बायोसिक्योर फार्मों के साथ साझेदारी करते हैं। पक्षियों को बिना किसी एंटीबायोटिक ग्रोथ प्रमोटर, स्टेरॉयड या सिंथेटिक हार्मोन के प्राकृतिक अनाज आहार पर पाला जाता है।'
+  },
+  'faq-3': {
+    question: 'एक्सप्रेस 30-90 मिनट डिलीवरी क्या है?',
+    answer: '4 किमी के दायरे में डार्क स्टोर से संचालित हमारी हाइपर-लोकल डिलीवरी सेवा एक्सप्रेस 30-90 मिनट है। यदि आपका पिनकोड योग्य है, तो कसाई द्वारा पैकिंग पूरी होते ही आपका ऑर्डर भेज दिया जाता है।'
+  },
+  'faq-4': {
+    question: 'प्रोटीन कट्स सदस्यता कैसे काम करती है?',
+    answer: 'अपनी पसंदीदा कट्स, आवृत्ति (दैनिक, साप्ताहिक, मासिक) और पसंदीदा डिलीवरी समय चुनें। आपको स्वचालित रूप से शून्य-डिलीवरी-शुल्क सुबह की डिलीवरी मिलती है, और आप कभी भी रोक या रद्द कर सकते हैं।'
+  },
+  'faq-5': {
+    question: 'अगर मुझे क्षतिग्रस्त पैकेजिंग वाला आइटम मिले तो क्या करूं?',
+    answer: 'यदि आप डिलीवरी के 2 घंटे के भीतर फोटो टिकट उठाते हैं, तो हम तुरंत 100% प्रतिस्थापन या आपके IGO वॉलेट में पूरा रिफंड प्रदान करते हैं।'
+  },
+  'faq-6': {
+    question: 'क्या हलाल मांस उपलब्ध है?',
+    answer: 'हाँ। IGO प्रोटीन कट्स हमारे एंटीबायोटिक-मुक्त सोर्सिंग मानक के साथ-साथ 100% हलाल प्रमाणित है — About पेज पर हमारे सभी प्रमाणपत्र देखें।'
+  },
+  'faq-7': {
+    question: 'आप कौन से भुगतान तरीके स्वीकार करते हैं?',
+    answer: 'UPI, क्रेडिट/डेबिट कार्ड, IGO वॉलेट और डिलीवरी पर नकद — चेकआउट पर जो चाहें चुनें।'
+  }
+};
+
+const FAQ_ML: Record<string, { question: string; answer: string }> = {
+  'faq-1': {
+    question: 'ഡെലിവറി സമയത്ത് 0-4°C പുതുമ എങ്ങനെ ഉറപ്പാക്കുന്നു?',
+    answer: 'ഞങ്ങളുടെ എല്ലാ മാംസവും 2°C-ൽ പ്രവർത്തിക്കുന്ന താപനില നിയന്ത്രിത ഡാർക്ക് സ്റ്റോറുകളിൽ മുറിക്കുന്നു. തെർമൽ ഡെലിവറി ബാഗുകൾക്കുള്ളിൽ ഭക്ഷ്യയോഗ്യമായ ജെൽ ഐസ് പായ്ക്കുകൾ ഉപയോഗിച്ച് പാക്കേജുകൾ ഇൻസുലേറ്റ് ചെയ്യുന്നു, ഇത് കൈമാറുന്നത് വരെ കർശനമായി 0-4°C നിലനിർത്തുന്നു.'
+  },
+  'faq-2': {
+    question: 'നിങ്ങളുടെ കോഴികൾ ആന്റിബയോട്ടിക്, രാസവസ്തു രഹിതമാണോ?',
+    answer: 'അതെ! ഞങ്ങൾ സർട്ടിഫൈഡ് ബയോസെക്യൂർ ഫാമുകളുമായി മാത്രമേ പങ്കാളിത്തം വഹിക്കൂ. ആന്റിബയോട്ടിക് ഗ്രോത്ത് പ്രമോട്ടറുകളോ സ്റ്റിറോയിഡുകളോ കൃത്രിമ ഹോർമോണുകളോ ഇല്ലാതെ പ്രകൃതിദത്ത ധാന്യാഹാരത്തിലാണ് പക്ഷികളെ വളർത്തുന്നത്.'
+  },
+  'faq-3': {
+    question: 'എക്സ്പ്രസ് 30-90 മിനിറ്റ് ഡെലിവറി എന്താണ്?',
+    answer: '4 കിലോമീറ്റർ ചുറ്റളവിലുള്ള ഡാർക്ക് സ്റ്റോറുകളിൽ നിന്ന് പ്രവർത്തിക്കുന്ന ഞങ്ങളുടെ ഹൈപ്പർ-ലോക്കൽ ഡെലിവറി സേവനമാണ് എക്സ്പ്രസ് 30-90 മിനിറ്റ്. നിങ്ങളുടെ പിൻകോഡ് യോഗ്യമാണെങ്കിൽ, ബുച്ചർ പാക്കിംഗ് പൂർത്തിയാക്കിയ ഉടൻ നിങ്ങളുടെ ഓർഡർ അയക്കും.'
+  },
+  'faq-4': {
+    question: 'പ്രോട്ടീൻ കട്സ് സബ്സ്ക്രിപ്ഷൻ എങ്ങനെ പ്രവർത്തിക്കുന്നു?',
+    answer: 'നിങ്ങൾക്ക് ഇഷ്ടമുള്ള കട്ടുകൾ, ആവൃത്തി (ദിവസേന, പ്രതിവാരം, പ്രതിമാസം) കൂടാതെ ഇഷ്ടമുള്ള ഡെലിവറി സമയവും തിരഞ്ഞെടുക്കുക. നിങ്ങൾക്ക് സ്വയമേവ സീറോ-ഡെലിവറി-ഫീ രാവിലെ ഡെലിവറികൾ ലഭിക്കും, എപ്പോൾ വേണമെങ്കിലും താൽക്കാലികമായി നിർത്താനോ റദ്ദാക്കാനോ കഴിയും.'
+  },
+  'faq-5': {
+    question: 'കേടായ പാക്കേജിംഗുള്ള ഒരു ഇനം ലഭിച്ചാൽ എന്ത് ചെയ്യണം?',
+    answer: 'ഡെലിവറി കഴിഞ്ഞ് 2 മണിക്കൂറിനുള്ളിൽ നിങ്ങൾ ഒരു ഫോട്ടോ ടിക്കറ്റ് ഉയർത്തിയാൽ, ഞങ്ങൾ ഉടനടി 100% മാറ്റിസ്ഥാപിക്കൽ അല്ലെങ്കിൽ നിങ്ങളുടെ IGO വാലറ്റിലേക്ക് പൂർണ്ണ റീഫണ്ട് നൽകുന്നു.'
+  },
+  'faq-6': {
+    question: 'ഹലാൽ മാംസം ലഭ്യമാണോ?',
+    answer: 'അതെ. ഞങ്ങളുടെ ആന്റിബയോട്ടിക് രഹിത സോഴ്സിംഗ് നിലവാരത്തോടൊപ്പം IGO പ്രോട്ടീൻ കട്സ് 100% ഹലാൽ സർട്ടിഫൈഡ് ആണ് — ഞങ്ങളുടെ എല്ലാ സർട്ടിഫിക്കറ്റുകളും About പേജിൽ കാണുക.'
+  },
+  'faq-7': {
+    question: 'നിങ്ങൾ ഏതെല്ലാം പേയ്മെന്റ് രീതികൾ സ്വീകരിക്കുന്നു?',
+    answer: 'UPI, ക്രെഡിറ്റ്/ഡെബിറ്റ് കാർഡ്, IGO വാലറ്റ്, ഡെലിവറിക്ക് ശേഷം പണം — ചെക്ക്ഔട്ടിൽ നിങ്ങൾക്ക് ഇഷ്ടമുള്ളത് തിരഞ്ഞെടുക്കുക.'
+  }
+};
+
+const FAQ_TE: Record<string, { question: string; answer: string }> = {
+  'faq-1': {
+    question: 'డెలివరీ సమయంలో 0-4°C తాజాదనాన్ని మీరు ఎలా నిర్ధారిస్తారు?',
+    answer: 'మా మాంసం మొత్తం 2°C వద్ద పనిచేసే ఉష్ణోగ్రత-నియంత్రిత డార్క్ స్టోర్లలో కట్ చేయబడుతుంది. ప్యాకేజీలు థర్మల్ డెలివరీ బ్యాగుల లోపల ఫుడ్-గ్రేడ్ జెల్ ఐస్ ప్యాక్‌లతో ఇన్సులేట్ చేయబడతాయి, ఇవి అందజేసే వరకు కచ్చితంగా 0-4°C ఉంచుతాయి.'
+  },
+  'faq-2': {
+    question: 'మీ కోళ్లు యాంటీబయాటిక్ మరియు రసాయన రహితమా?',
+    answer: 'అవును! మేము సర్టిఫైడ్ బయోసెక్యూర్ ఫారాలతో మాత్రమే భాగస్వామ్యం కలిగి ఉంటాము. పక్షులను యాంటీబయాటిక్ గ్రోత్ ప్రమోటర్లు, స్టెరాయిడ్లు లేదా సింథటిక్ హార్మోన్లు లేకుండా సహజ ధాన్యాహారంతో పెంచుతారు.'
+  },
+  'faq-3': {
+    question: 'ఎక్స్‌ప్రెస్ 30-90 నిమిషాల డెలివరీ అంటే ఏమిటి?',
+    answer: '4 కి.మీ పరిధిలోని డార్క్ స్టోర్ల నుండి పనిచేసే మా హైపర్-లోకల్ డెలివరీ సేవ ఎక్స్‌ప్రెస్ 30-90 నిమిషాలు. మీ పిన్‌కోడ్ అర్హత కలిగి ఉంటే, బుచర్ ప్యాకింగ్ పూర్తి చేసిన వెంటనే మీ ఆర్డర్ పంపబడుతుంది.'
+  },
+  'faq-4': {
+    question: 'ప్రోటీన్ కట్స్ సబ్‌స్క్రిప్షన్ ఎలా పనిచేస్తుంది?',
+    answer: 'మీకు నచ్చిన కట్‌లు, ఫ్రీక్వెన్సీ (రోజువారీ, వారానికోసారి, నెలవారీ) మరియు ఇష్టమైన డెలివరీ సమయాన్ని ఎంచుకోండి. మీకు స్వయంచాలకంగా జీరో-డెలివరీ-ఫీ ఉదయం డెలివరీలు లభిస్తాయి, ఎప్పుడైనా పాజ్ చేయవచ్చు లేదా రద్దు చేయవచ్చు.'
+  },
+  'faq-5': {
+    question: 'దెబ్బతిన్న ప్యాకేజింగ్‌తో ఒక వస్తువు వస్తే ఏం చేయాలి?',
+    answer: 'డెలివరీ అయిన 2 గంటల్లోపు మీరు ఫోటో టికెట్ లేవనెత్తితే, మేము తక్షణమే 100% రీప్లేస్‌మెంట్ లేదా మీ IGO వాలెట్‌కు పూర్తి రీఫండ్ అందిస్తాము.'
+  },
+  'faq-6': {
+    question: 'హలాల్ మాంసం అందుబాటులో ఉందా?',
+    answer: 'అవును. మా యాంటీబయాటిక్-రహిత సోర్సింగ్ ప్రమాణంతో పాటు IGO ప్రోటీన్ కట్స్ 100% హలాల్ సర్టిఫైడ్ — మా పూర్తి సర్టిఫికేట్లను About పేజీలో చూడండి.'
+  },
+  'faq-7': {
+    question: 'మీరు ఏ చెల్లింపు పద్ధతులను అంగీకరిస్తారు?',
+    answer: 'UPI, క్రెడిట్/డెబిట్ కార్డ్, IGO వాలెట్ మరియు డెలివరీ సమయంలో నగదు — చెక్అవుట్‌లో మీకు నచ్చినది ఎంచుకోండి.'
+  }
+};
+
 const TICKET_CATEGORIES_TA: Record<string, string> = {
   'Quality Concern': 'தர கவலை',
   'Delivery Delay': 'டெலிவரி தாமதம்',
   'Billing & Refund': 'பில்லிங் & பணத்திரும்பம்',
   'Subscription Modification': 'சந்தா மாற்றம்',
   'General Inquiry': 'பொது விசாரணை'
+};
+
+const TICKET_CATEGORIES_HI: Record<string, string> = {
+  'Quality Concern': 'गुणवत्ता संबंधी चिंता',
+  'Delivery Delay': 'डिलीवरी में देरी',
+  'Billing & Refund': 'बिलिंग और रिफंड',
+  'Subscription Modification': 'सदस्यता में बदलाव',
+  'General Inquiry': 'सामान्य पूछताछ'
+};
+
+const TICKET_CATEGORIES_ML: Record<string, string> = {
+  'Quality Concern': 'ഗുണനിലവാര ആശങ്ക',
+  'Delivery Delay': 'ഡെലിവറി കാലതാമസം',
+  'Billing & Refund': 'ബില്ലിംഗും റീഫണ്ടും',
+  'Subscription Modification': 'സബ്സ്ക്രിപ്ഷൻ മാറ്റം',
+  'General Inquiry': 'പൊതു അന്വേഷണം'
+};
+
+const TICKET_CATEGORIES_TE: Record<string, string> = {
+  'Quality Concern': 'నాణ్యత సమస్య',
+  'Delivery Delay': 'డెలివరీ ఆలస్యం',
+  'Billing & Refund': 'బిల్లింగ్ & రీఫండ్',
+  'Subscription Modification': 'సబ్‌స్క్రిప్షన్ మార్పు',
+  'General Inquiry': 'సాధారణ విచారణ'
 };
 
 export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
@@ -176,9 +344,13 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
     });
 
     setReturnSuccessMsg(
-      lang === 'ta'
-        ? 'உங்கள் திரும்பப் பெறும் கோரிக்கை பதிவு செய்யப்பட்டது! எங்கள் தர மேலாளர் பேட்ச் பதிவுகளை ஆய்வு செய்து உடனடி ஸ்டோர் கிரெடிட் அல்லது வங்கி பணத்திரும்பத்தை செயல்படுத்துவார்.'
-        : 'Your return request has been lodged! Our quality manager will inspect the batch records and process immediate store credit or bank refund.'
+      pick(lang, {
+        en: 'Your return request has been lodged! Our quality manager will inspect the batch records and process immediate store credit or bank refund.',
+        ta: 'உங்கள் திரும்பப் பெறும் கோரிக்கை பதிவு செய்யப்பட்டது! எங்கள் தர மேலாளர் பேட்ச் பதிவுகளை ஆய்வு செய்து உடனடி ஸ்டோர் கிரெடிட் அல்லது வங்கி பணத்திரும்பத்தை செயல்படுத்துவார்.',
+        hi: 'आपका रिटर्न अनुरोध दर्ज कर लिया गया है! हमारा गुणवत्ता प्रबंधक बैच रिकॉर्ड की जांच करेगा और तुरंत स्टोर क्रेडिट या बैंक रिफंड प्रोसेस करेगा।',
+        ml: 'നിങ്ങളുടെ റിട്ടേൺ അഭ്യർത്ഥന രജിസ്റ്റർ ചെയ്തു! ഞങ്ങളുടെ ക്വാളിറ്റി മാനേജർ ബാച്ച് രേഖകൾ പരിശോധിച്ച് ഉടനടി സ്റ്റോർ ക്രെഡിറ്റ് അല്ലെങ്കിൽ ബാങ്ക് റീഫണ്ട് നടപ്പിലാക്കും.',
+        te: 'మీ రిటర్న్ అభ్యర్థన నమోదు చేయబడింది! మా క్వాలిటీ మేనేజర్ బ్యాచ్ రికార్డులను పరిశీలించి తక్షణమే స్టోర్ క్రెడిట్ లేదా బ్యాంక్ రీఫండ్ ప్రాసెస్ చేస్తారు.'
+      })
     );
     setTimeout(() => {
       setReturnSuccessMsg(null);
@@ -202,13 +374,17 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
       <div className="bg-[#0A1F12] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg shadow-emerald-950/20 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-2">
           <div className="text-xs font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5" /> {lang === 'ta' ? '24/7 புதிய தர உதவி மையம்' : '24/7 FRESH QUALITY HELPDESK'}
+            <Sparkles className="w-3.5 h-3.5" /> {pick(lang, { en: '24/7 FRESH QUALITY HELPDESK', ta: '24/7 புதிய தர உதவி மையம்', hi: '24/7 ताज़ा गुणवत्ता हेल्पडेस्क', ml: '24/7 ഫ്രഷ് ക്വാളിറ്റി ഹെൽപ്ഡെസ്ക്', te: '24/7 ఫ్రెష్ క్వాలిటీ హెల్ప్‌డెస్క్' })}
           </div>
-          <h1 className="text-3xl font-black tracking-tight">{lang === 'ta' ? 'இன்று உங்களுக்கு எப்படி உதவ முடியும்?' : 'How Can We Help You Today?'}</h1>
+          <h1 className="text-3xl font-black tracking-tight">{pick(lang, { en: 'How Can We Help You Today?', ta: 'இன்று உங்களுக்கு எப்படி உதவ முடியும்?', hi: 'आज हम आपकी कैसे मदद कर सकते हैं?', ml: 'ഇന്ന് ഞങ്ങൾക്ക് നിങ്ങളെ എങ്ങനെ സഹായിക്കാം?', te: 'ఈరోజు మేము మీకు ఎలా సహాయపడగలం?' })}</h1>
           <p className="text-xs text-neutral-300">
-            {lang === 'ta'
-              ? 'வெப்பநிலை பதிவுகள், ஆர்டர் தாமதங்கள், பணத்திரும்ப கோரிக்கைகள் மற்றும் தயாரிப்பு குறிப்புகளுக்கான அர்ப்பணிக்கப்பட்ட தீர்வு.'
-              : 'Dedicated resolution for temperature logs, order delays, refund claims, and preparation tips.'}
+            {pick(lang, {
+              en: 'Dedicated resolution for temperature logs, order delays, refund claims, and preparation tips.',
+              ta: 'வெப்பநிலை பதிவுகள், ஆர்டர் தாமதங்கள், பணத்திரும்ப கோரிக்கைகள் மற்றும் தயாரிப்பு குறிப்புகளுக்கான அர்ப்பணிக்கப்பட்ட தீர்வு.',
+              hi: 'तापमान लॉग, ऑर्डर में देरी, रिफंड दावों और तैयारी संबंधी सुझावों के लिए समर्पित समाधान।',
+              ml: 'താപനില ലോഗുകൾ, ഓർഡർ കാലതാമസങ്ങൾ, റീഫണ്ട് ക്ലെയിമുകൾ, തയ്യാറാക്കൽ നുറുങ്ങുകൾ എന്നിവയ്ക്കുള്ള സമർപ്പിത പരിഹാരം.',
+              te: 'ఉష్ణోగ్రత లాగ్‌లు, ఆర్డర్ ఆలస్యాలు, రీఫండ్ క్లెయిమ్‌లు మరియు తయారీ చిట్కాల కోసం ప్రత్యేక పరిష్కారం.'
+            })}
           </p>
         </div>
 
@@ -217,9 +393,9 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
             <PhoneCall className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-[10px] text-emerald-300 uppercase font-bold">{lang === 'ta' ? 'கட்டணமில்லா உதவி எண்' : 'Toll-Free Helpline'}</div>
+            <div className="text-[10px] text-emerald-300 uppercase font-bold">{pick(lang, { en: 'Toll-Free Helpline', ta: 'கட்டணமில்லா உதவி எண்', hi: 'टोल-फ्री हेल्पलाइन', ml: 'ടോൾ-ഫ്രീ ഹെൽപ്ലൈൻ', te: 'టోల్-ఫ్రీ హెల్ప్‌లైన్' })}</div>
             <div className="text-lg font-black text-white">1800-446-446</div>
-            <div className="text-[10px] text-neutral-300">{lang === 'ta' ? 'திங்கள்-ஞாயிறு காலை 06:00 - இரவு 11:00' : 'Mon-Sun 06:00 AM - 11:00 PM'}</div>
+            <div className="text-[10px] text-neutral-300">{pick(lang, { en: 'Mon-Sun 06:00 AM - 11:00 PM', ta: 'திங்கள்-ஞாயிறு காலை 06:00 - இரவு 11:00', hi: 'सोम-रवि सुबह 06:00 - रात 11:00', ml: 'തിങ്കൾ-ഞായർ രാവിലെ 06:00 - രാത്രി 11:00', te: 'సోమ-ఆది ఉదయం 06:00 - రాత్రి 11:00' })}</div>
           </div>
         </div>
       </div>
@@ -232,7 +408,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
             activeTab === 'faqs' ? 'bg-[#0F7B3A] text-white shadow-lg' : 'bg-white border border-neutral-200 text-neutral-500 hover:text-[#0A1F12]'
           }`}
         >
-          <HelpCircle className="w-4 h-4" /> {lang === 'ta' ? 'அடிக்கடி கேட்கப்படும் கேள்விகள் & அறிவுத் தளம்' : 'FAQs & Knowledge Base'}
+          <HelpCircle className="w-4 h-4" /> {pick(lang, { en: 'FAQs & Knowledge Base', ta: 'அடிக்கடி கேட்கப்படும் கேள்விகள் & அறிவுத் தளம்', hi: 'सामान्य प्रश्न और नॉलेज बेस', ml: 'പതിവുചോദ്യങ്ങളും വിജ്ഞാനകേന്ദ്രവും', te: 'తరచుగా అడిగే ప్రశ్నలు & నాలెడ్జ్ బేస్' })}
         </button>
 
         <button
@@ -241,7 +417,13 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
             activeTab === 'tickets' ? 'bg-[#0F7B3A] text-white shadow-lg' : 'bg-white border border-neutral-200 text-neutral-500 hover:text-[#0A1F12]'
           }`}
         >
-          <MessageSquare className="w-4 h-4" /> {lang === 'ta' ? `நேரடி ஆதரவு அரட்டை & டிக்கெட்டுகள் (${tickets.length})` : `Live Support Chat & Tickets (${tickets.length})`}
+          <MessageSquare className="w-4 h-4" /> {pick(lang, {
+            en: `Live Support Chat & Tickets (${tickets.length})`,
+            ta: `நேரடி ஆதரவு அரட்டை & டிக்கெட்டுகள் (${tickets.length})`,
+            hi: `लाइव सपोर्ट चैट और टिकट (${tickets.length})`,
+            ml: `തത്സമയ പിന്തുണ ചാറ്റും ടിക്കറ്റുകളും (${tickets.length})`,
+            te: `లైవ్ సపోర్ట్ చాట్ & టికెట్లు (${tickets.length})`
+          })}
         </button>
 
         <button
@@ -250,7 +432,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
             activeTab === 'return' ? 'bg-[#0F7B3A] text-white shadow-lg' : 'bg-white border border-neutral-200 text-neutral-500 hover:text-[#0A1F12]'
           }`}
         >
-          <RotateCcw className="w-4 h-4" /> {lang === 'ta' ? 'புத்துணர்ச்சி உத்தரவாதம் & திரும்பப் பெறுதல்' : 'Freshness Guarantee & Returns'}
+          <RotateCcw className="w-4 h-4" /> {pick(lang, { en: 'Freshness Guarantee & Returns', ta: 'புத்துணர்ச்சி உத்தரவாதம் & திரும்பப் பெறுதல்', hi: 'ताज़गी गारंटी और रिटर्न', ml: 'പുതുമ ഗ്യാരണ്ടിയും റിട്ടേണും', te: 'తాజాదనం గ్యారంటీ & రిటర్న్‌లు' })}
         </button>
       </div>
 
@@ -261,7 +443,13 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
           <div className="relative">
             <input
               type="text"
-              placeholder={lang === 'ta' ? 'FAQ களைத் தேடுங்கள் — உதா. குளிர்சாதன வெப்பநிலை, ஆன்டிபயாடிக் சோதனை, பணத்திரும்ப காலவரிசை...' : 'Search FAQs e.g., cold chain temperature, antibiotic testing, refund timeline...'}
+              placeholder={pick(lang, {
+                en: 'Search FAQs e.g., cold chain temperature, antibiotic testing, refund timeline...',
+                ta: 'FAQ களைத் தேடுங்கள் — உதா. குளிர்சாதன வெப்பநிலை, ஆன்டிபயாடிக் சோதனை, பணத்திரும்ப காலவரிசை...',
+                hi: 'FAQ खोजें जैसे, कोल्ड चेन तापमान, एंटीबायोटिक परीक्षण, रिफंड समयसीमा...',
+                ml: 'FAQ തിരയുക ഉദാ. കോൾഡ് ചെയിൻ താപനില, ആന്റിബയോട്ടിക് ടെസ്റ്റിംഗ്, റീഫണ്ട് സമയപരിധി...',
+                te: 'FAQలను శోధించండి ఉదా. కోల్డ్ చైన్ ఉష్ణోగ్రత, యాంటీబయాటిక్ టెస్టింగ్, రీఫండ్ టైమ్‌లైన్...'
+              })}
               value={faqSearch}
               onChange={(e) => setFaqSearch(e.target.value)}
               className="w-full bg-white border border-neutral-200 focus:border-emerald-500 rounded-2xl px-12 py-3.5 text-xs text-[#0A1F12] focus:outline-none shadow-sm"
@@ -281,7 +469,11 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                     : 'bg-white border-neutral-200 text-neutral-500 hover:text-[#0A1F12]'
                 }`}
               >
-                {lang === 'ta' ? FAQ_CATEGORIES_TA[cat] ?? cat : cat}
+                {lang === 'ta' ? FAQ_CATEGORIES_TA[cat] ?? cat
+                  : lang === 'hi' ? FAQ_CATEGORIES_HI[cat] ?? cat
+                  : lang === 'ml' ? FAQ_CATEGORIES_ML[cat] ?? cat
+                  : lang === 'te' ? FAQ_CATEGORIES_TE[cat] ?? cat
+                  : cat}
               </button>
             ))}
           </div>
@@ -290,9 +482,13 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
           <div className="space-y-3">
             {filteredFaqs.map((faq) => {
               const isExpanded = expandedFaqId === faq.id;
-              const faqTa = FAQ_TA[faq.id];
-              const displayQuestion = lang === 'ta' && faqTa ? faqTa.question : faq.question;
-              const displayAnswer = lang === 'ta' && faqTa ? faqTa.answer : faq.answer;
+              const faqTranslated = lang === 'ta' ? FAQ_TA[faq.id]
+                : lang === 'hi' ? FAQ_HI[faq.id]
+                : lang === 'ml' ? FAQ_ML[faq.id]
+                : lang === 'te' ? FAQ_TE[faq.id]
+                : undefined;
+              const displayQuestion = faqTranslated ? faqTranslated.question : faq.question;
+              const displayAnswer = faqTranslated ? faqTranslated.answer : faq.answer;
               return (
                 <div
                   key={faq.id}
@@ -313,18 +509,30 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                     <div className="px-4 pb-4 pt-1 text-xs text-neutral-600 border-t border-neutral-100 leading-relaxed space-y-3">
                       <p>{displayAnswer}</p>
                       <div className="flex items-center gap-4 text-[11px] text-neutral-500 pt-2 border-t border-neutral-100">
-                        <span>{lang === 'ta' ? 'இந்த பதில் உதவியாக இருந்ததா?' : 'Was this answer helpful?'}</span>
+                        <span>{pick(lang, { en: 'Was this answer helpful?', ta: 'இந்த பதில் உதவியாக இருந்ததா?', hi: 'क्या यह उत्तर सहायक था?', ml: 'ഈ ഉത്തരം സഹായകമായിരുന്നോ?', te: 'ఈ సమాధానం సహాయకరంగా ఉందా?' })}</span>
                         <button
                           onClick={() => handleVoteFAQ(faq.id, true)}
                           className="flex items-center gap-1 hover:text-emerald-600 font-bold"
                         >
-                          <ThumbsUp className="w-3.5 h-3.5" /> {lang === 'ta' ? `ஆம் (${faq.helpfulVotes})` : `Yes (${faq.helpfulVotes})`}
+                          <ThumbsUp className="w-3.5 h-3.5" /> {pick(lang, {
+                            en: `Yes (${faq.helpfulVotes})`,
+                            ta: `ஆம் (${faq.helpfulVotes})`,
+                            hi: `हाँ (${faq.helpfulVotes})`,
+                            ml: `അതെ (${faq.helpfulVotes})`,
+                            te: `అవును (${faq.helpfulVotes})`
+                          })}
                         </button>
                         <button
                           onClick={() => handleVoteFAQ(faq.id, false)}
                           className="flex items-center gap-1 hover:text-[#0A1F12] font-bold"
                         >
-                          <ThumbsDown className="w-3.5 h-3.5" /> {lang === 'ta' ? `இல்லை (${faq.unhelpfulVotes})` : `No (${faq.unhelpfulVotes})`}
+                          <ThumbsDown className="w-3.5 h-3.5" /> {pick(lang, {
+                            en: `No (${faq.unhelpfulVotes})`,
+                            ta: `இல்லை (${faq.unhelpfulVotes})`,
+                            hi: `नहीं (${faq.unhelpfulVotes})`,
+                            ml: `ഇല്ല (${faq.unhelpfulVotes})`,
+                            te: `కాదు (${faq.unhelpfulVotes})`
+                          })}
                         </button>
                       </div>
                     </div>
@@ -342,12 +550,12 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
           {/* Left Tickets List */}
           <div className="lg:col-span-5 bg-white border border-neutral-200 rounded-3xl p-6 space-y-4 shadow-sm">
             <div className="flex items-center justify-between pb-4 border-b border-neutral-200">
-              <h3 className="font-bold text-[#0A1F12] text-sm">{lang === 'ta' ? 'உங்கள் ஆதரவு டிக்கெட்டுகள்' : 'Your Support Tickets'}</h3>
+              <h3 className="font-bold text-[#0A1F12] text-sm">{pick(lang, { en: 'Your Support Tickets', ta: 'உங்கள் ஆதரவு டிக்கெட்டுகள்', hi: 'आपके सपोर्ट टिकट', ml: 'നിങ്ങളുടെ പിന്തുണ ടിക്കറ്റുകൾ', te: 'మీ సపోర్ట్ టికెట్లు' })}</h3>
               <button
                 onClick={() => setShowCreateTicketModal(true)}
                 className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1"
               >
-                <Plus className="w-3.5 h-3.5" /> {lang === 'ta' ? 'டிக்கெட் உருவாக்கு' : 'Create Ticket'}
+                <Plus className="w-3.5 h-3.5" /> {pick(lang, { en: 'Create Ticket', ta: 'டிக்கெட் உருவாக்கு', hi: 'टिकट बनाएं', ml: 'ടിക്കറ്റ് സൃഷ്ടിക്കുക', te: 'టికెట్ సృష్టించండి' })}
               </button>
             </div>
 
@@ -375,7 +583,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                     </span>
                   </div>
                   <div className="font-bold text-[#0A1F12] truncate">{t.subject}</div>
-                  <div className="text-[10px] text-neutral-500 mt-1">{t.category} • {t.priority} {lang === 'ta' ? 'முன்னுரிமை' : 'Priority'}</div>
+                  <div className="text-[10px] text-neutral-500 mt-1">{t.category} • {t.priority} {pick(lang, { en: 'Priority', ta: 'முன்னுரிமை', hi: 'प्राथमिकता', ml: 'മുൻഗണന', te: 'ప్రాధాన్యత' })}</div>
                 </div>
               ))}
             </div>
@@ -391,7 +599,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                     <div className="text-xs font-bold text-emerald-700">{activeTicket.ticketNumber}</div>
                     <h3 className="text-base font-bold text-[#0A1F12]">{activeTicket.subject}</h3>
                   </div>
-                  <span className="text-xs text-neutral-500 font-mono">{activeTicket.priority} {lang === 'ta' ? 'முன்னுரிமை' : 'Priority'}</span>
+                  <span className="text-xs text-neutral-500 font-mono">{activeTicket.priority} {pick(lang, { en: 'Priority', ta: 'முன்னுரிமை', hi: 'प्राथमिकता', ml: 'മുൻഗണന', te: 'ప్రాధాన్యత' })}</span>
                 </div>
 
                 {/* Messages Body */}
@@ -424,7 +632,13 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                 <form onSubmit={handleSendChatMessage} className="pt-3 border-t border-neutral-200 flex items-center gap-2">
                   <input
                     type="text"
-                    placeholder={lang === 'ta' ? 'எங்கள் ஆதரவு நிர்வாகிக்கு உங்கள் செய்தியை தட்டச்சு செய்யவும்...' : 'Type your message to our support executive...'}
+                    placeholder={pick(lang, {
+                      en: 'Type your message to our support executive...',
+                      ta: 'எங்கள் ஆதரவு நிர்வாகிக்கு உங்கள் செய்தியை தட்டச்சு செய்யவும்...',
+                      hi: 'हमारे सपोर्ट एग्जीक्यूटिव को अपना संदेश टाइप करें...',
+                      ml: 'ഞങ്ങളുടെ പിന്തുണ എക്സിക്യൂട്ടീവിന് നിങ്ങളുടെ സന്ദേശം ടൈപ്പ് ചെയ്യുക...',
+                      te: 'మా సపోర్ట్ ఎగ్జిక్యూటివ్‌కు మీ సందేశాన్ని టైప్ చేయండి...'
+                    })}
                     value={chatMessageInput}
                     onChange={(e) => setChatMessageInput(e.target.value)}
                     className="flex-1 bg-white border border-neutral-200 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs text-[#0A1F12] focus:outline-none"
@@ -440,8 +654,14 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center text-neutral-500 space-y-2">
                 <MessageSquare className="w-12 h-12 text-emerald-200" />
-                <div className="text-sm font-bold text-[#0A1F12]">{lang === 'ta' ? 'அரட்டை வரலாற்றைப் பார்க்க ஒரு டிக்கெட்டைத் தேர்ந்தெடுக்கவும்' : 'Select a Ticket to View Chat History'}</div>
-                <p className="text-xs max-w-xs">{lang === 'ta' ? 'இடதுபுறத்தில் உள்ள ஏதேனும் டிக்கெட்டைக் கிளிக் செய்யவும் அல்லது புதிய விசாரணை டிக்கெட்டை உருவாக்கவும்.' : 'Click any ticket on the left or create a new inquiry ticket.'}</p>
+                <div className="text-sm font-bold text-[#0A1F12]">{pick(lang, { en: 'Select a Ticket to View Chat History', ta: 'அரட்டை வரலாற்றைப் பார்க்க ஒரு டிக்கெட்டைத் தேர்ந்தெடுக்கவும்', hi: 'चैट इतिहास देखने के लिए एक टिकट चुनें', ml: 'ചാറ്റ് ചരിത്രം കാണാൻ ഒരു ടിക്കറ്റ് തിരഞ്ഞെടുക്കുക', te: 'చాట్ చరిత్రను చూడటానికి ఒక టికెట్‌ను ఎంచుకోండి' })}</div>
+                <p className="text-xs max-w-xs">{pick(lang, {
+                  en: 'Click any ticket on the left or create a new inquiry ticket.',
+                  ta: 'இடதுபுறத்தில் உள்ள ஏதேனும் டிக்கெட்டைக் கிளிக் செய்யவும் அல்லது புதிய விசாரணை டிக்கெட்டை உருவாக்கவும்.',
+                  hi: 'बाईं ओर किसी भी टिकट पर क्लिक करें या नई पूछताछ टिकट बनाएं।',
+                  ml: 'ഇടതുവശത്തുള്ള ഏതെങ്കിലും ടിക്കറ്റിൽ ക്ലിക്ക് ചെയ്യുക അല്ലെങ്കിൽ പുതിയ അന്വേഷണ ടിക്കറ്റ് സൃഷ്ടിക്കുക.',
+                  te: 'ఎడమవైపు ఏదైనా టికెట్‌పై క్లిక్ చేయండి లేదా కొత్త విచారణ టికెట్‌ను సృష్టించండి.'
+                })}</p>
               </div>
             )}
           </div>
@@ -452,11 +672,15 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
       {activeTab === 'return' && (
         <div className="bg-white border border-neutral-200 rounded-3xl p-8 max-w-2xl mx-auto space-y-6 shadow-sm">
           <div className="space-y-1">
-            <h3 className="text-xl font-bold text-[#0A1F12]">{lang === 'ta' ? '100% தரம் & புத்துணர்ச்சி உத்தரவாத பணத்திரும்ப கோரிக்கை' : '100% Quality & Freshness Guarantee Refund Claim'}</h3>
+            <h3 className="text-xl font-bold text-[#0A1F12]">{pick(lang, { en: '100% Quality & Freshness Guarantee Refund Claim', ta: '100% தரம் & புத்துணர்ச்சி உத்தரவாத பணத்திரும்ப கோரிக்கை', hi: '100% गुणवत्ता और ताज़गी गारंटी रिफंड दावा', ml: '100% ഗുണനിലവാരവും പുതുമ ഗ്യാരണ്ടി റീഫണ്ട് ക്ലെയിമും', te: '100% నాణ్యత & తాజాదనం గ్యారంటీ రీఫండ్ క్లెయిమ్' })}</h3>
             <p className="text-xs text-neutral-500">
-              {lang === 'ta'
-                ? 'உங்கள் இறைச்சி அல்லது கடல் உணவு 0-4°C பாதுகாப்பு வரம்பிற்கு வெளியே வந்தால் அல்லது வெட்டு தரம் தோல்வியடைந்தால், உடனடி மாற்று அல்லது ஸ்டோர் கிரெடிட் பணத்திரும்பத்தை கோரவும்.'
-                : 'If your meat or seafood arrives outside the 0-4°C safety range or fails cut quality, request an immediate replacement or store credit refund.'}
+              {pick(lang, {
+                en: 'If your meat or seafood arrives outside the 0-4°C safety range or fails cut quality, request an immediate replacement or store credit refund.',
+                ta: 'உங்கள் இறைச்சி அல்லது கடல் உணவு 0-4°C பாதுகாப்பு வரம்பிற்கு வெளியே வந்தால் அல்லது வெட்டு தரம் தோல்வியடைந்தால், உடனடி மாற்று அல்லது ஸ்டோர் கிரெடிட் பணத்திரும்பத்தை கோரவும்.',
+                hi: 'यदि आपका मांस या समुद्री भोजन 0-4°C सुरक्षा सीमा से बाहर पहुंचता है या कट गुणवत्ता में विफल रहता है, तो तुरंत प्रतिस्थापन या स्टोर क्रेडिट रिफंड का अनुरोध करें।',
+                ml: 'നിങ്ങളുടെ മാംസമോ കടൽ വിഭവങ്ങളോ 0-4°C സുരക്ഷാ പരിധിക്ക് പുറത്ത് എത്തുകയോ കട്ട് ഗുണനിലവാരം പരാജയപ്പെടുകയോ ചെയ്താൽ, ഉടനടി മാറ്റിസ്ഥാപിക്കൽ അല്ലെങ്കിൽ സ്റ്റോർ ക്രെഡിറ്റ് റീഫണ്ട് അഭ്യർത്ഥിക്കുക.',
+                te: 'మీ మాంసం లేదా సీఫుడ్ 0-4°C భద్రతా పరిధి దాటి వస్తే లేదా కట్ నాణ్యత విఫలమైతే, తక్షణ రీప్లేస్‌మెంట్ లేదా స్టోర్ క్రెడిట్ రీఫండ్‌ను అభ్యర్థించండి.'
+              })}
             </p>
           </div>
 
@@ -469,14 +693,14 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
 
           <form onSubmit={handleSubmitReturn} className="space-y-4 text-xs">
             <div>
-              <label className="block font-bold text-neutral-600 mb-1">{lang === 'ta' ? 'ஆர்டர் எண்ணைத் தேர்ந்தெடுக்கவும்' : 'Select Order Number'}</label>
+              <label className="block font-bold text-neutral-600 mb-1">{pick(lang, { en: 'Select Order Number', ta: 'ஆர்டர் எண்ணைத் தேர்ந்தெடுக்கவும்', hi: 'ऑर्डर नंबर चुनें', ml: 'ഓർഡർ നമ്പർ തിരഞ്ഞെടുക്കുക', te: 'ఆర్డర్ నంబర్‌ను ఎంచుకోండి' })}</label>
               <select
                 value={returnOrderId}
                 onChange={(e) => setReturnOrderId(e.target.value)}
                 className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
                 required
               >
-                <option value="">{lang === 'ta' ? '-- சமீபத்திய ஆர்டரைத் தேர்ந்தெடுக்கவும் --' : '-- Choose Recent Order --'}</option>
+                <option value="">{pick(lang, { en: '-- Choose Recent Order --', ta: '-- சமீபத்திய ஆர்டரைத் தேர்ந்தெடுக்கவும் --', hi: '-- हाल का ऑर्डर चुनें --', ml: '-- സമീപകാല ഓർഡർ തിരഞ്ഞെടുക്കുക --', te: '-- ఇటీవలి ఆర్డర్‌ను ఎంచుకోండి --' })}</option>
                 {orders.map((o) => (
                   <option key={o.id} value={o.orderNumber}>
                     {o.orderNumber} ({o.status} - ₹{o.totalAmount})
@@ -486,7 +710,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
             </div>
 
             <div>
-              <label className="block font-bold text-neutral-600 mb-1">{lang === 'ta' ? 'கோரிக்கைக்கான காரணம்' : 'Reason for Claim'}</label>
+              <label className="block font-bold text-neutral-600 mb-1">{pick(lang, { en: 'Reason for Claim', ta: 'கோரிக்கைக்கான காரணம்', hi: 'दावे का कारण', ml: 'ക്ലെയിമിന്റെ കാരണം', te: 'క్లెయిమ్‌కు కారణం' })}</label>
               <select
                 value={returnReason}
                 onChange={(e) => setReturnReason(e.target.value)}
@@ -494,16 +718,26 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
               >
                 {Object.keys(RETURN_REASONS_TA).map((reason) => (
                   <option key={reason} value={reason}>
-                    {lang === 'ta' ? RETURN_REASONS_TA[reason] : reason}
+                    {lang === 'ta' ? RETURN_REASONS_TA[reason]
+                      : lang === 'hi' ? RETURN_REASONS_HI[reason]
+                      : lang === 'ml' ? RETURN_REASONS_ML[reason]
+                      : lang === 'te' ? RETURN_REASONS_TE[reason]
+                      : reason}
                   </option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="block font-bold text-neutral-600 mb-1">{lang === 'ta' ? 'கூடுதல் விவரங்கள்' : 'Additional Details'}</label>
+              <label className="block font-bold text-neutral-600 mb-1">{pick(lang, { en: 'Additional Details', ta: 'கூடுதல் விவரங்கள்', hi: 'अतिरिक्त विवरण', ml: 'അധിക വിവരങ്ങൾ', te: 'అదనపు వివరాలు' })}</label>
               <textarea
-                placeholder={lang === 'ta' ? 'டெலிவரியின் போது நிலைமையை விளக்கவும்...' : 'Explain the condition upon delivery...'}
+                placeholder={pick(lang, {
+                  en: 'Explain the condition upon delivery...',
+                  ta: 'டெலிவரியின் போது நிலைமையை விளக்கவும்...',
+                  hi: 'डिलीवरी के समय स्थिति बताएं...',
+                  ml: 'ഡെലിവറി സമയത്തെ അവസ്ഥ വിശദീകരിക്കുക...',
+                  te: 'డెలివరీ సమయంలో పరిస్థితిని వివరించండి...'
+                })}
                 value={returnComments}
                 onChange={(e) => setReturnComments(e.target.value)}
                 className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
@@ -515,7 +749,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
               type="submit"
               className="w-full bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold py-3 rounded-xl uppercase tracking-wider text-xs"
             >
-              {lang === 'ta' ? 'உடனடி திரும்பப் பெறும் கோரிக்கையை பதிவு செய்யவும்' : 'Lodge Instant Return Request'}
+              {pick(lang, { en: 'Lodge Instant Return Request', ta: 'உடனடி திரும்பப் பெறும் கோரிக்கையை பதிவு செய்யவும்', hi: 'तुरंत रिटर्न अनुरोध दर्ज करें', ml: 'തൽക്ഷണ റിട്ടേൺ അഭ്യർത്ഥന രജിസ്റ്റർ ചെയ്യുക', te: 'తక్షణ రిటర్న్ అభ్యర్థనను నమోదు చేయండి' })}
             </button>
           </form>
         </div>
@@ -525,13 +759,19 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
       {showCreateTicketModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white border border-neutral-200 rounded-3xl max-w-lg w-full p-6 text-[#0A1F12] space-y-4 shadow-2xl">
-            <h3 className="text-lg font-bold">{lang === 'ta' ? 'ஆதரவு டிக்கெட்டைப் பதிவு செய்யவும்' : 'Lodge Support Ticket'}</h3>
+            <h3 className="text-lg font-bold">{pick(lang, { en: 'Lodge Support Ticket', ta: 'ஆதரவு டிக்கெட்டைப் பதிவு செய்யவும்', hi: 'सपोर्ट टिकट दर्ज करें', ml: 'പിന്തുണ ടിക്കറ്റ് രജിസ്റ്റർ ചെയ്യുക', te: 'సపోర్ట్ టికెట్‌ను నమోదు చేయండి' })}</h3>
             <form onSubmit={handleCreateTicketSubmit} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-neutral-600 mb-1">{lang === 'ta' ? 'பொருள்' : 'Subject'}</label>
+                <label className="block font-bold text-neutral-600 mb-1">{pick(lang, { en: 'Subject', ta: 'பொருள்', hi: 'विषय', ml: 'വിഷയം', te: 'విషయం' })}</label>
                 <input
                   type="text"
-                  placeholder={lang === 'ta' ? 'உதா. டெலிவரி நேர தாமதம் அல்லது தயாரிப்பு விசாரணை' : 'e.g. Delivery slot delay or product inquiry'}
+                  placeholder={pick(lang, {
+                    en: 'e.g. Delivery slot delay or product inquiry',
+                    ta: 'உதா. டெலிவரி நேர தாமதம் அல்லது தயாரிப்பு விசாரணை',
+                    hi: 'उदा. डिलीवरी स्लॉट में देरी या उत्पाद पूछताछ',
+                    ml: 'ഉദാ. ഡെലിവറി സ്ലോട്ട് കാലതാമസം അല്ലെങ്കിൽ ഉൽപ്പന്ന അന്വേഷണം',
+                    te: 'ఉదా. డెలివరీ స్లాట్ ఆలస్యం లేదా ఉత్పత్తి విచారణ'
+                  })}
                   value={newTicketSubject}
                   onChange={(e) => setNewTicketSubject(e.target.value)}
                   className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
@@ -540,7 +780,7 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
               </div>
 
               <div>
-                <label className="block font-bold text-neutral-600 mb-1">{lang === 'ta' ? 'வகை' : 'Category'}</label>
+                <label className="block font-bold text-neutral-600 mb-1">{pick(lang, { en: 'Category', ta: 'வகை', hi: 'श्रेणी', ml: 'വിഭാഗം', te: 'వర్గం' })}</label>
                 <select
                   value={newTicketCategory}
                   onChange={(e: any) => setNewTicketCategory(e.target.value)}
@@ -548,16 +788,26 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                 >
                   {Object.keys(TICKET_CATEGORIES_TA).map((cat) => (
                     <option key={cat} value={cat}>
-                      {lang === 'ta' ? TICKET_CATEGORIES_TA[cat] : cat}
+                      {lang === 'ta' ? TICKET_CATEGORIES_TA[cat]
+                        : lang === 'hi' ? TICKET_CATEGORIES_HI[cat]
+                        : lang === 'ml' ? TICKET_CATEGORIES_ML[cat]
+                        : lang === 'te' ? TICKET_CATEGORIES_TE[cat]
+                        : cat}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block font-bold text-neutral-600 mb-1">{lang === 'ta' ? 'செய்தி விவரம்' : 'Message Detail'}</label>
+                <label className="block font-bold text-neutral-600 mb-1">{pick(lang, { en: 'Message Detail', ta: 'செய்தி விவரம்', hi: 'संदेश विवरण', ml: 'സന്ദേശ വിവരണം', te: 'సందేశ వివరాలు' })}</label>
                 <textarea
-                  placeholder={lang === 'ta' ? 'உங்கள் பிரச்சனையை விவரிக்கவும்...' : 'Describe your issue...'}
+                  placeholder={pick(lang, {
+                    en: 'Describe your issue...',
+                    ta: 'உங்கள் பிரச்சனையை விவரிக்கவும்...',
+                    hi: 'अपनी समस्या बताएं...',
+                    ml: 'നിങ്ങളുടെ പ്രശ്നം വിവരിക്കുക...',
+                    te: 'మీ సమస్యను వివరించండి...'
+                  })}
                   value={newTicketMessage}
                   onChange={(e) => setNewTicketMessage(e.target.value)}
                   className="w-full bg-white border border-neutral-200 rounded-xl p-3 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
@@ -572,13 +822,13 @@ export const SupportPage: React.FC<SupportPageProps> = ({ onNavigate }) => {
                   onClick={() => setShowCreateTicketModal(false)}
                   className="px-4 py-2 rounded-xl text-neutral-500 hover:text-[#0A1F12]"
                 >
-                  {lang === 'ta' ? 'ரத்து செய்' : 'Cancel'}
+                  {pick(lang, { en: 'Cancel', ta: 'ரத்து செய்', hi: 'रद्द करें', ml: 'റദ്ദാക്കുക', te: 'రద్దు చేయండి' })}
                 </button>
                 <button
                   type="submit"
                   className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl uppercase"
                 >
-                  {lang === 'ta' ? 'டிக்கெட்டைச் சமர்ப்பிக்கவும்' : 'Submit Ticket'}
+                  {pick(lang, { en: 'Submit Ticket', ta: 'டிக்கெட்டைச் சமர்ப்பிக்கவும்', hi: 'टिकट सबमिट करें', ml: 'ടിക്കറ്റ് സമർപ്പിക്കുക', te: 'టికెట్‌ను సమర్పించండి' })}
                 </button>
               </div>
             </form>

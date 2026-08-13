@@ -50,11 +50,13 @@ export const VoiceSearchModal: React.FC<VoiceSearchModalProps> = ({
   // the site to Tamil and spoke Tamil into the mic had every word
   // misrecognized as English, which reads as "voice search doesn't work" even
   // though the feature itself was running fine. Chrome's recognizer supports
-  // 'ta-IN', so follow the site's selected language instead.
-  const recognitionLang = lang === 'ta' ? 'ta-IN' : 'en-IN';
-  // If a browser/OS combination doesn't actually have the Tamil speech model
-  // installed, it reports 'language-not-supported' instead of transcribing.
-  // Fall back to English once rather than dead-ending the customer.
+  // 'ta-IN', 'hi-IN', 'ml-IN' and 'te-IN', so follow the site's selected
+  // language instead.
+  const recognitionLang =
+    lang === 'ta' ? 'ta-IN' : lang === 'hi' ? 'hi-IN' : lang === 'ml' ? 'ml-IN' : lang === 'te' ? 'te-IN' : 'en-IN';
+  // If a browser/OS combination doesn't actually have the selected-language
+  // speech model installed, it reports 'language-not-supported' instead of
+  // transcribing. Fall back to English once rather than dead-ending the customer.
   const triedLangFallbackRef = useRef(false);
   // 'network' is the single most common cause of "Voice recognition failed"
   // even with the mic permission fully granted — Chrome's built-in

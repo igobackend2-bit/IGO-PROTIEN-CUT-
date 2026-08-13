@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, ChevronLeft, ChevronRight, Gift } from 'lucide-react';
 import type { Product } from '../types';
-import { useLang } from '../lib/language';
+import { useLang, pick } from '../lib/language';
 
 interface ComboBannerProps {
   products: Product[];
@@ -46,7 +46,7 @@ export const ComboBanner: React.FC<ComboBannerProps> = ({ products, onSelectProd
           <div className="inline-flex items-center gap-2 w-fit bg-white/10 border border-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
             <Gift className="w-3.5 h-3.5 text-[#D4AF37]" />
             <span className="text-[10px] font-bold text-white uppercase tracking-widest">
-              {lang === 'ta' ? 'காம்போ பேக்' : 'Combo Pack'}
+              {pick(lang, { en: 'Combo Pack', ta: 'காம்போ பேக்', hi: 'कॉम्बो पैक', ml: 'കോംബോ പായ്ക്ക്', te: 'కాంబో ప్యాక్' })}
             </span>
           </div>
 
@@ -69,7 +69,7 @@ export const ComboBanner: React.FC<ComboBannerProps> = ({ products, onSelectProd
               </div>
               {combo.discountPercentage > 0 && (
                 <span className="block text-[9px] uppercase tracking-widest font-bold mt-1">
-                  {combo.discountPercentage}% {lang === 'ta' ? 'தள்ளுபடி' : 'Off'}
+                  {combo.discountPercentage}% {pick(lang, { en: 'Off', ta: 'தள்ளுபடி', hi: 'छूट', ml: 'കിഴിവ്', te: 'తగ్గింపు' })}
                 </span>
               )}
             </div>
@@ -78,7 +78,7 @@ export const ComboBanner: React.FC<ComboBannerProps> = ({ products, onSelectProd
               onClick={() => onSelectProduct(combo)}
               className="bg-white hover:bg-emerald-50 text-[#0A1F12] font-black px-6 py-3 rounded-2xl text-xs uppercase tracking-wider transition cursor-pointer shadow-lg flex items-center gap-2"
             >
-              {lang === 'ta' ? 'இப்போது ஆர்டர் செய்யுங்கள்' : 'Order Now'} <ArrowRight className="w-4 h-4" />
+              {pick(lang, { en: 'Order Now', ta: 'இப்போது ஆர்டர் செய்யுங்கள்', hi: 'अभी ऑर्डर करें', ml: 'ഇപ്പോൾ ഓർഡർ ചെയ്യുക', te: 'ఇప్పుడే ఆర్డర్ చేయండి' })} <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>

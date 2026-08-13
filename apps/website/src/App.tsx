@@ -557,7 +557,7 @@ export default function App() {
         onNavigate={navigate}
         currentPath={currentPath}
         lang={lang}
-        onToggleLang={() => setLang((prev) => (prev === 'en' ? 'ta' : 'en'))}
+        onSetLang={setLang}
         products={products}
       />
 

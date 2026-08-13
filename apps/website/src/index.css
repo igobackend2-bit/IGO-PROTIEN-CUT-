@@ -27,6 +27,17 @@
   :lang(ta) {
     font-family: 'Noto Sans Tamil', 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
+  /* Same fix, one rule per additional script now supported: Hindi
+     (Devanagari), Malayalam, Telugu. */
+  :lang(hi) {
+    font-family: 'Noto Sans Devanagari', 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  :lang(ml) {
+    font-family: 'Noto Sans Malayalam', 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  :lang(te) {
+    font-family: 'Noto Sans Telugu', 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
 }
 
 /* Custom Scrollbars */

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, X, BookOpen } from 'lucide-react';
-import { guides, guidesTa, Guide } from '../sections/GuidesSection';
-import { useLang } from '../lib/language';
+import { guides, guidesTa, guidesHi, guidesMl, guidesTe, Guide } from '../sections/GuidesSection';
+import { useLang, pick } from '../lib/language';
 
 /**
  * BLOG — reuses the same real, genuinely useful cooking/food-safety guides
@@ -13,18 +13,22 @@ import { useLang } from '../lib/language';
 export const BlogPage: React.FC = () => {
   const { lang } = useLang();
   const [openGuide, setOpenGuide] = useState<Guide | null>(null);
-  const resolvedGuides = lang === 'ta' ? guidesTa : guides;
+  const resolvedGuides = lang === 'ta' ? guidesTa : lang === 'hi' ? guidesHi : lang === 'ml' ? guidesMl : lang === 'te' ? guidesTe : guides;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
       {/* Hero */}
       <div className="bg-[#0A1F12] rounded-3xl p-8 sm:p-12 text-center max-w-3xl mx-auto space-y-3 text-white shadow-lg shadow-emerald-950/20">
         <BookOpen className="w-10 h-10 text-emerald-400 mx-auto" />
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight">{lang === 'ta' ? 'IGO சமையலறை வழிகாட்டிகள்' : 'IGO Kitchen Guides'}</h1>
+        <h1 className="text-3xl sm:text-4xl font-black tracking-tight">{pick(lang, { en: 'IGO Kitchen Guides', ta: 'IGO சமையலறை வழிகாட்டிகள்', hi: 'IGO किचन गाइड', ml: 'IGO അടുക്കള ഗൈഡുകൾ', te: 'IGO వంటగది గైడ్‌లు' })}</h1>
         <p className="text-xs sm:text-sm text-neutral-300 max-w-xl mx-auto">
-          {lang === 'ta'
-            ? 'நடைமுறை, உண்மையான உணவு பாதுகாப்பு மற்றும் சமையல் வழிகாட்டுதல் — நீங்கள் வாங்கியதை எப்படி சேமிப்பது, தரத்தை எப்படி மதிப்பிடுவது, மற்றும் எப்படி சரியாக சமைப்பது. அலங்காரமில்லாமல், உங்கள் சமையலறையில் உண்மையில் முக்கியமானது மட்டும்.'
-            : "Practical, real food-safety and cooking guidance — how to store what you bought, how to judge quality, and how to cook it right. No filler, just what actually matters in your kitchen."}
+          {pick(lang, {
+            en: "Practical, real food-safety and cooking guidance — how to store what you bought, how to judge quality, and how to cook it right. No filler, just what actually matters in your kitchen.",
+            ta: 'நடைமுறை, உண்மையான உணவு பாதுகாப்பு மற்றும் சமையல் வழிகாட்டுதல் — நீங்கள் வாங்கியதை எப்படி சேமிப்பது, தரத்தை எப்படி மதிப்பிடுவது, மற்றும் எப்படி சரியாக சமைப்பது. அலங்காரமில்லாமல், உங்கள் சமையலறையில் உண்மையில் முக்கியமானது மட்டும்.',
+            hi: 'व्यावहारिक, असली फूड-सेफ्टी और कुकिंग गाइडेंस — आपने जो खरीदा है उसे कैसे स्टोर करें, क्वालिटी कैसे परखें, और सही तरीके से कैसे पकाएं। कोई फिजूल बातें नहीं, बस वही जो आपकी रसोई में सच में मायने रखता है।',
+            ml: 'പ്രായോഗികവും യഥാർത്ഥവുമായ ഭക്ഷ്യസുരക്ഷയും പാചക മാർഗ്ഗനിർദ്ദേശവും — നിങ്ങൾ വാങ്ങിയത് എങ്ങനെ സൂക്ഷിക്കാം, ഗുണനിലവാരം എങ്ങനെ വിലയിരുത്താം, ശരിയായി എങ്ങനെ പാചകം ചെയ്യാം. അനാവശ്യമായതൊന്നുമില്ല, നിങ്ങളുടെ അടുക്കളയിൽ യഥാർത്ഥത്തിൽ പ്രധാനപ്പെട്ടത് മാത്രം.',
+            te: 'ఆచరణాత్మకమైన, నిజమైన ఫుడ్-సేఫ్టీ మరియు వంట మార్గదర్శకత్వం — మీరు కొన్నది ఎలా నిల్వ చేయాలో, నాణ్యతను ఎలా అంచనా వేయాలో, సరిగ్గా ఎలా వండాలో. అనవసరమైనవి ఏమీ లేవు, మీ వంటగదిలో నిజంగా ముఖ్యమైనది మాత్రమే.',
+          })}
         </p>
       </div>
 
@@ -54,7 +58,7 @@ export const BlogPage: React.FC = () => {
                 <h3 className="text-sm font-black text-[#0A1F12] leading-snug">{guide.title}</h3>
                 <p className="text-xs text-neutral-500 leading-relaxed">{guide.excerpt}</p>
                 <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 group-hover:gap-2 transition-all">
-                  {lang === 'ta' ? 'வழிகாட்டியைப் படிக்கவும்' : 'Read Guide'} <ArrowRight className="w-3.5 h-3.5" />
+                  {pick(lang, { en: 'Read Guide', ta: 'வழிகாட்டியைப் படிக்கவும்', hi: 'गाइड पढ़ें', ml: 'ഗൈഡ് വായിക്കുക', te: 'గైడ్ చదవండి' })} <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </div>
             </button>
@@ -77,7 +81,7 @@ export const BlogPage: React.FC = () => {
               <button
                 onClick={() => setOpenGuide(null)}
                 className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-[#0A1F12] cursor-pointer transition"
-                aria-label={lang === 'ta' ? 'வழிகாட்டியை மூடு' : 'Close guide'}
+                aria-label={pick(lang, { en: 'Close guide', ta: 'வழிகாட்டியை மூடு', hi: 'गाइड बंद करें', ml: 'ഗൈഡ് അടയ്ക്കുക', te: 'గైడ్‌ను మూసివేయండి' })}
               >
                 <X className="w-4 h-4" />
               </button>
