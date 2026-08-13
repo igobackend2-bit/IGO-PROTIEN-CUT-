@@ -62,6 +62,7 @@ import { resolveIcon } from '../lib/iconMap';
 import { isPincodeServiceable } from '../lib/serviceability';
 import { FadeImage } from '../components/FadeImage';
 import { useLang, pick } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 
 // Tamil titles for the 19 INITIAL_RECIPES entries (src/data/mockData.ts),
 // keyed by recipe id rather than adding a titleTa field to the shared Recipe
@@ -1698,7 +1699,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   className="group/card relative shrink-0 w-40 sm:w-48 bg-white border border-neutral-200 hover:border-emerald-400 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col hover:-translate-y-1"
                 >
                   <div className="relative aspect-square bg-neutral-100 overflow-hidden">
-                    <img src={product.image} alt={product.name} referrerPolicy="no-referrer" className={`w-full h-full object-cover group-hover/card:scale-110 transition duration-500 ${isOutOfStock ? 'grayscale opacity-70' : ''}`} />
+                    <img src={product.image} alt={translateProductName(product.id, product.name, lang)} referrerPolicy="no-referrer" className={`w-full h-full object-cover group-hover/card:scale-110 transition duration-500 ${isOutOfStock ? 'grayscale opacity-70' : ''}`} />
                     {isOutOfStock ? (
                       <span className="absolute top-2 left-2 bg-[#0A1F12] text-white text-[10px] font-black px-2 py-0.5 rounded-full">
                         {pick(lang, { en: 'Out of Stock', ta: 'கையிருப்பில் இல்லை', hi: 'स्टॉक खत्म', ml: 'സ്റ്റോക്ക് ഇല്ല', te: 'స్టాక్ లేదు' })}
@@ -1723,7 +1724,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </div>
                   <div className="p-3 flex-1 flex flex-col justify-between space-y-2">
                     <div>
-                      <h3 className="text-xs font-bold text-[#0A1F12] line-clamp-2 leading-snug">{product.name}</h3>
+                      <h3 className="text-xs font-bold text-[#0A1F12] line-clamp-2 leading-snug">{translateProductName(product.id, product.name, lang)}</h3>
                       <p className="text-[10px] text-neutral-500 mt-1">{weight?.pieces || product.subcategory}</p>
                       <div className="flex items-center gap-1 text-[10px] text-neutral-500 mt-0.5">
                         <Weight className="w-3 h-3 text-emerald-600 shrink-0" />
@@ -1836,7 +1837,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   className="group/card relative shrink-0 w-36 sm:w-40 bg-white border border-neutral-200 hover:border-emerald-400 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition cursor-pointer"
                 >
                   <div className="relative aspect-square bg-neutral-100 overflow-hidden">
-                    <img src={product.image} alt={product.name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                    <img src={product.image} alt={translateProductName(product.id, product.name, lang)} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
                     <span className="absolute top-2 left-2 bg-white/95 text-emerald-700 text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> FRESH TODAY
                     </span>
@@ -1854,7 +1855,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     </div>
                   </div>
                   <div className="p-2.5">
-                    <h3 className="text-[11px] font-bold text-[#0A1F12] line-clamp-2 leading-snug">{product.name}</h3>
+                    <h3 className="text-[11px] font-bold text-[#0A1F12] line-clamp-2 leading-snug">{translateProductName(product.id, product.name, lang)}</h3>
                     <div className="text-xs font-black text-emerald-700 mt-1">₹{product.basePrice}</div>
                   </div>
                 </div>
@@ -2037,7 +2038,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 className="group bg-white border border-neutral-200 hover:border-emerald-400 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-1"
               >
                 <div className="relative aspect-4/3 bg-neutral-100 overflow-hidden">
-                  <img src={product.image} alt={product.name} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
+                  <img src={product.image} alt={translateProductName(product.id, product.name, lang)} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
                   {product.discountPercentage > 0 && (
                     <span className="absolute top-2 left-2 bg-[#0F7B3A] text-white text-[10px] font-black px-2 py-0.5 rounded-full">
                       {product.discountPercentage}% {pick(lang, { en: 'OFF', ta: 'தள்ளுபடி', hi: 'छूट', ml: 'കിഴിവ്', te: 'తగ్గింపు' })}
@@ -2045,7 +2046,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   )}
                 </div>
                 <div className="p-3 space-y-1">
-                  <h3 className="text-xs font-bold text-[#0A1F12] line-clamp-1">{product.name}</h3>
+                  <h3 className="text-xs font-bold text-[#0A1F12] line-clamp-1">{translateProductName(product.id, product.name, lang)}</h3>
                   <div className="flex items-center gap-1 text-[10px] text-neutral-500">
                     <Star className="w-3 h-3 fill-emerald-500 text-emerald-500" /> {product.rating} ({product.reviewCount})
                   </div>
@@ -2337,13 +2338,13 @@ export const HomePage: React.FC<HomePageProps> = ({
                   className="group bg-white border border-emerald-100 hover:border-emerald-400 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col hover:-translate-y-1"
                 >
                   <div className="relative aspect-4/3 bg-neutral-100 overflow-hidden">
-                    <img src={product.image} alt={product.name} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
+                    <img src={product.image} alt={translateProductName(product.id, product.name, lang)} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
                     <span className="absolute top-2 left-2 bg-[#0A1F12] text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase flex items-center gap-1">
                       <ChefHat className="w-3 h-3" /> {pick(lang, { en: "Chef's Pick", ta: 'சமையல்காரர் தேர்வு', hi: 'शेफ की पसंद', ml: 'ഷെഫിന്റെ തിരഞ്ഞെടുപ്പ്', te: 'చెఫ్ పిక్' })}
                     </span>
                   </div>
                   <div className="p-3 space-y-1 flex-1">
-                    <h3 className="text-xs font-bold text-[#0A1F12] line-clamp-1">{product.name}</h3>
+                    <h3 className="text-xs font-bold text-[#0A1F12] line-clamp-1">{translateProductName(product.id, product.name, lang)}</h3>
                     <p className="text-[10px] text-neutral-500 line-clamp-1">
                       {pick(lang, { en: 'Best for: ', ta: 'இதற்கு சிறந்தது: ', hi: 'इसके लिए बेहतरीन: ', ml: 'ഏറ്റവും അനുയോജ്യം: ', te: 'దీనికి ఉత్తమం: ' })}
                       {product.recipePairing}
@@ -2453,9 +2454,9 @@ export const HomePage: React.FC<HomePageProps> = ({
                       onClick={() => onSelectProduct(prod)}
                       className="bg-white/95 border border-white hover:border-black/20 p-2.5 rounded-xl flex items-center gap-3 shrink-0 snap-start cursor-pointer transition shadow-sm"
                     >
-                      <img src={prod.image} alt={prod.name} referrerPolicy="no-referrer" className="w-10 h-10 rounded-lg object-cover" />
+                      <img src={prod.image} alt={translateProductName(prod.id, prod.name, lang)} referrerPolicy="no-referrer" className="w-10 h-10 rounded-lg object-cover" />
                       <div>
-                        <div className="text-xs font-bold text-[#0A1F12] line-clamp-1">{prod.name}</div>
+                        <div className="text-xs font-bold text-[#0A1F12] line-clamp-1">{translateProductName(prod.id, prod.name, lang)}</div>
                         <div className="text-xs text-emerald-700 font-black">₹{prod.basePrice} <span className="text-[10px] text-neutral-400 line-through">₹{prod.originalPrice}</span></div>
                       </div>
                     </div>

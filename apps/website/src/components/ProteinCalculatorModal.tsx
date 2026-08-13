@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, Dumbbell, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
 import { Product } from '../types';
+import { useLang } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 
 interface ProteinCalculatorModalProps {
   isOpen: boolean;
@@ -19,6 +21,7 @@ export const ProteinCalculatorModal: React.FC<ProteinCalculatorModalProps> = ({
   const [goal, setGoal] = useState<'muscle' | 'fatloss' | 'maintenance'>('muscle');
   const [activity, setActivity] = useState<'sedentary' | 'moderate' | 'athlete'>('athlete');
   const [calculatedTarget, setCalculatedTarget] = useState<number | null>(null);
+  const { lang } = useLang();
 
   if (!isOpen) return null;
 
@@ -161,7 +164,7 @@ export const ProteinCalculatorModal: React.FC<ProteinCalculatorModalProps> = ({
                     <div className="flex items-center gap-3">
                       <img src={prod.image} alt={prod.name} referrerPolicy="no-referrer" className="w-9 h-9 rounded-lg object-cover" />
                       <div>
-                        <div className="text-xs font-bold text-[#0A1F12] line-clamp-1">{prod.name}</div>
+                        <div className="text-xs font-bold text-[#0A1F12] line-clamp-1">{translateProductName(prod.id, prod.name, lang)}</div>
                         <div className="text-[10px] text-emerald-700 font-semibold">{prod.nutrition.protein} per serving</div>
                       </div>
                     </div>

@@ -3,6 +3,7 @@ import { Flame, Clock3, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-rea
 import type { Product } from '../types';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
 import { useLang, pick } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 
 interface TodaysDealsBannerProps {
   products: Product[];
@@ -120,7 +121,7 @@ export const TodaysDealsBanner: React.FC<TodaysDealsBannerProps> = ({ products, 
           <img
             key={deal.id}
             src={deal.image}
-            alt={deal.name}
+            alt={translateProductName(deal.id, deal.name, lang)}
             referrerPolicy="no-referrer"
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out ${
               idx === safeActive ? 'opacity-100 animate-kenburns' : 'opacity-0'
@@ -140,11 +141,11 @@ export const TodaysDealsBanner: React.FC<TodaysDealsBannerProps> = ({ products, 
             </h2>
             <p className="text-white/80 text-sm sm:text-base font-medium mb-6">
               {pick(lang, {
-                en: `On ${topDeal.name} and today's best cuts — limited time only.`,
-                ta: `${topDeal.name} மற்றும் இன்றைய சிறந்த கட்ஸில் — குறுகிய காலத்திற்கு மட்டும்.`,
-                hi: `${topDeal.name} और आज के बेहतरीन कट्स पर — सीमित समय के लिए।`,
-                ml: `${topDeal.name}, ഇന്നത്തെ മികച്ച കട്ടുകൾ എന്നിവയിൽ — പരിമിതമായ സമയത്തേക്ക് മാത്രം.`,
-                te: `${topDeal.name} మరియు ఈరోజు అత్యుత్తమ కట్స్‌పై — పరిమిత సమయం మాత్రమే.`
+                en: `On ${translateProductName(topDeal.id, topDeal.name, lang)} and today's best cuts — limited time only.`,
+                ta: `${translateProductName(topDeal.id, topDeal.name, lang)} மற்றும் இன்றைய சிறந்த கட்ஸில் — குறுகிய காலத்திற்கு மட்டும்.`,
+                hi: `${translateProductName(topDeal.id, topDeal.name, lang)} और आज के बेहतरीन कट्स पर — सीमित समय के लिए।`,
+                ml: `${translateProductName(topDeal.id, topDeal.name, lang)}, ഇന്നത്തെ മികച്ച കട്ടുകൾ എന്നിവയിൽ — പരിമിതമായ സമയത്തേക്ക് മാത്രം.`,
+                te: `${translateProductName(topDeal.id, topDeal.name, lang)} మరియు ఈరోజు అత్యుత్తమ కట్స్‌పై — పరిమిత సమయం మాత్రమే.`
               })}
             </p>
             <button
@@ -192,7 +193,7 @@ export const TodaysDealsBanner: React.FC<TodaysDealsBannerProps> = ({ products, 
                 <button
                   key={deal.id}
                   onClick={() => setActiveDeal(idx)}
-                  aria-label={`Show ${deal.name} deal`}
+                  aria-label={`Show ${translateProductName(deal.id, deal.name, lang)} deal`}
                   className={`h-1.5 rounded-full transition-all duration-500 cursor-pointer ${
                     idx === safeActive ? 'w-6 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/60'
                   }`}

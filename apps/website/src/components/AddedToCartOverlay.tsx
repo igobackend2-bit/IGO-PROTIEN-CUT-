@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { Product, ProductWeightOption } from '../types';
+import { useLang } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 
 interface AddedToCartOverlayProps {
   info: { product: Product; weight: ProductWeightOption; quantity: number } | null;
@@ -15,6 +17,7 @@ interface AddedToCartOverlayProps {
  * the backdrop.
  */
 export const AddedToCartOverlay: React.FC<AddedToCartOverlayProps> = ({ info, onClose }) => {
+  const { lang } = useLang();
   useEffect(() => {
     if (!info) return;
     const timer = setTimeout(onClose, 1800);
@@ -51,7 +54,7 @@ export const AddedToCartOverlay: React.FC<AddedToCartOverlayProps> = ({ info, on
             className="w-12 h-12 rounded-xl object-cover shrink-0"
           />
           <div className="min-w-0">
-            <div className="text-xs font-bold text-[#0A1F12] line-clamp-1">{product.name}</div>
+            <div className="text-xs font-bold text-[#0A1F12] line-clamp-1">{translateProductName(product.id, product.name, lang)}</div>
             <div className="text-[11px] text-neutral-500">
               {weight.label} &middot; Qty {quantity}
             </div>

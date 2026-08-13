@@ -6,6 +6,7 @@ import { StoreService } from '../lib/storage';
 import { createSubscription } from '../lib/api/subscriptions';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
 import { useLang, pick } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 
 // The fallback is exactly what this page rendered before it was wired to the
 // CMS — see the contract in useSiteContent.ts. Once an admin edits
@@ -538,8 +539,8 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
               const line = boxLines.find((l) => l.productId === p.id);
               return (
                 <div key={p.id} className="bg-neutral-50 border border-neutral-200 rounded-2xl p-2.5 space-y-2">
-                  <img src={p.image} alt={p.name} referrerPolicy="no-referrer" className="w-full aspect-square rounded-xl object-cover" />
-                  <div className="text-[11px] font-bold text-[#0A1F12] line-clamp-2 leading-tight">{p.name}</div>
+                  <img src={p.image} alt={translateProductName(p.id, p.name, lang)} referrerPolicy="no-referrer" className="w-full aspect-square rounded-xl object-cover" />
+                  <div className="text-[11px] font-bold text-[#0A1F12] line-clamp-2 leading-tight">{translateProductName(p.id, p.name, lang)}</div>
                   <div className="text-[10px] text-emerald-700 font-black">₹{p.weightOptions[0].price}</div>
                   {line ? (
                     <div className="flex items-center justify-between bg-white border border-neutral-200 rounded-lg p-1">
@@ -581,8 +582,8 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
               if (!p) return null;
               return (
                 <div key={line.productId} className="bg-neutral-50 border border-neutral-200 rounded-2xl p-2.5 space-y-1">
-                  <img src={p.image} alt={p.name} referrerPolicy="no-referrer" className="w-full aspect-square rounded-xl object-cover" />
-                  <div className="text-[11px] font-bold text-[#0A1F12] line-clamp-2 leading-tight">{p.name}</div>
+                  <img src={p.image} alt={translateProductName(p.id, p.name, lang)} referrerPolicy="no-referrer" className="w-full aspect-square rounded-xl object-cover" />
+                  <div className="text-[11px] font-bold text-[#0A1F12] line-clamp-2 leading-tight">{translateProductName(p.id, p.name, lang)}</div>
                   <div className="text-[10px] text-emerald-700 font-black">₹{p.weightOptions[0].price}</div>
                 </div>
               );
@@ -612,7 +613,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
             if (!p) return null;
             return (
               <div key={line.productId} className="flex items-center justify-between text-xs">
-                <span className="text-neutral-700">{p.name} x{line.quantity}</span>
+                <span className="text-neutral-700">{translateProductName(p.id, p.name, lang)} x{line.quantity}</span>
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-[#0A1F12]">₹{p.weightOptions[0].price * line.quantity}</span>
                   {isCustomBuilder && (

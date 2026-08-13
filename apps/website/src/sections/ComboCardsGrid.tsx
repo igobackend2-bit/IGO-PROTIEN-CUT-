@@ -4,6 +4,7 @@ import { StoreService } from '../lib/storage';
 import type { Product } from '../types';
 import { useSiteContent } from '../lib/hooks/useSiteContent';
 import { useLang, pick } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 
 interface ComboCardsGridProps {
   products: Product[];
@@ -105,11 +106,11 @@ export const ComboCardsGrid: React.FC<ComboCardsGridProps> = ({ products, onSele
               </div>
 
               <div className="absolute right-0 bottom-0 w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden border-4 border-white/30 translate-x-6 translate-y-6 group-hover:translate-x-4 group-hover:translate-y-4 transition duration-500">
-                <img src={combo.image} alt={combo.name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+                <img src={combo.image} alt={translateProductName(combo.id, combo.name, lang)} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
               </div>
 
               <div className="relative z-10 max-w-[60%]">
-                <h3 className="text-white font-black text-base leading-tight mb-1">{combo.name}</h3>
+                <h3 className="text-white font-black text-base leading-tight mb-1">{translateProductName(combo.id, combo.name, lang)}</h3>
                 <p className="text-white/70 text-xs leading-relaxed line-clamp-2 mb-2">{combo.shortDescription}</p>
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex items-baseline gap-1.5">

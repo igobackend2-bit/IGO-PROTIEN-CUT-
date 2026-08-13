@@ -3,6 +3,8 @@ import { X, CheckCircle2, Star, Truck } from 'lucide-react';
 import { Order, Product } from '../types';
 import { submitReview, fetchMyReview, MyReview } from '../lib/api/reviews';
 import { submitOrderFeedback, fetchMyOrderFeedback, MyOrderFeedback } from '../lib/api/orderFeedback';
+import { useLang } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 
 interface OrderFeedbackModalProps {
   order: Order;
@@ -62,6 +64,7 @@ export const OrderFeedbackModal: React.FC<OrderFeedbackModalProps> = ({ order, o
     ).values()
   );
 
+  const { lang } = useLang();
   const [productState, setProductState] = useState<Record<string, ProductFeedbackState>>({});
   const [overallRating, setOverallRating] = useState(5);
   const [overallComment, setOverallComment] = useState('');
@@ -211,7 +214,7 @@ export const OrderFeedbackModal: React.FC<OrderFeedbackModalProps> = ({ order, o
                       referrerPolicy="no-referrer"
                       className="w-10 h-10 rounded-xl object-cover bg-white border border-neutral-200 shrink-0"
                     />
-                    <div className="text-xs font-bold text-[#0A1F12] truncate">{product.name}</div>
+                    <div className="text-xs font-bold text-[#0A1F12] truncate">{translateProductName(product.id, product.name, lang)}</div>
                   </div>
 
                   {!state || !state.loaded ? (

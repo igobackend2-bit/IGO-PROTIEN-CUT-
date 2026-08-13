@@ -5,6 +5,8 @@ import { StoreService } from '../lib/storage';
 import { Hero3DCanvas } from './Hero3DCanvas';
 import { FadeImage } from './FadeImage';
 import { getBulkLineTotal } from '../lib/pricing';
+import { useLang } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 
 interface ProductModalProps {
   product: Product;
@@ -24,6 +26,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
   const [added, setAdded] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(() => StoreService.getWishlist().includes(product.id));
   const [cutStyle, setCutStyle] = useState<string>('Curry Cut');
+  const { lang } = useLang();
 
   const images = product.galleryImages.length > 0 ? product.galleryImages : [product.image];
   // Previously missing entirely — this modal let a Sold Out product be added
@@ -202,7 +205,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
                 </button>
               </div>
 
-              <h2 className="text-xl font-bold text-[#0A1F12] mb-1">{product.name}</h2>
+              <h2 className="text-xl font-bold text-[#0A1F12] mb-1">{translateProductName(product.id, product.name, lang)}</h2>
 
               <div className="flex items-center gap-3 text-xs text-neutral-500 mb-3">
                 <div className="flex items-center gap-1 text-[#0A1F12] font-bold">

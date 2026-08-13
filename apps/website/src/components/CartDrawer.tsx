@@ -3,6 +3,8 @@ import { X, Trash2, ShoppingBag, ArrowRight, Tag, ShieldCheck, Sparkles, ChefHat
 import { CartItem } from '../types';
 import { StoreService } from '../lib/storage';
 import { getBulkLineTotal } from '../lib/pricing';
+import { useLang } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -15,6 +17,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   onClose,
   onNavigate
 }) => {
+  const { lang } = useLang();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [couponCode, setCouponCode] = useState('');
   const [appliedDiscount, setAppliedDiscount] = useState(0);
@@ -160,13 +163,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 >
                   <img
                     src={item.product.image}
-                    alt={item.product.name}
+                    alt={translateProductName(item.product.id, item.product.name, lang)}
                     referrerPolicy="no-referrer"
                     className="w-16 h-16 rounded-xl object-cover shrink-0"
                   />
 
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-xs font-bold text-[#0A1F12] truncate">{item.product.name}</h4>
+                    <h4 className="text-xs font-bold text-[#0A1F12] truncate">{translateProductName(item.product.id, item.product.name, lang)}</h4>
                     <p className="text-[11px] text-neutral-500">{item.selectedWeight.label}</p>
                     <div className="text-xs font-black text-emerald-700 mt-1">
                       ₹{getBulkLineTotal(item.selectedWeight.price, item.quantity)}

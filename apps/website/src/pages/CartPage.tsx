@@ -47,6 +47,7 @@ import { PartnerRedirectModal } from '../components/PartnerRedirectModal';
 import { getActiveBulkTier, getBulkLineTotal } from '../lib/pricing';
 import confetti from 'canvas-confetti';
 import { useLang } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 
 interface CartPageProps {
   products: Product[];
@@ -82,7 +83,7 @@ export const CartPage: React.FC<CartPageProps> = ({
   onTrackOrder,
   onOpenAuth
 }) => {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [cart, setCart] = useState<CartItem[]>(() => StoreService.getCart());
   const [giftNote, setGiftNote] = useState(() => StoreService.getGiftNote());
   const [userProfile, setUserProfile] = useState(() => StoreService.getUserProfile());
@@ -231,7 +232,10 @@ export const CartPage: React.FC<CartPageProps> = ({
 
     if (qualifyingItems.length === 0) {
       const scopeLabel = match.productId
-        ? products.find((p) => p.id === match.productId)?.name ?? 'a specific product'
+        ? (() => {
+            const scopedProduct = products.find((p) => p.id === match.productId);
+            return scopedProduct ? translateProductName(scopedProduct.id, scopedProduct.name, lang) : 'a specific product';
+          })()
         : match.category
         ? `${match.category} products`
         : 'your cart';
@@ -259,7 +263,10 @@ export const CartPage: React.FC<CartPageProps> = ({
 
   /** Human-readable applicability line for a coupon's Terms & Conditions panel. */
   const couponScopeLabel = (c: Coupon): string => {
-    if (c.productId) return products.find((p) => p.id === c.productId)?.name ?? 'One specific product';
+    if (c.productId) {
+      const scopedProduct = products.find((p) => p.id === c.productId);
+      return scopedProduct ? translateProductName(scopedProduct.id, scopedProduct.name, lang) : 'One specific product';
+    }
     if (c.category) return `${c.category} products only`;
     return 'All products';
   };
@@ -490,7 +497,7 @@ export const CartPage: React.FC<CartPageProps> = ({
             {placedOrder.items.map((item, idx) => (
               <div key={idx} className="flex items-center justify-between text-xs">
                 <span className="text-neutral-600">
-                  {item.product.name} <span className="text-neutral-400">({item.selectedWeight.label} × {item.quantity})</span>
+                  {translateProductName(item.product.id, item.product.name, lang)} <span className="text-neutral-400">({item.selectedWeight.label} × {item.quantity})</span>
                 </span>
                 {/* Was showing the raw undiscounted line price — for a bulk
                     (qty >= 3) line the sum of these wouldn't add up to
@@ -721,7 +728,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                                 <button onClick={() => onSelectProduct(item.product)} className="cursor-pointer shrink-0">
                                   <img
                                     src={item.product.image}
-                                    alt={item.product.name}
+                                    alt={translateProductName(item.product.id, item.product.name, lang)}
                                     referrerPolicy="no-referrer"
                                     className="w-24 h-24 rounded-2xl object-cover border border-neutral-200"
                                   />
@@ -734,7 +741,7 @@ export const CartPage: React.FC<CartPageProps> = ({
                                     onClick={() => onSelectProduct(item.product)}
                                     className="font-bold text-[#0A1F12] text-sm cursor-pointer hover:text-emerald-700 transition"
                                   >
-                                    {item.product.name}
+                                    {translateProductName(item.product.id, item.product.name, lang)}
                                   </h4>
                                   <p className="text-xs text-neutral-600">
                                     Pack Option: <strong className="text-[#0A1F12]">{item.selectedWeight.label}</strong> ({item.selectedWeight.servings || '2-3 Persons'})
@@ -809,9 +816,9 @@ export const CartPage: React.FC<CartPageProps> = ({
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {recommendedCuts.map((p) => (
                           <div key={p.id} className="bg-neutral-50 border border-neutral-200 rounded-2xl p-3 flex items-center gap-3">
-                            <img src={p.image} alt={p.name} className="w-16 h-16 rounded-xl object-cover shrink-0" />
+                            <img src={p.image} alt={translateProductName(p.id, p.name, lang)} className="w-16 h-16 rounded-xl object-cover shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <h4 className="text-xs font-bold text-[#0A1F12] truncate">{p.name}</h4>
+                              <h4 className="text-xs font-bold text-[#0A1F12] truncate">{translateProductName(p.id, p.name, lang)}</h4>
                               <div className="text-xs text-emerald-700 font-bold mt-0.5">₹{p.basePrice}</div>
                             </div>
                             <button
@@ -1134,9 +1141,9 @@ export const CartPage: React.FC<CartPageProps> = ({
                         return (
                           <div key={`${item.product.id}-${idx}`} className="bg-neutral-50 border border-neutral-200 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3">
                             <div className="flex items-center gap-3 min-w-0">
-                              <img src={item.product.image} alt={item.product.name} className="w-11 h-11 rounded-xl object-cover shrink-0" />
+                              <img src={item.product.image} alt={translateProductName(item.product.id, item.product.name, lang)} className="w-11 h-11 rounded-xl object-cover shrink-0" />
                               <div className="min-w-0">
-                                <div className="text-xs font-bold text-[#0A1F12] truncate">{item.product.name}</div>
+                                <div className="text-xs font-bold text-[#0A1F12] truncate">{translateProductName(item.product.id, item.product.name, lang)}</div>
                                 <div className="text-[10px] text-neutral-500">Cooking as: <strong className="text-emerald-700">{itemCookingType}</strong></div>
                               </div>
                             </div>

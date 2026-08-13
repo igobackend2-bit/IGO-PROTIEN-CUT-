@@ -4,6 +4,7 @@ import { Product, ProductWeightOption } from '../types';
 import { StoreService } from '../lib/storage';
 import { FadeImage } from './FadeImage';
 import { useLang } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 
 interface ProductCardProps {
   product: Product;
@@ -24,7 +25,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onSelectProduct,
   onAddToCart
 }) => {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [added, setAdded] = useState(false);
   const [notified, setNotified] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(() => StoreService.getWishlist().includes(product.id));
@@ -107,7 +108,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             which looked especially bad on mobile. */}
         <FadeImage
           src={product.image}
-          alt={product.name}
+          alt={translateProductName(product.id, product.name, lang)}
           className={`w-full h-full object-cover group-hover:scale-105 transition duration-500 ${isOutOfStock ? 'grayscale opacity-70' : ''}`}
         />
 
@@ -136,7 +137,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </span>
 
           <h3 className="text-sm font-bold text-[#0A1F12] group-hover:text-emerald-600 transition line-clamp-1 mt-0.5">
-            {product.name}
+            {translateProductName(product.id, product.name, lang)}
           </h3>
 
           <div className="text-xs text-neutral-500 mt-1">{currentWeight.label}</div>

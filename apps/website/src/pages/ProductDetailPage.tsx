@@ -38,6 +38,7 @@ import { INITIAL_RECIPES } from '../data/mockData';
 import { fetchProduct } from '../lib/api/catalog';
 import { submitReview, fetchMyReview, deleteMyReview, MyReview } from '../lib/api/reviews';
 import { useLang } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 import { requestStockNotify } from '../lib/api/stockNotify';
 import { getCurrentUser } from '../lib/api/auth';
 
@@ -123,7 +124,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   onSelectProduct,
   onNavigate
 }) => {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [selectedWeight, setSelectedWeight] = useState<ProductWeightOption>(product.weightOptions[0]);
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(product.image);
@@ -212,7 +213,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
   // every catalog item gets accurate, scannable answers without hand-writing
   // FAQs per SKU. Matches Blinkit/Amazon's per-product FAQ accordion pattern.
   const productFaqs: FaqEntry[] = [
-    { question: `Is this ${product.name.toLowerCase()} fresh or frozen?`, answer: `It is fresh, never frozen, and graded "${product.freshnessGrade}".` },
+    { question: `Is this ${translateProductName(product.id, product.name, lang).toLowerCase()} fresh or frozen?`, answer: `It is fresh, never frozen, and graded "${product.freshnessGrade}".` },
     { question: 'Is it boneless or with bone?', answer: `This item is ${product.boneType}.` },
     { question: 'How long does it stay fresh?', answer: `Shelf life is ${shelfLifeDays} day${shelfLifeDays > 1 ? 's' : ''} when refrigerated. ${product.storageInstructions}` },
     { question: 'How long does it take to cook?', answer: `It typically cooks in about ${product.prepTimeMinutes} minutes, depending on the recipe.` },
@@ -429,7 +430,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           {product.category}
         </button>
         <ChevronRight className="w-3.5 h-3.5" />
-        <span className="text-[#0A1F12] font-semibold truncate">{product.name}</span>
+        <span className="text-[#0A1F12] font-semibold truncate">{translateProductName(product.id, product.name, lang)}</span>
       </div>
 
       {/* Trust Badges Strip */}
@@ -457,7 +458,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
           <div className="relative aspect-4/3 bg-neutral-100 rounded-3xl overflow-hidden border border-neutral-200 shadow-sm">
             <FadeImage
               src={activeImage}
-              alt={product.name}
+              alt={translateProductName(product.id, product.name, lang)}
               className="w-full h-full object-cover"
             />
             <span className="absolute top-4 left-4 bg-[#0F7B3A] text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-lg">
@@ -529,7 +530,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight leading-snug">
-              {product.name}
+              {translateProductName(product.id, product.name, lang)}
             </h1>
             <p className="text-xs sm:text-sm text-neutral-600 mt-2 leading-relaxed">
               {product.description}
@@ -792,10 +793,10 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                       </span>
                     )}
                     <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0">
-                      <FadeImage src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                      <FadeImage src={p.image} alt={translateProductName(p.id, p.name, lang)} className="w-full h-full object-cover" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-xs font-bold text-[#0A1F12] line-clamp-1">{p.name}</div>
+                      <div className="text-xs font-bold text-[#0A1F12] line-clamp-1">{translateProductName(p.id, p.name, lang)}</div>
                       <div className="text-xs text-emerald-700 font-black">
                         ₹{idx === 0 ? selectedWeight.price : p.weightOptions[0].price}
                       </div>

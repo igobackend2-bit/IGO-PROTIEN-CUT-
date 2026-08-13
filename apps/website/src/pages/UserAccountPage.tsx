@@ -37,6 +37,8 @@ import {
 } from 'lucide-react';
 import { StoreService } from '../lib/storage';
 import { SupabaseService } from '../lib/supabaseClient';
+import { useLang } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 import { OrderFeedbackModal } from '../components/OrderFeedbackModal';
 import {
   signOut,
@@ -95,6 +97,7 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
   onSelectOrderForTracking,
   initialTab
 }) => {
+  const { lang } = useLang();
   // Deep-link support (e.g. `/account?tab=profile`) — falls back to Orders
   // when initialTab is missing or isn't a recognized tab id, so a bad/old
   // link can never land on a blank tab.
@@ -778,7 +781,7 @@ export const UserAccountPage: React.FC<UserAccountPageProps> = ({
                             <div className="flex items-center gap-3 min-w-0">
                               <img src={item.product.image} alt={item.product.name} referrerPolicy="no-referrer" className="w-11 h-11 rounded-xl object-cover bg-neutral-100 border border-neutral-100 shrink-0" />
                               <div className="min-w-0">
-                                <div className="font-bold text-[#0A1F12] truncate">{item.product.name}</div>
+                                <div className="font-bold text-[#0A1F12] truncate">{translateProductName(item.product.id, item.product.name, lang)}</div>
                                 <div className="text-[10px] text-neutral-500 mt-0.5">{item.selectedWeight.label} • Qty: {item.quantity}</div>
                               </div>
                             </div>

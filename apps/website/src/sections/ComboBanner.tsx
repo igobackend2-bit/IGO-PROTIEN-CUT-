@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowRight, ChevronLeft, ChevronRight, Gift } from 'lucide-react';
 import type { Product } from '../types';
 import { useLang, pick } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 
 interface ComboBannerProps {
   products: Product[];
@@ -36,7 +37,7 @@ export const ComboBanner: React.FC<ComboBannerProps> = ({ products, onSelectProd
         <img
           key={combo.id}
           src={combo.image}
-          alt={combo.name}
+          alt={translateProductName(combo.id, combo.name, lang)}
           referrerPolicy="no-referrer"
           className="absolute inset-0 w-full h-full object-cover animate-kenburns"
         />
@@ -50,7 +51,7 @@ export const ComboBanner: React.FC<ComboBannerProps> = ({ products, onSelectProd
             </span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl font-black text-white leading-[1.05] tracking-tight">{combo.name}</h2>
+          <h2 className="text-3xl sm:text-4xl font-black text-white leading-[1.05] tracking-tight">{translateProductName(combo.id, combo.name, lang)}</h2>
           <p className="text-white/70 text-sm leading-relaxed max-w-md">{combo.shortDescription}</p>
 
           <div className="flex items-center gap-4 flex-wrap pt-1">
@@ -105,7 +106,7 @@ export const ComboBanner: React.FC<ComboBannerProps> = ({ products, onSelectProd
                 <button
                   key={c.id}
                   onClick={() => setActive(idx)}
-                  aria-label={`Show ${c.name}`}
+                  aria-label={`Show ${translateProductName(c.id, c.name, lang)}`}
                   className={`h-1.5 rounded-full transition-all duration-500 cursor-pointer ${
                     idx === active ? 'w-6 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/60'
                   }`}

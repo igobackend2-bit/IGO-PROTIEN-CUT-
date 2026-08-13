@@ -3,6 +3,8 @@ import { X, Sparkles, Search, ArrowRight, ChefHat } from 'lucide-react';
 import { Product } from '../types';
 import { StoreService } from '../lib/storage';
 import { localAiSearch } from '../lib/aiSearchFallback';
+import { useLang } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 
 interface AISearchModalProps {
   isOpen: boolean;
@@ -17,6 +19,7 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
   onSelectProduct,
   products
 }) => {
+  const { lang } = useLang();
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<any | null>(null);
@@ -153,7 +156,7 @@ export const AISearchModal: React.FC<AISearchModalProps> = ({
                   <div key={idx} className="bg-white border border-neutral-200 rounded-xl p-3 space-y-2 shadow-sm">
                     <div className="flex items-center justify-between">
                       <h4 className="font-bold text-[#0A1F12] text-sm flex items-center gap-1.5">
-                        <ChefHat className="w-4 h-4 text-emerald-600" /> {rec.name}
+                        <ChefHat className="w-4 h-4 text-emerald-600" /> {translateProductName(matchedProduct.id, rec.name, lang)}
                       </h4>
                       <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[10px] font-bold">
                         {rec.protein}

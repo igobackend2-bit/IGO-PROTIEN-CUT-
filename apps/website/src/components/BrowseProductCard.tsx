@@ -4,6 +4,7 @@ import { Product, ProductWeightOption } from '../types';
 import { StoreService } from '../lib/storage';
 import { FadeImage } from './FadeImage';
 import { useLang } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 
 interface BrowseProductCardProps {
   product: Product;
@@ -24,7 +25,7 @@ export const BrowseProductCard: React.FC<BrowseProductCardProps> = ({
   onSelectProduct,
   onAddToCart
 }) => {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [added, setAdded] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(() => StoreService.getWishlist().includes(product.id));
   // Previously Add just flashed to "Added" for ~1.2s and reverted to a plain
@@ -90,7 +91,7 @@ export const BrowseProductCard: React.FC<BrowseProductCardProps> = ({
       <div className="relative aspect-square bg-neutral-100 overflow-hidden">
         <FadeImage
           src={product.image}
-          alt={product.name}
+          alt={translateProductName(product.id, product.name, lang)}
           className={`w-full h-full object-cover group-hover:scale-105 transition duration-500 ${isOutOfStock ? 'grayscale opacity-70' : ''}`}
         />
 
@@ -122,7 +123,7 @@ export const BrowseProductCard: React.FC<BrowseProductCardProps> = ({
       <div className="p-3 space-y-1.5">
         <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">{product.subcategory}</span>
 
-        <h3 className="text-sm font-bold text-[#0A1F12] line-clamp-1">{product.name}</h3>
+        <h3 className="text-sm font-bold text-[#0A1F12] line-clamp-1">{translateProductName(product.id, product.name, lang)}</h3>
         <p className="text-xs text-neutral-500">{defaultWeight?.label}</p>
 
         <div className="pt-1">

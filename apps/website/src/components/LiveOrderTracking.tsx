@@ -3,6 +3,8 @@ import { Truck, CheckCircle2, PhoneCall, Clock, MapPin, AlertCircle, RefreshCw, 
 import { Order } from '../types';
 import { StoreService } from '../lib/storage';
 import { subscribeToOrder } from '../lib/api/orders';
+import { useLang } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 
 interface LiveOrderTrackingProps {
   orderId: string;
@@ -21,6 +23,7 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
   const [order, setOrder] = useState<Order | null>(
     () => StoreService.getOrders().find((o) => o.id === orderId) ?? null
   );
+  const { lang } = useLang();
 
   useEffect(() => {
     const syncOrder = () => {
@@ -217,7 +220,7 @@ export const LiveOrderTracking: React.FC<LiveOrderTrackingProps> = ({
                   className="w-10 h-10 rounded-lg object-cover"
                 />
                 <div>
-                  <div className="font-bold text-[#0A1F12]">{item.product.name}</div>
+                  <div className="font-bold text-[#0A1F12]">{translateProductName(item.product.id, item.product.name, lang)}</div>
                   <div className="text-[11px] text-neutral-500">{item.selectedWeight.label} × {item.quantity}</div>
                 </div>
               </div>

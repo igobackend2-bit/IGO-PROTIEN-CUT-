@@ -5,6 +5,7 @@ import { SupabaseService } from '../lib/supabaseClient';
 import { fetchComboPacks, ComboPackRow } from '../lib/api/catalog';
 import { toWebsiteComboPack } from '../lib/adapters/productAdapter';
 import { useLang, pick } from '../lib/language';
+import { translateProductName } from '../lib/productNames';
 
 interface OffersPageProps {
   products: Product[];
@@ -184,14 +185,14 @@ export const OffersPage: React.FC<OffersPageProps> = ({
               className="bg-white border border-neutral-200 hover:border-emerald-400 rounded-2xl p-4 flex flex-col justify-between space-y-4 cursor-pointer transition group shadow-sm hover:shadow-xl"
             >
               <div className="relative aspect-16/10 rounded-xl overflow-hidden bg-neutral-100">
-                <img src={p.image} alt={p.name} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                <img src={p.image} alt={translateProductName(p.id, p.name, lang)} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
                 <span className="absolute top-2 left-2 bg-emerald-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">
                   {pick(lang, { en: `${p.discountPercentage}% OFF`, ta: `${p.discountPercentage}% தள்ளுபடி`, hi: `${p.discountPercentage}% छूट`, ml: `${p.discountPercentage}% കിഴിവ്`, te: `${p.discountPercentage}% తగ్గింపు` })}
                 </span>
               </div>
 
               <div>
-                <h3 className="font-bold text-[#0A1F12] text-sm group-hover:text-emerald-600 transition line-clamp-1">{p.name}</h3>
+                <h3 className="font-bold text-[#0A1F12] text-sm group-hover:text-emerald-600 transition line-clamp-1">{translateProductName(p.id, p.name, lang)}</h3>
                 <p className="text-xs text-neutral-500 mt-1 line-clamp-1">{p.shortDescription}</p>
 
                 {/* Stock remaining bar. Only claims a specific unit count when
@@ -279,7 +280,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
                   <div key={idx} className="flex items-center justify-between text-xs text-neutral-600">
                     <span className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      {it.productName} ({it.weightLabel})
+                      {translateProductName(it.productId, it.productName, lang)} ({it.weightLabel})
                     </span>
                     <span className="font-bold text-[#0A1F12]">x{it.qty}</span>
                   </div>

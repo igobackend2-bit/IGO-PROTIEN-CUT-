@@ -31,6 +31,7 @@ import { Language, TRANSLATIONS, LANGUAGES, LANGUAGE_LABELS, pick } from '../lib
 import { isPincodeServiceable, isValidPincodeFormat } from '../lib/serviceability';
 import { Product } from '../types';
 import { rankedProductMatches } from '../lib/search';
+import { translateProductName } from '../lib/productNames';
 
 interface NavbarProps {
   onOpenCart: () => void;
@@ -523,7 +524,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           className="w-11 h-11 rounded-xl object-cover bg-neutral-100 border border-neutral-100 shrink-0"
                         />
                         <div className="min-w-0 flex-1">
-                          <div className="text-xs font-bold text-[#0A1F12] truncate">{p.name}</div>
+                          <div className="text-xs font-bold text-[#0A1F12] truncate">{translateProductName(p.id, p.name, lang)}</div>
                           <div className="text-[10px] text-neutral-400 uppercase font-semibold tracking-wide">{p.category}</div>
                         </div>
                         <div className="text-xs font-black text-emerald-700 shrink-0">₹{p.basePrice}</div>
