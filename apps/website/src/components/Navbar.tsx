@@ -164,7 +164,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           ta: 'சரியான 6-இலக்க பின்கோடை உள்ளிடவும்.',
           hi: 'कृपया एक मान्य 6-अंकीय पिनकोड दर्ज करें।',
           ml: 'സാധുവായ 6-അക്ക പിൻകോഡ് നൽകുക.',
-          te: 'దయచేసి చెల్లుబాటు అయ్యే 6-అంకెల పిన్‌కోడ్‌ను నమోదు చేయండి.'
+          te: 'దయచేసి చెల్లుబాటు అయ్యే 6-అంకెల పిన్‌కోడ్‌ను నమోదు చేయండి.',
+          kn: 'ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ 6-ಅಂಕಿಯ ಪಿನ್‌ಕೋಡ್ ನಮೂದಿಸಿ.'
         })
       );
       return;
@@ -180,7 +181,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           ta: 'உங்கள் பகுதியில் 30-90 நிமிட எக்ஸ்பிரஸ் குளிர் சங்கிலி டெலிவரி இயங்குகிறது!',
           hi: 'आपके क्षेत्र में 30-90 मिनट एक्सप्रेस कोल्ड चेन डिलीवरी सक्रिय है!',
           ml: 'നിങ്ങളുടെ പ്രദേശത്ത് 30-90 മിനിറ്റ് എക്സ്പ്രസ് കോൾഡ് ചെയിൻ ഡെലിവറി സജീവമാണ്!',
-          te: 'మీ ప్రాంతంలో 30-90 నిమిషాల ఎక్స్‌ప్రెస్ కోల్డ్ చైన్ డెలివరీ యాక్టివ్‌గా ఉంది!'
+          te: 'మీ ప్రాంతంలో 30-90 నిమిషాల ఎక్స్‌ప్రెస్ కోల్డ్ చైన్ డెలివరీ యాక్టివ్‌గా ఉంది!',
+          kn: 'ನಿಮ್ಮ ಪ್ರದೇಶದಲ್ಲಿ 30-90 ನಿಮಿಷಗಳ ಎಕ್ಸ್‌ಪ್ರೆಸ್ ಕೋಲ್ಡ್ ಚೈನ್ ಡೆಲಿವರಿ ಸಕ್ರಿಯವಾಗಿದೆ!'
         })
       );
       setTimeout(() => {
@@ -195,7 +197,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           ta: 'மன்னிக்கவும், நாங்கள் இந்த பின்கோடுக்கு இன்னும் டெலிவரி செய்யவில்லை. நாங்கள் தற்போது பெங்களூருக்கு மட்டுமே சேவை செய்கிறோம்.',
           hi: 'क्षमा करें, हम अभी इस पिनकोड पर डिलीवरी नहीं करते। हम फ़िलहाल केवल बेंगलुरु में सेवा देते हैं।',
           ml: 'ക്ഷമിക്കണം, ഈ പിൻകോഡിലേക്ക് ഞങ്ങൾ ഇതുവരെ ഡെലിവർ ചെയ്യുന്നില്ല. ഞങ്ങൾ നിലവിൽ ബെംഗളൂരുവിൽ മാത്രമേ സേവനം നൽകുന്നുള്ളൂ.',
-          te: 'క్షమించండి, మేము ఇంకా ఈ పిన్‌కోడ్‌కు డెలివరీ చేయడం లేదు. మేము ప్రస్తుతం బెంగళూరులో మాత్రమే సేవలందిస్తున్నాము.'
+          te: 'క్షమించండి, మేము ఇంకా ఈ పిన్‌కోడ్‌కు డెలివరీ చేయడం లేదు. మేము ప్రస్తుతం బెంగళూరులో మాత్రమే సేవలందిస్తున్నాము.',
+          kn: 'ಕ್ಷಮಿಸಿ, ನಾವು ಇನ್ನೂ ಈ ಪಿನ್‌ಕೋಡ್‌ಗೆ ಡೆಲಿವರಿ ಮಾಡುತ್ತಿಲ್ಲ. ನಾವು ಪ್ರಸ್ತುತ ಬೆಂಗಳೂರಿನಲ್ಲಿ ಮಾತ್ರ ಸೇವೆ ನೀಡುತ್ತಿದ್ದೇವೆ.'
         })
       );
     }
@@ -216,7 +219,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           ta: 'இந்த உலாவியில் நேரடி இருப்பிடம் ஆதரிக்கப்படவில்லை. உங்கள் பின்கோடை உள்ளிடவும்.',
           hi: 'इस ब्राउज़र पर लाइव लोकेशन समर्थित नहीं है। कृपया इसके बजाय अपना पिनकोड दर्ज करें।',
           ml: 'ഈ ബ്രൗസറിൽ ലൈവ് ലൊക്കേഷൻ പിന്തുണയ്‌ക്കുന്നില്ല. പകരം നിങ്ങളുടെ പിൻകോഡ് നൽകുക.',
-          te: 'ఈ బ్రౌజర్‌లో లైవ్ లొకేషన్ మద్దతు లేదు. దయచేసి బదులుగా మీ పిన్‌కోడ్‌ను నమోదు చేయండి.'
+          te: 'ఈ బ్రౌజర్‌లో లైవ్ లొకేషన్ మద్దతు లేదు. దయచేసి బదులుగా మీ పిన్‌కోడ్‌ను నమోదు చేయండి.',
+          kn: 'ಈ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಲೈವ್ ಲೊಕೇಶನ್ ಬೆಂಬಲಿತವಾಗಿಲ್ಲ. ದಯವಿಟ್ಟು ಬದಲಿಗೆ ನಿಮ್ಮ ಪಿನ್‌ಕೋಡ್ ನಮೂದಿಸಿ.'
         })
       );
       return;
@@ -255,7 +259,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             ta: 'நேரடி இருப்பிடம் கண்டறியப்பட்டது — உங்கள் பகுதியில் 30-90 நிமிட எக்ஸ்பிரஸ் குளிர் சங்கிலி டெலிவரி இயங்குகிறது!',
             hi: 'लाइव लोकेशन का पता चला — आपके क्षेत्र में 30-90 मिनट एक्सप्रेस कोल्ड चेन डिलीवरी सक्रिय है!',
             ml: 'ലൈവ് ലൊക്കേഷൻ കണ്ടെത്തി — നിങ്ങളുടെ പ്രദേശത്ത് 30-90 മിനിറ്റ് എക്സ്പ്രസ് കോൾഡ് ചെയിൻ ഡെലിവറി സജീവമാണ്!',
-            te: 'లైవ్ లొకేషన్ కనుగొనబడింది — మీ ప్రాంతంలో 30-90 నిమిషాల ఎక్స్‌ప్రెస్ కోల్డ్ చైన్ డెలివరీ యాక్టివ్‌గా ఉంది!'
+            te: 'లైవ్ లొకేషన్ కనుగొనబడింది — మీ ప్రాంతంలో 30-90 నిమిషాల ఎక్స్‌ప్రెస్ కోల్డ్ చైన్ డెలివరీ యాక్టివ్‌గా ఉంది!',
+            kn: 'ಲೈವ್ ಲೊಕೇಶನ್ ಪತ್ತೆಯಾಗಿದೆ — ನಿಮ್ಮ ಪ್ರದೇಶದಲ್ಲಿ 30-90 ನಿಮಿಷಗಳ ಎಕ್ಸ್‌ಪ್ರೆಸ್ ಕೋಲ್ಡ್ ಚೈನ್ ಡೆಲಿವರಿ ಸಕ್ರಿಯವಾಗಿದೆ!'
           })
         );
         setIsLocating(false);
@@ -280,7 +285,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               ta: 'இந்த தளத்திற்கு இருப்பிட அணுகல் தடுக்கப்பட்டுள்ளது. முகவரிப் பட்டைக்கு அருகில் உள்ள லாக்/தகவல் ஐகானைத் தட்டி, இருப்பிடத்தை இயக்கி, "என் தற்போதைய இருப்பிடத்தைப் பயன்படுத்து" என்பதை மீண்டும் தட்டவும் — அல்லது கீழே உங்கள் பின்கோடை உள்ளிடவும்.',
               hi: 'इस साइट के लिए लोकेशन एक्सेस अवरुद्ध है। एड्रेस बार के पास लॉक/जानकारी आइकन टैप करें, लोकेशन चालू करें, फिर "मेरी वर्तमान लोकेशन का उपयोग करें" पर फिर टैप करें — या नीचे अपना पिनकोड दर्ज करें।',
               ml: 'ഈ സൈറ്റിനുള്ള ലൊക്കേഷൻ ആക്സസ് തടഞ്ഞിരിക്കുന്നു. അഡ്രസ് ബാറിനടുത്തുള്ള ലോക്ക്/ഇൻഫോ ഐക്കണിൽ ടാപ്പ് ചെയ്ത്, ലൊക്കേഷൻ ഓണാക്കി, "എന്റെ നിലവിലെ ലൊക്കേഷൻ ഉപയോഗിക്കുക" വീണ്ടും ടാപ്പ് ചെയ്യുക — അല്ലെങ്കിൽ താഴെ നിങ്ങളുടെ പിൻകോഡ് നൽകുക.',
-              te: 'ఈ సైట్ కోసం లొకేషన్ యాక్సెస్ నిరోధించబడింది. అడ్రస్ బార్ పక్కన ఉన్న లాక్/ఇన్ఫో చిహ్నాన్ని నొక్కి, లొకేషన్‌ను ఆన్ చేసి, "నా ప్రస్తుత లొకేషన్‌ను ఉపయోగించండి" మళ్లీ నొక్కండి — లేదా దిగువన మీ పిన్‌కోడ్‌ను నమోదు చేయండి.'
+              te: 'ఈ సైట్ కోసం లొకేషన్ యాక్సెస్ నిరోధించబడింది. అడ్రస్ బార్ పక్కన ఉన్న లాక్/ఇన్ఫో చిహ్నాన్ని నొక్కి, లొకేషన్‌ను ఆన్ చేసి, "నా ప్రస్తుత లొకేషన్‌ను ఉపయోగించండి" మళ్లీ నొక్కండి — లేదా దిగువన మీ పిన్‌కోడ్‌ను నమోదు చేయండి.',
+              kn: 'ಈ ಸೈಟ್‌ಗಾಗಿ ಲೊಕೇಶನ್ ಆಕ್ಸೆಸ್ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ. ವಿಳಾಸ ಪಟ್ಟಿಯ ಪಕ್ಕದಲ್ಲಿರುವ ಲಾಕ್/ಮಾಹಿತಿ ಐಕಾನ್ ಟ್ಯಾಪ್ ಮಾಡಿ, ಲೊಕೇಶನ್ ಆನ್ ಮಾಡಿ, ನಂತರ "ನನ್ನ ಪ್ರಸ್ತುತ ಸ್ಥಳವನ್ನು ಬಳಸಿ" ಅನ್ನು ಮತ್ತೆ ಟ್ಯಾಪ್ ಮಾಡಿ — ಅಥವಾ ಕೆಳಗೆ ನಿಮ್ಮ ಪಿನ್‌ಕೋಡ್ ನಮೂದಿಸಿ.'
             })
           );
         } else if (err.code === err.TIMEOUT) {
@@ -295,7 +301,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               ta: 'இருப்பிடத்தை கண்டறிய அதிக நேரம் ஆகிறது. மீண்டும் முயற்சிக்கவும், அல்லது கீழே உங்கள் பின்கோடை உள்ளிடவும்.',
               hi: 'लोकेशन का पता लगाने में बहुत समय लग रहा है। कृपया फिर से प्रयास करें, या नीचे अपना पिनकोड दर्ज करें।',
               ml: 'ലൊക്കേഷൻ കണ്ടെത്താൻ വളരെയധികം സമയമെടുക്കുന്നു. വീണ്ടും ശ്രമിക്കുക, അല്ലെങ്കിൽ താഴെ നിങ്ങളുടെ പിൻകോഡ് നൽകുക.',
-              te: 'లొకేషన్‌ను గుర్తించడానికి చాలా సమయం పడుతోంది. దయచేసి మళ్లీ ప్రయత్నించండి, లేదా దిగువన మీ పిన్‌కోడ్‌ను నమోదు చేయండి.'
+              te: 'లొకేషన్‌ను గుర్తించడానికి చాలా సమయం పడుతోంది. దయచేసి మళ్లీ ప్రయత్నించండి, లేదా దిగువన మీ పిన్‌కోడ్‌ను నమోదు చేయండి.',
+              kn: 'ಸ್ಥಳವನ್ನು ಪತ್ತೆಹಚ್ಚಲು ಹೆಚ್ಚು ಸಮಯ ತೆಗೆದುಕೊಳ್ಳುತ್ತಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ, ಅಥವಾ ಕೆಳಗೆ ನಿಮ್ಮ ಪಿನ್‌ಕೋಡ್ ನಮೂದಿಸಿ.'
             })
           );
         } else {
@@ -305,7 +312,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               ta: 'உங்கள் நேரடி இருப்பிடத்தை கண்டறிய முடியவில்லை. பதிலாக உங்கள் பின்கோடை உள்ளிடவும்.',
               hi: 'आपकी लाइव लोकेशन का पता नहीं चल सका। कृपया इसके बजाय अपना पिनकोड दर्ज करें।',
               ml: 'നിങ്ങളുടെ ലൈവ് ലൊക്കേഷൻ കണ്ടെത്താനായില്ല. പകരം നിങ്ങളുടെ പിൻകോഡ് നൽകുക.',
-              te: 'మీ లైవ్ లొకేషన్‌ను గుర్తించలేకపోయాము. దయచేసి బదులుగా మీ పిన్‌కోడ్‌ను నమోదు చేయండి.'
+              te: 'మీ లైవ్ లొకేషన్‌ను గుర్తించలేకపోయాము. దయచేసి బదులుగా మీ పిన్‌కోడ్‌ను నమోదు చేయండి.',
+              kn: 'ನಿಮ್ಮ ಲೈವ್ ಸ್ಥಳವನ್ನು ಪತ್ತೆಹಚ್ಚಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಬದಲಿಗೆ ನಿಮ್ಮ ಪಿನ್‌ಕೋಡ್ ನಮೂದಿಸಿ.'
             })
           );
         }
@@ -327,24 +335,24 @@ export const Navbar: React.FC<NavbarProps> = ({
   // search bar already covers discovery, so it was removed rather than kept
   // as an unfamiliar, redundant nav item.
   const primaryLinks = [
-    { name: pick(lang, { en: 'Home', ta: 'முகப்பு', hi: 'होम', ml: 'ഹോം', te: 'హోమ్' }), path: '/', icon: Home }
+    { name: pick(lang, { en: 'Home', ta: 'முகப்பு', hi: 'होम', ml: 'ഹോം', te: 'హోమ్', kn: 'ಹೋಮ್' }), path: '/', icon: Home }
   ];
 
   // All shop-by-category links grouped under the "Categories" dropdown so the
   // header doesn't overflow into a cramped single row as more categories are added
   const categoryLinks = [
-    { name: pick(lang, { en: 'Chicken', ta: 'சிக்கன்', hi: 'चिकन', ml: 'ചിക്കൻ', te: 'చికెన్' }), path: '/category/chicken' },
-    { name: pick(lang, { en: 'Mutton', ta: 'மட்டன்', hi: 'मटन', ml: 'മട്ടൺ', te: 'మటన్' }), path: '/category/mutton' },
-    { name: pick(lang, { en: 'Beef', ta: 'பீஃப்', hi: 'बीफ', ml: 'ബീഫ്', te: 'బీఫ్' }), path: '/category/beef' },
-    { name: pick(lang, { en: 'Fish & Seafood', ta: 'மீன் & சீஃபுட்', hi: 'मछली व सीफूड', ml: 'മീനും സീഫുഡും', te: 'చేపలు & సీఫుడ్' }), path: '/category/fish' },
-    { name: pick(lang, { en: 'Dry Fish', ta: 'கருவாடு', hi: 'सूखी मछली', ml: 'ഉണക്ക മീൻ', te: 'ఎండు చేపలు' }), path: '/category/dry-fish' },
-    { name: pick(lang, { en: 'Eggs', ta: 'முட்டை', hi: 'अंडे', ml: 'മുട്ട', te: 'గుడ్లు' }), path: '/category/eggs' },
-    { name: pick(lang, { en: 'Healthy Add-ons', ta: 'ஆரோக்கிய சேர்க்கைகள்', hi: 'हेल्दी ऐड-ऑन', ml: 'ആരോഗ്യകരമായ ആഡ്-ഓണുകൾ', te: 'ఆరోగ్యకరమైన యాడ్-ఆన్‌లు' }), path: '/category/healthy-addons' },
-    { name: pick(lang, { en: 'Ready-to-Cook', ta: 'ரெடி-டு-குக்', hi: 'रेडी-टू-कुक', ml: 'റെഡി-ടു-കുക്ക്', te: 'రెడీ-టు-కుక్' }), path: '/category/ready-to-cook' },
-    { name: pick(lang, { en: 'Frozen Food', ta: 'உறைந்த உணவு', hi: 'फ्रोज़न फूड', ml: 'ഫ്രോസൺ ഫുഡ്', te: 'ఫ్రోజెన్ ఫుడ్' }), path: '/category/frozen-food' },
-    { name: pick(lang, { en: 'Biryani Kits', ta: 'பிரியாணி கிட்', hi: 'बिरयानी किट', ml: 'ബിരിയാണി കിറ്റുകൾ', te: 'బిర్యానీ కిట్స్' }), path: '/category/biryani' },
-    { name: pick(lang, { en: 'Cold Cuts', ta: 'கோல்ட் கட்ஸ்', hi: 'कोल्ड कट्स', ml: 'കോൾഡ് കട്സ്', te: 'కోల్డ్ కట్స్' }), path: '/category/cold-cuts' },
-    { name: pick(lang, { en: 'Combos', ta: 'கம்போஸ்', hi: 'कॉम्बोज़', ml: 'കോംബോകൾ', te: 'కాంబోలు' }), path: '/category/combo-packs' }
+    { name: pick(lang, { en: 'Chicken', ta: 'சிக்கன்', hi: 'चिकन', ml: 'ചിക്കൻ', te: 'చికెన్', kn: 'ಚಿಕನ್' }), path: '/category/chicken' },
+    { name: pick(lang, { en: 'Mutton', ta: 'மட்டன்', hi: 'मटन', ml: 'മട്ടൺ', te: 'మటన్', kn: 'ಮಟನ್' }), path: '/category/mutton' },
+    { name: pick(lang, { en: 'Beef', ta: 'பீஃப்', hi: 'बीफ', ml: 'ബീഫ്', te: 'బీఫ్', kn: 'ಬೀಫ್' }), path: '/category/beef' },
+    { name: pick(lang, { en: 'Fish & Seafood', ta: 'மீன் & சீஃபுட்', hi: 'मछली व सीफूड', ml: 'മീനും സീഫുഡും', te: 'చేపలు & సీఫుడ్', kn: 'ಮೀನು ಮತ್ತು ಸೀಫುಡ್' }), path: '/category/fish' },
+    { name: pick(lang, { en: 'Dry Fish', ta: 'கருவாடு', hi: 'सूखी मछली', ml: 'ഉണക്ക മീൻ', te: 'ఎండు చేపలు', kn: 'ಒಣ ಮೀನು' }), path: '/category/dry-fish' },
+    { name: pick(lang, { en: 'Eggs', ta: 'முட்டை', hi: 'अंडे', ml: 'മുട്ട', te: 'గుడ్లు', kn: 'ಮೊಟ್ಟೆಗಳು' }), path: '/category/eggs' },
+    { name: pick(lang, { en: 'Healthy Add-ons', ta: 'ஆரோக்கிய சேர்க்கைகள்', hi: 'हेल्दी ऐड-ऑन', ml: 'ആരോഗ്യകരമായ ആഡ്-ഓണുകൾ', te: 'ఆరోగ్యకరమైన యాడ్-ఆన్‌లు', kn: 'ಆರೋಗ್ಯಕರ ಆಡ್-ಆನ್‌ಗಳು' }), path: '/category/healthy-addons' },
+    { name: pick(lang, { en: 'Ready-to-Cook', ta: 'ரெடி-டு-குக்', hi: 'रेडी-टू-कुक', ml: 'റെഡി-ടു-കുക്ക്', te: 'రెడీ-టు-కుక్', kn: 'ರೆಡಿ-ಟು-ಕುಕ್' }), path: '/category/ready-to-cook' },
+    { name: pick(lang, { en: 'Frozen Food', ta: 'உறைந்த உணவு', hi: 'फ्रोज़न फूड', ml: 'ഫ്രോസൺ ഫുഡ്', te: 'ఫ్రోజెన్ ఫుడ్', kn: 'ಫ್ರೋಜನ್ ಫುಡ್' }), path: '/category/frozen-food' },
+    { name: pick(lang, { en: 'Biryani Kits', ta: 'பிரியாணி கிட்', hi: 'बिरयानी किट', ml: 'ബിരിയാണി കിറ്റുകൾ', te: 'బిర్యానీ కిట్స్', kn: 'ಬಿರಿಯಾನಿ ಕಿಟ್‌ಗಳು' }), path: '/category/biryani' },
+    { name: pick(lang, { en: 'Cold Cuts', ta: 'கோல்ட் கட்ஸ்', hi: 'कोल्ड कट्स', ml: 'കോൾഡ് കട്സ്', te: 'కోల్డ్ కట్స్', kn: 'ಕೋಲ್ಡ್ ಕಟ್ಸ್' }), path: '/category/cold-cuts' },
+    { name: pick(lang, { en: 'Combos', ta: 'கம்போஸ்', hi: 'कॉम्बोज़', ml: 'കോംബോകൾ', te: 'కాంబోలు', kn: 'ಕಾಂಬೋಗಳು' }), path: '/category/combo-packs' }
   ];
 
   // Ordered to match the standard professional nav pattern (browse → business
@@ -361,18 +369,18 @@ export const Navbar: React.FC<NavbarProps> = ({
     // customer who wasn't on the homepage or an empty cart had no way to
     // find it. It's a real standalone page (OffersPage.tsx), so it belongs
     // in the nav like every other section.
-    { name: pick(lang, { en: 'Offers', ta: 'சலுகைகள்', hi: 'ऑफर', ml: 'ഓഫറുകൾ', te: 'ఆఫర్లు' }), path: '/offers', icon: Percent },
+    { name: pick(lang, { en: 'Offers', ta: 'சலுகைகள்', hi: 'ऑफर', ml: 'ഓഫറുകൾ', te: 'ఆఫర్లు', kn: 'ಆಫರ್‌ಗಳು' }), path: '/offers', icon: Percent },
     // Was only reachable from a homepage rail and the checkout's "activate
     // subscription" flow — never had its own nav entry despite being a real,
     // dedicated page (SubscriptionsPage.tsx). Customer feedback flagged this
     // as a suggestion; adding a genuine nav link is the minimal way to
     // satisfy it without restructuring the page itself.
-    { name: pick(lang, { en: 'Subscriptions', ta: 'சந்தா', hi: 'सब्सक्रिप्शन', ml: 'സബ്സ്ക്രിപ്ഷനുകൾ', te: 'సబ్‌స్క్రిప్షన్లు' }), path: '/subscriptions', icon: Package },
-    { name: pick(lang, { en: 'B2B', ta: 'மொத்த வர்த்தகம்', hi: 'B2B', ml: 'B2B', te: 'B2B' }), path: '/b2b', icon: Briefcase },
-    { name: pick(lang, { en: 'About', ta: 'எங்களை பற்றி', hi: 'हमारे बारे में', ml: 'ഞങ്ങളെക്കുറിച്ച്', te: 'మా గురించి' }), path: '/about', icon: Info },
-    { name: pick(lang, { en: 'Blog', ta: 'வலைப்பதிவு', hi: 'ब्लॉग', ml: 'ബ്ലോഗ്', te: 'బ్లాగ్' }), path: '/blog', icon: Newspaper },
-    { name: pick(lang, { en: 'FAQ', ta: 'கேள்விகள்', hi: 'सामान्य प्रश्न', ml: 'പതിവ് ചോദ്യങ്ങൾ', te: 'తరచుగా అడిగే ప్రశ్నలు' }), path: '/support', icon: HelpCircle },
-    { name: pick(lang, { en: 'Contact', ta: 'தொடர்பு', hi: 'संपर्क करें', ml: 'ബന്ധപ്പെടുക', te: 'సంప్రదించండి' }), path: '/contact', icon: Mail }
+    { name: pick(lang, { en: 'Subscriptions', ta: 'சந்தா', hi: 'सब्सक्रिप्शन', ml: 'സബ്സ്ക്രിപ്ഷനുകൾ', te: 'సబ్‌స్క్రిప్షన్లు', kn: 'ಚಂದಾದಾರಿಕೆಗಳು' }), path: '/subscriptions', icon: Package },
+    { name: pick(lang, { en: 'B2B', ta: 'மொத்த வர்த்தகம்', hi: 'B2B', ml: 'B2B', te: 'B2B', kn: 'B2B' }), path: '/b2b', icon: Briefcase },
+    { name: pick(lang, { en: 'About', ta: 'எங்களை பற்றி', hi: 'हमारे बारे में', ml: 'ഞങ്ങളെക്കുറിച്ച്', te: 'మా గురించి', kn: 'ನಮ್ಮ ಬಗ್ಗೆ' }), path: '/about', icon: Info },
+    { name: pick(lang, { en: 'Blog', ta: 'வலைப்பதிவு', hi: 'ब्लॉग', ml: 'ബ്ലോഗ്', te: 'బ్లాగ్', kn: 'ಬ್ಲಾಗ್' }), path: '/blog', icon: Newspaper },
+    { name: pick(lang, { en: 'FAQ', ta: 'கேள்விகள்', hi: 'सामान्य प्रश्न', ml: 'പതിവ് ചോദ്യങ്ങൾ', te: 'తరచుగా అడిగే ప్రశ్నలు', kn: 'ಪದೇ ಪದೇ ಕೇಳುವ ಪ್ರಶ್ನೆಗಳು' }), path: '/support', icon: HelpCircle },
+    { name: pick(lang, { en: 'Contact', ta: 'தொடர்பு', hi: 'संपर्क करें', ml: 'ബന്ധപ്പെടുക', te: 'సంప్రదించండి', kn: 'ಸಂಪರ್ಕಿಸಿ' }), path: '/contact', icon: Mail }
   ];
 
   // Link styling for the dark sub-nav bar — plain bold text with a bottom
@@ -482,7 +490,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
             <button
               onClick={onOpenVoiceSearch}
-              title={pick(lang, { en: 'Voice Search', ta: 'குரல் தேடல்', hi: 'वॉइस सर्च', ml: 'വോയ്‌സ് സെർച്ച്', te: 'వాయిస్ సెర్చ్' })}
+              title={pick(lang, { en: 'Voice Search', ta: 'குரல் தேடல்', hi: 'वॉइस सर्च', ml: 'വോയ്‌സ് സെർച്ച്', te: 'వాయిస్ సెర్చ్', kn: 'ಧ್ವನಿ ಹುಡುಕಾಟ' })}
               className="p-2 text-emerald-600 hover:text-emerald-700 transition cursor-pointer shrink-0"
             >
               <Mic className="w-4 h-4" />
@@ -539,7 +547,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     }}
                     className="w-full text-center py-2.5 text-[11px] font-bold uppercase tracking-wider text-emerald-700 hover:bg-emerald-50 transition cursor-pointer border-t border-neutral-100"
                   >
-                    {pick(lang, { en: 'View All Results', ta: 'அனைத்து முடிவுகளையும் காண்க', hi: 'सभी परिणाम देखें', ml: 'എല്ലാ ഫലങ്ങളും കാണുക', te: 'అన్ని ఫలితాలు చూడండి' })}
+                    {pick(lang, { en: 'View All Results', ta: 'அனைத்து முடிவுகளையும் காண்க', hi: 'सभी परिणाम देखें', ml: 'എല്ലാ ഫലങ്ങളും കാണുക', te: 'అన్ని ఫలితాలు చూడండి', kn: 'ಎಲ್ಲಾ ಫಲಿತಾಂಶಗಳನ್ನು ವೀಕ್ಷಿಸಿ' })}
                   </button>
                 </>
               ) : (
@@ -549,7 +557,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     ta: `"${navSearchQuery.trim()}" உடன் பொருந்தும் தயாரிப்புகள் இல்லை.`,
                     hi: `"${navSearchQuery.trim()}" से मेल खाने वाला कोई उत्पाद नहीं मिला।`,
                     ml: `"${navSearchQuery.trim()}" പൊരുത്തപ്പെടുന്ന ഉൽപ്പന്നങ്ങളൊന്നുമില്ല.`,
-                    te: `"${navSearchQuery.trim()}" తో సరిపోలే ఉత్పత్తులు లేవు.`
+                    te: `"${navSearchQuery.trim()}" తో సరిపోలే ఉత్పత్తులు లేవు.`,
+                    kn: `"${navSearchQuery.trim()}" ಗೆ ಹೊಂದಿಕೆಯಾಗುವ ಉತ್ಪನ್ನಗಳಿಲ್ಲ.`
                   })}
                 </div>
               )}
@@ -601,7 +610,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={onOpenNotifications}
             className="relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-neutral-50 border border-neutral-300 shadow-sm text-neutral-500 hover:text-emerald-700 hover:border-emerald-400 transition cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400"
-            title={pick(lang, { en: 'Notifications', ta: 'அறிவிப்புகள்', hi: 'सूचनाएं', ml: 'അറിയിപ്പുകൾ', te: 'నోటిఫికేషన్లు' })}
+            title={pick(lang, { en: 'Notifications', ta: 'அறிவிப்புகள்', hi: 'सूचनाएं', ml: 'അറിയിപ്പുകൾ', te: 'నోటిఫికేషన్లు', kn: 'ಅಧಿಸೂಚನೆಗಳು' })}
           >
             <Bell className="w-4 h-4 text-emerald-600" />
             {unreadNotifCount > 0 && (
@@ -618,7 +627,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={() => onNavigate('/wishlist')}
             className="relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-neutral-50 border border-neutral-300 shadow-sm text-neutral-500 hover:text-emerald-700 hover:border-emerald-400 transition cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400"
-            title={pick(lang, { en: 'Wishlist', ta: 'விருப்பப் பட்டியல்', hi: 'विशलिस्ट', ml: 'വിഷ്‌ലിസ്റ്റ്', te: 'విష్‌లిస్ట్' })}
+            title={pick(lang, { en: 'Wishlist', ta: 'விருப்பப் பட்டியல்', hi: 'विशलिस्ट', ml: 'വിഷ്‌ലിസ്റ്റ്', te: 'విష్‌లిస్ట్', kn: 'ಇಷ್ಟಪಟ್ಟಿ' })}
           >
             <Heart className="w-4 h-4" />
             {wishlistCount > 0 && (
@@ -653,7 +662,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }
             }}
             className="flex items-center h-9 sm:h-10 gap-2 px-1 sm:px-1.5 xl:pr-3 rounded-full bg-neutral-50 border border-neutral-300 shadow-sm text-neutral-600 hover:border-emerald-400 hover:text-emerald-700 transition cursor-pointer text-xs font-medium focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400 shrink-0"
-            title={isLoggedIn ? pick(lang, { en: 'Go to Profile', ta: 'சுயவிவரத்திற்குச் செல்', hi: 'प्रोफ़ाइल पर जाएं', ml: 'പ്രൊഫൈലിലേക്ക് പോകുക', te: 'ప్రొఫైల్‌కు వెళ్లండి' }) : pick(lang, { en: 'Login', ta: 'உள்நுழைய', hi: 'लॉगिन', ml: 'ലോഗിൻ', te: 'లాగిన్' })}
+            title={isLoggedIn ? pick(lang, { en: 'Go to Profile', ta: 'சுயவிவரத்திற்குச் செல்', hi: 'प्रोफ़ाइल पर जाएं', ml: 'പ്രൊഫൈലിലേക്ക് പോകുക', te: 'ప్రొఫైల్‌కు వెళ్లండి', kn: 'ಪ್ರೊಫೈಲ್‌ಗೆ ಹೋಗಿ' }) : pick(lang, { en: 'Login', ta: 'உள்நுழைய', hi: 'लॉगिन', ml: 'ലോഗിൻ', te: 'లాగిన్', kn: 'ಲಾಗಿನ್' })}
           >
             <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">
               {isLoggedIn && userProfile.name ? userProfile.name.trim().charAt(0).toUpperCase() : <User className="w-3.5 h-3.5" />}
@@ -661,11 +670,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="hidden xl:flex flex-col items-start leading-tight">
               <span className="text-[9px] uppercase tracking-wide text-neutral-400 font-bold">
                 {isLoggedIn
-                  ? pick(lang, { en: 'My Profile', ta: 'எனது சுயவிவரம்', hi: 'मेरी प्रोफ़ाइल', ml: 'എന്റെ പ്രൊഫൈൽ', te: 'నా ప్రొఫైల్' })
-                  : pick(lang, { en: 'Welcome', ta: 'வரவேற்கிறோம்', hi: 'स्वागत है', ml: 'സ്വാഗതം', te: 'స్వాగతం' })}
+                  ? pick(lang, { en: 'My Profile', ta: 'எனது சுயவிவரம்', hi: 'मेरी प्रोफ़ाइल', ml: 'എന്റെ പ്രൊഫൈൽ', te: 'నా ప్రొఫైల్', kn: 'ನನ್ನ ಪ್ರೊಫೈಲ್' })
+                  : pick(lang, { en: 'Welcome', ta: 'வரவேற்கிறோம்', hi: 'स्वागत है', ml: 'സ്വാഗതം', te: 'స్వాగతం', kn: 'ಸ್ವಾಗತ' })}
               </span>
               <span className="text-[#0A1F12] font-bold">
-                {isLoggedIn ? (userProfile.name ? userProfile.name.split(' ')[0] : pick(lang, { en: 'Profile', ta: 'சுயவிவரம்', hi: 'प्रोफ़ाइल', ml: 'പ്രൊഫൈൽ', te: 'ప్రొఫైల్' })) : t.account}
+                {isLoggedIn ? (userProfile.name ? userProfile.name.split(' ')[0] : pick(lang, { en: 'Profile', ta: 'சுயவிவரம்', hi: 'प्रोफ़ाइल', ml: 'പ്രൊഫൈൽ', te: 'ప్రొఫైల్', kn: 'ಪ್ರೊಫೈಲ್' })) : t.account}
               </span>
             </span>
             <ChevronDown className="hidden xl:block w-3 h-3 text-neutral-400 shrink-0" />
@@ -706,7 +715,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     : 'text-white/85 border-transparent hover:text-white hover:border-white/50'
                 }`}
               >
-                {pick(lang, { en: 'Category', ta: 'வகைகள்', hi: 'श्रेणी', ml: 'വിഭാഗം', te: 'వర్గం' })}
+                {pick(lang, { en: 'Category', ta: 'வகைகள்', hi: 'श्रेणी', ml: 'വിഭാഗം', te: 'వర్గం', kn: 'ವರ್ಗ' })}
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${categoriesMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
@@ -716,7 +725,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <div className="absolute top-full left-0 mt-2 w-[440px] bg-white border border-neutral-200 rounded-2xl shadow-xl overflow-hidden z-50">
                     <div className="px-5 pt-4 pb-3 border-b border-neutral-100">
                       <div className="text-sm font-black text-[#0A1F12]">
-                        {pick(lang, { en: 'Shop by Category', ta: 'வகைகள் மூலம் ஷாப்பிங்', hi: 'श्रेणी अनुसार खरीदें', ml: 'വിഭാഗം അനുസരിച്ച് ഷോപ്പ് ചെയ്യുക', te: 'వర్గం వారీగా షాపింగ్' })}
+                        {pick(lang, { en: 'Shop by Category', ta: 'வகைகள் மூலம் ஷாப்பிங்', hi: 'श्रेणी अनुसार खरीदें', ml: 'വിഭാഗം അനുസരിച്ച് ഷോപ്പ് ചെയ്യുക', te: 'వర్గం వారీగా షాపింగ్', kn: 'ವರ್ಗದ ಪ್ರಕಾರ ಶಾಪಿಂಗ್' })}
                       </div>
                       <div className="text-[11px] text-neutral-400">
                         {pick(lang, {
@@ -724,7 +733,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                           ta: `${categoryLinks.length} வகைகள், தினமும் புதியது`,
                           hi: `${categoryLinks.length} श्रेणियां, हर दिन ताज़ा`,
                           ml: `${categoryLinks.length} വിഭാഗങ്ങൾ, എല്ലാ ദിവസവും ഫ്രഷ്`,
-                          te: `${categoryLinks.length} వర్గాలు, ప్రతిరోజూ ఫ్రెష్`
+                          te: `${categoryLinks.length} వర్గాలు, ప్రతిరోజూ ఫ్రెష్`,
+                          kn: `${categoryLinks.length} ವರ್ಗಗಳು, ಪ್ರತಿದಿನ ಫ್ರೆಶ್`
                         })}
                       </div>
                     </div>
@@ -832,7 +842,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest pt-2">
-            {pick(lang, { en: 'Shop by Category', ta: 'வகைகள் மூலம் ஷாப்பிங்', hi: 'श्रेणी अनुसार खरीदें', ml: 'വിഭാഗം അനുസരിച്ച് ഷോപ്പ് ചെയ്യുക', te: 'వర్గం వారీగా షాపింగ్' })}
+            {pick(lang, { en: 'Shop by Category', ta: 'வகைகள் மூலம் ஷாப்பிங்', hi: 'श्रेणी अनुसार खरीदें', ml: 'വിഭാഗം അനുസരിച്ച് ഷോപ്പ് ചെയ്യുക', te: 'వర్గం వారీగా షాపింగ్', kn: 'ವರ್ಗದ ಪ್ರಕಾರ ಶಾಪಿಂಗ್' })}
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs">
             {categoryLinks.map((link) => (
@@ -873,7 +883,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className="pt-2 flex items-center justify-center text-xs text-neutral-500">
-            <span>{pick(lang, { en: 'Customer Care: 1800-446-446', ta: 'வாடிக்கையாளர் சேவை: 1800-446-446', hi: 'ग्राहक सेवा: 1800-446-446', ml: 'കസ്റ്റമർ കെയർ: 1800-446-446', te: 'కస్టమర్ కేర్: 1800-446-446' })}</span>
+            <span>{pick(lang, { en: 'Customer Care: 1800-446-446', ta: 'வாடிக்கையாளர் சேவை: 1800-446-446', hi: 'ग्राहक सेवा: 1800-446-446', ml: 'കസ്റ്റമർ കെയർ: 1800-446-446', te: 'కస్టమర్ కేర్: 1800-446-446', kn: 'ಗ್ರಾಹಕ ಸೇವೆ: 1800-446-446' })}</span>
           </div>
         </div>
       )}
@@ -898,7 +908,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <X className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2 text-emerald-700 font-bold mb-2">
-              <MapPin className="w-5 h-5" /> {pick(lang, { en: 'Select Delivery Location', ta: 'டெலிவரி இடத்தைத் தேர்ந்தெடுக்கவும்', hi: 'डिलीवरी स्थान चुनें', ml: 'ഡെലിവറി സ്ഥലം തിരഞ്ഞെടുക്കുക', te: 'డెలివరీ స్థానాన్ని ఎంచుకోండి' })}
+              <MapPin className="w-5 h-5" /> {pick(lang, { en: 'Select Delivery Location', ta: 'டெலிவரி இடத்தைத் தேர்ந்தெடுக்கவும்', hi: 'डिलीवरी स्थान चुनें', ml: 'ഡെലിവറി സ്ഥലം തിരഞ്ഞെടുക്കുക', te: 'డెలివరీ స్థానాన్ని ఎంచుకోండి', kn: 'ಡೆಲಿವರಿ ಸ್ಥಳವನ್ನು ಆಯ್ಕೆಮಾಡಿ' })}
             </div>
             <p className="text-xs text-neutral-500 mb-4">
               {pick(lang, {
@@ -906,7 +916,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 ta: 'உங்கள் நேரடி இருப்பிடத்தைப் பயன்படுத்தவும், அல்லது கீழே உங்கள் டெலிவரி முகவரியைத் தேடவும்.',
                 hi: 'अपनी लाइव लोकेशन का उपयोग करें, या नीचे अपना डिलीवरी पता खोजें।',
                 ml: 'നിങ്ങളുടെ ലൈവ് ലൊക്കേഷൻ ഉപയോഗിക്കുക, അല്ലെങ്കിൽ താഴെ നിങ്ങളുടെ ഡെലിവറി വിലാസം തിരയുക.',
-                te: 'మీ లైవ్ లొకేషన్‌ను ఉపయోగించండి, లేదా దిగువన మీ డెలివరీ చిరునామాను వెతకండి.'
+                te: 'మీ లైవ్ లొకేషన్‌ను ఉపయోగించండి, లేదా దిగువన మీ డెలివరీ చిరునామాను వెతకండి.',
+                kn: 'ನಿಮ್ಮ ಲೈವ್ ಲೊಕೇಶನ್ ಬಳಸಿ, ಅಥವಾ ಕೆಳಗೆ ನಿಮ್ಮ ಡೆಲಿವರಿ ವಿಳಾಸವನ್ನು ಹುಡುಕಿ.'
               })}
             </p>
 
@@ -919,11 +930,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               {isLocating ? (
                 <>
                   <div className="w-3.5 h-3.5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-                  {pick(lang, { en: 'Detecting Your Location...', ta: 'உங்கள் இருப்பிடத்தைக் கண்டறிகிறது...', hi: 'आपकी लोकेशन का पता लगाया जा रहा है...', ml: 'നിങ്ങളുടെ ലൊക്കേഷൻ കണ്ടെത്തുന്നു...', te: 'మీ లొకేషన్‌ను గుర్తిస్తోంది...' })}
+                  {pick(lang, { en: 'Detecting Your Location...', ta: 'உங்கள் இருப்பிடத்தைக் கண்டறிகிறது...', hi: 'आपकी लोकेशन का पता लगाया जा रहा है...', ml: 'നിങ്ങളുടെ ലൊക്കേഷൻ കണ്ടെത്തുന്നു...', te: 'మీ లొకేషన్‌ను గుర్తిస్తోంది...', kn: 'ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಪತ್ತೆ ಮಾಡಲಾಗುತ್ತಿದೆ...' })}
                 </>
               ) : (
                 <>
-                  <LocateFixed className="w-3.5 h-3.5" /> {pick(lang, { en: 'Use My Current Location (GPS)', ta: 'என் தற்போதைய இருப்பிடத்தைப் பயன்படுத்து (GPS)', hi: 'मेरी वर्तमान लोकेशन का उपयोग करें (GPS)', ml: 'എന്റെ നിലവിലെ ലൊക്കേഷൻ ഉപയോഗിക്കുക (GPS)', te: 'నా ప్రస్తుత లొకేషన్‌ను ఉపయోగించండి (GPS)' })}
+                  <LocateFixed className="w-3.5 h-3.5" /> {pick(lang, { en: 'Use My Current Location (GPS)', ta: 'என் தற்போதைய இருப்பிடத்தைப் பயன்படுத்து (GPS)', hi: 'मेरी वर्तमान लोकेशन का उपयोग करें (GPS)', ml: 'എന്റെ നിലവിലെ ലൊക്കേഷൻ ഉപയോഗിക്കുക (GPS)', te: 'నా ప్రస్తుత లొకేషన్‌ను ఉపయోగించండి (GPS)', kn: 'ನನ್ನ ಪ್ರಸ್ತುತ ಸ್ಥಳವನ್ನು ಬಳಸಿ (GPS)' })}
                 </>
               )}
             </button>
@@ -931,7 +942,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="flex items-center gap-3 mb-4">
               <div className="h-px flex-1 bg-neutral-200" />
               <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
-                {pick(lang, { en: 'Or Enter Manually', ta: 'அல்லது கைமுறையாக உள்ளிடவும்', hi: 'या मैन्युअल रूप से दर्ज करें', ml: 'അല്ലെങ്കിൽ സ്വയം നൽകുക', te: 'లేదా మాన్యువల్‌గా నమోదు చేయండి' })}
+                {pick(lang, { en: 'Or Enter Manually', ta: 'அல்லது கைமுறையாக உள்ளிடவும்', hi: 'या मैन्युअल रूप से दर्ज करें', ml: 'അല്ലെങ്കിൽ സ്വയം നൽകുക', te: 'లేదా మాన్యువల్‌గా నమోదు చేయండి', kn: 'ಅಥವಾ ಕೈಯಾರೆ ನಮೂದಿಸಿ' })}
               </span>
               <div className="h-px flex-1 bg-neutral-200" />
             </div>
@@ -952,7 +963,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     ta: 'உங்கள் டெலிவரி பின்கோடை உள்ளிடவும், உதா. 560038',
                     hi: 'अपना डिलीवरी पिनकोड दर्ज करें, उदा. 560038',
                     ml: 'നിങ്ങളുടെ ഡെലിവറി പിൻകോഡ് നൽകുക, ഉദാ. 560038',
-                    te: 'మీ డెలివరీ పిన్‌కోడ్‌ను నమోదు చేయండి, ఉదా. 560038'
+                    te: 'మీ డెలివరీ పిన్‌కోడ్‌ను నమోదు చేయండి, ఉదా. 560038',
+                    kn: 'ನಿಮ್ಮ ಡೆಲಿವರಿ ಪಿನ್‌ಕೋಡ್ ನಮೂದಿಸಿ, ಉದಾ. 560038'
                   })}
                   value={inputPincode}
                   onChange={(e) => setInputPincode(e.target.value)}
@@ -987,7 +999,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 type="submit"
                 className="w-full bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold py-3 rounded-full text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-emerald-900/20"
               >
-                {pick(lang, { en: 'Confirm Location', ta: 'இருப்பிடத்தை உறுதிப்படுத்தவும்', hi: 'लोकेशन की पुष्टि करें', ml: 'ലൊക്കേഷൻ സ്ഥിരീകരിക്കുക', te: 'లొకేషన్‌ను నిర్ధారించండి' })}
+                {pick(lang, { en: 'Confirm Location', ta: 'இருப்பிடத்தை உறுதிப்படுத்தவும்', hi: 'लोकेशन की पुष्टि करें', ml: 'ലൊക്കേഷൻ സ്ഥിരീകരിക്കുക', te: 'లొకేషన్‌ను నిర్ధారించండి', kn: 'ಸ್ಥಳವನ್ನು ದೃಢೀಕರಿಸಿ' })}
               </button>
             </form>
           </div>

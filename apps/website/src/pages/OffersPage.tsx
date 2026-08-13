@@ -99,6 +99,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
         hi: 'क्षमा करें, यह कॉम्बो अभी उपलब्ध नहीं है।',
         ml: 'ക്ഷമിക്കണം, ഈ കോംബോ ഇപ്പോൾ ലഭ്യമല്ല.',
         te: 'క్షమించండి, ఈ కాంబో ప్రస్తుతం అందుబాటులో లేదు.',
+        kn: 'ಕ್ಷಮಿಸಿ, ಈ ಕಾಂಬೊ ಪ್ರಸ್ತುತ ಲಭ್ಯವಿಲ್ಲ.',
       }));
       setTimeout(() => setComboToast(null), 2500);
     }
@@ -115,10 +116,10 @@ export const OffersPage: React.FC<OffersPageProps> = ({
       <div className="bg-[#0A1F12] rounded-3xl p-8 text-white relative overflow-hidden shadow-lg shadow-emerald-950/20">
         <div className="max-w-2xl space-y-4 relative z-10">
           <div className="inline-flex items-center gap-2 bg-[#0F7B3A] text-white px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider">
-            <Flame className="w-4 h-4 fill-white" /> {pick(lang, { en: 'FESTIVAL & GYM PROTEIN DROPS', ta: 'பண்டிகை & ஜிம் புரத டீல்கள்', hi: 'फेस्टिवल और जिम प्रोटीन डील्स', ml: 'ഫെസ്റ്റിവൽ & ജിം പ്രോട്ടീൻ ഡീലുകൾ', te: 'పండుగ & జిమ్ ప్రోటీన్ డీల్స్' })}
+            <Flame className="w-4 h-4 fill-white" /> {pick(lang, { en: 'FESTIVAL & GYM PROTEIN DROPS', ta: 'பண்டிகை & ஜிம் புரத டீல்கள்', hi: 'फेस्टिवल और जिम प्रोटीन डील्स', ml: 'ഫെസ്റ്റിവൽ & ജിം പ്രോട്ടീൻ ഡീലുകൾ', te: 'పండుగ & జిమ్ ప్రోటీన్ డీల్స్', kn: 'ಹಬ್ಬ & ಜಿಮ್ ಪ್ರೋಟೀನ್ ಡೀಲ್‌ಗಳು' })}
           </div>
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
-            {pick(lang, { en: 'Exclusive Morning Fresh Meat & Seafood Deals', ta: 'பிரத்யேக காலை புதிய இறைச்சி & கடல் உணவு டீல்கள்', hi: 'एक्सक्लूसिव सुबह की ताज़ा मीट और सीफूड डील्स', ml: 'എക്‌സ്‌ക്ലൂസീവ് രാവിലെ ഫ്രഷ് മീറ്റ് & സീഫുഡ് ഡീലുകൾ', te: 'ప్రత్యేకమైన మార్నింగ్ ఫ్రెష్ మీట్ & సీఫుడ్ డీల్స్' })}
+            {pick(lang, { en: 'Exclusive Morning Fresh Meat & Seafood Deals', ta: 'பிரத்யேக காலை புதிய இறைச்சி & கடல் உணவு டீல்கள்', hi: 'एक्सक्लूसिव सुबह की ताज़ा मीट और सीफूड डील्स', ml: 'എക്‌സ്‌ക്ലൂസീവ് രാവിലെ ഫ്രഷ് മീറ്റ് & സീഫുഡ് ഡീലുകൾ', te: 'ప్రత్యేకమైన మార్నింగ్ ఫ్రెష్ మీట్ & సీఫుడ్ డీల్స్', kn: 'ವಿಶೇಷ ಬೆಳಗಿನ ಫ್ರೆಶ್ ಮೀಟ್ & ಸೀಫುಡ್ ಡೀಲ್‌ಗಳು' })}
           </h1>
           <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
             {pick(lang, {
@@ -127,6 +128,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
               hi: 'प्रीमियम एंटीबायोटिक-फ्री चिकन, वाइल्ड सीफूड, बकरे के मटन कट्स और 1-क्लिक कॉम्बो पैक्स पर 25% तक की छूट पाएं। 30-90 मिनट में 0-4°C पर चिल्ड डिलीवर किया जाता है।',
               ml: 'പ്രീമിയം ആന്റിബയോട്ടിക്-ഫ്രീ ചിക്കൻ, വൈൽഡ് സീഫുഡ്, ആട്ടിറച്ചി കട്ടുകൾ, 1-ക്ലിക്ക് കോംബോ പാക്കുകൾ എന്നിവയിൽ 25% വരെ കിഴിവ് നേടൂ. 30-90 മിനിറ്റിനുള്ളിൽ 0-4°C ൽ ചില്ഡ് ആയി ഡെലിവർ ചെയ്യുന്നു.',
               te: 'ప్రీమియం యాంటీబయాటిక్-ఫ్రీ చికెన్, వైల్డ్ సీఫుడ్, మేక మటన్ కట్స్ మరియు 1-క్లిక్ కాంబో ప్యాక్‌లపై 25% వరకు తగ్గింపు పొందండి. 30-90 నిమిషాల్లో 0-4°C వద్ద చల్లగా డెలివర్ చేయబడుతుంది.',
+              kn: 'ಪ್ರೀಮಿಯಂ ಆಂಟಿಬಯಾಟಿಕ್-ಫ್ರೀ ಚಿಕನ್, ವೈಲ್ಡ್ ಸೀಫುಡ್, ಮೇಕೆ ಮಟನ್ ಕಟ್‌ಗಳು ಮತ್ತು 1-ಕ್ಲಿಕ್ ಕಾಂಬೊ ಪ್ಯಾಕ್‌ಗಳ ಮೇಲೆ 25% ವರೆಗೆ ರಿಯಾಯಿತಿ ಪಡೆಯಿರಿ. 30-90 ನಿಮಿಷಗಳಲ್ಲಿ 0-4°C ನಲ್ಲಿ ತಂಪಾಗಿ ಡೆಲಿವರಿ ಮಾಡಲಾಗುತ್ತದೆ.',
             })}
           </p>
         </div>
@@ -140,15 +142,15 @@ export const OffersPage: React.FC<OffersPageProps> = ({
               <Flame className="w-6 h-6 fill-white" />
             </div>
             <div>
-              <div className="text-xs font-bold text-emerald-700 uppercase tracking-widest">{pick(lang, { en: 'LIMITED TIME DROPS', ta: 'வரையறுக்கப்பட்ட நேர டீல்கள்', hi: 'सीमित समय की डील्स', ml: 'പരിമിത സമയ ഡീലുകൾ', te: 'పరిమిత సమయ డీల్స్' })}</div>
-              <h2 className="text-2xl font-black text-[#0A1F12] tracking-tight">{pick(lang, { en: 'Flash Sale — Ends Soon!', ta: 'ஃபிளாஷ் சேல் — விரைவில் முடிவடையும்!', hi: 'फ्लैश सेल — जल्द खत्म हो रही है!', ml: 'ഫ്ലാഷ് സെയിൽ — ഉടൻ അവസാനിക്കും!', te: 'ఫ్లాష్ సేల్ — త్వరలో ముగుస్తుంది!' })}</h2>
+              <div className="text-xs font-bold text-emerald-700 uppercase tracking-widest">{pick(lang, { en: 'LIMITED TIME DROPS', ta: 'வரையறுக்கப்பட்ட நேர டீல்கள்', hi: 'सीमित समय की डील्स', ml: 'പരിമിത സമയ ഡീലുകൾ', te: 'పరిమిత సమయ డీల్స్', kn: 'ಸೀಮಿತ ಸಮಯದ ಡೀಲ್‌ಗಳು' })}</div>
+              <h2 className="text-2xl font-black text-[#0A1F12] tracking-tight">{pick(lang, { en: 'Flash Sale — Ends Soon!', ta: 'ஃபிளாஷ் சேல் — விரைவில் முடிவடையும்!', hi: 'फ्लैश सेल — जल्द खत्म हो रही है!', ml: 'ഫ്ലാഷ് സെയിൽ — ഉടൻ അവസാനിക്കും!', te: 'ఫ్లాష్ సేల్ — త్వరలో ముగుస్తుంది!', kn: 'ಫ್ಲ್ಯಾಶ್ ಸೇಲ್ — ಶೀಘ್ರದಲ್ಲೇ ಮುಗಿಯುತ್ತದೆ!' })}</h2>
             </div>
           </div>
 
           {/* Countdown Clock */}
           <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-2xl">
             <Clock className="w-4 h-4 text-emerald-600" />
-            <span className="text-xs text-neutral-500 font-bold uppercase">{pick(lang, { en: 'Ends in:', ta: 'முடிவடையும்:', hi: 'समाप्त होने में:', ml: 'അവസാനിക്കുന്നത്:', te: 'ముగియడానికి:' })}</span>
+            <span className="text-xs text-neutral-500 font-bold uppercase">{pick(lang, { en: 'Ends in:', ta: 'முடிவடையும்:', hi: 'समाप्त होने में:', ml: 'അവസാനിക്കുന്നത്:', te: 'ముగియడానికి:', kn: 'ಮುಗಿಯಲು:' })}</span>
             <div className="font-mono font-black text-[#0A1F12] text-sm flex items-center gap-1">
               <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">{String(timeLeft.hours).padStart(2, '0')}h</span>:
               <span className="bg-white px-2 py-0.5 rounded border border-emerald-200">{String(timeLeft.minutes).padStart(2, '0')}m</span>:
@@ -165,7 +167,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
         {flashSaleProducts.length === 0 ? (
           <div className="text-center py-10 space-y-2">
             <Flame className="w-8 h-8 text-neutral-300 mx-auto" />
-            <p className="text-sm font-bold text-[#0A1F12]">{pick(lang, { en: 'No flash deals live right now', ta: 'இப்போது நேரடி ஃபிளாஷ் டீல்கள் இல்லை', hi: 'अभी कोई फ्लैश डील लाइव नहीं है', ml: 'ഇപ്പോൾ ലൈവ് ഫ്ലാഷ് ഡീലുകൾ ഇല്ല', te: 'ప్రస్తుతం లైవ్ ఫ్లాష్ డీల్స్ లేవు' })}</p>
+            <p className="text-sm font-bold text-[#0A1F12]">{pick(lang, { en: 'No flash deals live right now', ta: 'இப்போது நேரடி ஃபிளாஷ் டீல்கள் இல்லை', hi: 'अभी कोई फ्लैश डील लाइव नहीं है', ml: 'ഇപ്പോൾ ലൈവ് ഫ്ലാഷ് ഡീലുകൾ ഇല്ല', te: 'ప్రస్తుతం లైవ్ ఫ్లాష్ డీల్స్ లేవు', kn: 'ಪ್ರಸ್ತುತ ಲೈವ್ ಫ್ಲ್ಯಾಶ್ ಡೀಲ್‌ಗಳಿಲ್ಲ' })}</p>
             <p className="text-xs text-neutral-500 max-w-sm mx-auto">
               {pick(lang, {
                 en: "New drops go live every day — check back soon, or browse the full catalog for today's best prices.",
@@ -173,6 +175,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
                 hi: 'हर दिन नई डील्स आती हैं — जल्द ही फिर से देखें, या आज की बेहतरीन कीमतों के लिए पूरा कैटलॉग ब्राउज़ करें।',
                 ml: 'ഓരോ ദിവസവും പുതിയ ഡീലുകൾ വരുന്നു — ഉടൻ വീണ്ടും പരിശോധിക്കുക, അല്ലെങ്കിൽ ഇന്നത്തെ മികച്ച വിലകൾക്കായി മുഴുവൻ കാറ്റലോഗും ബ്രൗസ് ചെയ്യുക.',
                 te: 'ప్రతిరోజూ కొత్త డీల్స్ వస్తాయి — త్వరలో మళ్ళీ చూడండి, లేదా నేటి ఉత్తమ ధరల కోసం పూర్తి కేటలాగ్‌ను బ్రౌజ్ చేయండి.',
+                kn: 'ಪ್ರತಿದಿನ ಹೊಸ ಡೀಲ್‌ಗಳು ಬರುತ್ತವೆ — ಶೀಘ್ರದಲ್ಲೇ ಮತ್ತೆ ಪರಿಶೀಲಿಸಿ, ಅಥವಾ ಇಂದಿನ ಅತ್ಯುತ್ತಮ ಬೆಲೆಗಳಿಗಾಗಿ ಪೂರ್ಣ ಕ್ಯಾಟಲಾಗ್ ಬ್ರೌಸ್ ಮಾಡಿ.',
               })}
             </p>
           </div>
@@ -187,7 +190,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
               <div className="relative aspect-16/10 rounded-xl overflow-hidden bg-neutral-100">
                 <img src={p.image} alt={translateProductName(p.id, p.name, lang)} referrerPolicy="no-referrer" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
                 <span className="absolute top-2 left-2 bg-emerald-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">
-                  {pick(lang, { en: `${p.discountPercentage}% OFF`, ta: `${p.discountPercentage}% தள்ளுபடி`, hi: `${p.discountPercentage}% छूट`, ml: `${p.discountPercentage}% കിഴിവ്`, te: `${p.discountPercentage}% తగ్గింపు` })}
+                  {pick(lang, { en: `${p.discountPercentage}% OFF`, ta: `${p.discountPercentage}% தள்ளுபடி`, hi: `${p.discountPercentage}% छूट`, ml: `${p.discountPercentage}% കിഴിവ്`, te: `${p.discountPercentage}% తగ్గింపు`, kn: `${p.discountPercentage}% ರಿಯಾಯಿತಿ` })}
                 </span>
               </div>
 
@@ -210,10 +213,11 @@ export const OffersPage: React.FC<OffersPageProps> = ({
                             hi: `बचा हुआ स्टॉक: ${p.stockQuantity} यूनिट`,
                             ml: `ബാക്കിയുള്ള സ്റ്റോക്ക്: ${p.stockQuantity} യൂണിറ്റുകൾ`,
                             te: `మిగిలిన స్టాక్: ${p.stockQuantity} యూనిట్లు`,
+                            kn: `ಉಳಿದ ಸ್ಟಾಕ್: ${p.stockQuantity} ಯೂನಿಟ್‌ಗಳು`,
                           })
-                        : pick(lang, { en: 'In Stock', ta: 'கையிருப்பில் உள்ளது', hi: 'स्टॉक में है', ml: 'സ്റ്റോക്കിൽ ഉണ്ട്', te: 'స్టాక్‌లో ఉంది' })}
+                        : pick(lang, { en: 'In Stock', ta: 'கையிருப்பில் உள்ளது', hi: 'स्टॉक में है', ml: 'സ്റ്റോക്കിൽ ഉണ്ട്', te: 'స్టాక్‌లో ఉంది', kn: 'ಸ್ಟಾಕ್‌ನಲ್ಲಿದೆ' })}
                     </span>
-                    <span className="text-emerald-700">{pick(lang, { en: 'Selling Fast', ta: 'வேகமாக விற்கிறது', hi: 'तेज़ी से बिक रहा है', ml: 'വേഗത്തിൽ വിറ്റുപോകുന്നു', te: 'వేగంగా అమ్ముడవుతోంది' })}</span>
+                    <span className="text-emerald-700">{pick(lang, { en: 'Selling Fast', ta: 'வேகமாக விற்கிறது', hi: 'तेज़ी से बिक रहा है', ml: 'വേഗത്തിൽ വിറ്റുപോകുന്നു', te: 'వేగంగా అమ్ముడవుతోంది', kn: 'ವೇಗವಾಗಿ ಮಾರಾಟವಾಗುತ್ತಿದೆ' })}</span>
                   </div>
                   <div className="w-full bg-emerald-50 h-1.5 rounded-full overflow-hidden">
                     <div className="bg-gradient-to-r from-emerald-400 to-emerald-600 h-full w-3/4 rounded-full animate-pulse" />
@@ -233,7 +237,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
                   }}
                   className="bg-[#0F7B3A] hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-xs uppercase"
                 >
-                  {pick(lang, { en: 'Claim Deal', ta: 'டீலைப் பெறுங்கள்', hi: 'डील पाएं', ml: 'ഡീൽ നേടൂ', te: 'డీల్ పొందండి' })}
+                  {pick(lang, { en: 'Claim Deal', ta: 'டீலைப் பெறுங்கள்', hi: 'डील पाएं', ml: 'ഡീൽ നേടൂ', te: 'డీల్ పొందండి', kn: 'ಡೀಲ್ ಪಡೆಯಿರಿ' })}
                 </button>
               </div>
             </div>
@@ -246,9 +250,9 @@ export const OffersPage: React.FC<OffersPageProps> = ({
       <section className="space-y-6">
         <div>
           <div className="text-xs font-bold text-emerald-700 uppercase tracking-widest flex items-center gap-1">
-            <Sparkles className="w-4 h-4" /> {pick(lang, { en: 'BUNDLE & SAVE', ta: 'பண்டில் & சேமிக்கவும்', hi: 'बंडल करें और बचाएं', ml: 'ബണ്ടിൽ ചെയ്ത് ലാഭിക്കൂ', te: 'బండిల్ చేసి ఆదా చేయండి' })}
+            <Sparkles className="w-4 h-4" /> {pick(lang, { en: 'BUNDLE & SAVE', ta: 'பண்டில் & சேமிக்கவும்', hi: 'बंडल करें और बचाएं', ml: 'ബണ്ടിൽ ചെയ്ത് ലാഭിക്കൂ', te: 'బండిల్ చేసి ఆదా చేయండి', kn: 'ಬಂಡಲ್ ಮಾಡಿ ಉಳಿಸಿ' })}
           </div>
-          <h2 className="text-2xl font-black text-[#0A1F12] tracking-tight">{pick(lang, { en: 'Curated High-Protein Combo Packs', ta: 'தேர்ந்தெடுக்கப்பட்ட உயர் புரத காம்போ பாக்குகள்', hi: 'चुनिंदा हाई-प्रोटीन कॉम्बो पैक', ml: 'തിരഞ്ഞെടുത്ത ഹൈ-പ്രോട്ടീൻ കോംബോ പാക്കുകൾ', te: 'ఎంపిక చేసిన హై-ప్రోటీన్ కాంబో ప్యాక్‌లు' })}</h2>
+          <h2 className="text-2xl font-black text-[#0A1F12] tracking-tight">{pick(lang, { en: 'Curated High-Protein Combo Packs', ta: 'தேர்ந்தெடுக்கப்பட்ட உயர் புரத காம்போ பாக்குகள்', hi: 'चुनिंदा हाई-प्रोटीन कॉम्बो पैक', ml: 'തിരഞ്ഞെടുത്ത ഹൈ-പ്രോട്ടീൻ കോംബോ പാക്കുകൾ', te: 'ఎంపిక చేసిన హై-ప్రోటీన్ కాంబో ప్యాక్‌లు', kn: 'ಆಯ್ದ ಹೈ-ಪ್ರೋಟೀನ್ ಕಾಂಬೋ ಪ್ಯಾಕ್‌ಗಳು' })}</h2>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -275,7 +279,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
 
               {/* Items List */}
               <div className="bg-neutral-50 border border-neutral-200 rounded-2xl p-4 space-y-2">
-                <div className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">{pick(lang, { en: 'Items Included in this Combo:', ta: 'இந்த காம்போவில் அடங்கியுள்ள பொருட்கள்:', hi: 'इस कॉम्बो में शामिल आइटम:', ml: 'ഈ കോംബോയിൽ ഉൾപ്പെടുന്ന ഇനങ്ങൾ:', te: 'ఈ కాంబోలో చేర్చిన అంశాలు:' })}</div>
+                <div className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">{pick(lang, { en: 'Items Included in this Combo:', ta: 'இந்த காம்போவில் அடங்கியுள்ள பொருட்கள்:', hi: 'इस कॉम्बो में शामिल आइटम:', ml: 'ഈ കോംബോയിൽ ഉൾപ്പെടുന്ന ഇനങ്ങൾ:', te: 'ఈ కాంబోలో చేర్చిన అంశాలు:', kn: 'ಈ ಕಾಂಬೋದಲ್ಲಿ ಸೇರಿಸಲಾದ ವಸ್ತುಗಳು:' })}</div>
                 {combo.items.map((it, idx) => (
                   <div key={idx} className="flex items-center justify-between text-xs text-neutral-600">
                     <span className="flex items-center gap-2">
@@ -291,7 +295,7 @@ export const OffersPage: React.FC<OffersPageProps> = ({
                 onClick={() => handleAddComboToCart(combo)}
                 className="w-full bg-[#0F7B3A] hover:bg-emerald-500 text-white font-black py-3.5 rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer shadow-lg shadow-emerald-900/20"
               >
-                <ShoppingBag className="w-4 h-4" /> {pick(lang, { en: 'Add Entire Combo To Cart', ta: 'முழு காம்போவையும் கார்ட்டில் சேர்க்கவும்', hi: 'पूरा कॉम्बो कार्ट में जोड़ें', ml: 'മുഴുവൻ കോംബോയും കാർട്ടിലേക്ക് ചേർക്കുക', te: 'మొత్తం కాంబోను కార్ట్‌కు జోడించండి' })}
+                <ShoppingBag className="w-4 h-4" /> {pick(lang, { en: 'Add Entire Combo To Cart', ta: 'முழு காம்போவையும் கார்ட்டில் சேர்க்கவும்', hi: 'पूरा कॉम्बो कार्ट में जोड़ें', ml: 'മുഴുവൻ കോംബോയും കാർട്ടിലേക്ക് ചേർക്കുക', te: 'మొత్తం కాంబోను కార్ట్‌కు జోడించండి', kn: 'ಸಂಪೂರ್ಣ ಕಾಂಬೋವನ್ನು ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಿ' })}
               </button>
             </div>
           ))}

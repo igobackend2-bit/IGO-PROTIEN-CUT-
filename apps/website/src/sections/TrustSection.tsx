@@ -65,6 +65,21 @@ const COMPARISON_FALLBACK_TE = {
   ]
 };
 
+const COMPARISON_FALLBACK_KN = {
+  eyebrow: 'ಸ್ಪರ್ಧಾತ್ಮಕ ಅಂಚು',
+  heading: 'IGO ಪ್ರೋಟೀನ್ ಕಟ್ಸ್ ಅನ್ನು ಏಕೆ ಆಯ್ಕೆ ಮಾಡಬೇಕು?',
+  subheading:
+    'ಮಾಂಸ ಉದ್ಯಮದಲ್ಲಿ ಗುಣಮಟ್ಟಕ್ಕಾಗಿ ನಾವು ಹೊಸ ಮಾನದಂಡವನ್ನು ಸ್ಥಾಪಿಸಿದ್ದೇವೆ. ನಮ್ಮನ್ನು ಸ್ಥಳೀಯ ಮಾರುಕಟ್ಟೆಯೊಂದಿಗೆ ಹೋಲಿಸಿ, ಪಾರದರ್ಶಕತೆ ತರುವ ವ್ಯತ್ಯಾಸವನ್ನು ನೋಡಿ.',
+  columns: { feature: 'ವೈಶಿಷ್ಟ್ಯ', igo: 'IGO ಮಾನದಂಡ', local: 'ಸ್ಥಳೀಯ ಮಾರುಕಟ್ಟೆ', competitor: 'ಸ್ಪರ್ಧಿಗಳು' },
+  rows: [
+    { feature: 'ಟ್ರೇಸಬಿಲಿಟಿ', igo: 'ಸಂಪೂರ್ಣ ಫಾರ್ಮ್-ಟು-ಟೇಬಲ್ (QR ಸ್ಕ್ಯಾನ್)', local: 'ಏನೂ ಇಲ್ಲ / ಬಾಯಿಮಾತಿನ', competitor: 'ಸೀಮಿತ ಬ್ಯಾಚ್ ಮಾಹಿತಿ' },
+    { feature: 'ತಾಜಾತನ', igo: 'ಎಂದಿಗೂ ಫ್ರೀಜ್ ಮಾಡಿಲ್ಲ (ಯಾವಾಗಲೂ 0-4°C)', local: 'ಕೋಣೆಯ ಉಷ್ಣಾಂಶ / ಬದಲಾಗುತ್ತದೆ', competitor: 'ಸಂಗ್ರಹಣೆಗಾಗಿ ಫ್ರೀಜ್ ಮಾಡಲಾಗಿದೆ' },
+    { feature: 'ಸಂಸ್ಕರಣೆ', igo: 'ISO 22000 ಸ್ಟೆರೈಲ್ ಸೌಲಭ್ಯ', local: 'ತೆರೆದ ಮಾರುಕಟ್ಟೆ', competitor: 'ಸಾಧಾರಣ ಗೋದಾಮು' },
+    { feature: 'ಡೆಲಿವರಿ', igo: '30-90 ನಿಮಿಷ ಕೋಲ್ಡ್-ಚೈನ್', local: 'ಡೆಲಿವರಿ ಇಲ್ಲ', competitor: '3-4 ಗಂಟೆಗಳು / ಒಣ ಬ್ಯಾಗ್' },
+    { feature: 'ಆಂಟಿಬಯಾಟಿಕ್ಸ್', igo: '100% ಆಂಟಿಬಯಾಟಿಕ್-ಮುಕ್ತ', local: 'ತಿಳಿದಿಲ್ಲ', competitor: 'ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ' }
+  ]
+};
+
 // Consolidated "Why Choose IGO" trust section — merges what used to be five
 // separate stacked sections (Freshness Promise pillars, Farm-to-Home 4-step
 // process, Why-IGO comparison table + bento grid, and Quality Certifications
@@ -137,15 +152,26 @@ const CERTS_FALLBACK_TE = {
   ]
 };
 
+const CERTS_FALLBACK_KN = {
+  eyebrow: 'ಪರಿಶೀಲಿಸಿದ ಮೂಲ',
+  heading: 'ಪ್ರೀಮಿಯಂ ಗುಣಮಟ್ಟಗಳು, ಪರಿಶೀಲಿಸಿ ನಂಬಿಕೆ ಗಳಿಸಿದೆ.',
+  items: [
+    { name: 'ISO 22000', icon: 'ShieldCheck', desc: 'ಆಹಾರ ಸುರಕ್ಷತಾ ನಿರ್ವಹಣೆ', year: '2027' },
+    { name: 'HACCP', icon: 'Award', desc: 'ರಿಸ್ಕ್ ಅಸೆಸ್‌ಮೆಂಟ್ ಮಾನದಂಡ', year: '2027' },
+    { name: 'FSSAI ಲೈಸೆನ್ಸ್ ಪಡೆದಿದೆ', icon: 'Globe', desc: 'ಲೈಸೆನ್ಸ್: 10022043000918', year: '2027' },
+    { name: '100% ಹಲಾಲ್', icon: 'Sprout', desc: 'ಜಬೀಹಾ ಪ್ರಮಾಣೀಕೃತ ಸೋರ್ಸಿಂಗ್', year: '' }
+  ]
+};
+
 export const TrustSection: React.FC = () => {
   const { lang } = useLang();
   const comparisonBlock = useSiteContent('sections.comparison', COMPARISON_FALLBACK);
   const certsBlock = useSiteContent('sections.certifications', CERTS_FALLBACK);
 
   const resolvedComparison =
-    lang === 'ta' ? COMPARISON_FALLBACK_TA : lang === 'hi' ? COMPARISON_FALLBACK_HI : lang === 'ml' ? COMPARISON_FALLBACK_ML : lang === 'te' ? COMPARISON_FALLBACK_TE : comparisonBlock;
+    lang === 'ta' ? COMPARISON_FALLBACK_TA : lang === 'hi' ? COMPARISON_FALLBACK_HI : lang === 'ml' ? COMPARISON_FALLBACK_ML : lang === 'te' ? COMPARISON_FALLBACK_TE : lang === 'kn' ? COMPARISON_FALLBACK_KN : comparisonBlock;
   const resolvedCerts =
-    lang === 'ta' ? CERTS_FALLBACK_TA : lang === 'hi' ? CERTS_FALLBACK_HI : lang === 'ml' ? CERTS_FALLBACK_ML : lang === 'te' ? CERTS_FALLBACK_TE : certsBlock;
+    lang === 'ta' ? CERTS_FALLBACK_TA : lang === 'hi' ? CERTS_FALLBACK_HI : lang === 'ml' ? CERTS_FALLBACK_ML : lang === 'te' ? CERTS_FALLBACK_TE : lang === 'kn' ? CERTS_FALLBACK_KN : certsBlock;
 
   const comparison = resolvedComparison.rows;
   const certs = resolvedCerts.items.map((c) => ({
@@ -159,10 +185,10 @@ export const TrustSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <div className="text-center max-w-2xl mx-auto space-y-2.5">
           <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
-            {pick(lang, { en: 'Why Choose Us', ta: 'ஏன் எங்களை தேர்வு செய்ய வேண்டும்', hi: 'हमें क्यों चुनें', ml: 'ഞങ്ങളെ എന്തുകൊണ്ട് തിരഞ്ഞെടുക്കണം', te: 'మమ్మల్ని ఎందుకు ఎంచుకోవాలి' })}
+            {pick(lang, { en: 'Why Choose Us', ta: 'ஏன் எங்களை தேர்வு செய்ய வேண்டும்', hi: 'हमें क्यों चुनें', ml: 'ഞങ്ങളെ എന്തുകൊണ്ട് തിരഞ്ഞെടുക്കണം', te: 'మమ్మల్ని ఎందుకు ఎంచుకోవాలి', kn: 'ನಮ್ಮನ್ನು ಏಕೆ ಆಯ್ಕೆ ಮಾಡಬೇಕು' })}
           </span>
           <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">
-            {pick(lang, { en: 'Why Choose IGO Protein Cuts?', ta: 'ஏன் IGO புரோட்டீன் கட்ஸை தேர்வு செய்ய வேண்டும்?', hi: 'IGO प्रोटीन कट्स को क्यों चुनें?', ml: 'എന്തുകൊണ്ട് IGO പ്രോട്ടീൻ കട്സ് തിരഞ്ഞെടുക്കണം?', te: 'IGO ప్రోటీన్ కట్స్‌ను ఎందుకు ఎంచుకోవాలి?' })}
+            {pick(lang, { en: 'Why Choose IGO Protein Cuts?', ta: 'ஏன் IGO புரோட்டீன் கட்ஸை தேர்வு செய்ய வேண்டும்?', hi: 'IGO प्रोटीन कट्स को क्यों चुनें?', ml: 'എന്തുകൊണ്ട് IGO പ്രോട്ടീൻ കട്സ് തിരഞ്ഞെടുക്കണം?', te: 'IGO ప్రోటీన్ కట్స్‌ను ఎందుకు ఎంచుకోవాలి?', kn: 'IGO ಪ್ರೋಟೀನ್ ಕಟ್ಸ್ ಅನ್ನು ಏಕೆ ಆಯ್ಕೆ ಮಾಡಬೇಕು?' })}
           </h2>
           <p className="text-xs sm:text-sm text-neutral-600">
             {pick(lang, {
@@ -170,7 +196,8 @@ export const TrustSection: React.FC = () => {
               ta: 'ஒரு புறநிலையான, அம்சம்-வாரியான ஒப்பீடு — சந்தைப்படுத்தல் பிரதி அல்ல. "பண்ணையிலிருந்து மேசை வரை" என்பது நடைமுறையில் என்ன என்பதைப் பாருங்கள்.',
               hi: 'एक निष्पक्ष, फीचर-दर-फीचर तुलना — मार्केटिंग कॉपी नहीं। देखें कि व्यवहार में "फार्म टू टेबल" का वास्तव में क्या मतलब है।',
               ml: 'വസ്തുനിഷ്ഠമായ, സവിശേഷത അടിസ്ഥാനത്തിലുള്ള താരതമ്യം — മാർക്കറ്റിംഗ് വാചകമല്ല. "ഫാം ടു ടേബിൾ" പ്രായോഗികമായി എന്താണ് അർത്ഥമാക്കുന്നതെന്ന് കൃത്യമായി കാണുക.',
-              te: 'ఒక నిష్పాక్షిక, ఫీచర్-బై-ఫీచర్ పోలిక — మార్కెటింగ్ కాపీ కాదు. ఆచరణలో "ఫార్మ్ టు టేబుల్" అంటే నిజంగా ఏమిటో సరిగ్గా చూడండి.'
+              te: 'ఒక నిష్పాక్షిక, ఫీచర్-బై-ఫీచర్ పోలిక — మార్కెటింగ్ కాపీ కాదు. ఆచరణలో "ఫార్మ్ టు టేబుల్" అంటే నిజంగా ఏమిటో సరిగ్గా చూడండి.',
+              kn: 'ಒಂದು ವಸ್ತುನಿಷ್ಠ, ವೈಶಿಷ್ಟ್ಯ-ಆಧಾರಿತ ಹೋಲಿಕೆ — ಮಾರ್ಕೆಟಿಂಗ್ ಪ್ರತಿ ಅಲ್ಲ. "ಫಾರ್ಮ್ ಟು ಟೇಬಲ್" ಎಂದರೆ ಪ್ರಾಯೋಗಿಕವಾಗಿ ಏನೆಂದು ನಿಖರವಾಗಿ ನೋಡಿ.'
             })}
           </p>
         </div>

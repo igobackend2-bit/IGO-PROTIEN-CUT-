@@ -58,7 +58,13 @@ export const TodaysDealsBanner: React.FC<TodaysDealsBannerProps> = ({ products, 
     ctaLabel: 'అన్ని డీల్స్ చూడండి',
     ctaPath: '/offers'
   };
-  const resolvedFlashHeading = lang === 'ta' ? flashHeadingTa : lang === 'hi' ? flashHeadingHi : lang === 'ml' ? flashHeadingMl : lang === 'te' ? flashHeadingTe : flashHeading;
+  const flashHeadingKn = {
+    eyebrow: 'ಇಂದಿನ ವಿಶೇಷ',
+    heading: 'ಇಂದಿನ ಫ್ಲ್ಯಾಶ್ ಮೀಟ್ ಡೀಲ್ಸ್',
+    ctaLabel: 'ಎಲ್ಲಾ ಡೀಲ್‌ಗಳನ್ನು ನೋಡಿ',
+    ctaPath: '/offers'
+  };
+  const resolvedFlashHeading = lang === 'ta' ? flashHeadingTa : lang === 'hi' ? flashHeadingHi : lang === 'ml' ? flashHeadingMl : lang === 'te' ? flashHeadingTe : lang === 'kn' ? flashHeadingKn : flashHeading;
 
   // Best discounted product per core category (deduped, so it's a genuine
   // spread across chicken/mutton/beef/fish rather than 4 chicken items just
@@ -137,7 +143,7 @@ export const TodaysDealsBanner: React.FC<TodaysDealsBannerProps> = ({ products, 
               <span className="text-[10px] font-bold text-white uppercase tracking-widest">{resolvedFlashHeading.eyebrow}</span>
             </div>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-[0.95] tracking-tighter mb-3">
-              {pick(lang, { en: `Up to ${maxDiscount}% OFF`, ta: `${maxDiscount}% வரை தள்ளுபடி`, hi: `${maxDiscount}% तक की छूट`, ml: `${maxDiscount}% വരെ കിഴിവ്`, te: `${maxDiscount}% వరకు తగ్గింపు` })}
+              {pick(lang, { en: `Up to ${maxDiscount}% OFF`, ta: `${maxDiscount}% வரை தள்ளுபடி`, hi: `${maxDiscount}% तक की छूट`, ml: `${maxDiscount}% വരെ കിഴിവ്`, te: `${maxDiscount}% వరకు తగ్గింపు`, kn: `${maxDiscount}% ವರೆಗೆ ರಿಯಾಯಿತಿ` })}
             </h2>
             <p className="text-white/80 text-sm sm:text-base font-medium mb-6">
               {pick(lang, {
@@ -145,7 +151,8 @@ export const TodaysDealsBanner: React.FC<TodaysDealsBannerProps> = ({ products, 
                 ta: `${translateProductName(topDeal.id, topDeal.name, lang)} மற்றும் இன்றைய சிறந்த கட்ஸில் — குறுகிய காலத்திற்கு மட்டும்.`,
                 hi: `${translateProductName(topDeal.id, topDeal.name, lang)} और आज के बेहतरीन कट्स पर — सीमित समय के लिए।`,
                 ml: `${translateProductName(topDeal.id, topDeal.name, lang)}, ഇന്നത്തെ മികച്ച കട്ടുകൾ എന്നിവയിൽ — പരിമിതമായ സമയത്തേക്ക് മാത്രം.`,
-                te: `${translateProductName(topDeal.id, topDeal.name, lang)} మరియు ఈరోజు అత్యుత్తమ కట్స్‌పై — పరిమిత సమయం మాత్రమే.`
+                te: `${translateProductName(topDeal.id, topDeal.name, lang)} మరియు ఈరోజు అత్యుత్తమ కట్స్‌పై — పరిమిత సమయం మాత్రమే.`,
+                kn: `${translateProductName(topDeal.id, topDeal.name, lang)} ಮತ್ತು ಇಂದಿನ ಅತ್ಯುತ್ತಮ ಕಟ್‌ಗಳ ಮೇಲೆ — ಸೀಮಿತ ಸಮಯಕ್ಕೆ ಮಾತ್ರ.`
               })}
             </p>
             <button
@@ -160,7 +167,7 @@ export const TodaysDealsBanner: React.FC<TodaysDealsBannerProps> = ({ products, 
             <Clock3 className="w-5 h-5 text-white/80" />
             <div>
               <div className="text-[9px] font-bold text-white/60 uppercase tracking-widest mb-1">
-                {pick(lang, { en: 'Deal Refreshes In', ta: 'சலுகை புதுப்பிக்கப்படும் நேரம்', hi: 'डील रिफ्रेश होने में', ml: 'ഡീൽ പുതുക്കുന്നത്', te: 'డీల్ రిఫ్రెష్ అవడానికి' })}
+                {pick(lang, { en: 'Deal Refreshes In', ta: 'சலுகை புதுப்பிக்கப்படும் நேரம்', hi: 'डील रिफ्रेश होने में', ml: 'ഡീൽ പുതുക്കുന്നത്', te: 'డీల్ రిఫ్రెష్ అవడానికి', kn: 'ಡೀಲ್ ರಿಫ್ರೆಶ್ ಆಗಲು' })}
               </div>
               <div className="flex items-center gap-1 font-mono font-black text-white text-2xl tracking-wider leading-none">
                 <span>{pad(hours)}</span>:<span>{pad(minutes)}</span>:<span>{pad(seconds)}</span>

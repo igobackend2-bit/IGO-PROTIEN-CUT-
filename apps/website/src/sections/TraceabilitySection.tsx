@@ -149,6 +149,33 @@ const featuresTe = [
   }
 ];
 
+const featuresKn = [
+  {
+    icon: MapPin,
+    title: 'ಪರಿಶೀಲಿಸಿದ ಮೂಲಗಳು',
+    desc: 'ದಕ್ಷಿಣ ಭಾರತದಾದ್ಯಂತ ಇರುವ ಪಾರಂಪರಿಕ ಫಾರ್ಮ್‌ಗಳಿಗೆ ಟ್ರೇಸ್ ಮಾಡಲಾಗಿದೆ.',
+    cta: 'ನೆಟ್‌ವರ್ಕ್ ನೋಡಿ'
+  },
+  {
+    icon: Thermometer,
+    title: 'ಕೋಲ್ಡ್ ಚೈನ್ ಪಾರದರ್ಶಕತೆ',
+    desc: 'ನಿಮ್ಮ ನಿರ್ದಿಷ್ಟ ಬ್ಯಾಚ್‌ಗಾಗಿ ರಿಯಲ್-ಟೈಮ್ ತಾಪಮಾನ ಲಾಗ್‌ಗಳು (0-4°C).',
+    cta: 'ಲೈವ್ ಸ್ಥಿತಿ'
+  },
+  {
+    icon: QrCode,
+    title: 'ಸ್ಕ್ಯಾನ್ ಮಾಡಿ ಎಲ್ಲವನ್ನೂ ನೋಡಿ',
+    desc: 'ಪ್ರತಿ ಪ್ಯಾಕ್‌ನಲ್ಲಿ QR ಕೋಡ್ ಇರುತ್ತದೆ — ಫಾರ್ಮ್, ದಿನಾಂಕ ಮತ್ತು ಹ್ಯಾಂಡ್ಲರ್ ತಿಳಿಯಿರಿ.',
+    cta: 'ಲುಕಪ್ ಪ್ರಯತ್ನಿಸಿ'
+  },
+  {
+    icon: ShieldCheck,
+    title: 'ಆಹಾರ ಸುರಕ್ಷತೆ ಪ್ರಮಾಣೀಕೃತ',
+    desc: 'ISO 22000, HACCP ಮತ್ತು ನೈರ್ಮಲ್ಯ ಮಾನದಂಡಗಳನ್ನು ಕಟ್ಟುನಿಟ್ಟಾಗಿ ಪರಿಶೀಲಿಸಲಾಗಿದೆ.',
+    cta: 'ಪ್ರಮಾಣಪತ್ರಗಳನ್ನು ನೋಡಿ'
+  }
+];
+
 const toResult = (row: BatchTraceRow): TraceResult => ({
   batchId: row.batch_id.toUpperCase(),
   productName: row.product_name,
@@ -162,7 +189,7 @@ const toResult = (row: BatchTraceRow): TraceResult => ({
 
 export const TraceabilitySection: React.FC = () => {
   const { lang } = useLang();
-  const resolvedFeatures = lang === 'ta' ? featuresTa : lang === 'hi' ? featuresHi : lang === 'ml' ? featuresMl : lang === 'te' ? featuresTe : features;
+  const resolvedFeatures = lang === 'ta' ? featuresTa : lang === 'hi' ? featuresHi : lang === 'ml' ? featuresMl : lang === 'te' ? featuresTe : lang === 'kn' ? featuresKn : features;
   const [batchId, setBatchId] = useState('');
   const [result, setResult] = useState<TraceResult | null>(null);
   // Was previously hardcoded to always return the same fake "Verified"
@@ -197,9 +224,9 @@ export const TraceabilitySection: React.FC = () => {
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
       <div className="text-center max-w-2xl mx-auto space-y-2">
-        <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{pick(lang, { en: 'Trust Your Protein', ta: 'உங்கள் புரதத்தை நம்புங்கள்', hi: 'अपने प्रोटीन पर भरोसा करें', ml: 'നിങ്ങളുടെ പ്രോട്ടീനിൽ വിശ്വസിക്കുക', te: 'మీ ప్రోటీన్‌ను నమ్మండి' })}</span>
+        <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">{pick(lang, { en: 'Trust Your Protein', ta: 'உங்கள் புரதத்தை நம்புங்கள்', hi: 'अपने प्रोटीन पर भरोसा करें', ml: 'നിങ്ങളുടെ പ്രോട്ടീനിൽ വിശ്വസിക്കുക', te: 'మీ ప్రోటీన్‌ను నమ్మండి', kn: 'ನಿಮ್ಮ ಪ್ರೋಟೀನ್ ಅನ್ನು ನಂಬಿ' })}</span>
         <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">
-          {pick(lang, { en: 'Know Your Source. Trust Your Cut.', ta: 'உங்கள் மூலத்தை அறியுங்கள். உங்கள் வெட்டை நம்புங்கள்.', hi: 'अपना स्रोत जानें। अपने कट पर भरोसा करें।', ml: 'നിങ്ങളുടെ ഉറവിടം അറിയുക. നിങ്ങളുടെ കട്ട് വിശ്വസിക്കുക.', te: 'మీ మూలాన్ని తెలుసుకోండి. మీ కట్‌ను నమ్మండి.' })}
+          {pick(lang, { en: 'Know Your Source. Trust Your Cut.', ta: 'உங்கள் மூலத்தை அறியுங்கள். உங்கள் வெட்டை நம்புங்கள்.', hi: 'अपना स्रोत जानें। अपने कट पर भरोसा करें।', ml: 'നിങ്ങളുടെ ഉറവിടം അറിയുക. നിങ്ങളുടെ കട്ട് വിശ്വസിക്കുക.', te: 'మీ మూలాన్ని తెలుసుకోండి. మీ కట్‌ను నమ్మండి.', kn: 'ನಿಮ್ಮ ಮೂಲವನ್ನು ತಿಳಿಯಿರಿ. ನಿಮ್ಮ ಕಟ್ ಅನ್ನು ನಂಬಿ.' })}
         </h2>
         <p className="text-xs sm:text-sm text-neutral-600">
           {pick(lang, {
@@ -207,7 +234,8 @@ export const TraceabilitySection: React.FC = () => {
             ta: 'எங்கள் தொழில்நுட்ப-இயங்கும் கண்காணிப்பு அமைப்பு பண்ணையிலிருந்து மேசைக்கு முழுமையான வெளிப்படைத்தன்மையை வழங்குகிறது. ஒவ்வொரு பாக்கிலும் நீங்கள் உடனடியாக சரிபார்க்கக்கூடிய ஒரு பேட்ச் ஐடி உள்ளது.',
             hi: 'हमारा तकनीक-संचालित ट्रेसेबिलिटी सिस्टम फार्म-से-टेबल तक पूर्ण पारदर्शिता प्रदान करता है। हर पैक में एक बैच आईडी होती है जिसे आप तुरंत सत्यापित कर सकते हैं।',
             ml: 'ഞങ്ങളുടെ സാങ്കേതികവിദ്യാധിഷ്ഠിത ട്രെയ്‌സബിലിറ്റി സംവിധാനം ഫാമിൽ നിന്ന് മേശയിലേക്ക് സമ്പൂർണ്ണ സുതാര്യത നൽകുന്നു. ഓരോ പാക്കിലും നിങ്ങൾക്ക് ഉടനടി പരിശോധിക്കാവുന്ന ഒരു ബാച്ച് ഐഡി ഉണ്ട്.',
-            te: 'మా సాంకేతికత ఆధారిత ట్రేసబిలిటీ వ్యవస్థ పొలం నుండి టేబుల్ వరకు పూర్తి పారదర్శకతను అందిస్తుంది. ప్రతి ప్యాక్‌లో మీరు తక్షణమే ధృవీకరించగల బ్యాచ్ ఐడీ ఉంటుంది.'
+            te: 'మా సాంకేతికత ఆధారిత ట్రేసబిలిటీ వ్యవస్థ పొలం నుండి టేబుల్ వరకు పూర్తి పారదర్శకతను అందిస్తుంది. ప్రతి ప్యాక్‌లో మీరు తక్షణమే ధృవీకరించగల బ్యాచ్ ఐడీ ఉంటుంది.',
+            kn: 'ನಮ್ಮ ತಂತ್ರಜ್ಞಾನ ಆಧಾರಿತ ಟ್ರೇಸಬಿಲಿಟಿ ವ್ಯವಸ್ಥೆಯು ಫಾರ್ಮ್‌ನಿಂದ ಟೇಬಲ್‌ವರೆಗೆ ಸಂಪೂರ್ಣ ಪಾರದರ್ಶಕತೆಯನ್ನು ಒದಗಿಸುತ್ತದೆ. ಪ್ರತಿ ಪ್ಯಾಕ್‌ನಲ್ಲಿ ನೀವು ತಕ್ಷಣ ಪರಿಶೀಲಿಸಬಹುದಾದ ಬ್ಯಾಚ್ ಐಡಿ ಇರುತ್ತದೆ.'
           })}
         </p>
       </div>
@@ -217,9 +245,9 @@ export const TraceabilitySection: React.FC = () => {
         <div className="absolute top-0 right-0 w-72 h-72 bg-emerald-600/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="relative z-10 max-w-xl mx-auto text-center space-y-5">
           <div className="inline-flex items-center gap-2 bg-emerald-950 border border-emerald-800 px-3 py-1 rounded-full text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" /> {pick(lang, { en: '0-4°C Supply Chain Integrity', ta: '0-4°C விநியோக சங்கிலி ஒருமைப்பாடு', hi: '0-4°C सप्लाई चेन इंटीग्रिटी', ml: '0-4°C സപ്ലൈ ചെയിൻ ഇന്റഗ്രിറ്റി', te: '0-4°C సప్లై చైన్ ఇంటిగ్రిటీ' })}
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" /> {pick(lang, { en: '0-4°C Supply Chain Integrity', ta: '0-4°C விநியோக சங்கிலி ஒருமைப்பாடு', hi: '0-4°C सप्लाई चेन इंटीग्रिटी', ml: '0-4°C സപ്ലൈ ചെയിൻ ഇന്റഗ്രിറ്റി', te: '0-4°C సప్లై చైన్ ఇంటిగ్రిటీ', kn: '0-4°C ಸಪ್ಲೈ ಚೈನ್ ಇಂಟಿಗ್ರಿಟಿ' })}
           </div>
-          <h3 className="text-xl sm:text-2xl font-black text-white">{pick(lang, { en: "Trace Your Pack's Journey", ta: 'உங்கள் பாக்கின் பயணத்தைக் கண்டறியுங்கள்', hi: 'अपने पैक की यात्रा ट्रेस करें', ml: 'നിങ്ങളുടെ പാക്കിന്റെ യാത്ര ട്രെയ്‌സ് ചെയ്യുക', te: 'మీ ప్యాక్ ప్రయాణాన్ని ట్రేస్ చేయండి' })}</h3>
+          <h3 className="text-xl sm:text-2xl font-black text-white">{pick(lang, { en: "Trace Your Pack's Journey", ta: 'உங்கள் பாக்கின் பயணத்தைக் கண்டறியுங்கள்', hi: 'अपने पैक की यात्रा ट्रेस करें', ml: 'നിങ്ങളുടെ പാക്കിന്റെ യാത്ര ട്രെയ്‌സ് ചെയ്യുക', te: 'మీ ప్యాక్ ప్రయాణాన్ని ట్రేస్ చేయండి', kn: 'ನಿಮ್ಮ ಪ್ಯಾಕ್‌ನ ಪ್ರಯಾಣವನ್ನು ಟ್ರೇಸ್ ಮಾಡಿ' })}</h3>
           <form onSubmit={handleTrace} className="flex flex-col sm:flex-row items-center gap-3">
             <input
               type="text"
@@ -228,7 +256,7 @@ export const TraceabilitySection: React.FC = () => {
                 setBatchId(e.target.value);
                 if (status !== 'loading') setStatus('idle');
               }}
-              placeholder={pick(lang, { en: 'Enter Batch ID (e.g., IGO-9421) to verify...', ta: 'சரிபார்க்க பேட்ச் ஐடியை உள்ளிடவும் (உதா. IGO-9421)...', hi: 'सत्यापित करने के लिए बैच आईडी दर्ज करें (उदा. IGO-9421)...', ml: 'പരിശോധിക്കാൻ ബാച്ച് ഐഡി നൽകുക (ഉദാ. IGO-9421)...', te: 'ధృవీకరించడానికి బ్యాచ్ ఐడీని నమోదు చేయండి (ఉదా. IGO-9421)...' })}
+              placeholder={pick(lang, { en: 'Enter Batch ID (e.g., IGO-9421) to verify...', ta: 'சரிபார்க்க பேட்ச் ஐடியை உள்ளிடவும் (உதா. IGO-9421)...', hi: 'सत्यापित करने के लिए बैच आईडी दर्ज करें (उदा. IGO-9421)...', ml: 'പരിശോധിക്കാൻ ബാച്ച് ഐഡി നൽകുക (ഉദാ. IGO-9421)...', te: 'ధృవీకరించడానికి బ్యాచ్ ఐడీని నమోదు చేయండి (ఉదా. IGO-9421)...', kn: 'ಪರಿಶೀಲಿಸಲು ಬ್ಯಾಚ್ ಐಡಿ ನಮೂದಿಸಿ (ಉದಾ. IGO-9421)...' })}
               className="w-full bg-white border border-neutral-200 rounded-2xl px-4 py-3 text-sm text-[#0A1F12] focus:outline-none focus:border-emerald-500"
             />
             <button
@@ -238,11 +266,11 @@ export const TraceabilitySection: React.FC = () => {
             >
               {status === 'loading' ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> {pick(lang, { en: 'Tracing...', ta: 'கண்டறிகிறது...', hi: 'ट्रेस हो रहा है...', ml: 'ട്രെയ്‌സ് ചെയ്യുന്നു...', te: 'ట్రేస్ చేస్తోంది...' })}
+                  <Loader2 className="w-4 h-4 animate-spin" /> {pick(lang, { en: 'Tracing...', ta: 'கண்டறிகிறது...', hi: 'ट्रेस हो रहा है...', ml: 'ട്രെയ്‌സ് ചെയ്യുന്നു...', te: 'ట్రేస్ చేస్తోంది...', kn: 'ಟ್ರೇಸ್ ಮಾಡುತ್ತಿದೆ...' })}
                 </>
               ) : (
                 <>
-                  {pick(lang, { en: 'Trace Now', ta: 'இப்போது கண்டறியவும்', hi: 'अभी ट्रेस करें', ml: 'ഇപ്പോൾ ട്രെയ്‌സ് ചെയ്യുക', te: 'ఇప్పుడు ట్రేస్ చేయండి' })} <ArrowRight className="w-4 h-4" />
+                  {pick(lang, { en: 'Trace Now', ta: 'இப்போது கண்டறியவும்', hi: 'अभी ट्रेस करें', ml: 'ഇപ്പോൾ ട്രെയ്‌സ് ചെയ്യുക', te: 'ఇప్పుడు ట్రేస్ చేయండి', kn: 'ಈಗ ಟ್ರೇಸ್ ಮಾಡಿ' })} <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
@@ -256,7 +284,8 @@ export const TraceabilitySection: React.FC = () => {
                 ta: `"${batchId.trim()}" க்கு பேட்ச் எதுவும் கிடைக்கவில்லை — உங்கள் பாக்கில் உள்ள குறியீட்டை மீண்டும் சரிபார்க்கவும், அல்லது தவறாகத் தெரிந்தால் ஆதரவைத் தொடர்பு கொள்ளவும்.`,
                 hi: `"${batchId.trim()}" के लिए कोई बैच नहीं मिला — अपने पैक पर लिखे कोड को दोबारा जांचें, या गलत लगे तो सहायता से संपर्क करें।`,
                 ml: `"${batchId.trim()}" എന്നതിന് ബാച്ച് കണ്ടെത്തിയില്ല — നിങ്ങളുടെ പാക്കിലെ കോഡ് വീണ്ടും പരിശോധിക്കുക, അല്ലെങ്കിൽ തെറ്റാണെന്ന് തോന്നിയാൽ സപ്പോർട്ടിനെ ബന്ധപ്പെടുക.`,
-                te: `"${batchId.trim()}" కోసం బ్యాచ్ కనుగొనబడలేదు — మీ ప్యాక్‌పై ఉన్న కోడ్‌ని మళ్లీ తనిఖీ చేయండి, లేదా తప్పుగా అనిపిస్తే మద్దతును సంప్రదించండి.`
+                te: `"${batchId.trim()}" కోసం బ్యాచ్ కనుగొనబడలేదు — మీ ప్యాక్‌పై ఉన్న కోడ్‌ని మళ్లీ తనిఖీ చేయండి, లేదా తప్పుగా అనిపిస్తే మద్దతును సంప్రదించండి.`,
+                kn: `"${batchId.trim()}" ಗಾಗಿ ಯಾವುದೇ ಬ್ಯಾಚ್ ಕಂಡುಬಂದಿಲ್ಲ — ನಿಮ್ಮ ಪ್ಯಾಕ್‌ನಲ್ಲಿರುವ ಕೋಡ್ ಅನ್ನು ಮತ್ತೊಮ್ಮೆ ಪರಿಶೀಲಿಸಿ, ಅಥವಾ ತಪ್ಪಾಗಿ ಕಂಡುಬಂದರೆ ಬೆಂಬಲವನ್ನು ಸಂಪರ್ಕಿಸಿ.`
               })}
             </div>
           )}
@@ -269,7 +298,8 @@ export const TraceabilitySection: React.FC = () => {
                 ta: 'இப்போது கண்காணிப்பு சேவையை அடைய முடியவில்லை — சிறிது நேரத்தில் மீண்டும் முயற்சிக்கவும்.',
                 hi: 'अभी ट्रेसेबिलिटी सेवा तक नहीं पहुंच सके — कृपया कुछ देर बाद फिर से प्रयास करें।',
                 ml: 'ട്രെയ്‌സബിലിറ്റി സേവനത്തിലേക്ക് ഇപ്പോൾ എത്താൻ കഴിഞ്ഞില്ല — അൽപ്പസമയത്തിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക.',
-                te: 'ప్రస్తుతం ట్రేసబిలిటీ సేవను చేరుకోలేకపోయాము — దయచేసి కొద్దిసేపటిలో మళ్లీ ప్రయత్నించండి.'
+                te: 'ప్రస్తుతం ట్రేసబిలిటీ సేవను చేరుకోలేకపోయాము — దయచేసి కొద్దిసేపటిలో మళ్లీ ప్రయత్నించండి.',
+                kn: 'ಸದ್ಯಕ್ಕೆ ಟ್ರೇಸಬಿಲಿಟಿ ಸೇವೆಯನ್ನು ತಲುಪಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ — ದಯವಿಟ್ಟು ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.'
               })}
             </div>
           )}
@@ -277,9 +307,9 @@ export const TraceabilitySection: React.FC = () => {
           {result && (
             <div className="bg-white/5 border border-emerald-800 rounded-2xl p-5 text-left space-y-3 animate-fadeIn">
               <div className="flex items-center justify-between border-b border-emerald-900 pb-3">
-                <span className="font-mono font-black text-emerald-400 text-sm">{pick(lang, { en: `Batch #${result.batchId}`, ta: `பேட்ச் #${result.batchId}`, hi: `बैच #${result.batchId}`, ml: `ബാച്ച് #${result.batchId}`, te: `బ్యాచ్ #${result.batchId}` })}</span>
+                <span className="font-mono font-black text-emerald-400 text-sm">{pick(lang, { en: `Batch #${result.batchId}`, ta: `பேட்ச் #${result.batchId}`, hi: `बैच #${result.batchId}`, ml: `ബാച്ച് #${result.batchId}`, te: `బ్యాచ్ #${result.batchId}`, kn: `ಬ್ಯಾಚ್ #${result.batchId}` })}</span>
                 <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 uppercase bg-emerald-950 border border-emerald-800 px-2 py-0.5 rounded-full">
-                  <CheckCircle2 className="w-3 h-3" /> {pick(lang, { en: 'Verified', ta: 'சரிபார்க்கப்பட்டது', hi: 'सत्यापित', ml: 'പരിശോധിച്ചു', te: 'ధృవీకరించబడింది' })}
+                  <CheckCircle2 className="w-3 h-3" /> {pick(lang, { en: 'Verified', ta: 'சரிபார்க்கப்பட்டது', hi: 'सत्यापित', ml: 'പരിശോധിച്ചു', te: 'ధృవీకరించబడింది', kn: 'ಪರಿಶೀಲಿಸಲಾಗಿದೆ' })}
                 </span>
               </div>
               {result.productName && (
@@ -292,7 +322,7 @@ export const TraceabilitySection: React.FC = () => {
                 </div>
                 <div className="flex items-start gap-2">
                   <Clock className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                  <span>{pick(lang, { en: `Cut & packed: ${result.cutDate}`, ta: `வெட்டப்பட்டு பேக் செய்யப்பட்டது: ${result.cutDate}`, hi: `कटा और पैक किया गया: ${result.cutDate}`, ml: `മുറിച്ച് പാക്ക് ചെയ്തത്: ${result.cutDate}`, te: `కట్ చేసి ప్యాక్ చేయబడింది: ${result.cutDate}` })}</span>
+                  <span>{pick(lang, { en: `Cut & packed: ${result.cutDate}`, ta: `வெட்டப்பட்டு பேக் செய்யப்பட்டது: ${result.cutDate}`, hi: `कटा और पैक किया गया: ${result.cutDate}`, ml: `മുറിച്ച് പാക്ക് ചെയ്തത്: ${result.cutDate}`, te: `కట్ చేసి ప్యాక్ చేయబడింది: ${result.cutDate}`, kn: `ಕತ್ತರಿಸಿ ಪ್ಯಾಕ್ ಮಾಡಲಾಗಿದೆ: ${result.cutDate}` })}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />

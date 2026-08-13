@@ -278,6 +278,48 @@ export const guidesTe: Guide[] = [
   }
 ];
 
+export const guidesKn: Guide[] = [
+  {
+    title: 'ಮನೆಯಲ್ಲಿ ತಾಜಾ ಕಟ್ಸ್ ಅನ್ನು ಹೇಗೆ ಸಂಗ್ರಹಿಸುವುದು',
+    excerpt: 'ತಾಜಾವಾಗಿ ಡೆಲಿವರಿ ಆಗಿದೆ ಎಂದ ಮಾತ್ರಕ್ಕೆ ಅದು ಯಾವಾಗಲೂ ಹಾಗೆಯೇ ಇರುತ್ತದೆ ಎಂದಲ್ಲ — ನಿಮ್ಮ ಕಟ್ಸ್‌ನ ತಾಜಾತನವನ್ನು ಕಾಪಾಡಲು ಅವುಗಳನ್ನು ಹೇಗೆ ಸಂಗ್ರಹಿಸಬೇಕು ಎಂಬುದು ಇಲ್ಲಿದೆ.',
+    icon: Snowflake,
+    image: '/Images/Meat Images/Chicken/Chicken Breast Boneless.jpg',
+    paragraphs: [
+      'ತಕ್ಷಣ ಫ್ರಿಡ್ಜ್‌ಗೆ ಸೇರಿಸಿ: ಡೆಲಿವರಿ ಬಂದ 20 ನಿಮಿಷಗಳ ಒಳಗೆ ನೇರವಾಗಿ ಫ್ರಿಡ್ಜ್‌ಗೆ (0-4°C) ಅಥವಾ ಫ್ರೀಜರ್‌ಗೆ ಹಾಕಿ — ಕೊಠಡಿಯ ಉಷ್ಣತೆಯಲ್ಲಿ ಬಿಡಬೇಡಿ.',
+      '24-48 ಗಂಟೆಗಳ ಒಳಗೆ ಬಳಸಿ: ತಾಜಾ, ಎಂದಿಗೂ ಫ್ರೀಜ್ ಆಗದ ಕಟ್ಸ್ 1-2 ದಿನಗಳ ಒಳಗೆ ಬಳಸಿದರೆ ಅತ್ಯುತ್ತಮ ರುಚಿ ಸಿಗುತ್ತದೆ. ಅಷ್ಟು ಬೇಗ ಅಡುಗೆ ಮಾಡದಿದ್ದರೆ, ಅದನ್ನು ಫ್ರೀಜ್ ಮಾಡಿ.',
+      'ಸರಿಯಾಗಿ ಫ್ರೀಜ್ ಮಾಡಿ: ಗಾಳಿ ಆಡದ ಚೀಲ ಅಥವಾ ಪಾತ್ರೆಯಲ್ಲಿ ಬಿಗಿಯಾಗಿ ಸುತ್ತಿ, ಹೆಚ್ಚುವರಿ ಗಾಳಿಯನ್ನು ಒತ್ತಿ ತೆಗೆದು, ದಿನಾಂಕದೊಂದಿಗೆ ಲೇಬಲ್ ಮಾಡಿ. ಹೆಚ್ಚಿನ ಕಟ್ಸ್ ಗುಣಮಟ್ಟ ಕಳೆದುಕೊಳ್ಳದೆ 1-3 ತಿಂಗಳು ಫ್ರೀಜ್‌ನಲ್ಲಿ ಚೆನ್ನಾಗಿರುತ್ತವೆ.',
+      'ಸುರಕ್ಷಿತವಾಗಿ ಕರಗಿಸಿ: ಯಾವಾಗಲೂ ರಾತ್ರಿಯಿಡೀ ಫ್ರಿಡ್ಜ್‌ನಲ್ಲಿ ಕರಗಿಸಿ, ಕೌಂಟರ್‌ನಲ್ಲಿ ಅಲ್ಲ — ಇದು ಬ್ಯಾಕ್ಟೀರಿಯಾ ಬೆಳವಣಿಗೆಯನ್ನು ನಿಯಂತ್ರಣದಲ್ಲಿಡುತ್ತದೆ.',
+      'ಕಚ್ಚಾ ಮತ್ತು ಬೇಯಿಸಿದ್ದನ್ನು ಪ್ರತ್ಯೇಕವಾಗಿಡಿ: ಕಚ್ಚಾ ಮಾಂಸವನ್ನು ಫ್ರಿಡ್ಜ್‌ನ ಅತ್ಯಂತ ಕೆಳಗಿನ ಶೆಲ್ಫ್‌ನಲ್ಲಿಡಿ, ಇದರಿಂದ ರಸ ಇತರ ಆಹಾರದ ಮೇಲೆ ತೊಟ್ಟಿಕ್ಕುವುದಿಲ್ಲ, ಮತ್ತು ಪ್ರತ್ಯೇಕ ಕಟಿಂಗ್ ಬೋರ್ಡ್‌ಗಳನ್ನು ಬಳಸಿ.'
+    ]
+  },
+  {
+    title: 'ಪರಿಪೂರ್ಣ ಒಣ ಮೀನು ಖರೀದಿ ಮಾರ್ಗದರ್ಶಿ',
+    excerpt: 'ಕರುವಾಡು (ಬಿಸಿಲಿನಲ್ಲಿ ಒಣಗಿಸಿದ ಮೀನು) ದಕ್ಷಿಣ ಭಾರತದಾದ್ಯಂತ ಅಡುಗೆಮನೆಯ ಅಗತ್ಯ ವಸ್ತು — ಒಳ್ಳೆಯ ಒಣ ಮೀನನ್ನು ಕೆಟ್ಟದರಿಂದ ನಿಜವಾಗಿ ಬೇರ್ಪಡಿಸುವುದು ಏನು ಎಂಬುದು ಇಲ್ಲಿದೆ.',
+    icon: Fish,
+    image: '/Images/Meat Images/Fish/Anchovy.jpg',
+    paragraphs: [
+      'ನೋಡಿ, ಕೇವಲ ವಾಸನೆ ನೋಡಬೇಡಿ: ಒಳ್ಳೆಯ ಒಣ ಮೀನು ಗಟ್ಟಿಯಾಗಿ ಮತ್ತು ಸ್ವಲ್ಪ ಹೊಳಪಾಗಿ ಕಾಣಬೇಕು, ಸುಣ್ಣದಂತೆ ಅಥವಾ ಅತಿಯಾಗಿ ಕಪ್ಪಾಗಿರಬಾರದು. ಬಲವಾದ, ಉಪ್ಪಿನ ವಾಸನೆ ಸಾಮಾನ್ಯ; ಹುಳಿ ಅಥವಾ ಅಮೋನಿಯದಂತಹ ವಾಸನೆ ಎಂದರೆ ಅದು ಕೆಟ್ಟುಹೋಗಿದೆ ಎಂದರ್ಥ.',
+      'ಉಪ್ಪನ್ನು ಪರಿಶೀಲಿಸಿ: ಸಾಂಪ್ರದಾಯಿಕ ಬಿಸಿಲಿನಲ್ಲಿ ಒಣಗಿಸುವಿಕೆ ಉಪ್ಪನ್ನು ನೈಸರ್ಗಿಕ ಸಂರಕ್ಷಕವಾಗಿ ಬಳಸುತ್ತದೆ — ಹಗುರವಾದ ಬಿಳಿ ಪದರ ಸರಿ, ಆದರೆ ಅತಿಯಾದ ಉಪ್ಪಿನ ಶೇಖರಣೆ ಸಾಮಾನ್ಯವಾಗಿ ಸರಿಯಾಗಿ ಒಣಗಿಸದ ಸ್ಥಿತಿಯನ್ನು ಸೂಚಿಸುತ್ತದೆ.',
+      'ಖಾದ್ಯಕ್ಕೆ ತಕ್ಕಂತೆ ವಿಧವನ್ನು ಆರಿಸಿ: ನೆತ್ತಿಲಿ (ಆಂಚೊವಿ) ಮತ್ತು ಸಣ್ಣ ಸೀಗಡಿಗಳು ಬೇಗನೆ ಫ್ರೈ ಮಾಡಲು ಮತ್ತು ಚಟ್ನಿಗಳಿಗೆ ಚೆನ್ನಾಗಿ ಹೊಂದುತ್ತವೆ; ಶಾರ್ಕ್ ಅಥವಾ ಸೀರ್‌ನಂತಹ ದೊಡ್ಡ ಒಣ ಮೀನುಗಳು ಸಾರುಗಳಲ್ಲಿ ನಿಧಾನವಾಗಿ ಬೇಯಿಸಲು ಉತ್ತಮ.',
+      'ಸರಿಯಾಗಿ ಸಂಗ್ರಹಿಸಿ: ಒಣ ಮೀನನ್ನು ತಂಪಾದ, ಒಣ ಸ್ಥಳದಲ್ಲಿ ಗಾಳಿ ಆಡದ ಪಾತ್ರೆಯಲ್ಲಿಡಿ — ತೇವಾಂಶದ ಹವಾಮಾನದಲ್ಲಿ ಹೆಚ್ಚು ಕಾಲ ಬಾಳಿಕೆಗಾಗಿ ಫ್ರಿಡ್ಜ್‌ನಲ್ಲಿಡಿ.',
+      'ಅಡುಗೆಗೆ ಮುನ್ನ ನೆನೆಸಿ: ಬಿಸಿನೀರಿನಲ್ಲಿ 10-15 ನಿಮಿಷ ನೆನೆಸುವುದು ಮೀನನ್ನು ಮೃದುಗೊಳಿಸುತ್ತದೆ ಮತ್ತು ಅಡುಗೆಗೆ ಮುನ್ನ ಮೇಲ್ಮೈಯ ಹೆಚ್ಚುವರಿ ಉಪ್ಪನ್ನು ತೊಳೆಯುತ್ತದೆ.'
+    ]
+  },
+  {
+    title: 'ಮ್ಯಾರಿನೇಟೆಡ್ ಚಿಕನ್: ಪರಿಪೂರ್ಣ ಫಲಿತಾಂಶಗಳಿಗಾಗಿ ಅಡುಗೆ ಸಲಹೆಗಳು',
+    excerpt: 'ಮ್ಯಾರಿನೇಟ್ ಮಾಡಿ ಅಡುಗೆಗೆ ಸಿದ್ಧವಾಗಿದೆ ಎಂದ ಮಾತ್ರಕ್ಕೆ ಅದು ತಪ್ಪಿಲ್ಲದೆಂದಲ್ಲ — ರಬ್ಬರಿನಂತಾಗುವುದು ಮತ್ತು ರೆಸ್ಟೋರೆಂಟ್-ಗುಣಮಟ್ಟದ ನಡುವಿನ ವ್ಯತ್ಯಾಸವನ್ನು ಕೆಲವು ಸಣ್ಣ ಅಭ್ಯಾಸಗಳೇ ಸೃಷ್ಟಿಸುತ್ತವೆ.',
+    icon: Flame,
+    image: '/Images/Meat Images/Chicken/Chicken Wings.jpg',
+    paragraphs: [
+      'ಮೊದಲು ಕೊಠಡಿಯ ಉಷ್ಣತೆಗೆ ತನ್ನಿ: ಅಡುಗೆ ಮಾಡುವ ಮೊದಲು ಮ್ಯಾರಿನೇಟೆಡ್ ಚಿಕನ್ ಅನ್ನು 15-20 ನಿಮಿಷ ಹೊರಗೆ ಇಡಿ, ಇದರಿಂದ ಮಧ್ಯದಲ್ಲಿ ತಣ್ಣಗಿರದೆ ಸಮನಾಗಿ ಬೇಯುತ್ತದೆ.',
+      'ಪ್ಯಾನ್‌ನಲ್ಲಿ ಹೆಚ್ಚು ತುಂಬಬೇಡಿ: ಅಗತ್ಯವಿದ್ದರೆ ಬ್ಯಾಚ್‌ಗಳಲ್ಲಿ ಬೇಯಿಸಿ — ಹೆಚ್ಚು ತುಂಬುವುದು ಆವಿಯನ್ನು ಸಿಕ್ಕಿಸಿ ಮ್ಯಾರಿನೇಡ್ ಸರಿಯಾಗಿ ಕ್ಯಾರಮಲೈಸ್ ಆಗದಂತೆ ತಡೆಯುತ್ತದೆ.',
+      'ಕಟ್‌ಗೆ ತಕ್ಕಂತೆ ಶಾಖವನ್ನು ಹೊಂದಿಸಿ: ಎಲುಬಿಲ್ಲದ ತುಂಡುಗಳು ಹೆಚ್ಚಿನ ಶಾಖದಲ್ಲಿ ಬೇಗ ಬೇಯುತ್ತವೆ (ಚಾರ್ ಮಾಡಲು ಉತ್ತಮ); ಎಲುಬಿನೊಂದಿಗಿನ ತುಂಡುಗಳಿಗೆ ಮಧ್ಯಮ ಶಾಖ ಮತ್ತು ಹೆಚ್ಚಿನ ಸಮಯ ಬೇಕು, ಇದರಿಂದ ಹೊರಗೆ ಸುಡದೆ ಒಳಗೆ ಪೂರ್ತಿಯಾಗಿ ಬೇಯುತ್ತದೆ.',
+      'ಸರಿಯಾಗಿ ಬೆಂದಿದೆಯೇ ಎಂದು ಪರಿಶೀಲಿಸಿ: ಚಿಕನ್ 74°C (165°F) ಒಳಗಿನ ಉಷ್ಣತೆಯಲ್ಲಿ ಸುರಕ್ಷಿತವಾಗಿ ಬೇಯುತ್ತದೆ — ಕತ್ತರಿಸಿ ಊಹಿಸುವುದಕ್ಕಿಂತ ಮೀಟ್ ಥರ್ಮಾಮೀಟರ್ ಹೆಚ್ಚು ವಿಶ್ವಾಸಾರ್ಹ.',
+      'ಬಡಿಸುವ ಮೊದಲು ವಿಶ್ರಾಂತಿ ನೀಡಿ: ಬೆಂದ ಚಿಕನ್ ಅನ್ನು ಶಾಖದಿಂದ ತೆಗೆದು 3-5 ನಿಮಿಷ ವಿಶ್ರಾಂತಿ ನೀಡಿ, ಇದರಿಂದ ರಸ ತಟ್ಟೆಗೆ ಹರಿಯದೆ ಮತ್ತೆ ಹರಡುತ್ತದೆ.'
+    ]
+  }
+];
+
 const GUIDES_FALLBACK_HI: { eyebrow: string; heading: string; items: CmsGuideItem[] } = {
   eyebrow: 'किचन गाइड',
   heading: 'सही तरीके से पकाएं',
@@ -311,6 +353,17 @@ const GUIDES_FALLBACK_TE: { eyebrow: string; heading: string; items: CmsGuideIte
   }))
 };
 
+const GUIDES_FALLBACK_KN: { eyebrow: string; heading: string; items: CmsGuideItem[] } = {
+  eyebrow: 'ಅಡುಗೆಮನೆ ಮಾರ್ಗದರ್ಶಿಗಳು',
+  heading: 'ಸರಿಯಾಗಿ ಅಡುಗೆ ಮಾಡಿ',
+  items: guidesKn.map((g, i) => ({
+    id: `guide-0${i + 1}`,
+    title: g.title,
+    excerpt: g.excerpt,
+    image: g.image
+  }))
+};
+
 const GUIDE_DETAILS_BY_ID_HI: Record<string, Guide> = Object.fromEntries(
   guidesHi.map((g, i) => [`guide-0${i + 1}`, g])
 );
@@ -320,6 +373,9 @@ const GUIDE_DETAILS_BY_ID_ML: Record<string, Guide> = Object.fromEntries(
 const GUIDE_DETAILS_BY_ID_TE: Record<string, Guide> = Object.fromEntries(
   guidesTe.map((g, i) => [`guide-0${i + 1}`, g])
 );
+const GUIDE_DETAILS_BY_ID_KN: Record<string, Guide> = Object.fromEntries(
+  guidesKn.map((g, i) => [`guide-0${i + 1}`, g])
+);
 
 export const GuidesSection: React.FC = () => {
   const { lang } = useLang();
@@ -327,17 +383,17 @@ export const GuidesSection: React.FC = () => {
 
   const block = useSiteContent('plans.guides', GUIDES_FALLBACK);
   const resolvedDetailsById =
-    lang === 'ta' ? GUIDE_DETAILS_BY_ID_TA : lang === 'hi' ? GUIDE_DETAILS_BY_ID_HI : lang === 'ml' ? GUIDE_DETAILS_BY_ID_ML : lang === 'te' ? GUIDE_DETAILS_BY_ID_TE : GUIDE_DETAILS_BY_ID;
-  const resolvedGuides = lang === 'ta' ? guidesTa : lang === 'hi' ? guidesHi : lang === 'ml' ? guidesMl : lang === 'te' ? guidesTe : guides;
+    lang === 'ta' ? GUIDE_DETAILS_BY_ID_TA : lang === 'hi' ? GUIDE_DETAILS_BY_ID_HI : lang === 'ml' ? GUIDE_DETAILS_BY_ID_ML : lang === 'te' ? GUIDE_DETAILS_BY_ID_TE : lang === 'kn' ? GUIDE_DETAILS_BY_ID_KN : GUIDE_DETAILS_BY_ID;
+  const resolvedGuides = lang === 'ta' ? guidesTa : lang === 'hi' ? guidesHi : lang === 'ml' ? guidesMl : lang === 'te' ? guidesTe : lang === 'kn' ? guidesKn : guides;
   // In non-English languages, always show the local fallback rather than
   // whatever the CMS block resolved to — the CMS only ever stores English
   // text (no per-language field), so trusting it here silently mixed English
   // guide titles into an otherwise-translated page. English keeps reading
   // straight from the CMS block as before, so admin edits still show up.
   const items: CmsGuideItem[] =
-    lang === 'ta' ? GUIDES_FALLBACK_TA.items : lang === 'hi' ? GUIDES_FALLBACK_HI.items : lang === 'ml' ? GUIDES_FALLBACK_ML.items : lang === 'te' ? GUIDES_FALLBACK_TE.items : block.items;
+    lang === 'ta' ? GUIDES_FALLBACK_TA.items : lang === 'hi' ? GUIDES_FALLBACK_HI.items : lang === 'ml' ? GUIDES_FALLBACK_ML.items : lang === 'te' ? GUIDES_FALLBACK_TE.items : lang === 'kn' ? GUIDES_FALLBACK_KN.items : block.items;
   const resolvedHeadingBlock =
-    lang === 'ta' ? GUIDES_FALLBACK_TA : lang === 'hi' ? GUIDES_FALLBACK_HI : lang === 'ml' ? GUIDES_FALLBACK_ML : lang === 'te' ? GUIDES_FALLBACK_TE : block;
+    lang === 'ta' ? GUIDES_FALLBACK_TA : lang === 'hi' ? GUIDES_FALLBACK_HI : lang === 'ml' ? GUIDES_FALLBACK_ML : lang === 'te' ? GUIDES_FALLBACK_TE : lang === 'kn' ? GUIDES_FALLBACK_KN : block;
 
   const displayGuides: Guide[] = items.map((item, i) => {
     const detail = (item.id && resolvedDetailsById[item.id]) || resolvedGuides[i];
@@ -382,7 +438,7 @@ export const GuidesSection: React.FC = () => {
                 <h3 className="text-sm font-black text-[#0A1F12] leading-snug line-clamp-2">{guide.title}</h3>
                 <p className="text-xs text-neutral-500 leading-relaxed line-clamp-2">{guide.excerpt}</p>
                 <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 group-hover:gap-2 transition-all">
-                  {pick(lang, { en: 'Read Guide', ta: 'வழிகாட்டியைப் படிக்க', hi: 'गाइड पढ़ें', ml: 'ഗൈഡ് വായിക്കുക', te: 'గైడ్ చదవండి' })} <ArrowRight className="w-3.5 h-3.5" />
+                  {pick(lang, { en: 'Read Guide', ta: 'வழிகாட்டியைப் படிக்க', hi: 'गाइड पढ़ें', ml: 'ഗൈഡ് വായിക്കുക', te: 'గైడ్ చదవండి', kn: 'ಗೈಡ್ ಓದಿ' })} <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </div>
             </button>

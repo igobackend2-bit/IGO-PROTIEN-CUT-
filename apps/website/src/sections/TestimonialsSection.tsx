@@ -124,10 +124,32 @@ const FALLBACK_TE = {
   ]
 };
 
+const FALLBACK_KN = {
+  eyebrow: 'ಗ್ರಾಹಕರು ಏಕೆ ನಮ್ಮೊಂದಿಗೆ ಇರುತ್ತಾರೆ',
+  heading: 'ಕೇವಲ ಡೆಲಿವರಿ ಅಲ್ಲ, ನಂಬಿಕೆಯ ಮೇಲೆ ಕಟ್ಟಲಾಗಿದೆ',
+  items: [
+    {
+      icon: 'Truck',
+      title: 'ವೇಗದ, ಐಸ್-ತಣ್ಣನೆಯ ಡೆಲಿವರಿ',
+      text: 'ಕಟ್ಸ್‌ಗಳನ್ನು ಇನ್ಸುಲೇಟೆಡ್, ಐಸ್-ಲೈನ್ಡ್ ಬಾಕ್ಸ್‌ಗಳಲ್ಲಿ ಪ್ಯಾಕ್ ಮಾಡಿ ನಿಮ್ಮ ಭರವಸೆಯ ಬೆಳಗಿನ ಸ್ಲಾಟ್‌ನಲ್ಲಿ ತಲುಪಿಸಲಾಗುತ್ತದೆ — ಪ್ರತಿ ಆರ್ಡರ್‌ನಲ್ಲೂ, ಪ್ರತಿ ಬಾರಿಯೂ.'
+    },
+    {
+      icon: 'ShieldCheck',
+      title: 'ಶುಚಿತ್ವಕ್ಕೆ ಆದ್ಯತೆ ನೀಡುವ ಸೋರ್ಸಿಂಗ್',
+      text: 'ಪ್ರತಿ ಕಟ್‌ಗೂ ಫ್ರೆಶ್‌ನೆಸ್ ಗ್ರೇಡ್ ಇದೆ ಮತ್ತು ಆಂಟಿಬಯಾಟಿಕ್-ಮುಕ್ತವಾಗಿದ್ದು, ನೀವು ಆರ್ಡರ್ ಮಾಡುವ ವಿವರಣೆಗೆ ಸರಿಯಾಗಿ ಸ್ವಚ್ಛಗೊಳಿಸಿ ಭಾಗಿಸಲಾಗುತ್ತದೆ.'
+    },
+    {
+      icon: 'Repeat',
+      title: 'ನಿಜವಾದ ಚಂದಾದಾರಿಕೆ ಬೆಂಬಲ',
+      text: 'ಯಾವಾಗ ಬೇಕಾದರೂ ವಿರಾಮ ನೀಡಿ, ಮರುಶೆಡ್ಯೂಲ್ ಮಾಡಿ, ಅಥವಾ ನಿಮ್ಮ ಪ್ಲಾನ್ ಬದಲಾಯಿಸಿ — ನಿಜವಾಗಿಯೂ ಫೋನ್ ಎತ್ತುವ ಬೆಂಬಲ ತಂಡದ ಸಹಾಯದೊಂದಿಗೆ.'
+    }
+  ]
+};
+
 export const TestimonialsSection: React.FC = () => {
   const { lang } = useLang();
   const block = useSiteContent('sections.trust_strip', FALLBACK);
-  const resolvedBlock = lang === 'ta' ? FALLBACK_TA : lang === 'hi' ? FALLBACK_HI : lang === 'ml' ? FALLBACK_ML : lang === 'te' ? FALLBACK_TE : block;
+  const resolvedBlock = lang === 'ta' ? FALLBACK_TA : lang === 'hi' ? FALLBACK_HI : lang === 'ml' ? FALLBACK_ML : lang === 'te' ? FALLBACK_TE : lang === 'kn' ? FALLBACK_KN : block;
   const valueProps = resolvedBlock.items.map((item) => ({
     icon: resolveIcon(item.icon),
     title: item.title,
@@ -138,10 +160,10 @@ export const TestimonialsSection: React.FC = () => {
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
       <div className="text-center max-w-xl mx-auto space-y-2">
         <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
-          {pick(lang, { en: 'Why Households Choose Us', ta: 'குடும்பங்கள் ஏன் எங்களைத் தேர்வு செய்கின்றன', hi: 'परिवार हमें क्यों चुनते हैं', ml: 'കുടുംബങ്ങൾ ഞങ്ങളെ തിരഞ്ഞെടുക്കുന്നത് എന്തുകൊണ്ട്', te: 'కుటుంబాలు మమ్మల్ని ఎందుకు ఎంచుకుంటాయి' })}
+          {pick(lang, { en: 'Why Households Choose Us', ta: 'குடும்பங்கள் ஏன் எங்களைத் தேர்வு செய்கின்றன', hi: 'परिवार हमें क्यों चुनते हैं', ml: 'കുടുംബങ്ങൾ ഞങ്ങളെ തിരഞ്ഞെടുക്കുന്നത് എന്തുകൊണ്ട്', te: 'కుటుంబాలు మమ్మల్ని ఎందుకు ఎంచుకుంటాయి', kn: 'ಕುಟುಂಬಗಳು ನಮ್ಮನ್ನು ಏಕೆ ಆಯ್ಕೆ ಮಾಡುತ್ತವೆ' })}
         </span>
         <h2 className="text-2xl sm:text-3xl font-black text-[#0A1F12] tracking-tight">
-          {pick(lang, { en: 'Built Around Trust, Not Just Delivery', ta: 'நம்பிக்கையை மையமாகக் கொண்டது, டெலிவரி மட்டுமல்ல', hi: 'सिर्फ डिलीवरी नहीं, भरोसे पर आधारित', ml: 'വിശ്വാസത്തെ അടിസ്ഥാനമാക്കി, കേവലം ഡെലിവറി മാത്രമല്ല', te: 'కేవలం డెలివరీ కాదు, నమ్మకంపై ఆధారపడింది' })}
+          {pick(lang, { en: 'Built Around Trust, Not Just Delivery', ta: 'நம்பிக்கையை மையமாகக் கொண்டது, டெலிவரி மட்டுமல்ல', hi: 'सिर्फ डिलीवरी नहीं, भरोसे पर आधारित', ml: 'വിശ്വാസത്തെ അടിസ്ഥാനമാക്കി, കേവലം ഡെലിവറി മാത്രമല്ല', te: 'కేవలం డెలివరీ కాదు, నమ్మకంపై ఆధారపడింది', kn: 'ಕೇವಲ ಡೆಲಿವರಿ ಅಲ್ಲ, ನಂಬಿಕೆಯ ಮೇಲೆ ಕಟ್ಟಲಾಗಿದೆ' })}
         </h2>
       </div>
 

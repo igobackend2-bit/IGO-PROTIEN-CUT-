@@ -60,11 +60,19 @@ const FALLBACK_TE = {
     { title: 'సబ్‌స్క్రైబ్ చేసి ఆదా చేయండి', subtitle: '20% వరకు తగ్గింపు', cta: 'ప్రారంభించండి', path: '/subscriptions', image: '/Images/banners/promo-subscriber-banner.jpg', theme: 'light' }
   ]
 };
+const FALLBACK_KN = {
+  items: [
+    { title: 'ಉಚಿತ ಡೆಲಿವರಿ', subtitle: '₹499 ಮೇಲ್ಪಟ್ಟ ಆರ್ಡರ್‌ಗಳಿಗೆ', cta: 'ಈಗಲೇ ಶಾಪ್ ಮಾಡಿ', path: '/search', image: '/Images/banners/promo-free-delivery-banner.jpg', theme: 'light' },
+    { title: 'ಬಿರಿಯಾನಿ ಕಿಟ್‌ಗಳು', subtitle: 'ಎಲ್ಲವೂ ಸೇರಿದೆ', cta: 'ಈಗಲೇ ಆರ್ಡರ್ ಮಾಡಿ', path: '/category/biryani', image: '/Images/banners/biryani-kit.jpg', theme: 'dark', badge: 'ಹೊಸದು' },
+    { title: 'ವಾರದ ಫಿಟ್ನೆಸ್ ಪ್ರೋಟೀನ್ ಪಾಸ್', subtitle: '12 ಡೆಲಿವರಿಗಳು', cta: 'ಪ್ಲಾನ್ ನೋಡಿ', path: '/subscriptions', image: '/Images/banners/plan-fitness-banner.jpg', theme: 'dark' },
+    { title: 'ಸಬ್‌ಸ್ಕ್ರೈಬ್ ಮಾಡಿ ಉಳಿಸಿ', subtitle: '20% ವರೆಗೆ ರಿಯಾಯಿತಿ', cta: 'ಪ್ರಾರಂಭಿಸಿ', path: '/subscriptions', image: '/Images/banners/promo-subscriber-banner.jpg', theme: 'light' }
+  ]
+};
 
 export const PromoTileStrip: React.FC<PromoTileStripProps> = ({ onNavigate }) => {
   const { lang } = useLang();
   const block = useSiteContent('sections.promo_tiles', FALLBACK);
-  const resolvedBlock = lang === 'ta' ? FALLBACK_TA : lang === 'hi' ? FALLBACK_HI : lang === 'ml' ? FALLBACK_ML : lang === 'te' ? FALLBACK_TE : block;
+  const resolvedBlock = lang === 'ta' ? FALLBACK_TA : lang === 'hi' ? FALLBACK_HI : lang === 'ml' ? FALLBACK_ML : lang === 'te' ? FALLBACK_TE : lang === 'kn' ? FALLBACK_KN : block;
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollByAmount = (dir: 'left' | 'right') => {
     const el = scrollRef.current;

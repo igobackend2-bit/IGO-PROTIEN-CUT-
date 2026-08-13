@@ -24,6 +24,11 @@ const CONTENT_TE = {
   intro: 'త్వరిత సహాయం కోసం మేము ప్రతిరోజూ ఉదయం 6:00 నుండి రాత్రి 11:00 వరకు అందుబాటులో ఉంటాము.'
 };
 
+const CONTENT_KN = {
+  title: 'ಗ್ರಾಹಕ ಸೇವೆಯನ್ನು ಸಂಪರ್ಕಿಸಿ',
+  intro: 'ತ್ವರಿತ ಸಹಾಯಕ್ಕಾಗಿ ನಾವು ಪ್ರತಿದಿನ ಬೆಳಿಗ್ಗೆ 6:00 ರಿಂದ ರಾತ್ರಿ 11:00 ರವರೆಗೆ ಲಭ್ಯವಿದ್ದೇವೆ.'
+};
+
 interface ContactPageProps {
   onNavigate?: (path: string) => void;
 }
@@ -49,6 +54,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
       ? { ...content, ...CONTENT_ML }
       : lang === 'te'
       ? { ...content, ...CONTENT_TE }
+      : lang === 'kn'
+      ? { ...content, ...CONTENT_KN }
       : content;
 
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
@@ -81,7 +88,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
         ta: 'உங்கள் செய்தியை அனுப்ப முடியவில்லை. மீண்டும் முயற்சிக்கவும் அல்லது எங்களுக்கு நேரடியாக மின்னஞ்சல் அனுப்பவும்.',
         hi: 'आपका संदेश भेजा नहीं जा सका। कृपया फिर से प्रयास करें या हमें सीधे ईमेल करें।',
         ml: 'നിങ്ങളുടെ സന്ദേശം അയയ്ക്കാൻ കഴിഞ്ഞില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക അല്ലെങ്കിൽ ഞങ്ങൾക്ക് നേരിട്ട് ഇമെയിൽ ചെയ്യുക.',
-        te: 'మీ సందేశాన్ని పంపడం సాధ్యం కాలేదు. దయచేసి మళ్ళీ ప్రయత్నించండి లేదా నేరుగా మాకు ఇమెయిల్ చేయండి.'
+        te: 'మీ సందేశాన్ని పంపడం సాధ్యం కాలేదు. దయచేసి మళ్ళీ ప్రయత్నించండి లేదా నేరుగా మాకు ఇమెయిల్ చేయండి.',
+        kn: 'ನಿಮ್ಮ ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ನೇರವಾಗಿ ನಮಗೆ ಇಮೇಲ್ ಮಾಡಿ.'
       }));
       return;
     }
@@ -104,13 +112,13 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white border border-neutral-200 rounded-2xl p-6 text-center space-y-2 shadow-sm">
           <Phone className="w-8 h-8 text-emerald-600 mx-auto" />
-          <h3 className="font-bold text-[#0A1F12] text-sm">{pick(lang, { en: 'Toll Free Hotline', ta: 'கட்டணமில்லா ஹாட்லைன்', hi: 'टोल फ्री हॉटलाइन', ml: 'ടോൾ ഫ്രീ ഹോട്ട്‌ലൈൻ', te: 'టోల్ ఫ్రీ హాట్‌లైన్' })}</h3>
+          <h3 className="font-bold text-[#0A1F12] text-sm">{pick(lang, { en: 'Toll Free Hotline', ta: 'கட்டணமில்லா ஹாட்லைன்', hi: 'टोल फ्री हॉटलाइन', ml: 'ടോൾ ഫ്രീ ഹോട്ട്‌ലൈൻ', te: 'టోల్ ఫ్రీ హాట్‌లైన్', kn: 'ಟೋಲ್ ಫ್ರೀ ಹಾಟ್‌ಲೈನ್' })}</h3>
           <a href="tel:1800-446-446" className="text-xs text-neutral-500 hover:text-emerald-700 transition">1800-446-446</a>
         </div>
 
         <div className="bg-white border border-neutral-200 rounded-2xl p-6 text-center space-y-2 shadow-sm">
           <MessageSquare className="w-8 h-8 text-emerald-600 mx-auto" />
-          <h3 className="font-bold text-[#0A1F12] text-sm">{pick(lang, { en: 'WhatsApp Care', ta: 'வாட்ஸ்அப் சேவை', hi: 'व्हाट्सएप केयर', ml: 'വാട്ട്‌സാപ്പ് കെയർ', te: 'వాట్సాప్ కేర్' })}</h3>
+          <h3 className="font-bold text-[#0A1F12] text-sm">{pick(lang, { en: 'WhatsApp Care', ta: 'வாட்ஸ்அப் சேவை', hi: 'व्हाट्सएप केयर', ml: 'വാട്ട്‌സാപ്പ് കെയർ', te: 'వాట్సాప్ కేర్', kn: 'ವಾಟ್ಸಾಪ್ ಕೇರ್' })}</h3>
           <a
             href="https://wa.me/919840000000?text=Hi%20IGO%20Protein%20Cuts%2C%20I%20need%20help%20with%20my%20order."
             target="_blank"
@@ -123,7 +131,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
 
         <div className="bg-white border border-neutral-200 rounded-2xl p-6 text-center space-y-2 shadow-sm">
           <Mail className="w-8 h-8 text-emerald-600 mx-auto" />
-          <h3 className="font-bold text-[#0A1F12] text-sm">{pick(lang, { en: 'Email Support', ta: 'மின்னஞ்சல் ஆதரவு', hi: 'ईमेल सहायता', ml: 'ഇമെയിൽ പിന്തുണ', te: 'ఇమెయిల్ మద్దతు' })}</h3>
+          <h3 className="font-bold text-[#0A1F12] text-sm">{pick(lang, { en: 'Email Support', ta: 'மின்னஞ்சல் ஆதரவு', hi: 'ईमेल सहायता', ml: 'ഇമെയിൽ പിന്തുണ', te: 'ఇమెయిల్ మద్దతు', kn: 'ಇಮೇಲ್ ಬೆಂಬಲ' })}</h3>
           <a href={`mailto:${content.email}`} className="text-xs text-neutral-500 hover:text-emerald-700 transition">
             {content.email}
           </a>
@@ -137,31 +145,31 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
           <div className="bg-white border border-neutral-200 rounded-2xl p-5 flex items-start gap-3 shadow-sm">
             <MapPin className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
             <div>
-              <div className="text-sm font-bold text-[#0A1F12]">{pick(lang, { en: 'Registered Office', ta: 'பதிவு செய்யப்பட்ட அலுவலகம்', hi: 'पंजीकृत कार्यालय', ml: 'രജിസ്റ്റർ ചെയ്ത ഓഫീസ്', te: 'రిజిస్టర్డ్ కార్యాలయం' })}</div>
-              <p className="text-xs text-neutral-500 mt-1">{pick(lang, { en: 'IGO Groups HQ, 100 Feet Road, Indiranagar, Bengaluru, KA 560038', ta: 'IGO குரூப்ஸ் தலைமையகம், 100 ஃபீட் ரோடு, இந்திரநகர், பெங்களூரு, KA 560038', hi: 'आईजीओ ग्रुप्स मुख्यालय, 100 फीट रोड, इंदिरानगर, बेंगलुरु, KA 560038', ml: 'ഐജിഒ ഗ്രൂപ്‌സ് ആസ്ഥാനം, 100 ഫീറ്റ് റോഡ്, ഇന്ദിരാനഗർ, ബെംഗളൂരു, KA 560038', te: 'ఐజీవో గ్రూప్స్ ప్రధాన కార్యాలయం, 100 ఫీట్ రోడ్, ఇందిరానగర్, బెంగళూరు, KA 560038' })}</p>
+              <div className="text-sm font-bold text-[#0A1F12]">{pick(lang, { en: 'Registered Office', ta: 'பதிவு செய்யப்பட்ட அலுவலகம்', hi: 'पंजीकृत कार्यालय', ml: 'രജിസ്റ്റർ ചെയ്ത ഓഫീസ്', te: 'రిజిస్టర్డ్ కార్యాలయం', kn: 'ನೋಂದಾಯಿತ ಕಚೇರಿ' })}</div>
+              <p className="text-xs text-neutral-500 mt-1">{pick(lang, { en: 'IGO Groups HQ, 100 Feet Road, Indiranagar, Bengaluru, KA 560038', ta: 'IGO குரூப்ஸ் தலைமையகம், 100 ஃபீட் ரோடு, இந்திரநகர், பெங்களூரு, KA 560038', hi: 'आईजीओ ग्रुप्स मुख्यालय, 100 फीट रोड, इंदिरानगर, बेंगलुरु, KA 560038', ml: 'ഐജിഒ ഗ്രൂപ്‌സ് ആസ്ഥാനം, 100 ഫീറ്റ് റോഡ്, ഇന്ദിരാനഗർ, ബെംഗളൂരു, KA 560038', te: 'ఐజీవో గ్రూప్స్ ప్రధాన కార్యాలయం, 100 ఫీట్ రోడ్, ఇందిరానగర్, బెంగళూరు, KA 560038', kn: 'ಐಜಿಒ ಗ್ರೂಪ್ಸ್ ಪ್ರಧಾನ ಕಚೇರಿ, 100 ಫೀಟ್ ರೋಡ್, ಇಂದಿರಾನಗರ, ಬೆಂಗಳೂರು, KA 560038' })}</p>
             </div>
           </div>
 
           <div className="bg-white border border-neutral-200 rounded-2xl p-5 space-y-3 shadow-sm">
             <div className="flex items-center gap-2 text-sm font-bold text-[#0A1F12]">
-              <Clock className="w-5 h-5 text-emerald-600" /> {pick(lang, { en: 'Support Hours', ta: 'ஆதரவு நேரங்கள்', hi: 'सहायता समय', ml: 'പിന്തുണാ സമയം', te: 'మద్దతు వేళలు' })}
+              <Clock className="w-5 h-5 text-emerald-600" /> {pick(lang, { en: 'Support Hours', ta: 'ஆதரவு நேரங்கள்', hi: 'सहायता समय', ml: 'പിന്തുണാ സമയം', te: 'మద్దతు వేళలు', kn: 'ಬೆಂಬಲ ಸಮಯ' })}
             </div>
             <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-xs">
-              <span className="text-neutral-500">{pick(lang, { en: 'Phone & WhatsApp', ta: 'ஃபோன் & வாட்ஸ்அப்', hi: 'फोन और व्हाट्सएप', ml: 'ഫോൺ & വാട്ട്‌സാപ്പ്', te: 'ఫోన్ & వాట్సాప్' })}</span>
-              <span className="font-semibold text-[#0A1F12] text-right">{pick(lang, { en: '6:00 AM – 11:00 PM, all days', ta: 'காலை 6:00 – இரவு 11:00, தினமும்', hi: 'सुबह 6:00 – रात 11:00, सभी दिन', ml: 'രാവിലെ 6:00 – രാത്രി 11:00, എല്ലാ ദിവസവും', te: 'ఉదయం 6:00 – రాత్రి 11:00, అన్ని రోజులు' })}</span>
+              <span className="text-neutral-500">{pick(lang, { en: 'Phone & WhatsApp', ta: 'ஃபோன் & வாட்ஸ்அப்', hi: 'फोन और व्हाट्सएप', ml: 'ഫോൺ & വാട്ട്‌സാപ്പ്', te: 'ఫోన్ & వాట్సాప్', kn: 'ಫೋನ್ & ವಾಟ್ಸಾಪ್' })}</span>
+              <span className="font-semibold text-[#0A1F12] text-right">{pick(lang, { en: '6:00 AM – 11:00 PM, all days', ta: 'காலை 6:00 – இரவு 11:00, தினமும்', hi: 'सुबह 6:00 – रात 11:00, सभी दिन', ml: 'രാവിലെ 6:00 – രാത്രി 11:00, എല്ലാ ദിവസവും', te: 'ఉదయం 6:00 – రాత్రి 11:00, అన్ని రోజులు', kn: 'ಬೆಳಿಗ್ಗೆ 6:00 – ರಾತ್ರಿ 11:00, ಎಲ್ಲಾ ದಿನಗಳಲ್ಲಿ' })}</span>
 
-              <span className="text-neutral-500">{pick(lang, { en: 'Email Support', ta: 'மின்னஞ்சல் ஆதரவு', hi: 'ईमेल सहायता', ml: 'ഇമെയിൽ പിന്തുണ', te: 'ఇమెయిల్ మద్దతు' })}</span>
-              <span className="font-semibold text-[#0A1F12] text-right">{pick(lang, { en: 'Reply within 4 hours', ta: '4 மணி நேரத்திற்குள் பதில்', hi: '4 घंटे के भीतर जवाब', ml: '4 മണിക്കൂറിനുള്ളിൽ മറുപടി', te: '4 గంటల్లో సమాధానం' })}</span>
+              <span className="text-neutral-500">{pick(lang, { en: 'Email Support', ta: 'மின்னஞ்சல் ஆதரவு', hi: 'ईमेल सहायता', ml: 'ഇമെയിൽ പിന്തുണ', te: 'ఇమెయిల్ మద్దతు', kn: 'ಇಮೇಲ್ ಬೆಂಬಲ' })}</span>
+              <span className="font-semibold text-[#0A1F12] text-right">{pick(lang, { en: 'Reply within 4 hours', ta: '4 மணி நேரத்திற்குள் பதில்', hi: '4 घंटे के भीतर जवाब', ml: '4 മണിക്കൂറിനുള്ളിൽ മറുപടി', te: '4 గంటల్లో సమాధానం', kn: '4 ಗಂಟೆಗಳಲ್ಲಿ ಪ್ರತಿಕ್ರಿಯೆ' })}</span>
 
-              <span className="text-neutral-500">{pick(lang, { en: 'Live Order Tracking', ta: 'நேரடி ஆர்டர் கண்காணிப்பு', hi: 'लाइव ऑर्डर ट्रैकिंग', ml: 'തത്സമയ ഓർഡർ ട്രാക്കിംഗ്', te: 'లైవ్ ఆర్డర్ ట్రాకింగ్' })}</span>
-              <span className="font-semibold text-emerald-700 text-right">{pick(lang, { en: '24/7 in your account', ta: 'உங்கள் கணக்கில் 24/7', hi: 'आपके खाते में 24/7', ml: 'നിങ്ങളുടെ അക്കൗണ്ടിൽ 24/7', te: 'మీ ఖాతాలో 24/7' })}</span>
+              <span className="text-neutral-500">{pick(lang, { en: 'Live Order Tracking', ta: 'நேரடி ஆர்டர் கண்காணிப்பு', hi: 'लाइव ऑर्डर ट्रैकिंग', ml: 'തത്സമയ ഓർഡർ ട്രാക്കിംഗ്', te: 'లైవ్ ఆర్డర్ ట్రాకింగ్', kn: 'ಲೈವ್ ಆರ್ಡರ್ ಟ್ರ್ಯಾಕಿಂಗ್' })}</span>
+              <span className="font-semibold text-emerald-700 text-right">{pick(lang, { en: '24/7 in your account', ta: 'உங்கள் கணக்கில் 24/7', hi: 'आपके खाते में 24/7', ml: 'നിങ്ങളുടെ അക്കൗണ്ടിൽ 24/7', te: 'మీ ఖాతాలో 24/7', kn: 'ನಿಮ್ಮ ಖಾತೆಯಲ್ಲಿ 24/7' })}</span>
             </div>
           </div>
 
           <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex items-start gap-3">
             <LifeBuoy className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
             <div>
-              <div className="text-sm font-bold text-[#0A1F12]">{pick(lang, { en: 'Looking for order help or FAQs?', ta: 'ஆர்டர் உதவி அல்லது FAQ களைத் தேடுகிறீர்களா?', hi: 'ऑर्डर सहायता या सामान्य प्रश्न ढूंढ रहे हैं?', ml: 'ഓർഡർ സഹായമോ പതിവുചോദ്യങ്ങളോ തിരയുകയാണോ?', te: 'ఆర్డర్ సహాయం లేదా తరచుగా అడిగే ప్రశ్నల కోసం చూస్తున్నారా?' })}</div>
+              <div className="text-sm font-bold text-[#0A1F12]">{pick(lang, { en: 'Looking for order help or FAQs?', ta: 'ஆர்டர் உதவி அல்லது FAQ களைத் தேடுகிறீர்களா?', hi: 'ऑर्डर सहायता या सामान्य प्रश्न ढूंढ रहे हैं?', ml: 'ഓർഡർ സഹായമോ പതിവുചോദ്യങ്ങളോ തിരയുകയാണോ?', te: 'ఆర్డర్ సహాయం లేదా తరచుగా అడిగే ప్రశ్నల కోసం చూస్తున్నారా?', kn: 'ಆರ್ಡರ್ ಸಹಾಯ ಅಥವಾ ಪದೇ ಪದೇ ಕೇಳುವ ಪ್ರಶ್ನೆಗಳಿಗಾಗಿ ಹುಡುಕುತ್ತಿದ್ದೀರಾ?' })}</div>
               <p className="text-xs text-neutral-600 mt-1">
                 {lang === 'ta' ? (
                   <>
@@ -195,6 +203,14 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                     </button>{' '}
                     సందర్శించండి.
                   </>
+                ) : lang === 'kn' ? (
+                  <>
+                    ಆರ್ಡರ್ ಟ್ರ್ಯಾಕಿಂಗ್, ರಿಟರ್ನ್‌ಗಳು ಮತ್ತು ಸಾಮಾನ್ಯ ಪ್ರಶ್ನೆಗಳಿಗಾಗಿ ನಮ್ಮ{' '}
+                    <button onClick={() => onNavigate?.('/support')} className="font-bold text-emerald-700 underline cursor-pointer">
+                      ಸಪೋರ್ಟ್ ಸೆಂಟರ್
+                    </button>{' '}
+                    ಗೆ ಭೇಟಿ ನೀಡಿ.
+                  </>
                 ) : (
                   <>
                     Visit our{' '}
@@ -211,13 +227,13 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
 
         {/* Right: Contact Form */}
         <div className="bg-white border border-neutral-200 rounded-3xl p-6 shadow-sm">
-          <h3 className="text-lg font-bold text-[#0A1F12] mb-2">{pick(lang, { en: 'Send Us a Message', ta: 'எங்களுக்கு ஒரு செய்தி அனுப்பவும்', hi: 'हमें संदेश भेजें', ml: 'ഞങ്ങൾക്ക് ഒരു സന്ദേശം അയയ്ക്കുക', te: 'మాకు సందేశం పంపండి' })}</h3>
-          <p className="text-xs text-neutral-500 mb-6">{pick(lang, { en: 'Our team typically replies within a few hours.', ta: 'எங்கள் குழு பொதுவாக சில மணி நேரங்களுக்குள் பதிலளிக்கும்.', hi: 'हमारी टीम आमतौर पर कुछ घंटों के भीतर जवाब देती है।', ml: 'ഞങ്ങളുടെ ടീം സാധാരണയായി ഏതാനും മണിക്കൂറുകൾക്കുള്ളിൽ മറുപടി നൽകും.', te: 'మా బృందం సాధారణంగా కొన్ని గంటల్లో స్పందిస్తుంది.' })}</p>
+          <h3 className="text-lg font-bold text-[#0A1F12] mb-2">{pick(lang, { en: 'Send Us a Message', ta: 'எங்களுக்கு ஒரு செய்தி அனுப்பவும்', hi: 'हमें संदेश भेजें', ml: 'ഞങ്ങൾക്ക് ഒരു സന്ദേശം അയയ്ക്കുക', te: 'మాకు సందేశం పంపండి', kn: 'ನಮಗೆ ಸಂದೇಶ ಕಳುಹಿಸಿ' })}</h3>
+          <p className="text-xs text-neutral-500 mb-6">{pick(lang, { en: 'Our team typically replies within a few hours.', ta: 'எங்கள் குழு பொதுவாக சில மணி நேரங்களுக்குள் பதிலளிக்கும்.', hi: 'हमारी टीम आमतौर पर कुछ घंटों के भीतर जवाब देती है।', ml: 'ഞങ്ങളുടെ ടീം സാധാരണയായി ഏതാനും മണിക്കൂറുകൾക്കുള്ളിൽ മറുപടി നൽകും.', te: 'మా బృందం సాధారణంగా కొన్ని గంటల్లో స్పందిస్తుంది.', kn: 'ನಮ್ಮ ತಂಡ ಸಾಮಾನ್ಯವಾಗಿ ಕೆಲವೇ ಗಂಟೆಗಳಲ್ಲಿ ಪ್ರತಿಕ್ರಿಯಿಸುತ್ತದೆ.' })}</p>
 
           {submitted ? (
             <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-2xl text-center space-y-3">
               <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
-              <h4 className="font-bold text-[#0A1F12] text-base">{pick(lang, { en: 'Message Received!', ta: 'செய்தி பெறப்பட்டது!', hi: 'संदेश प्राप्त हुआ!', ml: 'സന്ദേശം ലഭിച്ചു!', te: 'సందేశం అందింది!' })}</h4>
+              <h4 className="font-bold text-[#0A1F12] text-base">{pick(lang, { en: 'Message Received!', ta: 'செய்தி பெறப்பட்டது!', hi: 'संदेश प्राप्त हुआ!', ml: 'സന്ദേശം ലഭിച്ചു!', te: 'సందేశం అందింది!', kn: 'ಸಂದೇಶ ಸ್ವೀಕರಿಸಲಾಗಿದೆ!' })}</h4>
               <p className="text-xs text-neutral-600">
                 {lang === 'ta' ? (
                   <>
@@ -239,6 +255,11 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                     {formData.name || 'మిమ్మల్ని'} మేము త్వరలో సంప్రదిస్తాము. నేరుగా సంప్రదించాలనుకుంటున్నారా?{' '}
                     <a href={mailtoHref} className="font-bold text-emerald-700 underline">వివరాలను మాకు ఇమెయిల్ చేయండి</a>.
                   </>
+                ) : lang === 'kn' ? (
+                  <>
+                    {formData.name || 'ನಿಮ್ಮನ್ನು'} ನಾವು ಶೀಘ್ರದಲ್ಲೇ ಸಂಪರ್ಕಿಸುತ್ತೇವೆ. ನೇರವಾಗಿ ಸಂಪರ್ಕಿಸಲು ಬಯಸುವಿರಾ?{' '}
+                    <a href={mailtoHref} className="font-bold text-emerald-700 underline">ವಿವರಗಳನ್ನು ನಮಗೆ ಇಮೇಲ್ ಮಾಡಿ</a>.
+                  </>
                 ) : (
                   <>
                     We'll get back to {formData.name || 'you'} shortly. Want to follow up directly?{' '}
@@ -251,18 +272,18 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-neutral-600 font-semibold mb-1">{pick(lang, { en: 'Your Name *', ta: 'உங்கள் பெயர் *', hi: 'आपका नाम *', ml: 'നിങ്ങളുടെ പേര് *', te: 'మీ పేరు *' })}</label>
+                  <label className="block text-neutral-600 font-semibold mb-1">{pick(lang, { en: 'Your Name *', ta: 'உங்கள் பெயர் *', hi: 'आपका नाम *', ml: 'നിങ്ങളുടെ പേര് *', te: 'మీ పేరు *', kn: 'ನಿಮ್ಮ ಹೆಸರು *' })}</label>
                   <input
                     type="text"
                     required
-                    placeholder={pick(lang, { en: 'Full name', ta: 'முழு பெயர்', hi: 'पूरा नाम', ml: 'മുഴുവൻ പേര്', te: 'పూర్తి పేరు' })}
+                    placeholder={pick(lang, { en: 'Full name', ta: 'முழு பெயர்', hi: 'पूरा नाम', ml: 'മുഴുവൻ പേര്', te: 'పూర్తి పేరు', kn: 'ಪೂರ್ಣ ಹೆಸರು' })}
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-neutral-600 font-semibold mb-1">{pick(lang, { en: 'Email *', ta: 'மின்னஞ்சல் *', hi: 'ईमेल *', ml: 'ഇമെയിൽ *', te: 'ఇమెయిల్ *' })}</label>
+                  <label className="block text-neutral-600 font-semibold mb-1">{pick(lang, { en: 'Email *', ta: 'மின்னஞ்சல் *', hi: 'ईमेल *', ml: 'ഇമെയിൽ *', te: 'ఇమెయిల్ *', kn: 'ಇಮೇಲ್ *' })}</label>
                   <input
                     type="email"
                     required
@@ -275,10 +296,10 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
               </div>
 
               <div>
-                <label className="block text-neutral-600 font-semibold mb-1">{pick(lang, { en: 'Subject', ta: 'பொருள்', hi: 'विषय', ml: 'വിഷയം', te: 'విషయం' })}</label>
+                <label className="block text-neutral-600 font-semibold mb-1">{pick(lang, { en: 'Subject', ta: 'பொருள்', hi: 'विषय', ml: 'വിഷയം', te: 'విషయం', kn: 'ವಿಷಯ' })}</label>
                 <input
                   type="text"
-                  placeholder={pick(lang, { en: 'e.g. Order delay, product query, feedback', ta: 'உதா. ஆர்டர் தாமதம், தயாரிப்பு விசாரணை, கருத்து', hi: 'उदा. ऑर्डर में देरी, उत्पाद पूछताछ, प्रतिक्रिया', ml: 'ഉദാ. ഓർഡർ വൈകൽ, ഉൽപ്പന്ന അന്വേഷണം, അഭിപ്രായം', te: 'ఉదా. ఆర్డర్ ఆలస్యం, ఉత్పత్తి విచారణ, అభిప్రాయం' })}
+                  placeholder={pick(lang, { en: 'e.g. Order delay, product query, feedback', ta: 'உதா. ஆர்டர் தாமதம், தயாரிப்பு விசாரணை, கருத்து', hi: 'उदा. ऑर्डर में देरी, उत्पाद पूछताछ, प्रतिक्रिया', ml: 'ഉദാ. ഓർഡർ വൈകൽ, ഉൽപ്പന്ന അന്വേഷണം, അഭിപ്രായം', te: 'ఉదా. ఆర్డర్ ఆలస్యం, ఉత్పత్తి విచారణ, అభిప్రాయం', kn: 'ಉದಾ. ಆರ್ಡರ್ ವಿಳಂಬ, ಉತ್ಪನ್ನ ವಿಚಾರಣೆ, ಪ್ರತಿಕ್ರಿಯೆ' })}
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                   className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
@@ -286,11 +307,11 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
               </div>
 
               <div>
-                <label className="block text-neutral-600 font-semibold mb-1">{pick(lang, { en: 'Message *', ta: 'செய்தி *', hi: 'संदेश *', ml: 'സന്ദേശം *', te: 'సందేశం *' })}</label>
+                <label className="block text-neutral-600 font-semibold mb-1">{pick(lang, { en: 'Message *', ta: 'செய்தி *', hi: 'संदेश *', ml: 'സന്ദേശം *', te: 'సందేశం *', kn: 'ಸಂದೇಶ *' })}</label>
                 <textarea
                   required
                   rows={4}
-                  placeholder={pick(lang, { en: 'Tell us how we can help...', ta: 'நாங்கள் எப்படி உதவலாம் என்று சொல்லுங்கள்...', hi: 'हमें बताएं हम कैसे मदद कर सकते हैं...', ml: 'ഞങ്ങൾക്ക് എങ്ങനെ സഹായിക്കാമെന്ന് പറയൂ...', te: 'మేము ఎలా సహాయం చేయగలమో మాకు చెప్పండి...' })}
+                  placeholder={pick(lang, { en: 'Tell us how we can help...', ta: 'நாங்கள் எப்படி உதவலாம் என்று சொல்லுங்கள்...', hi: 'हमें बताएं हम कैसे मदद कर सकते हैं...', ml: 'ഞങ്ങൾക്ക് എങ്ങനെ സഹായിക്കാമെന്ന് പറയൂ...', te: 'మేము ఎలా సహాయం చేయగలమో మాకు చెప్పండి...', kn: 'ನಾವು ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದೆಂದು ಹೇಳಿ...' })}
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   className="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-[#0A1F12] focus:outline-none focus:border-emerald-500"
@@ -307,8 +328,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                 className="w-full bg-[#0F7B3A] hover:bg-emerald-500 disabled:opacity-60 text-white font-bold py-3 rounded-xl uppercase tracking-wider transition cursor-pointer shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2"
               >
                 {isSubmitting
-                  ? pick(lang, { en: 'Sending…', ta: 'அனுப்புகிறது…', hi: 'भेजा जा रहा है…', ml: 'അയയ്ക്കുന്നു…', te: 'పంపుతోంది…' })
-                  : (<>{pick(lang, { en: 'Send Message', ta: 'செய்தி அனுப்பவும்', hi: 'संदेश भेजें', ml: 'സന്ദേശം അയയ്ക്കുക', te: 'సందేశం పంపండి' })} <Send className="w-4 h-4" /></>)}
+                  ? pick(lang, { en: 'Sending…', ta: 'அனுப்புகிறது…', hi: 'भेजा जा रहा है…', ml: 'അയയ്ക്കുന്നു…', te: 'పంపుతోంది…', kn: 'ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ…' })
+                  : (<>{pick(lang, { en: 'Send Message', ta: 'செய்தி அனுப்பவும்', hi: 'संदेश भेजें', ml: 'സന്ദേശം അയയ്ക്കുക', te: 'సందేశం పంపండి', kn: 'ಸಂದೇಶ ಕಳುಹಿಸಿ' })} <Send className="w-4 h-4" /></>)}
               </button>
             </form>
           )}

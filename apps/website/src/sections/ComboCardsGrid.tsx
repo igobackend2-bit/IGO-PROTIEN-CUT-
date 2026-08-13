@@ -54,7 +54,14 @@ export const ComboCardsGrid: React.FC<ComboCardsGridProps> = ({ products, onSele
     viewAllLabel: 'అన్నీ చూడండి',
     viewAllPath: '/category/combo-packs'
   };
-  const resolvedComboHeading = lang === 'ta' ? comboHeadingTa : lang === 'hi' ? comboHeadingHi : lang === 'ml' ? comboHeadingMl : lang === 'te' ? comboHeadingTe : comboHeading;
+  const comboHeadingKn = {
+    eyebrow: 'ಬಂಡಲ್ ಮಾಡಿ ಉಳಿಸಿ',
+    heading: 'ಕಾಂಬೋ ಪ್ಯಾಕ್‌ಗಳು',
+    subheading: 'ಪ್ರತಿ ತುಂಡನ್ನು ಪ್ರತ್ಯೇಕವಾಗಿ ಖರೀದಿಸುವುದಕ್ಕಿಂತ ಉತ್ತಮ ಬೆಲೆಯಲ್ಲಿ ಆಯ್ಕೆಮಾಡಿದ ಬಂಡಲ್‌ಗಳು.',
+    viewAllLabel: 'ಎಲ್ಲವನ್ನೂ ನೋಡಿ',
+    viewAllPath: '/category/combo-packs'
+  };
+  const resolvedComboHeading = lang === 'ta' ? comboHeadingTa : lang === 'hi' ? comboHeadingHi : lang === 'ml' ? comboHeadingMl : lang === 'te' ? comboHeadingTe : lang === 'kn' ? comboHeadingKn : comboHeading;
 
   const combos = products.filter((p) => p.category === 'combo-packs');
   const [wishlist, setWishlist] = useState<string[]>(() => StoreService.getWishlist());
@@ -75,6 +82,8 @@ export const ComboCardsGrid: React.FC<ComboCardsGridProps> = ({ products, onSele
     ? ['ബെസ്റ്റ് കോംബോ!', 'ഫീസ്റ്റ് കോംബോ!', 'വാല്യൂ കോംബോ!']
     : lang === 'te'
     ? ['బెస్ట్ కాంబో!', 'ఫీస్ట్ కాంబో!', 'వాల్యూ కాంబో!']
+    : lang === 'kn'
+    ? ['ಬೆಸ್ಟ್ ಕಾಂಬೋ!', 'ಫೀಸ್ಟ್ ಕಾಂಬೋ!', 'ವ್ಯಾಲ್ಯೂ ಕಾಂಬೋ!']
     : ['Best Combo!', 'Feast Combo!', 'Value Combo!'];
 
   return (
@@ -121,12 +130,12 @@ export const ComboCardsGrid: React.FC<ComboCardsGridProps> = ({ products, onSele
                   </div>
                   {!!combo.discountPercentage && (
                     <span className="bg-[#D4AF37] text-[#0A1F12] text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide">
-                      {combo.discountPercentage}% {pick(lang, { en: 'Off', ta: 'தள்ளுபடி', hi: 'छूट', ml: 'കിഴിവ്', te: 'తగ్గింపు' })}
+                      {combo.discountPercentage}% {pick(lang, { en: 'Off', ta: 'தள்ளுபடி', hi: 'छूट', ml: 'കിഴിവ്', te: 'తగ్గింపు', kn: 'ರಿಯಾಯಿತಿ' })}
                     </span>
                   )}
                 </div>
                 <span className="inline-flex items-center gap-1 text-white text-[10px] font-black uppercase tracking-wider mt-2 group-hover:gap-1.5 transition-all">
-                  {pick(lang, { en: 'Order Now', ta: 'இப்போது ஆர்டர் செய்யுங்கள்', hi: 'अभी ऑर्डर करें', ml: 'ഇപ്പോൾ ഓർഡർ ചെയ്യുക', te: 'ఇప్పుడే ఆర్డర్ చేయండి' })} <ArrowRight className="w-3 h-3" />
+                  {pick(lang, { en: 'Order Now', ta: 'இப்போது ஆர்டர் செய்யுங்கள்', hi: 'अभी ऑर्डर करें', ml: 'ഇപ്പോൾ ഓർഡർ ചെയ്യുക', te: 'ఇప్పుడే ఆర్డర్ చేయండి', kn: 'ಈಗಲೇ ಆರ್ಡರ್ ಮಾಡಿ' })} <ArrowRight className="w-3 h-3" />
                 </span>
               </div>
             </div>

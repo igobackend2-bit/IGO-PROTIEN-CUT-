@@ -52,6 +52,12 @@ const SEGMENT_META_TE: Record<string, { label: string }> = {
   Custom: { label: 'అధిక పరిమాణం & కస్టమ్' }
 };
 
+const SEGMENT_META_KN: Record<string, { label: string }> = {
+  Fitness: { label: 'ದೈನಂದಿನ ಖರೀದಿದಾರರು & ಜಿಮ್ ಬಳಕೆದಾರರು' },
+  Family: { label: 'ಕುಟುಂಬಗಳು' },
+  Custom: { label: 'ಹೆಚ್ಚಿನ ಪ್ರಮಾಣ & ಕಸ್ಟಮ್' }
+};
+
 // Tamil variants of the mock subscription plans (id-keyed, mirrors the
 // English INITIAL_SUBSCRIPTION_PLANS shape). Only used when subsBlock.items
 // falls back to INITIAL_SUBSCRIPTION_PLANS (i.e. no CMS override) — live CMS
@@ -204,6 +210,43 @@ const SUBSCRIPTION_PLANS_TE: Record<
   }
 };
 
+const SUBSCRIPTION_PLANS_KN: Record<
+  string,
+  { title: string; tagline: string; badge?: string; savings: string; itemsIncluded: string[]; recommendedFor: string }
+> = {
+  'plan-01': {
+    title: 'ಡೈಲಿ ಫಿಟ್‌ನೆಸ್ ಪ್ರೋಟೀನ್ ಪ್ಲಾನ್',
+    tagline: 'ಜಿಮ್ ಪ್ರೋಟೀನ್ ಎಂದಿಗೂ ಖಾಲಿಯಾಗುವುದಿಲ್ಲ',
+    itemsIncluded: ['500g ಎಲುಬು ರಹಿತ ಚಿಕನ್ ಬ್ರೆಸ್ಟ್', '6 ಆರ್ಗ್ಯಾನಿಕ್ ಮೊಟ್ಟೆಗಳು', 'ಉಚಿತ ಎಕ್ಸ್‌ಪ್ರೆಸ್ ಬೆಳಗಿನ ಡೆಲಿವರಿ'],
+    savings: '₹601 / ತಿಂಗಳಿಗೆ ಉಳಿಸಿ',
+    badge: 'ಅತ್ಯಂತ ಜನಪ್ರಿಯ',
+    recommendedFor: 'ಕ್ರೀಡಾಪಟುಗಳು, ಜಿಮ್ ಬಳಕೆದಾರರು & ಮ್ಯಾಕ್ರೋ ಟ್ರ್ಯಾಕರ್‌ಗಳು'
+  },
+  'plan-02': {
+    title: 'ವೀಕ್ಲಿ ಫ್ಯಾಮಿಲಿ ಮೀಟ್ ಬಾಕ್ಸ್',
+    tagline: 'ಫ್ರೆಶ್ ವಾರಾಂತ್ಯದ ಔತಣ ತಾನಾಗಿಯೇ',
+    itemsIncluded: ['1kg ಕರಿ ಕಟ್ ಚಿಕನ್', '500g ಮಟನ್ ಕಟ್', '500g ಸೀರ್ ಫಿಶ್ ಸ್ಟೀಕ್ಸ್', '30 ಮೊಟ್ಟೆಗಳ ಟ್ರೇ'],
+    savings: '₹701 / ತಿಂಗಳಿಗೆ ಉಳಿಸಿ',
+    recommendedFor: '3 ರಿಂದ 5 ಸದಸ್ಯರಿರುವ ಕುಟುಂಬಗಳು'
+  },
+  'plan-03': {
+    title: 'ಮಂತ್ಲಿ ಎಲೈಟ್ ಮೀಟ್ ಪಾಸ್',
+    tagline: 'ಅನಿಯಮಿತ ಉಚಿತ ಎಕ್ಸ್‌ಪ್ರೆಸ್ ಡೆಲಿವರಿಗಳು + 20% ರಿಯಾಯಿತಿ',
+    itemsIncluded: ['ಕಸ್ಟಮ್ ಮೀಟ್ ಸೆಲೆಕ್ಟರ್', 'ಆದ್ಯತೆಯ 20-ನಿಮಿಷದ ಎಕ್ಸ್‌ಪ್ರೆಸ್ ಸ್ಲಾಟ್', 'ವಿಶೇಷ IGO ಬಟ್ಲರ್ ಸೇವೆ', '0 ಡೆಲಿವರಿ ಶುಲ್ಕ'],
+    savings: '₹1201 / ತಿಂಗಳಿಗೆ ಉಳಿಸಿ',
+    badge: 'ಲಕ್ಷುರಿ VIP',
+    recommendedFor: 'ಗೋರ್ಮೆಟ್ ಮೀಟ್ ಪ್ರಿಯರು & ಹೆಚ್ಚಿನ ಪ್ರಮಾಣದಲ್ಲಿ ಖರೀದಿಸುವವರು'
+  },
+  'plan-04': {
+    title: 'ಬಾರ್ಬೆಕ್ಯೂ & ಗ್ರಿಲ್ ಪ್ಯಾಕ್',
+    tagline: 'ವಾರಾಂತ್ಯದ ಗ್ರಿಲ್ಲಿಂಗ್‌ಗೆ ಬೇಕಾದ ಎಲ್ಲವೂ, ಶುಕ್ರವಾರ ಬೆಳಗಿನ ಡೆಲಿವರಿ',
+    itemsIncluded: ['500g ಚಿಕನ್ ಲಾಲಿಪಾಪ್ ಕಟ್ಸ್', '500g ತಂದೂರಿ ಚಿಕನ್ ಟಿಕ್ಕಾ (ಮ್ಯಾರಿನೇಟೆಡ್)', '500g ಮಟನ್ ಸೀಕ್ ಕಬಾಬ್ (ಮ್ಯಾರಿನೇಟೆಡ್)', '500g ಶೆಫ್ ಪೆರಿ ಪೆರಿ ಮಸಾಲಾ ಚಿಕನ್ ವಿಂಗ್ಸ್'],
+    savings: '₹601 / ತಿಂಗಳಿಗೆ ಉಳಿಸಿ',
+    badge: 'ಹೊಸದು',
+    recommendedFor: 'ವಾರಾಂತ್ಯದ ಗ್ರಿಲ್ಲರ್‌ಗಳು & ಬಿಬಿಕ್ಯೂ ಹೋಸ್ಟ್‌ಗಳು'
+  }
+};
+
 const DAY_LABELS_TA: Record<string, string> = {
   Mon: 'திங்கள்',
   Tue: 'செவ்வாய்',
@@ -242,6 +285,16 @@ const DAY_LABELS_TE: Record<string, string> = {
   Fri: 'శుక్రవారం',
   Sat: 'శనివారం',
   Sun: 'ఆదివారం'
+};
+
+const DAY_LABELS_KN: Record<string, string> = {
+  Mon: 'ಸೋಮವಾರ',
+  Tue: 'ಮಂಗಳವಾರ',
+  Wed: 'ಬುಧವಾರ',
+  Thu: 'ಗುರುವಾರ',
+  Fri: 'ಶುಕ್ರವಾರ',
+  Sat: 'ಶನಿವಾರ',
+  Sun: 'ಭಾನುವಾರ'
 };
 
 interface SubscriptionsPageProps {
@@ -305,6 +358,8 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
       ? { eyebrow: 'ആവർത്തിക്കുന്ന ഫ്രഷ് മീറ്റ് പാസ്', heading: 'പ്രോട്ടീൻ കട്സ് സബ്സ്ക്രിപ്ഷനുകൾ' }
       : lang === 'te'
       ? { eyebrow: 'రికరింగ్ ఫ్రెష్ మీట్ పాస్', heading: 'ప్రోటీన్ కట్స్ సబ్‌స్క్రిప్షన్లు' }
+      : lang === 'kn'
+      ? { eyebrow: 'ಪುನರಾವರ್ತಿತ ಫ್ರೆಶ್ ಮೀಟ್ ಪಾಸ್', heading: 'ಪ್ರೋಟೀನ್ ಕಟ್ಸ್ ಚಂದಾದಾರಿಕೆಗಳು' }
       : { eyebrow: subsBlock.eyebrow, heading: subsBlock.heading };
   const plans: SubscriptionPlan[] =
     Array.isArray(subsBlock.items) && subsBlock.items.length > 0 ? subsBlock.items : INITIAL_SUBSCRIPTION_PLANS;
@@ -379,12 +434,12 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
   const handleConfirmCustomBox = async () => {
     setSubmitError(null);
     if (!StoreService.isLoggedIn()) {
-      setSubmitError(pick(lang, { en: 'Please sign in to start a subscription.', ta: 'சந்தாவைத் தொடங்க உள்நுழையவும்.', hi: 'सब्सक्रिप्शन शुरू करने के लिए साइन इन करें।', ml: 'സബ്സ്ക്രിപ്ഷൻ ആരംഭിക്കാൻ സൈൻ ഇൻ ചെയ്യുക.', te: 'సబ్‌స్క్రిప్షన్ ప్రారంభించడానికి సైన్ ఇన్ చేయండి.' }));
+      setSubmitError(pick(lang, { en: 'Please sign in to start a subscription.', ta: 'சந்தாவைத் தொடங்க உள்நுழையவும்.', hi: 'सब्सक्रिप्शन शुरू करने के लिए साइन इन करें।', ml: 'സബ്സ്ക്രിപ്ഷൻ ആരംഭിക്കാൻ സൈൻ ഇൻ ചെയ്യുക.', te: 'సబ్‌స్క్రిప్షన్ ప్రారంభించడానికి సైన్ ఇన్ చేయండి.', kn: 'ಚಂದಾದಾರಿಕೆ ಪ್ರಾರಂಭಿಸಲು ಸೈನ್ ಇನ್ ಮಾಡಿ.' }));
       onNavigate?.('/login');
       return;
     }
     if (!defaultAddress) {
-      setSubmitError(pick(lang, { en: 'Add a delivery address in My Account first.', ta: 'முதலில் என் கணக்கில் ஒரு டெலிவரி முகவரியைச் சேர்க்கவும்.', hi: 'पहले माय अकाउंट में एक डिलीवरी पता जोड़ें।', ml: 'ആദ്യം എന്റെ അക്കൗണ്ടിൽ ഒരു ഡെലിവറി വിലാസം ചേർക്കുക.', te: 'ముందుగా మై అకౌంట్‌లో డెలివరీ చిరునామాను జోడించండి.' }));
+      setSubmitError(pick(lang, { en: 'Add a delivery address in My Account first.', ta: 'முதலில் என் கணக்கில் ஒரு டெலிவரி முகவரியைச் சேர்க்கவும்.', hi: 'पहले माय अकाउंट में एक डिलीवरी पता जोड़ें।', ml: 'ആദ്യം എന്റെ അക്കൗണ്ടിൽ ഒരു ഡെലിവറി വിലാസം ചേർക്കുക.', te: 'ముందుగా మై అకౌంట్‌లో డెలివరీ చిరునామాను జోడించండి.', kn: 'ಮೊದಲು ನನ್ನ ಖಾತೆಯಲ್ಲಿ ಡೆಲಿವರಿ ವಿಳಾಸವನ್ನು ಸೇರಿಸಿ.' }));
       return;
     }
     if (boxLines.length === 0) return;
@@ -408,7 +463,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
       );
       const failed = results.find((r) => !r.ok);
       if (failed) {
-        setSubmitError(failed.error ?? pick(lang, { en: 'Some items could not be subscribed. Please try again.', ta: 'சில பொருட்களுக்கு சந்தா செய்ய முடியவில்லை. மீண்டும் முயற்சிக்கவும்.', hi: 'कुछ आइटम्स के लिए सब्सक्राइब नहीं किया जा सका। कृपया फिर से कोशिश करें।', ml: 'ചില ഇനങ്ങൾ സബ്സ്ക്രൈബ് ചെയ്യാൻ കഴിഞ്ഞില്ല. വീണ്ടും ശ്രമിക്കുക.', te: 'కొన్ని వస్తువులను సబ్‌స్క్రైబ్ చేయలేకపోయాము. దయచేసి మళ్లీ ప్రయత్నించండి.' }));
+        setSubmitError(failed.error ?? pick(lang, { en: 'Some items could not be subscribed. Please try again.', ta: 'சில பொருட்களுக்கு சந்தா செய்ய முடியவில்லை. மீண்டும் முயற்சிக்கவும்.', hi: 'कुछ आइटम्स के लिए सब्सक्राइब नहीं किया जा सका। कृपया फिर से कोशिश करें।', ml: 'ചില ഇനങ്ങൾ സബ്സ്ക്രൈബ് ചെയ്യാൻ കഴിഞ്ഞില്ല. വീണ്ടും ശ്രമിക്കുക.', te: 'కొన్ని వస్తువులను సబ్‌స్క్రైబ్ చేయలేకపోయాము. దయచేసి మళ్లీ ప్రయత్నించండి.', kn: 'ಕೆಲವು ವಸ್ತುಗಳನ್ನು ಚಂದಾದಾರಿಕೆ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.' }));
         return;
       }
       setSubscribed(true);
@@ -431,7 +486,8 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
             ta: 'உங்கள் அதிக புரத உணவு அல்லது வாராந்திர குடும்ப இறைச்சி விநியோகத்தை தானியங்குபடுத்துங்கள். உத்தரவாதமான காலை 6 மணி நேரங்கள், பூஜ்ஜிய டெலிவரி கட்டணங்கள் மற்றும் 20% வரை தள்ளுபடி பெறுங்கள்.',
             hi: 'अपने हाई-प्रोटीन डाइट या साप्ताहिक फैमिली मीट सप्लाई को ऑटोमेट करें। गारंटीड सुबह 6 बजे के स्लॉट, शून्य डिलीवरी शुल्क और 20% तक की छूट पाएं।',
             ml: 'നിങ്ങളുടെ ഉയർന്ന പ്രോട്ടീൻ ഡയറ്റോ പ്രതിവാര ഫാമിലി മീറ്റ് സപ്ലൈയോ ഓട്ടോമേറ്റ് ചെയ്യൂ. ഗ്യാരണ്ടീഡ് രാവിലെ 6 മണി സ്ലോട്ടുകൾ, പൂജ്യം ഡെലിവറി ചാർജുകൾ, 20% വരെ കിഴിവ് എന്നിവ ആസ്വദിക്കൂ.',
-            te: 'మీ హై-ప్రోటీన్ డైట్ లేదా వారాంతపు ఫ్యామిలీ మీట్ సరఫరాను ఆటోమేట్ చేయండి. హామీ ఇచ్చిన ఉదయం 6 గంటల స్లాట్‌లు, సున్నా డెలివరీ ఛార్జీలు మరియు 20% వరకు తగ్గింపు పొందండి.'
+            te: 'మీ హై-ప్రోటీన్ డైట్ లేదా వారాంతపు ఫ్యామిలీ మీట్ సరఫరాను ఆటోమేట్ చేయండి. హామీ ఇచ్చిన ఉదయం 6 గంటల స్లాట్‌లు, సున్నా డెలివరీ ఛార్జీలు మరియు 20% వరకు తగ్గింపు పొందండి.',
+            kn: 'ನಿಮ್ಮ ಹೆಚ್ಚಿನ ಪ್ರೋಟೀನ್ ಆಹಾರ ಅಥವಾ ವಾರದ ಕುಟುಂಬ ಮಾಂಸ ಪೂರೈಕೆಯನ್ನು ಆಟೋಮೇಟ್ ಮಾಡಿ. ಖಾತರಿಪಡಿಸಿದ ಬೆಳಗಿನ 6 ಗಂಟೆಯ ಸ್ಲಾಟ್‌ಗಳು, ಶೂನ್ಯ ಡೆಲಿವರಿ ಶುಲ್ಕಗಳು ಮತ್ತು 20% ವರೆಗೆ ರಿಯಾಯಿತಿ ಪಡೆಯಿರಿ.'
           })}
         </p>
       </div>
@@ -440,11 +496,11 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {plans.map((plan) => {
           const subPlansByLang =
-            lang === 'ta' ? SUBSCRIPTION_PLANS_TA : lang === 'hi' ? SUBSCRIPTION_PLANS_HI : lang === 'ml' ? SUBSCRIPTION_PLANS_ML : lang === 'te' ? SUBSCRIPTION_PLANS_TE : null;
+            lang === 'ta' ? SUBSCRIPTION_PLANS_TA : lang === 'hi' ? SUBSCRIPTION_PLANS_HI : lang === 'ml' ? SUBSCRIPTION_PLANS_ML : lang === 'te' ? SUBSCRIPTION_PLANS_TE : lang === 'kn' ? SUBSCRIPTION_PLANS_KN : null;
           const planTranslated = subPlansByLang?.[plan.id];
           const displayPlan = planTranslated ? { ...plan, ...planTranslated } : plan;
           const segmentMetaByLang =
-            lang === 'ta' ? SEGMENT_META_TA : lang === 'hi' ? SEGMENT_META_HI : lang === 'ml' ? SEGMENT_META_ML : lang === 'te' ? SEGMENT_META_TE : null;
+            lang === 'ta' ? SEGMENT_META_TA : lang === 'hi' ? SEGMENT_META_HI : lang === 'ml' ? SEGMENT_META_ML : lang === 'te' ? SEGMENT_META_TE : lang === 'kn' ? SEGMENT_META_KN : null;
           const segmentMeta = segmentMetaByLang?.[plan.category];
           return (
           <div
@@ -474,7 +530,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
 
               <div className="my-4 pt-4 border-t border-neutral-200">
                 <div className="text-2xl font-black text-[#0A1F12]">
-                  ₹{plan.pricePerMonth} <span className="text-xs text-neutral-500 font-normal">{pick(lang, { en: '/ month', ta: '/ மாதம்', hi: '/ माह', ml: '/ മാസം', te: '/ నెల' })}</span>
+                  ₹{plan.pricePerMonth} <span className="text-xs text-neutral-500 font-normal">{pick(lang, { en: '/ month', ta: '/ மாதம்', hi: '/ माह', ml: '/ മാസം', te: '/ నెల', kn: '/ ತಿಂಗಳಿಗೆ' })}</span>
                 </div>
                 <div className="text-xs text-emerald-700 font-bold">{displayPlan.savings}</div>
               </div>
@@ -490,7 +546,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
             </div>
 
             <div className="text-xs font-semibold text-neutral-500 border-t border-neutral-200 pt-3">
-              {pick(lang, { en: 'Target:', ta: 'இலக்கு:', hi: 'लक्ष्य:', ml: 'ലക്ഷ്യം:', te: 'లక్ష్యం:' })} <strong className="text-[#0A1F12]">{displayPlan.recommendedFor}</strong>
+              {pick(lang, { en: 'Target:', ta: 'இலக்கு:', hi: 'लक्ष्य:', ml: 'ലക്ഷ്യം:', te: 'లక్ష్యం:', kn: 'ಗುರಿ:' })} <strong className="text-[#0A1F12]">{displayPlan.recommendedFor}</strong>
             </div>
           </div>
           );
@@ -502,7 +558,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
         <div className="bg-white border-2 border-emerald-200 rounded-3xl p-6 max-w-4xl mx-auto space-y-6 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h3 className="text-base font-bold text-[#0A1F12] flex items-center gap-2">
-              <Settings2 className="w-5 h-5 text-emerald-600" /> {pick(lang, { en: 'Build Your Own Box', ta: 'உங்கள் சொந்த பெட்டியை உருவாக்குங்கள்', hi: 'अपना खुद का बॉक्स बनाएं', ml: 'നിങ്ങളുടെ സ്വന്തം ബോക്സ് നിർമ്മിക്കൂ', te: 'మీ సొంత బాక్స్‌ను తయారు చేసుకోండి' })}
+              <Settings2 className="w-5 h-5 text-emerald-600" /> {pick(lang, { en: 'Build Your Own Box', ta: 'உங்கள் சொந்த பெட்டியை உருவாக்குங்கள்', hi: 'अपना खुद का बॉक्स बनाएं', ml: 'നിങ്ങളുടെ സ്വന്തം ബോക്സ് നിർമ്മിക്കൂ', te: 'మీ సొంత బాక్స్‌ను తయారు చేసుకోండి', kn: 'ನಿಮ್ಮ ಸ್ವಂತ ಬಾಕ್ಸ್ ರಚಿಸಿ' })}
             </h3>
             <div className="flex items-center gap-1.5 bg-neutral-50 border border-neutral-200 rounded-xl p-1">
               {(['Weekly', 'Monthly'] as const).map((f) => (
@@ -518,7 +574,8 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
                     ta: f === 'Weekly' ? 'வாராந்திரம்' : 'மாதாந்திரம்',
                     hi: f === 'Weekly' ? 'साप्ताहिक' : 'मासिक',
                     ml: f === 'Weekly' ? 'പ്രതിവാരം' : 'പ്രതിമാസം',
-                    te: f === 'Weekly' ? 'వారానికి' : 'నెలవారీ'
+                    te: f === 'Weekly' ? 'వారానికి' : 'నెలవారీ',
+                    kn: f === 'Weekly' ? 'ವಾರಕ್ಕೊಮ್ಮೆ' : 'ತಿಂಗಳಿಗೊಮ್ಮೆ'
                   })}
                 </button>
               ))}
@@ -530,7 +587,8 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
               ta: 'உங்கள் தொடர் பெட்டியில் என்ன வேண்டும் என்பதை சரியாகத் தேர்ந்தெடுக்கவும். தனிப்பயன் பெட்டிகளுக்கு தனித்தனியாக பொருட்களை வாங்குவதை விட தானாக 15% தள்ளுபடி கிடைக்கும்.',
               hi: 'अपने रिकरिंग बॉक्स में बिल्कुल वही चुनें जो आप चाहते हैं। कस्टम बॉक्स पर आइटम अलग-अलग खरीदने की तुलना में स्वचालित 15% छूट मिलती है।',
               ml: 'നിങ്ങളുടെ ആവർത്തിക്കുന്ന ബോക്സിൽ വേണ്ടത് കൃത്യമായി തിരഞ്ഞെടുക്കൂ. കസ്റ്റം ബോക്സുകൾക്ക് ഇനങ്ങൾ വെവ്വേറെ വാങ്ങുന്നതിനെക്കാൾ ഓട്ടോമാറ്റിക് 15% കിഴിവ് ലഭിക്കും.',
-              te: 'మీ రికరింగ్ బాక్స్‌లో ఖచ్చితంగా మీకు కావలసినది ఎంచుకోండి. కస్టమ్ బాక్స్‌లకు వస్తువులను విడివిడిగా కొనడం కంటే ఆటోమేటిక్‌గా 15% తగ్గింపు లభిస్తుంది.'
+              te: 'మీ రికరింగ్ బాక్స్‌లో ఖచ్చితంగా మీకు కావలసినది ఎంచుకోండి. కస్టమ్ బాక్స్‌లకు వస్తువులను విడివిడిగా కొనడం కంటే ఆటోమేటిక్‌గా 15% తగ్గింపు లభిస్తుంది.',
+              kn: 'ನಿಮ್ಮ ಪುನರಾವರ್ತಿತ ಬಾಕ್ಸ್‌ನಲ್ಲಿ ನಿಮಗೆ ಬೇಕಾದದ್ದನ್ನು ಸರಿಯಾಗಿ ಆಯ್ಕೆ ಮಾಡಿ. ಕಸ್ಟಮ್ ಬಾಕ್ಸ್‌ಗಳಿಗೆ ವಸ್ತುಗಳನ್ನು ಪ್ರತ್ಯೇಕವಾಗಿ ಖರೀದಿಸುವುದಕ್ಕಿಂತ ಸ್ವಯಂಚಾಲಿತವಾಗಿ 15% ರಿಯಾಯಿತಿ ಸಿಗುತ್ತದೆ.'
             })}
           </p>
 
@@ -557,7 +615,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
                       onClick={() => addToBox(p.id)}
                       className="w-full bg-white border border-emerald-300 text-emerald-700 hover:bg-[#0F7B3A] hover:text-white font-bold py-1.5 rounded-lg text-[10px] uppercase transition"
                     >
-                      {pick(lang, { en: '+ Add to Box', ta: '+ பெட்டியில் சேர்', hi: '+ बॉक्स में जोड़ें', ml: '+ ബോക്സിലേക്ക് ചേർക്കൂ', te: '+ బాక్స్‌కు జోడించండి' })}
+                      {pick(lang, { en: '+ Add to Box', ta: '+ பெட்டியில் சேர்', hi: '+ बॉक्स में जोड़ें', ml: '+ ബോക്സിലേക്ക് ചേർക്കൂ', te: '+ బాక్స్‌కు జోడించండి', kn: '+ ಬಾಕ್ಸ್‌ಗೆ ಸೇರಿಸಿ' })}
                     </button>
                   )}
                 </div>
@@ -574,7 +632,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
       {!isCustomBuilder && boxLines.length > 0 && (
         <div className="bg-white border-2 border-emerald-200 rounded-3xl p-6 max-w-4xl mx-auto space-y-3 shadow-sm">
           <h3 className="text-base font-bold text-[#0A1F12] flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600" /> {pick(lang, { en: 'This Plan Includes', ta: 'இந்த திட்டத்தில் அடங்கும்', hi: 'इस प्लान में शामिल है', ml: 'ഈ പ്ലാനിൽ ഉൾപ്പെടുന്നത്', te: 'ఈ ప్లాన్‌లో ఉన్నవి' })}
+            <CheckCircle2 className="w-5 h-5 text-emerald-600" /> {pick(lang, { en: 'This Plan Includes', ta: 'இந்த திட்டத்தில் அடங்கும்', hi: 'इस प्लान में शामिल है', ml: 'ഈ പ്ലാനിൽ ഉൾപ്പെടുന്നത്', te: 'ఈ ప్లాన్‌లో ఉన్నవి', kn: 'ಈ ಪ್ಲಾನ್‌ನಲ್ಲಿ ಸೇರಿರುವುದು' })}
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {boxLines.map((line) => {
@@ -605,7 +663,8 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
               ta: `${isCustomBuilder ? 'உங்கள் பெட்டி' : 'திட்ட மொத்தம்'} (${boxLines.reduce((a, l) => a + l.quantity, 0)} பொருட்கள்)`,
               hi: `${isCustomBuilder ? 'आपका बॉक्स' : 'प्लान टोटल'} (${boxLines.reduce((a, l) => a + l.quantity, 0)} आइटम)`,
               ml: `${isCustomBuilder ? 'നിങ്ങളുടെ ബോക്സ്' : 'പ്ലാൻ ആകെ'} (${boxLines.reduce((a, l) => a + l.quantity, 0)} ഇനങ്ങൾ)`,
-              te: `${isCustomBuilder ? 'మీ బాక్స్' : 'ప్లాన్ మొత్తం'} (${boxLines.reduce((a, l) => a + l.quantity, 0)} వస్తువులు)`
+              te: `${isCustomBuilder ? 'మీ బాక్స్' : 'ప్లాన్ మొత్తం'} (${boxLines.reduce((a, l) => a + l.quantity, 0)} వస్తువులు)`,
+              kn: `${isCustomBuilder ? 'ನಿಮ್ಮ ಬಾಕ್ಸ್' : 'ಪ್ಲಾನ್ ಒಟ್ಟು'} (${boxLines.reduce((a, l) => a + l.quantity, 0)} ವಸ್ತುಗಳು)`
             })}
           </div>
           {boxLines.map((line) => {
@@ -633,14 +692,16 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
                     ta: `பெட்டி மொத்தம் (${boxFrequency === 'Weekly' ? 'வாராந்திரம்' : 'மாதாந்திரம்'}, 15% தள்ளுபடி)`,
                     hi: `बॉक्स टोटल (${boxFrequency === 'Weekly' ? 'साप्ताहिक' : 'मासिक'}, 15% छूट)`,
                     ml: `ബോക്സ് ആകെ (${boxFrequency === 'Weekly' ? 'പ്രതിവാരം' : 'പ്രതിമാസം'}, 15% കിഴിവ്)`,
-                    te: `బాక్స్ మొత్తం (${boxFrequency === 'Weekly' ? 'వారానికి' : 'నెలవారీ'}, 15% తగ్గింపు)`
+                    te: `బాక్స్ మొత్తం (${boxFrequency === 'Weekly' ? 'వారానికి' : 'నెలవారీ'}, 15% తగ్గింపు)`,
+                    kn: `ಬಾಕ್ಸ್ ಒಟ್ಟು (${boxFrequency === 'Weekly' ? 'ವಾರಕ್ಕೊಮ್ಮೆ' : 'ತಿಂಗಳಿಗೊಮ್ಮೆ'}, 15% ರಿಯಾಯಿತಿ)`
                   })
                 : pick(lang, {
                     en: 'Per-Delivery Total',
                     ta: 'டெலிவரிக்கு மொத்தம்',
                     hi: 'प्रति डिलीवरी टोटल',
                     ml: 'ഓരോ ഡെലിവറിക്കും ആകെ',
-                    te: 'ప్రతి డెలివరీకి మొత్తం'
+                    te: 'ప్రతి డెలివరీకి మొత్తం',
+                    kn: 'ಪ್ರತಿ ಡೆಲಿವರಿಗೆ ಒಟ್ಟು'
                   })}
             </span>
             {isCustomBuilder ? (
@@ -662,7 +723,8 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
             ta: 'விருப்பமான வாராந்திர டெலிவரி நாட்களைத் தேர்ந்தெடுக்கவும்',
             hi: 'पसंदीदा साप्ताहिक डिलीवरी दिन चुनें',
             ml: 'ഇഷ്ടപ്പെട്ട പ്രതിവാര ഡെലിവറി ദിവസങ്ങൾ തിരഞ്ഞെടുക്കൂ',
-            te: 'ఇష్టమైన వారపు డెలివరీ రోజులను ఎంచుకోండి'
+            te: 'ఇష్టమైన వారపు డెలివరీ రోజులను ఎంచుకోండి',
+            kn: 'ಇಷ್ಟದ ವಾರದ ಡೆಲಿವರಿ ದಿನಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಿ'
           })}
         </h3>
 
@@ -680,7 +742,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
                     : 'bg-neutral-50 border-neutral-200 text-neutral-500 hover:text-[#0A1F12]'
                 }`}
               >
-                {lang === 'ta' ? DAY_LABELS_TA[day] : lang === 'hi' ? DAY_LABELS_HI[day] : lang === 'ml' ? DAY_LABELS_ML[day] : lang === 'te' ? DAY_LABELS_TE[day] : day}
+                {lang === 'ta' ? DAY_LABELS_TA[day] : lang === 'hi' ? DAY_LABELS_HI[day] : lang === 'ml' ? DAY_LABELS_ML[day] : lang === 'te' ? DAY_LABELS_TE[day] : lang === 'kn' ? DAY_LABELS_KN[day] : day}
               </button>
             );
           })}
@@ -693,7 +755,8 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
               ta: 'சந்தா வெற்றிகரமாக செயல்படுத்தப்பட்டது!',
               hi: 'सब्सक्रिप्शन सफलतापूर्वक चालू हो गया!',
               ml: 'സബ്സ്ക്രിപ്ഷൻ വിജയകരമായി സജീവമാക്കി!',
-              te: 'సబ్‌స్క్రిప్షన్ విజయవంతంగా యాక్టివేట్ చేయబడింది!'
+              te: 'సబ్‌స్క్రిప్షన్ విజయవంతంగా యాక్టివేట్ చేయబడింది!',
+              kn: 'ಚಂದಾದಾರಿಕೆ ಯಶಸ್ವಿಯಾಗಿ ಸಕ್ರಿಯಗೊಂಡಿದೆ!'
             })}
             <div className="text-[11px] text-neutral-600 font-normal">
               {lang === 'ta' ? (
@@ -715,6 +778,11 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
                 <>
                   దీన్ని మేనేజ్ చేయడానికి మై అకౌంట్ → సబ్‌స్క్రిప్షన్‌లు చూడండి. మీ మొదటి డెలివరీ{' '}
                   {new Date(Date.now() + 86400000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} నాటికి షెడ్యూల్ చేయబడింది.
+                </>
+              ) : lang === 'kn' ? (
+                <>
+                  ಇದನ್ನು ನಿರ್ವಹಿಸಲು ನನ್ನ ಖಾತೆ → ಚಂದಾದಾರಿಕೆಗಳನ್ನು ನೋಡಿ. ನಿಮ್ಮ ಮೊದಲ ಡೆಲಿವರಿ{' '}
+                  {new Date(Date.now() + 86400000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} ರಂದು ನಿಗದಿಯಾಗಿದೆ.
                 </>
               ) : (
                 <>
@@ -738,7 +806,7 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> {pick(lang, { en: 'Starting Subscription…', ta: 'சந்தா தொடங்குகிறது…', hi: 'सब्सक्रिप्शन शुरू हो रहा है…', ml: 'സബ്സ്ക്രിപ്ഷൻ ആരംഭിക്കുന്നു…', te: 'సబ్‌స్క్రిప్షన్ ప్రారంభమవుతోంది…' })}
+                  <Loader2 className="w-4 h-4 animate-spin" /> {pick(lang, { en: 'Starting Subscription…', ta: 'சந்தா தொடங்குகிறது…', hi: 'सब्सक्रिप्शन शुरू हो रहा है…', ml: 'സബ്സ്ക്രിപ്ഷൻ ആരംഭിക്കുന്നു…', te: 'సబ్‌స్క్రిప్షన్ ప్రారంభమవుతోంది…', kn: 'ಚಂದಾದಾರಿಕೆ ಪ್ರಾರಂಭವಾಗುತ್ತಿದೆ…' })}
                 </>
               ) : (
                 <>
@@ -748,14 +816,16 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
                         ta: 'உறுதிசெய்து சந்தாவைத் தொடங்கவும்',
                         hi: 'पुष्टि करें और सब्सक्रिप्शन शुरू करें',
                         ml: 'സ്ഥിരീകരിച്ച് സബ്സ്ക്രിപ്ഷൻ ആരംഭിക്കൂ',
-                        te: 'నిర్ధారించి సబ్‌స్క్రిప్షన్ ప్రారంభించండి'
+                        te: 'నిర్ధారించి సబ్‌స్క్రిప్షన్ ప్రారంభించండి',
+                        kn: 'ದೃಢೀಕರಿಸಿ ಚಂದಾದಾರಿಕೆ ಪ್ರಾರಂಭಿಸಿ'
                       })
                     : pick(lang, {
                         en: 'Activate Plan & Start Subscription',
                         ta: 'திட்டத்தை செயல்படுத்தி சந்தாவைத் தொடங்கவும்',
                         hi: 'प्लान चालू करें और सब्सक्रिप्शन शुरू करें',
                         ml: 'പ്ലാൻ സജീവമാക്കി സബ്സ്ക്രിപ്ഷൻ ആരംഭിക്കൂ',
-                        te: 'ప్లాన్‌ను యాక్టివేట్ చేసి సబ్‌స్క్రిప్షన్ ప్రారంభించండి'
+                        te: 'ప్లాన్‌ను యాక్టివేట్ చేసి సబ్‌స్క్రిప్షన్ ప్రారంభించండి',
+                        kn: 'ಪ್ಲಾನ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ ಚಂದಾದಾರಿಕೆ ಪ್ರಾರಂಭಿಸಿ'
                       })} <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -768,7 +838,8 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
               ta: 'மேலே உங்கள் பெட்டியில் குறைந்தது ஒரு பொருளையாவது சேர்க்கவும்.',
               hi: 'ऊपर अपने बॉक्स में कम से कम एक आइटम जोड़ें।',
               ml: 'മുകളിലുള്ള നിങ്ങളുടെ ബോക്സിൽ കുറഞ്ഞത് ഒരു ഇനമെങ്കിലും ചേർക്കൂ.',
-              te: 'పైన మీ బాక్స్‌లో కనీసం ఒక వస్తువును జోడించండి.'
+              te: 'పైన మీ బాక్స్‌లో కనీసం ఒక వస్తువును జోడించండి.',
+              kn: 'ಮೇಲಿನ ನಿಮ್ಮ ಬಾಕ್ಸ್‌ಗೆ ಕನಿಷ್ಠ ಒಂದು ವಸ್ತುವನ್ನಾದರೂ ಸೇರಿಸಿ.'
             })}
           </p>
         ) : (
@@ -793,6 +864,11 @@ export const SubscriptionsPage: React.FC<SubscriptionsPageProps> = ({ products =
                 <>
                   ప్రస్తుతం స్టాక్‌లో ఉన్న వస్తువులతో ఈ ప్లాన్‌ను మేము సరిపోల్చలేకపోయాము — ఇప్పుడే ఒక నిజమైన సబ్‌స్క్రిప్షన్ ప్రారంభించడానికి పైన ఉన్న{' '}
                   <strong>మీ సొంత బాక్స్‌ను తయారు చేసుకోండి</strong> (కస్టమ్ ప్లాన్) ఉపయోగించండి, లేదా మీ కోసం ఈ ప్లాన్‌ను సెటప్ చేయడానికి సపోర్ట్ ద్వారా మా టీమ్‌ను సంప్రదించండి.
+                </>
+              ) : lang === 'kn' ? (
+                <>
+                  ಪ್ರಸ್ತುತ ಸ್ಟಾಕ್‌ನಲ್ಲಿರುವ ವಸ್ತುಗಳಿಗೆ ಈ ಪ್ಲಾನ್ ಅನ್ನು ನಾವು ಹೊಂದಿಸಲಾಗಲಿಲ್ಲ — ಈಗಲೇ ನಿಜವಾದ ಚಂದಾದಾರಿಕೆಯನ್ನು ಪ್ರಾರಂಭಿಸಲು ಮೇಲಿನ{' '}
+                  <strong>ನಿಮ್ಮ ಸ್ವಂತ ಬಾಕ್ಸ್ ಅನ್ನು ರಚಿಸಿ</strong> (ಕಸ್ಟಮ್ ಪ್ಲಾನ್) ಬಳಸಿ, ಅಥವಾ ನಿಮಗಾಗಿ ಈ ಪ್ಲಾನ್ ಅನ್ನು ಸೆಟಪ್ ಮಾಡಲು ಸಪೋರ್ಟ್ ಮೂಲಕ ನಮ್ಮ ತಂಡವನ್ನು ಸಂಪರ್ಕಿಸಿ.
                 </>
               ) : (
                 <>

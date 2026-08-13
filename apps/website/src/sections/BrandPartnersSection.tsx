@@ -32,11 +32,16 @@ const FALLBACK_TE = {
   heading: 'మా ఫార్మ్ & సప్లై భాగస్వాములు',
   subheading: 'ప్రాంతం అంతటా సర్టిఫైడ్ ఫార్మ్‌ల నుండి మరియు హేచరీల నుండి నేరుగా సేకరించబడుతుంది.'
 };
+const FALLBACK_KN = {
+  eyebrow: 'ವಿಶ್ವಾಸಾರ್ಹ ಸೋರ್ಸಿಂಗ್ ನೆಟ್‌ವರ್ಕ್',
+  heading: 'ನಮ್ಮ ಫಾರ್ಮ್ & ಸಪ್ಲೈ ಪಾಲುದಾರರು',
+  subheading: 'ಪ್ರದೇಶದಾದ್ಯಂತ ಪ್ರಮಾಣೀಕೃತ ಫಾರ್ಮ್‌ಗಳು ಮತ್ತು ಹ್ಯಾಚರಿಗಳಿಂದ ನೇರವಾಗಿ ಪಡೆಯಲಾಗುತ್ತದೆ.'
+};
 
 export const BrandPartnersSection: React.FC = () => {
   const { lang } = useLang();
   const block = useSiteContent('sections.partners', FALLBACK);
-  const resolved = lang === 'ta' ? FALLBACK_TA : lang === 'hi' ? FALLBACK_HI : lang === 'ml' ? FALLBACK_ML : lang === 'te' ? FALLBACK_TE : block;
+  const resolved = lang === 'ta' ? FALLBACK_TA : lang === 'hi' ? FALLBACK_HI : lang === 'ml' ? FALLBACK_ML : lang === 'te' ? FALLBACK_TE : lang === 'kn' ? FALLBACK_KN : block;
 
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">

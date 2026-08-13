@@ -117,10 +117,32 @@ const FALLBACK_TE = {
   ]
 };
 
+const FALLBACK_KN = {
+  eyebrow: 'ಸರಳ ಪ್ರಕ್ರಿಯೆ',
+  heading: '3 ಹಂತಗಳಲ್ಲಿ ನಿಮ್ಮ ಬಾಗಿಲಿಗೆ ತಾಜಾ',
+  items: [
+    {
+      icon: 'ShoppingCart',
+      title: 'ನಿಮ್ಮ ಆರ್ಡರ್ ಇರಿಸಿ',
+      text: 'ತಾಜಾ ವಿಭಾಗಗಳನ್ನು ಬ್ರೌಸ್ ಮಾಡಿ, ನಿಮ್ಮ ಕಟ್ಸ್ ಆಯ್ಕೆಮಾಡಿ, 2 ನಿಮಿಷಗಳಲ್ಲಿ ಚೆಕ್‌ಔಟ್ ಮಾಡಿ.'
+    },
+    {
+      icon: 'PackageCheck',
+      title: 'ಪ್ರೊಸೆಸ್ ಮಾಡಿ ತಾಜಾವಾಗಿ ಪ್ಯಾಕ್ ಮಾಡಲಾಗುತ್ತದೆ',
+      text: 'ಕಟ್ಸ್‌ಗಳನ್ನು ಅದೇ ಬೆಳಿಗ್ಗೆ ಸ್ಟೆರೈಲ್, ತಾಪಮಾನ-ನಿಯಂತ್ರಿತ ಡಾರ್ಕ್ ಸ್ಟೋರ್‌ಗಳಲ್ಲಿ ಪ್ರೊಸೆಸ್ ಮಾಡಲಾಗುತ್ತದೆ.'
+    },
+    {
+      icon: 'Truck',
+      title: 'ತಾಜಾವಾಗಿ ಡೆಲಿವರಿ',
+      text: 'ಎಂಡ್-ಟು-ಎಂಡ್ ಕೋಲ್ಡ್ ಚೈನ್‌ನೊಂದಿಗೆ ಗರಿಷ್ಠ ತಾಜಾತನದಲ್ಲಿ (0-4°C) ನಿಮ್ಮ ಬಾಗಿಲಿಗೆ ತಲುಪುತ್ತದೆ.'
+    }
+  ]
+};
+
 export const HowItWorksSection: React.FC = () => {
   const { lang } = useLang();
   const block = useSiteContent('sections.how_it_works', FALLBACK);
-  const resolvedBlock = lang === 'ta' ? FALLBACK_TA : lang === 'hi' ? FALLBACK_HI : lang === 'ml' ? FALLBACK_ML : lang === 'te' ? FALLBACK_TE : block;
+  const resolvedBlock = lang === 'ta' ? FALLBACK_TA : lang === 'hi' ? FALLBACK_HI : lang === 'ml' ? FALLBACK_ML : lang === 'te' ? FALLBACK_TE : lang === 'kn' ? FALLBACK_KN : block;
   const steps = resolvedBlock.items.map((item, index) => ({
     id: index + 1,
     title: item.title,
