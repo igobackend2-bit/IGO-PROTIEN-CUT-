@@ -1,35 +1,69 @@
-# IGO Protein Cuts — Website
+# IGo Academy LMS
 
-Public marketing site and storefront, built with React 19, TypeScript, Vite 6 and Tailwind 4. Also ships a React admin panel at `/admin`.
+A 100% custom Learning Management System for **IGo Academy** (Chennai, Tamil Nadu — TNSDC + MSME recognised). Trainers create courses, upload videos, run quizzes and grade assignments; students enroll, watch lectures, take assessments and earn auto-generated, QR-verified PDF certificates.
 
-Part of a monorepo — read the [root README](../../README.md) first, especially the note about there being two separate backends. **This app does not share a database with `apps/mobile` or `apps/admin`.**
+> First time here? Follow [`SETUP.md`](SETUP.md) for the full local setup walkthrough (env vars, Supabase buckets, migrations, seeding). This README covers architecture and day-to-day commands.
 
-Live at [igoproteincuts.com](https://igoproteincuts.com).
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| API server | Node.js 20 + Express |
+| Database | PostgreSQL (Supabase), Knex for migrations/queries |
+| Sessions | Redis (Upstash cloud) + JWT |
+| File/video storage | Supabase Storage (private buckets) |
+| Web client | React 18 + Vite + Tailwind CSS, Zustand, TanStack Query |
+| Mobile | Flutter (Riverpod, go_router, Supabase, Firebase) — early scaffold, see `mobile/` |
+| Payments | Cashfree |
+| Certificates | Puppeteer (PDF) + QR code |
+| Email | Nodemailer (SMTP) |
+| Realtime | Socket.io (planned: live classes/attendance) |
+| Cron | node-cron (daily enrollment-expiry checks) |
 
 ## Run it
 
-```bash
+\```bash
+cd server
+PUPPETEER_SKIP_DOWNLOAD=true npm install
+cd ../client
 npm install
-npm run dev
-```
+\```
 
-Other scripts: `npm run build` (Vite build + bundles `server.ts` for Node hosting), `npm start` (run the built server), `npm run preview`, `npm run lint` (`tsc --noEmit`).
+From the repo root:
 
-## Where it deploys — and why that matters
+\```bash
+npm run dev            # runs API + client together
+npm run dev:server     # http://localhost:5000
+npm run dev:client     # http://localhost:3000
+\```
 
-**The live site is served by Hostinger, not Vercel.** `.github/workflows/deploy.yml` in the monorepo root builds this app with Vite on every push to `main` that touches `apps/website/**`, then FTPs `dist/` to a static host. Static hosting means **no Node, no serverless functions** — anything under `/api/` 404s in production, even though `vercel.json` and `api/ai-search.ts` exist for a possible future move to Vercel.
+Windows shortcuts: `RUN-SERVER.bat`, `RUN-CLIENT.bat`, or `START-PLATFORM.bat` for both.
 
-Static assets live in `static/`, not Vite's default `public/` — the monorepo's root `.gitignore` excludes `apps/website/public/`, so anything placed there is silently never committed. `static/` also holds `.htaccess` (SPA routing, HTTPS redirect, security headers, gzip, cache rules), `manifest.json`, `robots.txt`, `sitemap.xml` and `llms.txt`, all of which the deploy workflow copies into `dist/`. See `DEPLOY.md` for the full push/deploy walkthrough.
+## Database
 
-## Backend
+\```bash
+npm run migrate
+npm run migrate:rollback
+npm run seed
+\```
 
-Reads and writes go directly to Supabase project `aweevhgnbjuxcvnvjeie` (shared with `apps/mobile` and `apps/admin`) using the client SDK — there's no API layer in front of it for the app's own tables:
+Copy/create `.env` in `server/` — see [`SETUP.md`](SETUP.md) for the full variable list (Supabase, Upstash, SMTP, Cashfree, JWT secret). The DB connects through Supabase's **session pooler**, not the direct host, since the direct host is IPv6-only.
 
-- **Reads** — `products`, `categories`, `coupons`, `offers`, `combo_packs`, `combo_pack_items`, `faq_items`, `delivery_partners`, `achievements` are public-read and fetched with the anon key.
-- **Writes** — `orders`, `order_items`, `profiles`, `support_tickets`, `ticket_messages`, `subscriptions`, `wishlist_items`, `product_reviews`, `payments`, `stock_alerts`, `order_ratings` are user-scoped RLS tables, written through an authenticated Supabase Auth session.
-- **Website-only data** (banners, SEO, weight-variant ladders, B2B/franchise leads) lives in separate `igo_*` tables and is never added as a column on an app-owned table.
-- Admin-owned data — prices, stock, catalog, coupons, offers, combos — is **read-only** from the website; the Flutter admin (`apps/admin`) is the only writer.
+## Building & testing
 
-Full rules are in `CLAUDE.md`; the current work-in-progress state is tracked in `PROGRESS.md`.
+\```bash
+npm run build          # full production build
+npm run build:client   # client only
+cd server && npm test  # Jest + Supertest
+\```
 
-## Layout
+## Deployment
+
+- **Vercel** (root `vercel.json`) — client built to `client/dist`, API as a serverless function via `api/index.js`, plus a daily cron for enrollment expiry.
+- **Self-hosted / EC2** (`infra/`) — `infra/github-actions/deploy.yml` tests on every push, then SSHes into staging on `main`, migrates, and restarts under `pm2`. `infra/nginx/igo-platform.conf` handles TLS, `/api` and `/socket.io` proxying, SPA fallback, and rate limiting.
+
+Two Dockerfiles: root `Dockerfile` builds only the client (`nginx:alpine`); `server/Dockerfile` is Debian-based (Puppeteer needs glibc) and runs the API on port 5000.
+
+## Roadmap
+
+Phase 2 — live classes (WebRTC/MediaSoup), real-time attendance (Socket.io), enhanced certificates. Phase 3 — mobile app for Android/iOS. `mobile/` is currently just the Flutter scaffold, no built features yet.
